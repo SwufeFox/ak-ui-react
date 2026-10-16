@@ -1,0 +1,119 @@
+/* Demo-only layout helpers. Deliberately outside src/ak/styles so the library stylesheet
+   stays a faithful 1:1 port of the upstream SCSS. */
+body {
+  margin: 0;
+  background: #0b0d0f;
+  color: #d2d2d2;
+  font-family: var(--ak-font-sans, system-ui, sans-serif);
+}
+
+.demo-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(25, 209, 255, 0.08), transparent 45%),
+    #0b0d0f;
+}
+
+.demo-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 clamp(1.25rem, 4vw, 4rem);
+  border-bottom: 1px solid rgb(255 255 255 / 22%);
+  background: rgb(12 14 16 / 92%);
+  backdrop-filter: blur(8px);
+}
+
+.demo-header h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  letter-spacing: -0.02em;
+}
+
+.demo-eyebrow {
+  display: block;
+  color: #19d1ff;
+  font-family: var(--ak-font-mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.demo-main {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem) 6rem;
+}
+
+.demo-block {
+  padding-block: clamp(1.75rem, 4vw, 3rem);
+  border-top: 1px solid rgb(255 255 255 / 14%);
+}
+
+.demo-block > h2 {
+  margin: 0.6rem 0 0.5rem;
+  color: #fff;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+  letter-spacing: -0.03em;
+}
+
+.demo-note {
+  margin: 0 0 1.5rem;
+  max-width: 60ch;
+  color: rgb(210 210 210 / 74%);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-grid {
+  display: grid;
+  gap: var(--ak-space-4, 1rem);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.demo-stack {
+  display: grid;
+  gap: var(--ak-space-4, 1rem);
+  max-width: 34rem;
+}
+
+.demo-canvas {
+  position: relative;
+  height: 12rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: #0e1114;
+}
+
+.demo-canvas-label {
+  position: relative;
+  display: inline-block;
+  padding: var(--ak-space-4, 1rem);
+  color: rgb(210 210 210 / 80%);
+  font-size: 0.85rem;
+}
+
+.demo-inline-value {
+  color: #19d1ff;
+  font-family: var(--ak-font-mono, ui-monospace, monospace);
+}
+
+/* The site shell paints its own dark surface, so give it breathing room in the page. */
+.demo-shell {
+  position: relative;
+  margin-top: var(--ak-space-4, 1rem);
+  border: 1px solid rgb(255 255 255 / 18%);
+}

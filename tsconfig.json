@@ -1,39 +1,22 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "strict": true,
-    "allowJs": true,
-    "checkJs": false,
-    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "noEmit": true,
-    "resolveJsonModule": true
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client"]
   },
-  "include": [
-    "registry/**/*.ts",
-    "docs/.vitepress/theme/components/EffectsPlayground.vue",
-    "registry/**/*.vue",
-    "docs/.vitepress/theme/components/a2ui/**/*.ts",
-    "docs/.vitepress/theme/components/a2ui/**/*.vue",
-    "examples/a2ui/**/*.mjs",
-    "src/js/**/*.d.ts",
-    "tests/fixtures/**/*.vue",
-    "docs/.vitepress/en.ts",
-    "docs/.vitepress/theme/Layout.vue",
-    "docs/.vitepress/theme/components/AkHome.vue",
-    "docs/.vitepress/theme/components/AkNotFound.vue",
-    "docs/.vitepress/theme/components/AkShowcase.vue",
-    "docs/.vitepress/theme/components/ArtworkPicker.vue",
-    "docs/.vitepress/theme/components/DepthControls.vue",
-    "docs/.vitepress/theme/components/showcaseArtwork.ts",
-    "docs/.vitepress/theme/components/useShowcaseDepth.ts",
-    "docs/.vitepress/env.d.ts",
-    "docs/.vitepress/theme/components/site/**/*.vue"
-  ]
+  "include": ["src", "vite.config.ts"]
 }

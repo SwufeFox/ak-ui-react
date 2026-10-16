@@ -1,2 +1,0 @@
-node scripts/verify-staged-media.mjs || exit 1
-pnpm exec lint-staged

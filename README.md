@@ -1,145 +1,141 @@
-# ak-ui
+# ak-ui-react
 
-**English** | [简体中文](./README.zh-CN.md)
+**The React version of [ak-ui](https://github.com/YunYouJun/ak-ui)** — an Arknights-inspired
+design system. This repository is the React rewrite; upstream is Vue-first (SCSS primitives plus
+a shadcn-**vue** registry).
 
-[![Docs](https://github.com/YunYouJun/ak-ui/actions/workflows/docs.yml/badge.svg)](https://github.com/YunYouJun/ak-ui/actions/workflows/docs.yml)
-[![npm](https://img.shields.io/npm/v/@yunyoujun/ak-ui.svg?style=flat-square)](https://www.npmjs.com/package/@yunyoujun/ak-ui)
-[![license](https://img.shields.io/npm/l/@yunyoujun/ak-ui.svg?style=flat-square)](./LICENSE)
+The component layer is re-implemented in React while the design layer stays intact: the
+framework-agnostic SCSS and the DOM controllers are reused as-is, so the React components drive
+the *same* controller instances the Vue components did.
 
-An unofficial, Arknights-inspired styling foundation for building original interfaces with AI or by hand. ak-ui provides semantic design tokens, framework-agnostic CSS primitives, component guidelines, and an installable Agent Skill.
+- **Package:** `@swufefox/ak-ui-react`
+- **Repo:** https://github.com/SwufeFox/ak-ui-react
+- **Upstream:** [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (Vue)
+- **Peer deps:** React 18 or 19
 
-- Documentation: <https://ak-ui.yyj.moe/en/>
-- Design foundation: tokens, geometry, hierarchy, motion, and interaction states
-- Integration: AI Skill, CSS Core, Vue Registry, or any unstyled headless library
-- Runtime dependency: none
-
-ak-ui does not aim to reproduce a specific game screen pixel for pixel. It turns the underlying industrial geometry and tactical information language into constraints that can adapt to your own product and brand.
-
-Explore runtime-generated interfaces in the [A2UI experiment](https://ak-ui.yyj.moe/en/guide/a2ui), a local simulation using the official protocol processor with no added runtime dependencies in the CSS package. See the [1.0 stability and release checklist](https://ak-ui.yyj.moe/en/guide/stability) for the compatibility contract.
-
-Stable release: **1.1.0**. See the [0.2.x migration guide](https://ak-ui.yyj.moe/en/guide/migration-v1) and [Vue Registry API](https://ak-ui.yyj.moe/en/registry/api).
-
-1.1 adds [website interaction controllers](https://ak-ui.yyj.moe/en/components/ak-site) and a [six-section showcase](https://ak-ui.yyj.moe/en/showcase/website), covering navigation, menus, galleries, real loading and particles.
-
-## Use with AI (recommended)
-
-Install the public `ak-ui` Skill with the open [Skills CLI](https://github.com/vercel-labs/skills):
+## Install
 
 ```bash
-npx skills add YunYouJun/ak-ui --skill ak-ui
+npm install @swufefox/ak-ui-react
+# or: pnpm add @swufefox/ak-ui-react
 ```
 
-Then ask your agent to integrate, build, extend, or review an interface:
-
-```text
-Use $ak-ui to integrate the ak-ui design language into this project.
-Preserve the existing brand and accessible component behavior.
-```
-
-Choose `accent`, `system` (default), or `terminal` to control the style intensity. See the [AI Skill guide](https://ak-ui.yyj.moe/en/guide/ai-skill) for workflows and examples.
-
-## Manual integration
-
-```bash
-pnpm add @yunyoujun/ak-ui
-```
-
-Packages are published to [npm](https://www.npmjs.com/package/@yunyoujun/ak-ui). `latest` tracks stable releases; use `pnpm add @yunyoujun/ak-ui@next` to evaluate release candidates. The legacy GitHub Packages entry has been removed; npm is the only package registry.
-
-Import only the semantic token foundation when styling your own or headless components:
+Then import the stylesheet once, at your app entry:
 
 ```ts
-import '@yunyoujun/ak-ui/tokens.css'
+import '@swufefox/ak-ui-react/style.css'
 ```
 
-Import the full CSS Core when using existing ak-ui classes:
+## Usage
+
+```tsx
+import { useState } from 'react'
+import { AkButton, AkCard, AkCardHeader, AkCardTitle, AkCardContent, AkTabs } from '@swufefox/ak-ui-react'
+
+export function Panel() {
+  const [tab, setTab] = useState('overview')
+
+  return (
+    <AkCard>
+      <AkCardHeader>
+        <AkCardTitle>Deployment</AkCardTitle>
+      </AkCardHeader>
+      <AkCardContent>
+        <AkButton variant="action">Launch</AkButton>
+        <AkTabs
+          items={[
+            { value: 'overview', label: 'Overview', title: 'Overview' },
+            { value: 'archive', label: 'Archive', title: 'Archive' },
+          ]}
+          value={tab}
+          onValueChange={(v) => setTab(v ?? 'overview')}
+        />
+      </AkCardContent>
+    </AkCard>
+  )
+}
+```
+
+### Components
+
+`AkButton` · `AkCard` (`Header`/`Title`/`Description`/`Content`/`Footer`) · `AkTag` · `AkStatus` ·
+`AkNotice` · `AkProgress` · `AkGauge` · `AkSlider` · `AkInputNumber` · `AkTabs` · `AkSegmented` ·
+`AkCountUp` · `AkEntrance` · `AkAssetLoader` · `AkMediaGallery` · `AkMobileMenu` ·
+`AkParticleField` · `AkSectionNavigator`
+
+Every component is typed; all public types are re-exported from the package root.
+
+### Framework-agnostic controllers
+
+The DOM controllers behind motion, galleries, menus, section navigation, particles and asset
+loading have no React dependency and are shipped as sub-path exports:
 
 ```ts
-import '@yunyoujun/ak-ui/style.css'
+import { createSectionNavigation, createMediaGallery } from '@swufefox/ak-ui-react/core'
+import { createCountUp, createEntrance } from '@swufefox/ak-ui-react/core/effects'
+import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
 ```
 
-Or use the Sass entry:
+### Styling
 
-```scss
-@use '@yunyoujun/ak-ui/scss';
+The compiled stylesheet is available at `@swufefox/ak-ui-react/style.css`. The original SCSS is
+shipped too (`dist/scss/`) if you want to recompile or theme it:
+
+```ts
+@use "@swufefox/ak-ui-react/dist/scss/ak-ui.scss";
 ```
 
-CDN usage:
+## API conventions
 
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yunyoujun/ak-ui@latest/dist/ak-ui.min.css">
-```
+- **`variant`** follows the upstream registry convention: `default` renders the bare class,
+  any other value appends a BEM modifier (`ak-button--action`).
+- **Controlled inputs** (`AkSlider`, `AkInputNumber`, `AkTabs`, `AkSegmented`, `AkMediaGallery`)
+  take `value` + `onValueChange`, replacing Vue's `v-model`.
+- **Slot props** replace named slots: `icon` (AkButton), `renderPanel` (AkTabs),
+  `renderMedia` (AkMediaGallery), and `children`-as-function (AkAssetLoader).
+- **Imperative handles** are used where the original exposed methods via `defineExpose`
+  (`AkCountUp`, `AkEntrance`, `AkMobileMenu`, `AkSectionNavigator`) — pass a `ref`.
 
-For production, pin an exact version instead of `@latest` to avoid unexpected upgrades.
+### Two components with real contracts
 
-`tokens.css` only declares namespaced `--ak-*` custom properties. It does not reset global elements. The full CSS Core includes native form controls, `<dialog>`, Popover API surfaces, and the original display, navigation, and feedback modules. Browse the [design token contract](https://ak-ui.yyj.moe/en/guide/tokens) and complete HTML examples in the [component documentation](https://ak-ui.yyj.moe/components/).
-
-## Vue Registry
-
-Vue users can copy editable adapters into their project with the shadcn-vue CLI:
-
-```bash
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/button.json
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/card.json
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/input-number.json
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/status.json
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/progress.json
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/notice.json
-pnpm dlx shadcn-vue@latest add https://ak-ui.yyj.moe/r/tabs.json
-```
-
-The copied Vue source imports the framework-agnostic CSS package, so there is no separate ak-ui runtime. See the [Vue Registry guide](https://ak-ui.yyj.moe/en/registry/) for usage and live examples.
-
-## Design language and headless components
-
-ak-ui separates behavior from presentation. Keep native or headless primitives responsible for semantics, keyboard input, state, and focus; map their rendered parts to ak-ui tokens and geometry. The Skill prefers a project's existing headless library and uses Reka UI only as an optional Vue example.
-
-- [ak-ui design language](https://ak-ui.yyj.moe/en/guide/design-language)
-- [Headless adapter contract](https://ak-ui.yyj.moe/en/guide/headless)
-- [Reka UI example](https://ak-ui.yyj.moe/en/guide/reka-ui)
-- [Quality checklist](https://ak-ui.yyj.moe/en/guide/quality)
-
-The architecture migration and implementation history are documented in the [project revival log](https://ak-ui.yyj.moe/en/guide/revival).
+- **`AkSectionNavigator`** is a full-screen scroll-snap shell, not a generic page wrapper. It
+  requires a `[data-ak-section-viewport]` containing sections that each have a **unique `id`**;
+  the controller throws otherwise. Section links use `data-ak-section-link` and receive
+  `aria-current="location"`.
+- **`AkMobileMenu`**'s trigger is hidden above `48rem` by the stylesheet — it is a mobile
+  affordance.
 
 ## Development
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev        # demo app at http://localhost:5273
+npm run typecheck  # tsc --noEmit
+npm run build      # typecheck + emit dist/ (ESM, .d.ts, style.css, scss/, core/)
+npm run pack:check # inspect the published file list
 ```
 
-Useful commands:
+`src/ak/` is the library. `src/demo/` is a dev-only showcase and is not published.
 
-```bash
-pnpm build               # build dist CSS
-pnpm docs:build          # build the VitePress site
-pnpm lint                # check SCSS
-pnpm test:visual         # Chromium, Firefox and WebKit behavior, layout and render checks
-pnpm test:captures       # on-demand component screenshots in all three browsers
-pnpm test:captures:report # open the human review report
-pnpm test:visual:update:linux # update lossless WebP baselines in the CI-matched Linux container
-pnpm test                # run all verification with Linux visual regression
-```
+## Port notes
 
-Before the first local browser run, use `pnpm exec playwright install chromium firefox webkit`. Only Chromium compares homepage pixels; Firefox/WebKit validate page behavior and layout.
+| Layer | Upstream | Here | Strategy |
+| --- | --- | --- | --- |
+| Design tokens & component CSS | `src/scss/**` | `src/ak/styles/scss/**` | Vendored unchanged — framework-agnostic. |
+| DOM controllers | `src/js/*.mjs` | `src/ak/core/*.mjs` | Vendored unchanged — no Vue dependency. |
+| Component layer | `registry/ak/ui/*.vue` | `src/ak/ui/**/*.tsx` | Rewritten in React over the same `ak-*` classes and `data-*` contracts. |
 
-The files in `examples/` are the single source for documentation previews, displayed source code, and Playwright browser tests.
-Only the desktop and mobile homepage baselines are versioned. Default CI checks every example for visible content without capturing the catalog. Run `pnpm test:captures` to generate screenshots and an HTML review report, then `pnpm test:captures:report` to browse images by browser and example. Use `pnpm test:captures --project=firefox --grep="button/fab"` to capture a single example. The report is for manual review, not pixel comparison.
+Because the controllers were already framework-agnostic, the React components drive the **same**
+controller instances the Vue components did — behaviour was not reimplemented.
 
-For a remote report, manually run the **CI** workflow with the **captures** option enabled. This runs the normal checks first, then captures components using the same prepared environment. Download and extract its `component-preview-report` artifact, then run `pnpm exec playwright show-report <extracted-directory>`. Keep the entire report directory, including `data/`. Reports are retained for 14 days and are not published as a public website. The homepage baselines use the pinned Playwright Noble container so local updates match the Ubuntu 24.04 CI renderer.
-
-## Releasing with OIDC
-
-The existing [Release workflow](.github/workflows/release.yml) uses npm Trusted Publishing (OIDC), without a long-lived npm token. It has already published `1.0.0` successfully and generated provenance.
-
-1. Update the package version and matching Registry dependencies, then merge the release commit into `master`.
-2. Wait for CI to pass on that exact commit.
-3. Create and push the matching `v<version>` tag. This triggers package verification, OIDC publication and GitHub Release notes.
-
-Prereleases publish under `next`; stable versions use `latest`. The npm trusted publisher must match this repository and the `release.yml` filename. See [npm's trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/) when changing that identity.
+Vue → React mapping: `defineProps`→typed props · named slots→`ReactNode` props ·
+`v-model`→`value`/`onValueChange` · `defineExpose`→`forwardRef` + `useImperativeHandle` ·
+`onMounted`/`onScopeDispose`→`useEffect`. The one substitution worth noting: React's `useId`
+emits colons, which are invalid in `id` attributes and break `getElementById`-based ARIA wiring,
+so tab/menu components use an internal `useInstanceId` instead.
 
 ## License
 
-[MIT](./LICENSE)
-
-This is an unofficial interface study with no affiliation to Hypergryph. Arknights and related assets belong to their respective owners. Do not use the Skill to copy game logos, character art, screenshots, or extracted assets.
+MIT. This repository is a port of [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) and
+retains its license; the design tokens, SCSS and DOM controller sources originate there and
+remain under the original copyright (© 2019 云游君).

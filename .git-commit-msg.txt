@@ -1,0 +1,13 @@
+feat: rewrite as React port (@swufefox/ak-ui-react)
+
+Replace the Vue-first implementation with a React 19 + TypeScript + Vite port.
+
+- Vendor the framework-agnostic SCSS design layer (src/ak/styles/scss) and the
+  framework-agnostic DOM controllers (src/ak/core) unchanged from upstream.
+- Rewrite the component layer in React over the same `ak-*` classes and
+  `data-*` contracts: 18 components under src/ak/ui.
+- Publish as @swufefox/ak-ui-react: ESM bundle + type declarations + style.css,
+  with subpath exports ./core, ./core/effects, ./core/depth.
+- Demo app in src/demo (dev only, not published).
+
+Upstream design tokens, SCSS and controller sources are by YunYouJun/ak-ui (MIT).

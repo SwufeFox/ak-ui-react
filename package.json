@@ -1,129 +1,90 @@
 {
-  "name": "@yunyoujun/ak-ui",
+  "name": "@swufefox/ak-ui-react",
   "version": "1.1.0",
-  "type": "module",
-  "description": "Arknights-inspired design language, tokens, and framework-agnostic CSS primitives.",
-  "packageManager": "pnpm@12.4.2",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "build": "node scripts/build-css.mjs",
-    "dev": "pnpm docs:dev",
-    "audit:deps": "pnpm audit --audit-level low",
-    "lint": "stylelint \"src/scss/**/*.scss\"",
-    "lint:fix": "pnpm lint --fix",
-    "tokens:verify": "node scripts/verify-tokens.mjs",
-    "registry:build": "shadcn-vue build --output docs/public/r",
-    "registry:verify": "node scripts/verify-registry.mjs",
-    "docs:dev": "pnpm registry:build && vitepress dev docs --host 0.0.0.0",
-    "docs:build": "pnpm build && pnpm registry:build && vitepress build docs",
-    "docs:preview": "vitepress preview docs --host 0.0.0.0",
-    "test:visual": "playwright test",
-    "test:captures": "playwright test --config=playwright.captures.config.ts",
-    "test:captures:report": "playwright show-report playwright-report/captures",
-    "test:visual:update": "playwright test --update-snapshots=all",
-    "test:visual:linux": "sh scripts/run-visual-linux.sh test",
-    "test:visual:update:linux": "sh scripts/run-visual-linux.sh update",
-    "test": "pnpm audit:deps && pnpm lint && pnpm typecheck && pnpm docs:build && pnpm docs:verify && pnpm tokens:verify && pnpm api:verify && pnpm runtime:verify && pnpm package:verify && pnpm a2ui:verify && pnpm registry:verify && pnpm test:visual:linux",
-    "release:github": "changelogithub",
-    "release:notes": "changelogithub --dry",
-    "prepare": "husky",
-    "prepublishOnly": "pnpm build",
-    "a2ui:verify": "node --test tests/a2ui/*.test.mjs",
-    "package:verify": "node scripts/verify-package.mjs",
-    "typecheck": "vue-tsc --noEmit",
-    "api:verify": "node scripts/verify-api.mjs",
-    "runtime:verify": "node --test tests/runtime/*.test.mjs",
-    "docs:verify": "node scripts/verify-docs.mjs"
-  },
-  "style": "dist/ak-ui.min.css",
-  "sass": "src/scss/ak-ui.scss",
-  "main": "dist/ak-ui.min.css",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/YunYouJun/ak-ui.git"
-  },
+  "description": "Arknights-inspired design system for React — tokens, CSS primitives and components ported from @yunyoujun/ak-ui.",
   "keywords": [
     "ak-ui",
     "arknights",
+    "design-system",
     "design-tokens",
-    "agent-skills",
-    "framework",
-    "web"
+    "react",
+    "react-components",
+    "typescript",
+    "ui"
   ],
-  "author": "YunYouJun",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SwufeFox/ak-ui-react.git"
+  },
   "bugs": {
-    "url": "https://github.com/YunYouJun/ak-ui/issues"
+    "url": "https://github.com/SwufeFox/ak-ui-react/issues"
   },
-  "homepage": "https://ak-ui.yyj.moe",
-  "exports": {
-    ".": {
-      "sass": "./src/scss/ak-ui.scss",
-      "style": "./dist/ak-ui.css",
-      "default": "./dist/ak-ui.css"
-    },
-    "./style.css": "./dist/ak-ui.css",
-    "./style.min.css": "./dist/ak-ui.min.css",
-    "./tokens.css": "./dist/tokens.css",
-    "./tokens.min.css": "./dist/tokens.min.css",
-    "./scss": "./src/scss/ak-ui.scss",
-    "./depth": {
-      "types": "./src/js/dashboard-depth.d.ts",
-      "import": "./src/js/dashboard-depth.mjs",
-      "default": "./src/js/dashboard-depth.mjs"
-    },
-    "./effects": {
-      "types": "./src/js/effects.d.ts",
-      "import": "./src/js/effects.mjs",
-      "default": "./src/js/effects.mjs"
-    },
-    "./site": {
-      "types": "./src/js/site.d.ts",
-      "import": "./src/js/site.mjs",
-      "default": "./src/js/site.mjs"
-    }
-  },
+  "homepage": "https://github.com/SwufeFox/ak-ui-react#readme",
+  "author": "SwufeFox <42512131@smail.swufe.edu.cn>",
+  "type": "module",
   "sideEffects": [
-    "**/*.css",
-    "**/*.scss"
+    "**/*.css"
   ],
-  "browserslist": [
-    "defaults",
-    "not IE 11"
-  ],
-  "lint-staged": {
-    "src/scss/**/*.scss": "pnpm lint"
-  },
-  "devDependencies": {
-    "@a2ui/web_core": "0.10.7",
-    "@playwright/test": "1.62.1",
-    "autoprefixer": "^10.6.1",
-    "changelogithub": "15.0.4",
-    "clean-css": "^5.3.3",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.5.1",
-    "markdown-it-container": "^4.0.0",
-    "postcss": "^8.5.28",
-    "sass": "^1.104.1",
-    "shadcn-vue": "2.8.2",
-    "stylelint": "^17.15.0",
-    "stylelint-config-recommended-scss": "^17.0.1",
-    "stylelint-scss": "^7.3.0",
-    "typescript": "5.9.3",
-    "vitepress": "2.0.0-alpha.19",
-    "vue": "^3.5.43",
-    "vue-tsc": "3.3.11",
-    "zod": "3.25.76"
-  },
   "files": [
     "dist",
-    "src/js",
-    "src/scss"
-  ]
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/style.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./core": {
+      "types": "./dist/core/site.d.mts",
+      "import": "./dist/core/site.mjs",
+      "default": "./dist/core/site.mjs"
+    },
+    "./core/effects": {
+      "types": "./dist/core/effects.d.mts",
+      "import": "./dist/core/effects.mjs",
+      "default": "./dist/core/effects.mjs"
+    },
+    "./core/depth": {
+      "types": "./dist/core/dashboard-depth.d.mts",
+      "import": "./dist/core/dashboard-depth.mjs",
+      "default": "./dist/core/dashboard-depth.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build.mjs",
+    "build:lib": "vite build --config vite.lib.config.ts && node scripts/postbuild.mjs",
+    "build:demo": "node scripts/build-demo.mjs",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build",
+    "pack:check": "npm pack --dry-run"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sass": "^1.105.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
 }

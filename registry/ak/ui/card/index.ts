@@ -1,7 +1,0 @@
-export { default as AkCard } from './AkCard.vue'
-export { default as AkCardContent } from './AkCardContent.vue'
-export { default as AkCardDescription } from './AkCardDescription.vue'
-export { default as AkCardFooter } from './AkCardFooter.vue'
-export { default as AkCardHeader } from './AkCardHeader.vue'
-export { default as AkCardTitle } from './AkCardTitle.vue'
-export type { AkCardVariant } from './types'

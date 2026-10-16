@@ -1,35 +1,8 @@
-# Custom
-.DS_Store
-.vscode
-ref
-yarn.lock
-package-lock.json
-
-# Build
+﻿.alma-snapshots
+node_modules
 dist
-docs/.vuepress/public/css
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Dependency directories
-node_modules/
-.pnpm-store/
-
-# dotenv environment variables file
-.env
-.env.test
-
-# Documentation and browser test output
-docs/.vitepress/cache
-docs/.vitepress/dist
-docs/public/r
+*.local
+.DS_Store
 playwright-report
 test-results
-
-# Documentation media is stored in COS; never commit the upload cache.
-/docs/public/img/
+_vue-source
