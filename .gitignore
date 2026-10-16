@@ -1,4 +1,4 @@
-﻿.alma-snapshots
+.alma-snapshots
 node_modules
 dist
 *.local
@@ -6,3 +6,4 @@ dist
 playwright-report
 test-results
 _vue-source
+.git-commit-msg.txt
