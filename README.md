@@ -117,6 +117,42 @@ npm run pack:check # inspect the published file list
 
 `src/ak/` is the library. `src/demo/` is a dev-only showcase and is not published.
 
+## Releasing
+
+Publishing runs in CI via **npm trusted publishing (OIDC)** — there is no `NPM_TOKEN`
+secret to rotate, and 2FA is satisfied by the OIDC exchange rather than a one-time password.
+
+`.github/workflows/publish.yml` runs on a `v*` tag (or manually via `workflow_dispatch`,
+with a `dry_run` option that builds and packs without publishing).
+
+```bash
+# 1. bump the version
+npm version patch          # or minor / major — creates a commit and the tag locally
+
+# 2. push the commit and the tag
+git push --follow-tags
+
+# 3. CI typechecks, builds, verifies tag == package.json version, then publishes
+```
+
+**One-time setup on npmjs.com** — the package must already exist before a trusted publisher
+can be attached (v1.1.0 was published manually with a granular token):
+
+1. Open the package settings: `https://www.npmjs.com/package/@swufefox/ak-ui-react/access`
+2. Under **Trusted Publisher**, choose **GitHub Actions** and fill in:
+   - Organization or user: `SwufeFox`
+   - Repository: `ak-ui-react`
+   - Workflow filename: `publish.yml`
+   - Environment name: `npm-publish`
+3. Tick **Allow npm publish** (not just `npm stage publish`), then save.
+
+The workflow matches those values exactly — `environment: npm-publish`, `id-token: write`,
+and `node-version: '22.14.0'` with npm upgraded to `^11.5.1` (trusted publishing requires
+npm ≥ 11.5.1 and Node ≥ 22.14.0).
+
+> The configuration expires if it does not complete a first successful publish within two
+> days of creation.
+
 ## Port notes
 
 | Layer | Upstream | Here | Strategy |
