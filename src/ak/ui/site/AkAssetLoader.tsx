@@ -20,18 +20,19 @@ export function AkAssetLoader({ tasks, label = 'Resources', retryLabel = 'Retry'
 
   onChangeRef.current = onChange
 
+  // Create the controller once. Loading itself is owned by the tasks effect below —
+  // it also fires on mount (immediately after this one), so loading here as well
+  // would run every task twice.
   useEffect(() => {
     const controller = createAssetLoader((next) => {
       setState(next)
       onChangeRef.current?.(next)
     })
     controllerRef.current = controller
-    void controller.load(tasks)
     return () => {
       controller.destroy()
       controllerRef.current = null
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 {
   "name": "@swufefox/ak-ui-react",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Arknights-inspired design system for React — tokens, CSS primitives and components ported from @yunyoujun/ak-ui.",
   "keywords": [
     "ak-ui",
@@ -66,8 +66,6 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/build.mjs",
-    "build:lib": "vite build --config vite.lib.config.ts && node scripts/postbuild.mjs",
-    "build:demo": "node scripts/build-demo.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "prepublishOnly": "npm run build",
