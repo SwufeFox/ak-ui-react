@@ -128,7 +128,7 @@
   color: #111315;
   background: rgba(243, 244, 239, 0.94);
   box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.3);
-  clip-path: polygon(0 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - var(--ak-cut, 0.75rem)) 0, 100% var(--ak-cut, 0.75rem), 100% 100%, 0 100%);
   grid-template-columns: 5.6rem minmax(0, 1fr);
   gap: 1rem;
 

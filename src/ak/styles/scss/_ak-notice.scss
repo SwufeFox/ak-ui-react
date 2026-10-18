@@ -16,7 +16,7 @@
   border: 1px solid rgba(17, 19, 21, 0.24);
   color: #171a1d;
   background: rgba(243, 244, 239, 0.94);
-  clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - var(--ak-cut, 1rem)) 0, 100% var(--ak-cut, 1rem), 100% 100%, 0 100%);
   grid-template-columns: 6.5rem 1fr;
 
   &::before {

@@ -1,4 +1,4 @@
-import type { ElementType, HTMLAttributes, ReactNode } from 'react'
+import type { CSSProperties, ElementType, HTMLAttributes, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 
 /**
@@ -261,6 +261,47 @@ export interface AkBlueBandProps extends SlotProps<HTMLSpanElement> {
 export function AkBlueBand({ as: Tag = 'span', className, children, ...rest }: AkBlueBandProps) {
   return (
     <Tag {...rest} className={cx('ak-blue-band', 'ak-halftone', className)} data-slot="ak-blue-band">
+      {children}
+    </Tag>
+  )
+}
+
+// ── 切角 ──────────────────────────────────────────────────────────────
+
+export type AkCutCorner = 'tr' | 'tl' | 'br' | 'bl' | 'all'
+export type AkCutSize = 'sm' | 'md' | 'lg'
+
+export interface AkCutProps extends DivProps {
+  as?: ElementType
+  /** 切哪个角，默认右上（方舟面板的常规斜切方向）。`all` 四角全切。 */
+  corner?: AkCutCorner
+  /** 半径档位，取 `--ak-cut-sm/md/lg`（默认 `md`）。 */
+  size?: AkCutSize
+  /** 直接给半径，覆盖 `size`（例如 `'1.25rem'`）。 */
+  radius?: string
+}
+
+/**
+ * 切角容器：方舟面板的斜切结构。
+ *
+ * 库内原本把「切右上角」硬编码了 5 遍（dialog 1.25rem / notice 1rem / popover .9rem /
+ * san .75rem / status .55rem），而 `--ak-cut-sm/md/lg` 三个令牌零消费者。这个组件
+ * 把那套形状语言变成可复用、可调档的公开接口。
+ *
+ * ⚠️ `clip-path` 会裁掉元素自身的阴影。要「切角 + 投影」，把投影放在外层：
+ * `<div style={{boxShadow:…}}><AkCut>…</AkCut></div>`
+ */
+export function AkCut({ as: Tag = 'div', corner = 'tr', size = 'md', radius, className, children, ...rest }: AkCutProps) {
+  const sizeClass = size === 'md' ? null : `ak-cut--${size}`
+  return (
+    <Tag
+      {...rest}
+      className={cx('ak-cut', sizeClass, corner !== 'tr' && `ak-cut--${corner}`, className)}
+      data-slot="ak-cut"
+      data-corner={corner}
+      data-size={size}
+      style={radius ? ({ '--ak-cut-corner': radius, ...rest.style } as CSSProperties) : rest.style}
+    >
       {children}
     </Tag>
   )

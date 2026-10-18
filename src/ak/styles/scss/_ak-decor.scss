@@ -145,7 +145,8 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.05) 2px 3px);
+    // 上游这里写死 rgba(0,0,0,.05)，在默认暗色主题上等于隐形 → 换成随主题翻转的令牌
+    background: repeating-linear-gradient(0deg, transparent 0 2px, var(--ak-scanline-color) 2px 3px);
   }
 }
 
@@ -365,4 +366,68 @@
 
 a.ak-chevrons:hover::after {
   transform: translateX(3px);
+}
+
+// ── 切角 Cut corner · 方舟面板的斜切结构 ──────────────────────────────
+// 在库里，这个语言此前被硬编码了 5 遍、5 个不同半径：
+//   .ak-dialog 1.25rem / .ak-notice 1rem / .ak-popover .9rem / .ak-san .75rem / .ak-status .55rem
+// 而 --ak-cut-sm / -md / -lg 三个令牌一个消费者都没有 —— 形状语言有，却不可复用、
+// 也无法在主题或宿主层面统一调整。这组类把它做成公开接口：
+//   几何 = 切右上角；可用 --ak-cut-corner 覆盖半径，或用修饰符取页面级令牌。
+//
+// 注意：用 clip-path 切角会裁掉该元素自身的阴影（不是 bug，是 clip-path 的语义），
+// 要「切角 + 投影」就在外面套一层（外层扛阴影，内层被裁）。
+
+.ak-cut,
+.ak-cut--tr {
+  --ak-cut-corner: var(--ak-cut-md);
+
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ak-cut-corner)) 0,
+    100% var(--ak-cut-corner),
+    100% 100%,
+    0 100%
+  );
+}
+
+// 默认就是切右上角（`--tr` 与裸类等价，两个写法单独用都能成立）；
+// 其余三角保持同一枚令牌驱动。
+.ak-cut--tl {
+  clip-path: polygon(var(--ak-cut-corner) 0, 100% 0, 100% 100%, 0 100%, 0 var(--ak-cut-corner));
+}
+
+.ak-cut--br {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, var(--ak-cut-corner) 100%, 0 calc(100% - var(--ak-cut-corner)));
+}
+
+.ak-cut--bl {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--ak-cut-corner)), calc(100% - var(--ak-cut-corner)) 100%, 0 100%);
+}
+
+// 半径档位，直接复用那三个此前无人消费的令牌
+.ak-cut--sm {
+  --ak-cut-corner: var(--ak-cut-sm);
+}
+
+.ak-cut--md {
+  --ak-cut-corner: var(--ak-cut-md);
+}
+
+.ak-cut--lg {
+  --ak-cut-corner: var(--ak-cut-lg);
+}
+
+// 全切：四角都切（游戏内卡片语言）
+.ak-cut--all {
+  clip-path: polygon(
+    var(--ak-cut-corner) 0,
+    calc(100% - var(--ak-cut-corner)) 0,
+    100% var(--ak-cut-corner),
+    100% calc(100% - var(--ak-cut-corner)),
+    calc(100% - var(--ak-cut-corner)) 100%,
+    var(--ak-cut-corner) 100%,
+    0 calc(100% - var(--ak-cut-corner)),
+    0 var(--ak-cut-corner)
+  );
 }

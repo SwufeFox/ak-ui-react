@@ -1,6 +1,11 @@
 import { useState, type ReactNode } from 'react'
 import {
   AkAssetLoader,
+  AkAttr,
+  AkAttrs,
+  AkBilingual,
+  AkBlueBand,
+  AkBrackets,
   AkButton,
   AkCard,
   AkCardContent,
@@ -8,21 +13,50 @@ import {
   AkCardFooter,
   AkCardHeader,
   AkCardTitle,
+  AkChevrons,
+  AkCodeId,
+  AkCorner,
   AkCountUp,
+  AkCut,
+  AkDisplay,
+  AkElite,
+  AkEn,
   AkGauge,
+  AkGlyphBox,
+  AkGridBackdrop,
+  AkHalftone,
   AkInputNumber,
+  AkInverse,
+  AkKv,
+  AkKvItem,
   AkMediaGallery,
   AkMobileMenu,
   AkNotice,
+  AkNum,
+  AkOverline,
   AkParticleField,
+  AkPot,
+  AkPotList,
+  AkPotential,
+  AkProfession,
+  AkProfessionLabel,
   AkProgress,
+  AkRarity,
+  AkRarityBar,
+  AkRarityChip,
   AkSectionNavigator,
   AkSegmented,
+  AkSkillLevels,
   AkSlider,
+  AkSpec,
   AkStatus,
+  AkStripes,
   AkTabs,
   AkTag,
+  AkTrust,
+  AkWatermark,
 } from '../ak'
+import type { AkSkillLevel } from '../ak'
 import { galleryItems } from './gallery-art'
 import './demo.css'
 
@@ -86,6 +120,7 @@ export function App() {
   const [slider, setSlider] = useState(42)
   const [count, setCount] = useState(1280)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
 
   return (
     <div className="demo-page">
@@ -255,6 +290,117 @@ export function App() {
 
         <Block eyebrow="09 / SECTION NAVIGATOR" title="Site shell" note="Scroll-snap navigation with hash sync, per-section entrance animation and cancellable transitions. Sections must have unique ids behind a `[data-ak-section-viewport]`.">
           <SiteShellDemo />
+        </Block>
+
+        <Block
+          eyebrow="10 / DECOR"
+          title="Decoration language"
+          note="Ported from prts-design (MIT). The geometry that makes a UI read as Arknights: hazard stripes, halftone, blueprint grids, corner triangles, cut corners."
+        >
+          <div className="demo-stack">
+            <div className="demo-row">
+              <AkStripes bar variant="warning" style={{ width: '8rem' }} />
+              <AkStripes bar variant="danger" style={{ width: '8rem' }} />
+              <AkStripes bar variant="hazard" style={{ width: '8rem' }} />
+            </div>
+            <AkStripes variant="strong" style={{ height: '2.5rem' }} />
+            <div className="demo-row">
+              <AkGridBackdrop variant="grid" style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }} />
+              <AkGridBackdrop variant="dots" style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }} />
+              <AkGridBackdrop variant="diag" style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }} />
+              <AkGridBackdrop variant="scanlines" style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }} />
+            </div>
+            <div className="demo-row">
+              <AkCorner position="tr" tone="yellow" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)' }} />
+              <AkCorner position="tl" tone="red" large style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)' }} />
+              <AkBrackets style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)' }} />
+              <AkHalftone variant="full" style={{ padding: 'var(--ak-space-3)' }}>
+                <AkGlyphBox style={{ padding: '0.25rem' }}>G</AkGlyphBox>
+              </AkHalftone>
+            </div>
+            <div className="demo-row" style={{ alignItems: 'flex-end' }}>
+              {/* AkCut: clip-path 会裁掉自己的阴影，所以投影放外层 */}
+              <div style={{ boxShadow: 'var(--ak-shadow-panel)' }}>
+                <AkCut size="sm" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', padding: '0.5rem' }}>
+                  <AkCodeId>LM04</AkCodeId>
+                </AkCut>
+              </div>
+              <AkCut style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', padding: '0.5rem' }}>--md</AkCut>
+              <AkCut size="lg" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', padding: '0.5rem' }}>--lg</AkCut>
+              <AkCut corner="all" size="lg" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', padding: '0.5rem' }}>all</AkCut>
+            </div>
+            <div className="demo-row" style={{ alignItems: 'center' }}>
+              <AkBlueBand>Blue band</AkBlueBand>
+              <AkInverse style={{ padding: '0.375rem 0.75rem' }}>Inverse</AkInverse>
+              {/* 指向真实存在的锚点（shellSections 里定义的 id），不留死链接 */}
+              <AkChevrons href="#shell-archive">Proceed</AkChevrons>
+            </div>
+            <div style={{ position: 'relative', paddingBottom: 'var(--ak-space-4)' }}>
+              <AkDisplay xl>AK-UI</AkDisplay>
+              <AkWatermark>RHODES</AkWatermark>
+            </div>
+            <div className="demo-row" style={{ alignItems: 'baseline' }}>
+              <AkOverline>Overline</AkOverline>
+              <AkNum>1,234,567.89</AkNum>
+              <AkEn>LATIN</AkEn>
+              <AkBilingual cn="明日方舟" en="Arknights" />
+              <AkBilingual cn="终端" en="Terminal" row />
+            </div>
+          </div>
+        </Block>
+
+        <Block
+          eyebrow="11 / ARKNIGHTS DATA"
+          title="Game data"
+          note="Ported from prts-design (MIT). Icons are supplied by the host — none of these components ship game art."
+        >
+          <div className="demo-stack">
+            <div className="demo-row" style={{ alignItems: 'center' }}>
+              <AkRarity level={6} />
+              <AkRarity level={5} size="lg" />
+              <AkRarity level={2} variant="white" />
+              <AkRarity level={3} size="sm" />
+              <AkRarityChip level={6}>R6</AkRarityChip>
+              <AkRarityBar level={4} style={{ padding: 'var(--ak-space-2)', backgroundColor: 'var(--ak-surface-sunken)' }}>
+                <span className="ak-r-text">R4 rail</span>
+              </AkRarityBar>
+            </div>
+
+            <div className="demo-row" style={{ alignItems: 'center' }}>
+              <AkProfession name="medic" boxed size="lg" icon={<span aria-hidden="true">+</span>} />
+              <AkProfession name="caster" outline icon={<span aria-hidden="true">◇</span>} />
+              <AkProfessionLabel name="医疗" en="Medic" prof="medic" />
+              <AkElite level={2} icon={<b>E2</b>} />
+              <AkPotential label="潜能 6" icon={<b>P6</b>} />
+              <AkSpec label="专精三" icon={<b>S3</b>} bare />
+              <AkTrust value="信赖 200" />
+            </div>
+
+            <AkSkillLevels value={skillLevel} onValueChange={setSkillLevel} max="M3" />
+
+            <AkPotList>
+              <AkPot index={<b>P2</b>} label="潜能 2" active>
+                部署费用 -1
+              </AkPot>
+              <AkPot index={<b>P3</b>} label="潜能 3">
+                攻击力 +25
+              </AkPot>
+              <AkPot index={<b>P4</b>} label="潜能 4">
+                再部署时间 -4s
+              </AkPot>
+            </AkPotList>
+
+            <AkAttrs>
+              <AkAttr label="ATK" labelCn="攻击" value="1234" hint="+90" accent />
+              <AkAttr label="DEF" labelCn="防御" value="312" />
+              <AkAttr label="RST" labelCn="法抗" value="0" />
+            </AkAttrs>
+
+            <AkKv>
+              <AkKvItem label="所属势力">罗德岛</AkKvItem>
+              <AkKvItem label="上线时间">2019-05-01</AkKvItem>
+            </AkKv>
+          </div>
         </Block>
       </main>
     </div>

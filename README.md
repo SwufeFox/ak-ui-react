@@ -67,7 +67,7 @@ Decoration (`decor`) — ported from prts-design:
 
 `AkStripes` · `AkCorner` · `AkBrackets` · `AkGridBackdrop` · `AkHalftone` · `AkBlueBand` ·
 `AkDisplay` · `AkNum` · `AkCodeId` · `AkOverline` · `AkEn` · `AkWatermark` · `AkBilingual` ·
-`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox`
+`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox` · `AkCut`
 
 Arknights game data (`arknights`) — ported from prts-design:
 
@@ -142,6 +142,32 @@ the host as `children`/`icon` and renders nothing (rather than a placeholder) wh
 An earlier iteration of this port reviewed the same repository while its license status was still
 unresolved and deliberately borrowed only abstract design directions. That restriction is now
 lifted; the note is kept here for context.
+
+### Cut corners (`AkCut`)
+
+Upstream hardcoded the same "clip the top-right corner" shape in five places at five different
+radii (dialog `1.25rem`, notice `1rem`, popover `0.9rem`, san `0.75rem`, tag `0.55rem`) while
+`--ak-cut-sm/md/lg` had **no consumers at all** — the shape existed but was neither reusable nor
+tunable. Those five now read the same token:
+
+```css
+clip-path: polygon(0 0, calc(100% - var(--ak-cut, <original radius>)) 0, …)
+```
+
+Each keeps its original radius as the fallback, so nothing shifts visually unless you override it.
+Set `--ak-cut` on any ancestor to retune every cut surface at once:
+
+```css
+/* host wants a tighter, more technical cut everywhere */
+.app-shell { --ak-cut: 4px; }
+```
+
+`AkCut` is the same geometry as a component — `corner` (`tr` default, `tl`/`br`/`bl`/`all`),
+`size` (`sm`/`md`/`lg`), or an explicit `radius`.
+
+> `clip-path` clips the element's own shadow — that is its semantics, not a bug. For "cut corner
+> **and** drop shadow", put the shadow on a wrapper: `<div style={{boxShadow:…}}><AkCut>…</AkCut></div>`.
+> A background on the element itself still shows, since the clip applies to the painted box.
 
 
 ```bash

@@ -19,7 +19,7 @@
   padding: 1rem 1.1rem;
   border: 1px solid #626a70;
   border-top: 4px solid var(--ak-popover-signal);
-  clip-path: polygon(0 0, calc(100% - 0.9rem) 0, 100% 0.9rem, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - var(--ak-cut, 0.9rem)) 0, 100% var(--ak-cut, 0.9rem), 100% 100%, 0 100%);
 
   & &__eyebrow {
     display: block;

@@ -22,6 +22,7 @@ export {
   AkChevrons,
   AkCodeId,
   AkCorner,
+  AkCut,
   AkDisplay,
   AkEn,
   AkGlyph,

@@ -21,7 +21,7 @@
   align-items: center;
   color: var(--ak-tag-text);
   background: var(--ak-tag-surface);
-  clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 0.55rem, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - var(--ak-cut, 0.55rem)) 0, 100% var(--ak-cut, 0.55rem), 100% 100%, 0 100%);
   font-family: $font-monospace;
   font-size: 0.6875rem;
   font-weight: 800;

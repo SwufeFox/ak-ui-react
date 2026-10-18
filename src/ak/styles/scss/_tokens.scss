@@ -88,6 +88,9 @@
   --ak-stripe-size: 8px;
   --ak-halftone-color: rgba(255, 255, 255, 0.16);
   --ak-halftone-size: 6px;
+  // 扫描线：上游写死 rgba(0,0,0,.05)（它的默认主题是亮色）——直接搬过来在 ak-ui 的
+  // 默认暗色主题上完全看不见，所以这里做成随主题翻转的令牌。
+  --ak-scanline-color: rgba(255, 255, 255, 0.035);
   --ak-glyph-filter: none;
   --ak-trust-icon: none;
   --ak-trust-content: none;
@@ -160,5 +163,6 @@
   --ak-grid-color: rgba(0, 0, 0, 0.06);
   --ak-stripe-color: rgba(0, 0, 0, 0.08);
   --ak-halftone-color: rgba(0, 0, 0, 0.14);
+  --ak-scanline-color: rgba(0, 0, 0, 0.05);
   --ak-glyph-filter: invert(1);
 }
