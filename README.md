@@ -324,6 +324,26 @@ npm run dev        # local, http://localhost:5273
 npx vite build     # builds the showcase into dist-demo/
 ```
 
+The deployment is deliberately **purely static** — no Pages Functions, no `_worker.js`, no
+`_routes.json`. Cloudflare's docs are explicit that "on a purely static project, Pages offers
+unlimited free requests"; adding Functions is what makes requests count against the daily limit
+and prompts the whole `_routes.json` exclusion dance. So the build output stays four files:
+
+```
+dist-demo/index.html
+dist-demo/_headers        # response headers, parsed by Pages, not served as an asset
+dist-demo/assets/*.js     # 269 KB
+dist-demo/assets/*.css    # 107 KB
+```
+
+`_headers` (authored in `public/`, copied in by Vite) caches the hashed assets immutably and
+keeps `index.html` revalidating, so a deploy is picked up immediately rather than serving a
+stale entry point.
+
+If you ever add a `functions/` directory, that changes: every request would invoke a Function by
+default, and you would need a `_routes.json` to exclude static routes — which must contain **at
+least one `include` rule**, so `"include": []` is invalid and the deploy is rejected.
+
 **One-time setup** — the workflow is guarded by `vars.CLOUDFLARE_PAGES_ENABLED`, so it skips
 itself until both secrets exist and that variable is set. This keeps forks and fresh clones green.
 

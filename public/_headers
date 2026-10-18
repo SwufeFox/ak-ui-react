@@ -1,0 +1,25 @@
+# Cloudflare Pages static-asset response headers.
+#
+# Parsed by Pages and applied to plain static responses. This file is not
+# served as an asset, and it does not add or require Functions — the project
+# stays purely static, which is what keeps requests free and unlimited.
+# Vite copies public/ into dist-demo/ at build time.
+
+# Fingerprinted build assets are safe to cache forever: the content hash in
+# the filename changes whenever the file does, so a new build is a new URL.
+/assets/*
+	Cache-Control: public, max-age=31536000, immutable
+
+# The HTML entry point must revalidate, otherwise a visitor who has it cached
+# keeps loading the previous bundle's hashed filenames after a deploy.
+# Both forms are listed: `/` for the root request and `/index.html` for a
+# direct hit. Cloudflare is not documented to map one to the other.
+/
+	Cache-Control: public, max-age=0, must-revalidate
+	X-Content-Type-Options: nosniff
+	Referrer-Policy: strict-origin-when-cross-origin
+
+/index.html
+	Cache-Control: public, max-age=0, must-revalidate
+	X-Content-Type-Options: nosniff
+	Referrer-Policy: strict-origin-when-cross-origin
