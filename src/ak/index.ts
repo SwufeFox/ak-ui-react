@@ -17,6 +17,17 @@ export { AkInputNumber, type AkInputNumberProps } from './ui/input-number/AkInpu
 export { AkSegmented, AkTabs, type AkSegmentedOption, type AkSegmentedProps, type AkTabsItem, type AkTabsProps } from './ui/tabs/AkTabs'
 export { AkCountUp, type AkCountUpHandle, type AkCountUpProps } from './ui/effects/AkCountUp'
 export { AkEntrance, type AkEntranceHandle, type AkEntranceProps } from './ui/effects/AkEntrance'
+// 上游 .ak-fx-* 特效层（真正的 ak-ui 动效语言：呼吸辉光 / 扩散轮廓环 / ±10° 斜切）
+export {
+  AkGlow,
+  AkOutline,
+  AkSkew,
+  type AkGlowProps,
+  type AkGlowTone,
+  type AkOutlineProps,
+  type AkSkewDirection,
+  type AkSkewProps,
+} from './ui/effects/AkFx'
 export { AkAssetLoader, type AkAssetLoaderProps } from './ui/site/AkAssetLoader'
 export { AkMediaGallery, type AkMediaGalleryProps, type GalleryItem } from './ui/site/AkMediaGallery'
 export { AkMobileMenu, type AkMobileMenuHandle, type AkMobileMenuProps } from './ui/site/AkMobileMenu'

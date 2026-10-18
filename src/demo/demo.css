@@ -437,17 +437,14 @@ body {
   border: 1px solid var(--demo-hairline);
 }
 
-/* 动效节奏演示：AkMotion 只声明过渡属性，还需要一个真的会变的值，
-   hover 才看得出 quick / base / slow 的差别。 */
-.demo-motion-card {
-  cursor: pointer;
-  translate: 0 0;
-  opacity: 0.72;
-}
-
-.demo-motion-card:hover {
-  opacity: 1;
-  translate: 0 -6px;
+/* 特效演示：AkGlow / AkOutline / AkSkew 自身就是可见的（CSS animation infinite +
+   静态倾斜），不需要额外 hover 规则去「让它动起来」。 */
+.demo-fx-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-5, 1.5rem);
+  padding: var(--ak-space-4, 1rem) var(--ak-space-2, 0.5rem);
 }
 
 /* ── 小屏：三栏退回单列堆叠 ────────────────────────────────────────────── */

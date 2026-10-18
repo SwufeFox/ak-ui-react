@@ -31,7 +31,9 @@ import {
   AkKvItem,
   AkMediaGallery,
   AkMobileMenu,
-  AkMotion,
+  AkGlow,
+  AkOutline,
+  AkSkew,
   AkNotice,
   AkNum,
   AkOverline,
@@ -746,36 +748,23 @@ function ReferenceView() {
             <AkDisplay xl>{t('app.name')}</AkDisplay>
             <AkWatermark>{t('ref.decor.watermark')}</AkWatermark>
           </div>
-          <div className="demo-row" style={{ alignItems: 'stretch' }}>
-            {/* 节奏档：hover 才看得出快 / 中 / 慢的差别 */}
-            <AkMotion
-              className="demo-motion-card"
-              effect="rise"
-              pace="quick"
-              style={{ padding: 'var(--ak-space-3)', background: 'var(--ak-surface-sunken-2)' }}
-            >
-              <AkCodeId>{t('common.quick')}</AkCodeId>
-              <div style={{ fontSize: '0.8125rem' }}>{t('ref.decor.hoverPace', { n: 120 })}</div>
-            </AkMotion>
-            <AkMotion
-              className="demo-motion-card"
-              effect="rise"
-              pace="base"
-              style={{ padding: 'var(--ak-space-3)', background: 'var(--ak-surface-sunken-2)' }}
-            >
-              <AkCodeId>{t('common.base')}</AkCodeId>
-              <div style={{ fontSize: '0.8125rem' }}>{t('ref.decor.hoverPace', { n: 200 })}</div>
-            </AkMotion>
-            <AkMotion
-              className="demo-motion-card"
-              effect="rise"
-              pace="slow"
-              emphasized
-              style={{ padding: 'var(--ak-space-3)', background: 'var(--ak-surface-sunken-2)' }}
-            >
-              <AkCodeId>{t('common.slowEmphasized')}</AkCodeId>
-              <div style={{ fontSize: '0.8125rem' }}>{t('ref.decor.hoverPace', { n: 420 })}</div>
-            </AkMotion>
+          {/* 上游特效层：这三样才是 ak-ui 的动效语言（都是 CSS animation infinite） */}
+          <div className="demo-fx-row">
+            <AkGlow>
+              <AkButton variant="outline">{t('common.glow')}</AkButton>
+            </AkGlow>
+            <AkGlow tone="action">
+              <AkButton variant="action">{t('common.glowAction')}</AkButton>
+            </AkGlow>
+            <AkOutline color="var(--ak-signal-info)">
+              <AkButton variant="outline">{t('common.outlineRing')}</AkButton>
+            </AkOutline>
+            <AkSkew direction="left" style={{ display: 'inline-block' }}>
+              <AkInverse style={{ padding: '0.375rem 0.75rem' }}>{t('common.skewLeft')}</AkInverse>
+            </AkSkew>
+            <AkSkew direction="right" style={{ display: 'inline-block' }}>
+              <AkInverse style={{ padding: '0.375rem 0.75rem' }}>{t('common.skewRight')}</AkInverse>
+            </AkSkew>
           </div>
           <div className="demo-row" style={{ alignItems: 'baseline' }}>
             <AkOverline>{t('common.overline')}</AkOverline>

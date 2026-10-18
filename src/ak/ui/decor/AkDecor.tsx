@@ -326,10 +326,14 @@ export interface AkMotionProps extends DivProps {
 }
 
 /**
- * 动效节奏容器：把 `--ak-motion-*` / `--ak-ease-*` 节奏档接到真实过渡上。
+ * @deprecated 这是通用网页过渡，**不是 ak-ui 的动效语言**，别拿它当「方舟感」的来源。
  *
- * 这组令牌此前零消费者（库内动画各写各的），所以这个组件也是让它们「活过来」
- * 的那条线。`effect` 必给：没有过渡属性的节奏档不产生任何效果。
+ * ak-ui 真正的动效是 `AkGlow`（呼吸辉光）/ `AkOutline`（扩散轮廓环）/ `AkSkew`（±10° 斜切），
+ * 加上控制器层的 `AkEntrance` / `AkCountUp` / `AkParticleField`——它们跑 CSS animation
+ * （infinite）或 Web Animations API，而不是 transition。这几样用起来。
+ *
+ * 保留本组件仅为兼容 v1.2.0 的调用方（它已随 v1.2.0 发布，直接删是破坏性变更），
+ * 不要在文档或新代码里推荐它。
  *
  * ```tsx
  * <AkMotion effect="rise" pace="slow" emphasized>…</AkMotion>

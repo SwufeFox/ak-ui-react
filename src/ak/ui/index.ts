@@ -7,6 +7,8 @@ export { AkSlider } from './slider/AkSlider'
 export { AkInputNumber } from './input-number/AkInputNumber'
 export { AkSegmented, AkTabs } from './tabs/AkTabs'
 export { AkCountUp } from './effects/AkCountUp'
+// 上游 .ak-fx-* 特效层（glow / outline / skew）——此前只有 CSS，没有组件暴露
+export { AkGlow, AkOutline, AkSkew } from './effects/AkFx'
 export { AkEntrance } from './effects/AkEntrance'
 export { AkAssetLoader } from './site/AkAssetLoader'
 export { AkMediaGallery } from './site/AkMediaGallery'

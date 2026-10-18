@@ -68,7 +68,8 @@ Decoration (`decor`) — ported from prts-design:
 
 `AkStripes` · `AkCorner` · `AkBrackets` · `AkGridBackdrop` · `AkHalftone` · `AkBlueBand` ·
 `AkDisplay` · `AkNum` · `AkCodeId` · `AkOverline` · `AkEn` · `AkWatermark` · `AkBilingual` ·
-`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox` · `AkCut` · `AkMotion`
+`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox` · `AkCut` · `AkGlow` · `AkOutline` ·
+`AkSkew` · `AkMotion` *(deprecated)*
 
 Arknights game data (`arknights`) — ported from prts-design:
 
@@ -188,48 +189,44 @@ Set `--ak-cut` on any ancestor to retune every cut surface at once:
 > **and** drop shadow", put the shadow on a wrapper: `<div style={{boxShadow:…}}><AkCut>…</AkCut></div>`.
 > A background on the element itself still shows, since the clip applies to the painted box.
 
-### Motion pacing (`AkMotion`)
+### Effects (`AkGlow` / `AkOutline` / `AkSkew`)
 
-Same story as the cut corners, one layer up. `--ak-motion-fast/base/slow` and
-`--ak-ease-emphasized` had **no consumers** — every animation in the library hardcoded its own
-number (`.ak-entrance`'s controller defaults to `650ms`, `.ak-fx` to `1.5s` / `0.7s`) — so the
-pacing scale existed but nothing was on it.
-
-`AkMotion` wires the scale to a real transition:
+The library's actual motion language lives in the `.ak-fx-*` layer, ported from upstream and
+running on **CSS `animation` with `infinite`** — not on transitions. That distinction is the
+whole point: a transition is a generic web affordance, while these are the continuously-running
+signals that make a surface read as Arknights.
 
 ```tsx
-<AkMotion effect="rise" pace="slow" emphasized>
-  <AkPanel />
-</AkMotion>
+<AkGlow tone="action"><AkButton variant="action">Deploy</AkButton></AkGlow>
+<AkOutline color="var(--ak-signal-info)"><AkButton variant="outline">Inspect</AkButton></AkOutline>
+<AkSkew direction="left"><AkInverse>Slanted plate</AkInverse></AkSkew>
 ```
 
-- `pace` — `quick` (120ms) · `base` (200ms) · `slow` (420ms)
-- `effect` — `fade` (`opacity`) · `rise` (`opacity, transform`) · `color` (color/border)
-- `emphasized` — swaps `--ak-ease-standard` for `--ak-ease-emphasized`
+| Component | Upstream rule | Measured |
+| --- | --- | --- |
+| `AkGlow` | `.ak-fx--glow` | `ak-glow 1.5s infinite alternate ease-out` — box-shadow breathing |
+| `AkOutline` | `.ak-fx--outline` | `ak-outline-fade 0.7s infinite` — ring expanding outward, fading |
+| `AkSkew` | `.ak-fx--skew-*` | `skewX(∓10deg)` — static shape language, not animated |
 
-`effect` is **required in practice**: `transition-duration` alone does nothing without a
-`transition-property`, so a pace with no effect is an inert class. That is why they ship paired.
+All three honour `prefers-reduced-motion: reduce` (verified: the computed `animation-name`
+becomes `none`).
 
-`prefers-reduced-motion: reduce` zeroes the duration rather than removing the transition, so hosts
-that rely on `transitionend` are not left hanging.
+`AkGlow` takes a `tone` (`action` / `info` / `danger`) that routes the signal tokens, or an
+explicit `color`; `AkOutline` and `AkSkew` take `color` / `direction` respectively.
 
-You can also skip the component and use the tokens directly:
+> **`AkMotion` is deprecated.** It shipped in v1.2.0 and is kept so existing callers keep
+> working, but it is a generic transition helper — pace + fade/rise/color — and has nothing to
+> do with the effects above. Do not reach for it as a source of "Arknights feel"; use `AkGlow` /
+> `AkOutline` / `AkSkew`, or the controller-based `AkEntrance` / `AkCountUp` / `AkParticleField`.
 
-```css
-.my-panel {
-  transition: opacity var(--ak-motion-dur, var(--ak-motion-base)) var(--ak-motion-ease, var(--ak-ease-standard));
-}
-```
+The controller layer is a separate axis and stays as it is: `AkEntrance` (direction-aware
+fade+translate, 650ms, `cubic-bezier(0.16,1,0.3,1)`) and `AkCountUp` (easeOutCubic, 1000ms) run
+through the Web Animations API in `src/ak/core/effects.mjs`, and both already check
+`prefers-reduced-motion`.
 
-**To retune pacing from an ancestor, override the scale token, not `--ak-motion-dur`:**
-
-```css
-.app-shell { --ak-motion-slow: 900ms; }   /* ✅ reaches every AkMotion in the subtree */
-.app-shell { --ak-motion-dur: 90ms; }     /* ❌ no-op — .ak-motion declares it on the element */
-```
-
-The same shape applies to `AkCut`: override `--ak-cut`, not `--ak-cut-corner`
-(`.ak-cut` sets `--ak-cut-corner` itself, so an ancestor value never arrives).
+If you set `--ak-motion-*` yourself, note that `.ak-motion` declares `--ak-motion-dur` on the
+element, so retuning from an ancestor means overriding the scale token (`--ak-motion-slow`), not
+`--ak-motion-dur`. Same shape as `AkCut`: override `--ak-cut`, not `--ak-cut-corner`.
 
 ### Signal glow (`--ak-shadow-signal`)
 
