@@ -1,6 +1,9 @@
 .alma-snapshots
 node_modules
 dist
+# The showcase build (vite.config.ts outDir). Without this the build output
+# shows up as untracked after every local `vite build`.
+dist-demo
 *.local
 .DS_Store
 playwright-report

@@ -10,6 +10,7 @@ the *same* controller instances the Vue components did.
 
 - **Package:** `@swufefox/ak-ui-react`
 - **Repo:** https://github.com/SwufeFox/ak-ui-react
+- **Showcase:** https://ak-ui-react.pages.dev
 - **Upstream:** [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (Vue)
 - **Peer deps:** React 18 or 19
 
@@ -310,6 +311,37 @@ npm ≥ 11.5.1 and Node ≥ 22.14.0).
 
 > The configuration expires if it does not complete a first successful publish within two
 > days of creation.
+
+## Showcase
+
+The component showcase is the same Vite app used for development (`src/demo/`, 11 sections from
+Actions through Arknights game data). It deploys to **Cloudflare Pages** on every push to
+`master`, via `.github/workflows/pages.yml` — independent of the npm release, so a docs change
+does not cut a version and a release does not wait on the site.
+
+```bash
+npm run dev        # local, http://localhost:5273
+npx vite build     # builds the showcase into dist-demo/
+```
+
+**One-time setup** — the workflow is guarded by `vars.CLOUDFLARE_PAGES_ENABLED`, so it skips
+itself until both secrets exist and that variable is set. This keeps forks and fresh clones green.
+
+1. Create a Pages project named `ak-ui-react` (Workers & Pages → Create → Pages → *Direct
+   Upload*). Do **not** connect it to this repo through the Git integration — the workflow
+   uploads with `wrangler pages deploy`, so a Git build would deploy the same thing twice.
+2. Create an API token (My Profile → API Tokens) scoped to **Account → Cloudflare Pages →
+   Edit**.
+3. Add two repository secrets (Settings → Secrets and variables → Actions → *Secrets*):
+   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+4. Add one repository **variable** (same page, *Variables* tab): `CLOUDFLARE_PAGES_ENABLED` =
+   `true`.
+
+Then push to `master`, or run the workflow from the Actions tab with `dry_run` to build without
+deploying.
+
+> The deployed URL is `https://<project-name>.pages.dev`. If the project name is taken, pick
+> another and change `--project-name` to match in `pages.yml`.
 
 ## Port notes
 

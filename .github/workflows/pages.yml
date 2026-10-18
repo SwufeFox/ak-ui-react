@@ -1,0 +1,69 @@
+name: Deploy showcase to Cloudflare Pages
+
+# Builds the component showcase (the Vite demo app) and publishes it to
+# Cloudflare Pages. This is separate from publish.yml, which ships the npm
+# package — the two are independent on purpose: a docs-only change should not
+# cut a release, and a release should not depend on the docs site building.
+on:
+  push:
+    branches: [master]
+  # Lets you redeploy from the Actions tab without pushing a commit.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build only — skip the Cloudflare deploy
+        type: boolean
+        default: false
+
+# Only one deploy at a time, and never cancel one mid-flight: a cancelled
+# deployment can leave the project pointing at a half-uploaded build.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run when the Cloudflare credentials exist. Without them the job
+    # would fail every push on a fork or a fresh clone of this repo, which is
+    # noise rather than signal.
+    if: ${{ github.repository == 'SwufeFox/ak-ui-react' && (github.event_name == 'workflow_dispatch' || vars.CLOUDFLARE_PAGES_ENABLED == 'true') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+          cache: npm
+
+      - run: npm ci
+
+      # Reuse the library's own typecheck rather than a second, drifting one.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build showcase
+        run: npx vite build
+
+      # Fail loudly here instead of deploying an empty directory, which
+      # Cloudflare would happily accept.
+      - name: Verify build output
+        run: |
+          test -f dist-demo/index.html
+          test -d dist-demo/assets
+          echo "dist-demo size: $(du -sh dist-demo | cut -f1)"
+          echo "files: $(find dist-demo -type f | wc -l)"
+
+      - name: Deploy to Cloudflare Pages
+        if: ${{ inputs.dry_run != true }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            pages deploy dist-demo
+            --project-name=ak-ui-react
+            --branch=${{ github.ref_name }}
