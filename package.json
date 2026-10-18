@@ -1,6 +1,6 @@
 {
   "name": "@swufefox/ak-ui-react",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Arknights-inspired design system for React — tokens, CSS primitives and components ported from @yunyoujun/ak-ui.",
   "keywords": [
     "ak-ui",
