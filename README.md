@@ -316,13 +316,51 @@ npm ≥ 11.5.1 and Node ≥ 22.14.0).
 
 The component showcase is the same Vite app used for development (`src/demo/`, 11 sections from
 Actions through Arknights game data). It deploys to **Cloudflare Pages** on every push to
-`master`, via `.github/workflows/pages.yml` — independent of the npm release, so a docs change
-does not cut a version and a release does not wait on the site.
+`master` — independent of the npm release, so a docs change does not cut a version and a release
+does not wait on the site.
 
 ```bash
-npm run dev        # local, http://localhost:5273
-npx vite build     # builds the showcase into dist-demo/
+npm run dev          # local, http://localhost:5273
+npm run build:demo   # builds the showcase into dist-demo/
+npm run build        # NOT this one — it builds the npm package into dist/
 ```
+
+> ⚠️ **`build` and `build:demo` are different things, and picking the wrong one deploys the
+> wrong artifact.** `npm run build` runs `scripts/build.mjs` and produces the publishable library
+> in `dist/`. The showcase is `npm run build:demo` → `vite build` → `dist-demo/`. This is why the
+> Cloudflare project must use the explicit `build:demo` script rather than the conventional
+> `npm run build`.
+
+### Cloudflare Pages setup
+
+Connect the Pages project to this repo through Cloudflare's Git integration — no API token or
+GitHub secret is needed, and Cloudflare builds the site itself.
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | `None` |
+| Build command | `npm run build:demo` |
+| Build output directory | `dist-demo` |
+| Root directory | `/` |
+| Environment variable | `NODE_VERSION` = `22.14.0` |
+
+Three of those are deliberate:
+
+- **Framework preset `None`, not `Vite`** — the Vite preset would prefill `npm run build` and
+  `dist`, which is exactly the wrong pair here.
+- **`build:demo`, not `build`** — see the warning above.
+- **`NODE_VERSION`** — Vite 8 requires `^20.19.0 || >=22.12.0`. Pinning it matches CI and keeps
+  the build off whatever Node the image ships by default. This lives in the Pages dashboard and
+  in `.nvmrc` for local use; it is deliberately *not* in `package.json` `engines`, because that
+  field would only warn consumers about a runtime constraint that does not apply to them.
+
+`public/_headers` (copied into `dist-demo/` by Vite) caches the hashed assets immutably and keeps
+`index.html` revalidating, so a deploy is picked up immediately rather than serving a stale entry
+point.
+
+If you ever add a `functions/` directory, that changes: every request would invoke a Function by
+default, and you would need a `_routes.json` to exclude static routes — which must contain **at
+least one `include` rule**, so `"include": []` is invalid and the deploy is rejected.
 
 The deployment is deliberately **purely static** — no Pages Functions, no `_worker.js`, no
 `_routes.json`. Cloudflare's docs are explicit that "on a purely static project, Pages offers
@@ -344,24 +382,21 @@ If you ever add a `functions/` directory, that changes: every request would invo
 default, and you would need a `_routes.json` to exclude static routes — which must contain **at
 least one `include` rule**, so `"include": []` is invalid and the deploy is rejected.
 
-**One-time setup** — the workflow is guarded by `vars.CLOUDFLARE_PAGES_ENABLED`, so it skips
-itself until both secrets exist and that variable is set. This keeps forks and fresh clones green.
+The deployment is deliberately **purely static** — no Pages Functions, no `_worker.js`, no
+`_routes.json`. Cloudflare's docs are explicit that "on a purely static project, Pages offers
+unlimited free requests"; adding Functions is what makes requests count against the daily limit
+and prompts the whole `_routes.json` exclusion dance. The build output stays four files:
 
-1. Create a Pages project named `ak-ui-react` (Workers & Pages → Create → Pages → *Direct
-   Upload*). Do **not** connect it to this repo through the Git integration — the workflow
-   uploads with `wrangler pages deploy`, so a Git build would deploy the same thing twice.
-2. Create an API token (My Profile → API Tokens) scoped to **Account → Cloudflare Pages →
-   Edit**.
-3. Add two repository secrets (Settings → Secrets and variables → Actions → *Secrets*):
-   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-4. Add one repository **variable** (same page, *Variables* tab): `CLOUDFLARE_PAGES_ENABLED` =
-   `true`.
+```
+dist-demo/index.html
+dist-demo/_headers        # response headers, parsed by Pages, not served as an asset
+dist-demo/assets/*.js     # 269 KB
+dist-demo/assets/*.css    # 107 KB
+```
 
-Then push to `master`, or run the workflow from the Actions tab with `dry_run` to build without
-deploying.
-
-> The deployed URL is `https://<project-name>.pages.dev`. If the project name is taken, pick
-> another and change `--project-name` to match in `pages.yml`.
+> The deployed URL is `https://<project-name>.pages.dev`. If that project name is taken, pick
+> another — the name is only referenced in the Pages dashboard, so there is nothing in this repo
+> to change.
 
 ## Port notes
 
