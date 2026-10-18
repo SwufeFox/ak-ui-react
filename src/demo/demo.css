@@ -1,49 +1,368 @@
 /* Demo-only layout helpers. Deliberately outside src/ak/styles so the library stylesheet
    stays a faithful 1:1 port of the upstream SCSS. */
+
+/* 档案（亮色）主题下整页底色也要跟着翻，否则面板是亮的、页面还是黑的。 */
+:root {
+  --demo-canvas: #0b0d0f;
+  --demo-canvas-glow: rgb(25 209 255 / 8%);
+  --demo-hairline: rgb(255 255 255 / 18%);
+  --demo-topbar: rgb(12 14 16 / 92%);
+  --demo-text: #d2d2d2;
+  --demo-text-strong: #fff;
+  --demo-text-muted: rgb(210 210 210 / 74%);
+}
+
+:root[data-ak-theme='archive'] {
+  --demo-canvas: #eef0f1;
+  --demo-canvas-glow: rgb(0 152 220 / 8%);
+  --demo-hairline: rgb(0 0 0 / 14%);
+  --demo-topbar: rgb(250 250 249 / 94%);
+  --demo-text: #2b2d2f;
+  --demo-text-strong: #141516;
+  --demo-text-muted: rgb(43 45 47 / 72%);
+}
+
 body {
   margin: 0;
-  background: #0b0d0f;
-  color: #d2d2d2;
+  background: var(--demo-canvas);
+  color: var(--demo-text);
   font-family: var(--ak-font-sans, system-ui, sans-serif);
 }
 
-.demo-page {
+/* ── 应用外壳：顶栏 + 视图 ──────────────────────────────────────────────── */
+
+.demo-app {
+  display: grid;
+  grid-template-rows: auto 1fr;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 15% 0%, rgba(25, 209, 255, 0.08), transparent 45%),
-    #0b0d0f;
+    radial-gradient(circle at 15% 0%, var(--demo-canvas-glow), transparent 45%),
+    var(--demo-canvas);
 }
 
-.demo-header {
+.demo-topbar {
   position: sticky;
   top: 0;
   z-index: 5;
-  display: flex;
-  min-height: 5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0 clamp(1.25rem, 4vw, 4rem);
-  border-bottom: 1px solid rgb(255 255 255 / 22%);
-  background: rgb(12 14 16 / 92%);
+  gap: var(--ak-space-4, 1rem);
+  min-height: 5rem;
+  padding: 0 clamp(1rem, 3vw, 2.5rem);
+  border-bottom: 1px solid var(--demo-hairline);
+  background: var(--demo-topbar);
   backdrop-filter: blur(8px);
 }
 
-.demo-header h1 {
-  margin: 0;
-  color: #fff;
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
-  letter-spacing: -0.02em;
+.demo-topbar__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
 }
 
-.demo-eyebrow {
-  display: block;
-  color: #19d1ff;
+.demo-topbar__brand .ak-display {
+  color: var(--demo-text-strong);
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+}
+
+.demo-topbar__tagline {
+  color: var(--demo-text-strong);
+  font-size: 0.85rem;
+}
+
+.demo-topbar__subtitle {
+  color: var(--demo-text-muted);
   font-family: var(--ak-font-mono, ui-monospace, monospace);
   font-size: 0.7rem;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
+
+.demo-topbar__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+/* ── 控制台视图：三栏主体 + 底部日志 ───────────────────────────────────── */
+
+.demo-console {
+  display: grid;
+  gap: var(--ak-space-4, 1rem);
+  width: min(100%, 96rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.5rem) 3rem;
+}
+
+.demo-console__head .ak-display {
+  display: block;
+  margin: 0.4rem 0 0.35rem;
+  color: var(--demo-text-strong);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.demo-console__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-console__hazard {
+  flex: 1 1 10rem;
+  min-width: 8rem;
+}
+
+.demo-console__body {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1fr) minmax(20rem, 1.6fr) minmax(20rem, 1.5fr);
+  align-items: start;
+  gap: var(--ak-space-4, 1rem);
+}
+
+/* 切角面板：clip-path 会裁掉自己的阴影，所以投影放外层容器上 */
+.demo-panel {
+  position: relative;
+  display: grid;
+  gap: var(--ak-space-3, 0.75rem);
+  padding: var(--ak-space-4, 1rem);
+  background: var(--ak-surface-sunken);
+  box-shadow: var(--ak-shadow-panel, 0 0 10px rgb(0 0 0 / 20%));
+}
+
+.demo-panel__halftone,
+.demo-panel__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.demo-panel > :not(.demo-panel__halftone):not(.demo-panel__backdrop):not(.demo-panel__corner) {
+  position: relative;
+  z-index: 1;
+}
+
+.demo-console__rail .ak-kv {
+  margin-bottom: 0;
+}
+
+.demo-console__roster,
+.demo-console__detail,
+.demo-console__log {
+  min-width: 0;
+}
+
+/* ── 干员名单 ──────────────────────────────────────────────────────────── */
+
+.demo-roster__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-roster__count {
+  margin-left: auto;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+}
+
+.demo-roster {
+  display: grid;
+  gap: var(--ak-space-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 左缘色条 = 稀有度；选中态再叠一层边框与底色 */
+.demo-roster__row {
+  display: block;
+  background: var(--ak-surface-sunken-2);
+  box-shadow: inset 0 0 0 1px var(--ak-border-subtle);
+  transition: box-shadow var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease);
+}
+
+.demo-roster__row.is-selected {
+  box-shadow:
+    inset 0 0 0 1px var(--ak-signal-action),
+    0 0 12px rgb(255 216 0 / 22%);
+}
+
+/* AkCard 默认是 inline-block + 自带内边距，名单里让它铺满一行 */
+.demo-roster__card {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  box-shadow: none;
+  cursor: pointer;
+  text-align: start;
+  /* <button> 不继承祖先的 color，UA 默认给近黑色；名单行底是深灰
+     (--ak-surface-sunken-2)，黑字在上面几乎不可见。显式给文字色。 */
+  color: var(--demo-text-strong);
+}
+
+/* .ak-bilingual__cn 在库里只有 font-weight / font-size，没有颜色，
+   于是它继承上面的 UA 黑。这里补上，否则干员名会被深底吃掉。
+   （英文副标题由库的 .ak-bilingual__en 自己给 muted 色，不用管。） */
+.demo-roster__card .ak-bilingual__cn {
+  color: var(--demo-text-strong);
+}
+
+.demo-roster__card:hover {
+  background: rgb(255 255 255 / 5%);
+}
+
+.demo-roster__card:focus-visible {
+  outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #ffd800);
+  outline-offset: -3px;
+}
+
+.demo-roster__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.demo-roster__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--demo-text-muted);
+}
+
+.demo-roster__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.demo-empty {
+  margin: 0;
+  padding: var(--ak-space-4, 1rem);
+  border: 1px dashed var(--ak-border);
+  color: var(--demo-text-muted);
+}
+
+/* ── 详情面板 ──────────────────────────────────────────────────────────── */
+
+.demo-detail {
+  display: grid;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-detail__id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-detail__id .ak-bilingual__cn {
+  color: var(--demo-text-strong);
+  font-size: 1.15rem;
+}
+
+.demo-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-detail .ak-kv {
+  margin-bottom: 0;
+}
+
+.demo-section {
+  display: grid;
+  gap: var(--ak-space-2, 0.5rem);
+}
+
+.demo-skill {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 2px solid var(--ak-signal-info);
+  background: var(--ak-surface-sunken-2);
+}
+
+.demo-skill__name {
+  color: var(--demo-text-strong);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.demo-skill__desc {
+  color: var(--demo-text-muted);
+  font-size: 0.8rem;
+}
+
+.demo-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ak-space-2, 0.5rem);
+}
+
+.demo-detail__actions .ak-button {
+  flex: 1 1 7rem;
+}
+
+/* ── 部署日志 ──────────────────────────────────────────────────────────── */
+
+.demo-log__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-log__count {
+  margin-right: auto;
+  color: var(--demo-text-muted);
+  font-size: 0.8rem;
+}
+
+.demo-log__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.demo-log__row {
+  display: grid;
+  grid-template-columns: auto auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+  padding: 0.4rem 0.6rem;
+  background: var(--ak-surface-sunken-2);
+}
+
+.demo-log__index,
+.demo-log__time {
+  color: var(--demo-text-muted);
+  font-size: 0.75rem;
+}
+
+.demo-log__text {
+  overflow: hidden;
+  color: var(--demo-text-strong);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 参考视图 ──────────────────────────────────────────────────────────── */
 
 .demo-main {
   max-width: 76rem;
@@ -53,12 +372,12 @@ body {
 
 .demo-block {
   padding-block: clamp(1.75rem, 4vw, 3rem);
-  border-top: 1px solid rgb(255 255 255 / 14%);
+  border-top: 1px solid var(--demo-hairline);
 }
 
 .demo-block > h2 {
   margin: 0.6rem 0 0.5rem;
-  color: #fff;
+  color: var(--demo-text-strong);
   font-size: clamp(1.4rem, 3vw, 2.1rem);
   letter-spacing: -0.03em;
 }
@@ -66,7 +385,7 @@ body {
 .demo-note {
   margin: 0 0 1.5rem;
   max-width: 60ch;
-  color: rgb(210 210 210 / 74%);
+  color: var(--demo-text-muted);
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -94,20 +413,20 @@ body {
   position: relative;
   height: 12rem;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 18%);
-  background: #0e1114;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken);
 }
 
 .demo-canvas-label {
   position: relative;
   display: inline-block;
   padding: var(--ak-space-4, 1rem);
-  color: rgb(210 210 210 / 80%);
+  color: var(--demo-text-muted);
   font-size: 0.85rem;
 }
 
 .demo-inline-value {
-  color: #19d1ff;
+  color: var(--ak-signal-info);
   font-family: var(--ak-font-mono, ui-monospace, monospace);
 }
 
@@ -115,7 +434,7 @@ body {
 .demo-shell {
   position: relative;
   margin-top: var(--ak-space-4, 1rem);
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid var(--demo-hairline);
 }
 
 /* 动效节奏演示：AkMotion 只声明过渡属性，还需要一个真的会变的值，
@@ -129,4 +448,26 @@ body {
 .demo-motion-card:hover {
   opacity: 1;
   translate: 0 -6px;
+}
+
+/* ── 小屏：三栏退回单列堆叠 ────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .demo-topbar {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: var(--ak-space-3, 0.75rem);
+  }
+
+  .demo-topbar__controls {
+    justify-content: flex-start;
+  }
+
+  .demo-console__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .demo-log__row {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--ak-space-2, 0.5rem);
+  }
 }

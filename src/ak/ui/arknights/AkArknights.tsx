@@ -34,6 +34,9 @@ export interface AkRarityProps extends Omit<SpanProps, 'children'> {
 export function AkRarity({ level = 6, size = 'default', variant = 'default', count, className, ...rest }: AkRarityProps) {
   const stars = Math.max(0, Math.min(6, count ?? level))
 
+  // 本地化：调用方可用 aria-label 覆盖（此前字面量写在 {...rest} 之后，传了也会被静默覆盖）
+  const accessibleLabel = rest['aria-label'] ?? `${stars} 星`
+
   return (
     <span
       {...rest}
@@ -47,7 +50,7 @@ export function AkRarity({ level = 6, size = 'default', variant = 'default', cou
       data-level={level}
       data-variant={variant}
       role="img"
-      aria-label={`${stars} 星`}
+      aria-label={accessibleLabel}
     >
       {Array.from({ length: stars }, (_, index) => (
         <i key={index} aria-hidden="true" />
@@ -184,13 +187,16 @@ export interface AkEliteProps extends Omit<SpanProps, 'children'> {
 
 /** 精英化标记。 */
 export function AkElite({ level, icon, large = false, className, ...rest }: AkEliteProps) {
+  // 本地化：调用方可用 title 覆盖（此前字面量写在 {...rest} 之后，传了也会被静默覆盖）
+  const hint = rest.title ?? `精英 ${level}`
+
   return (
     <span
       {...rest}
       className={cx('ak-elite', large && 'ak-elite--lg', className)}
       data-slot="ak-elite"
       data-level={level}
-      title={`精英 ${level}`}
+      title={hint}
     >
       {icon}
     </span>

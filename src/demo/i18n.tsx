@@ -1,0 +1,772 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+
+/**
+ * 展示站的轻量 i18n。
+ *
+ * 刻意不引第三方库：这里只有两种语言、一张扁平表，引 i18next / react-intl 会带来
+ * 比字典本身还大的依赖，而展示站的价值在于「一眼看懂组件怎么用」，不在于 i18n 引擎。
+ *
+ * 约定：
+ *   - 字典是**扁平**的 key → string，key 用「区块.用途」的命名（`ref.actions.title`）。
+ *     不做嵌套对象，因为嵌套会让「漏翻译」变成运行时 undefined 而不是类型错误。
+ *   - `en` 是 authority：`zh-CN` 的类型取自 `en`，所以漏一条 key 会在 tsc 阶段报错，
+ *     不会在页面上显示空白。这是这个文件里最重要的一个约束。
+ */
+
+export type Locale = 'en' | 'zh-CN'
+
+/** 英文是 authority —— 中文的类型由它推导，漏 key 会编译失败。 */
+const en = {
+  // ── 应用外壳 ──────────────────────────────────────────────────────
+  'app.name': 'AK-UI',
+  'app.tagline': 'Arknights-inspired design system',
+  'app.subtitle': 'React port',
+  'app.view.console': 'Console',
+  'app.view.reference': 'Components',
+  'app.lang.label': 'Language',
+  'app.theme.label': 'Theme',
+  'app.theme.terminal': 'Terminal',
+  'app.theme.archive': 'Archive',
+
+  // ── 应用示例（Consoles 视图）─────────────────────────────────────
+  'console.eyebrow': 'APPLICATION EXAMPLE',
+  'console.title': 'Operator console',
+  'console.note':
+    'The same tokens and components composed into a working surface — status rail, roster, detail panel and a live log. Nothing here is a component demo.',
+
+  'console.status.online': 'SYSTEM',
+  'console.status.detail': 'Online',
+  'console.status.degraded': 'DEGRADED',
+
+  'console.rail.title': 'SECTOR',
+  'console.rail.sector': 'Sector',
+  'console.rail.operation': 'Operation',
+  'console.rail.deploy': 'Deploy',
+  'console.rail.funds': 'Funds',
+  'console.rail.stability': 'Stability',
+
+  'console.roster.title': 'Roster',
+  'console.roster.filter': 'Filter',
+  'console.roster.all': 'All',
+  'console.roster.medic': 'Medic',
+  'console.roster.caster': 'Caster',
+  'console.roster.count': '{n} operators',
+  'console.roster.empty': 'No operators match this filter.',
+
+  'console.detail.title': 'Operator',
+  'console.detail.select': 'Select an operator from the roster.',
+  'console.detail.attrs': 'Attributes',
+  'console.detail.skills': 'Skills',
+  'console.detail.potential': 'Potential',
+  'console.detail.trust': 'Trust',
+  'console.detail.elite': 'Elite',
+
+  'console.log.title': 'Deployment log',
+  'console.log.clear': 'Clear',
+  'console.log.empty': 'No entries yet — deploy an operator.',
+
+  'console.action.deploy': 'Deploy',
+  'console.action.recall': 'Recall',
+  'console.action.deployed': 'deployed',
+  'console.action.recalled': 'recalled',
+  'console.action.assign': 'Assigned',
+
+  // ── 组件参考（Reference 视图）──────────────────────────────────────
+  'ref.actions.title': 'Button & Tag',
+  'ref.actions.note': 'Variant-driven BEM class names, ported one-to-one from the Vue registry.',
+  'ref.surfaces.title': 'Card',
+  'ref.surfaces.note':
+    '`AkCard` renders any element via `as`, with header / title / content / footer slots.',
+  'ref.feedback.title': 'Notice, Status, Progress & Gauge',
+  'ref.feedback.note': 'Four ways to report state, from inline chips to full-width notices.',
+  'ref.inputs.title': 'Slider, InputNumber & Segmented',
+  'ref.inputs.note': 'Controlled inputs take `value` + `onValueChange`, replacing Vue v-model.',
+  'ref.navigation.title': 'Tabs',
+  'ref.navigation.note':
+    'Arrow keys, Home and End move focus between tabs; panels are wired with aria-controls.',
+  'ref.effects.title': 'CountUp & ParticleField',
+  'ref.effects.note': 'Both drive the framework-agnostic controllers vendored in src/ak/core.',
+  'ref.gallery.title': 'MediaGallery',
+  'ref.gallery.note':
+    'Controller-managed carousel: prev/next, selectors, swipe gestures and an expanded dialog.',
+  'ref.site.title': 'AssetLoader & MobileMenu',
+  'ref.site.note': 'Site-shell pieces. The mobile menu trigger is hidden above 48rem.',
+  'ref.shell.title': 'Site shell',
+  'ref.shell.note':
+    'Scroll-snap navigation with hash sync, per-section entrance animation and cancellable transitions.',
+  'ref.decor.title': 'Decoration language',
+  'ref.decor.note':
+    'Ported from prts-design (MIT). The geometry that makes a UI read as Arknights: hazard stripes, halftone, blueprint grids, corner triangles, cut corners and motion pacing.',
+  'ref.arknights.title': 'Game data',
+  'ref.arknights.note':
+    'Ported from prts-design (MIT). Icons are supplied by the host — none of these components ship game art.',
+
+  // ── 共享部件文案 ──────────────────────────────────────────────────
+  'common.default': 'Default',
+  'common.outline': 'Outline',
+  'common.action': 'Action',
+  'common.advanced': 'Advanced',
+  'common.light': 'Light',
+  'common.tag': 'Tag',
+  'common.danger': 'Danger',
+  'common.neutral': 'Neutral',
+  'common.block': 'Block',
+  'common.disabled': 'Disabled',
+  'common.inspect': 'Inspect',
+  'common.withIcon': 'With icon',
+  'common.hoverMe': 'Hover me',
+  'common.proceed': 'Proceed',
+  'common.blueBand': 'Blue band',
+  'common.inverse': 'Inverse',
+  'common.rail': 'rail',
+  'common.quick': 'quick',
+  'common.base': 'base',
+  'common.slowEmphasized': 'slow + emphasized',
+  'common.overline': 'Overline',
+  'common.latin': 'Latin',
+  'common.terminalRow': 'Terminal',
+  'common.medic': 'Medic',
+  'common.caster': 'Caster',
+  'common.trust200': 'Trust 200',
+  'common.atk': 'ATK',
+  'common.def': 'DEF',
+  'common.rst': 'RES',
+  'common.attack': 'Attack',
+  'common.defense': 'Defense',
+  'common.resist': 'Resist',
+  'common.faction': 'Faction',
+  'common.released': 'Released',
+  'common.rhodes': 'Rhodes Island',
+  'common.potentialShort': 'P',
+  'common.potential2': 'Potential 2',
+  'common.potential3': 'Potential 3',
+  'common.potential4': 'Potential 4',
+  'common.deployCostMinus': 'Deploy cost -1',
+  'common.atkPlus': 'ATK +25',
+  'common.redeployMinus': 'Redeploy -4s',
+
+  // ── 卡片 / 浮层示例 ──────────────────────────────────────────────
+  'card.default.title': 'Default card',
+  'card.default.desc': 'Standard containment surface.',
+  'card.default.body': 'Body copy using the shared typography token.',
+  'card.outline.title': 'Outline card',
+  'card.outline.desc': 'Hairline framing variant.',
+
+  // ── 通知示例 ────────────────────────────────────────────────────
+  'notice.info.title': 'Mission briefing',
+  'notice.info.body': 'All operators report to the command deck before deployment.',
+  'notice.warn.title': 'Caution',
+  'notice.warn.body': 'Originium density above threshold in sector 04.',
+  'notice.crit.title': 'Critical',
+  'notice.crit.body': 'Hull breach detected — evacuation protocol engaged.',
+  'notice.ok.title': 'Deployment complete',
+  'notice.ok.body': 'All squads have reached their assigned positions.',
+
+  // ── 应用外壳补充 ────────────────────────────────────────────────
+  'app.view.label': 'View',
+  'app.lang.zh-cn': '中文',
+  'app.lang.en': 'EN',
+
+  // ── 控制台示例数据 ──────────────────────────────────────────────
+  'console.rail.sectorValue': 'S-04 · Lungmen',
+  'console.rail.operationValue': 'OP-07 · Daybreak',
+  'console.rail.stabilityValue': 'Stable',
+  'console.banner.hazard': 'Originium density above threshold',
+  'console.prof.medic': 'Medic',
+  'console.prof.caster': 'Caster',
+  'console.prof.sniper': 'Sniper',
+  'console.prof.tank': 'Defender',
+  'console.prof.pioneer': 'Vanguard',
+  'console.prof.warrior': 'Guard',
+  'console.prof.support': 'Supporter',
+  'console.prof.special': 'Specialist',
+  'console.detail.classLabel': 'Class',
+  'console.detail.rarityLabel': 'Rarity',
+  'console.detail.cost': 'Deploy cost',
+  'console.detail.trustValue': 'Trust {n}',
+  'console.detail.eliteTitle': 'Elite {n}',
+  'console.log.count': '{n} entries',
+  'console.log.entry.deploy': 'Deployed {name}',
+  'console.log.entry.recall': 'Recalled {name}',
+  'console.tag.dps': 'DPS',
+  'console.tag.aoe': 'AoE',
+  'console.tag.heal': 'Healing',
+  'console.tag.defense': 'Defense',
+  'console.tag.slow': 'Slow',
+  'common.rarityAria': '{n} star',
+  'common.skillLevelAria': 'Skill levels',
+  'ref.inputs.volume': 'Volume',
+
+  // 干员名是专有名词：两种语言下都同时展示「中 + 英」，所以 `.cn` / `.en`
+  // 在两个字典里取值相同，和当前 locale 无关（AkBilingual 的语义就是这样）。
+  'op.amiya.cn': '阿米娅',
+  'op.amiya.en': 'Amiya',
+  'op.amiya.skill1': 'Tactical Chant',
+  'op.amiya.skill1.desc': 'Recovers SP for nearby operators.',
+  'op.amiya.skill2': 'Spirit Burst',
+  'op.amiya.skill2.desc': 'Deals Arts damage to every enemy in range.',
+  'op.ifrit.cn': '伊芙利特',
+  'op.ifrit.en': 'Ifrit',
+  'op.ifrit.skill1': 'Scorching Burst',
+  'op.ifrit.skill1.desc': 'Keeps a wide line ahead of her burning.',
+  'op.ifrit.skill2': 'Scorching Ray',
+  'op.ifrit.skill2.desc': 'Continuous Arts damage along a line.',
+  'op.eyja.cn': '艾雅法拉',
+  'op.eyja.en': 'Eyjafjalla',
+  'op.eyja.skill1': 'Volcano',
+  'op.eyja.skill1.desc': 'Massive Arts damage across a large area.',
+  'op.eyja.skill2': 'Pyroclasm',
+  'op.eyja.skill2.desc': 'Faster attacks with bonus Arts damage.',
+  'op.kaltsit.cn': '凯尔希',
+  'op.kaltsit.en': 'Kal\'tsit',
+  'op.kaltsit.skill1': 'Command: Tactical Coordination',
+  'op.kaltsit.skill1.desc': 'Boosts every ally inside the med-kit range.',
+  'op.kaltsit.skill2': 'Command: Structural Fortification',
+  'op.kaltsit.skill2.desc': 'Grants nearby allies damage reduction.',
+  'op.silence.cn': '白面鸮',
+  'op.silence.en': 'Ptilopsis',
+  'op.silence.skill1': 'Tactical Chant',
+  'op.silence.skill1.desc': 'Restores SP to all operators in range.',
+  'op.silence.skill2': 'Jamming Device',
+  'op.silence.skill2.desc': 'Slows enemy attack speed in range.',
+  'op.nightingale.cn': '夜莺',
+  'op.nightingale.en': 'Nightingale',
+  'op.nightingale.skill1': 'Zero Point Accord',
+  'op.nightingale.skill1.desc': 'Shields allies against Arts damage.',
+  'op.nightingale.skill2': 'Sanctuary',
+  'op.nightingale.skill2.desc': 'Wide-area damage reduction for the squad.',
+  'op.exusiai.cn': '能天使',
+  'op.exusiai.en': 'Exusiai',
+  'op.exusiai.skill1': 'Charging Mode',
+  'op.exusiai.skill1.desc': 'Attacks three targets at once.',
+  'op.exusiai.skill2': 'Sweeping Mode',
+  'op.exusiai.skill2.desc': 'Rapid single-target fire.',
+  'op.saria.cn': '塞雷娅',
+  'op.saria.en': 'Saria',
+  'op.saria.skill1': 'Calcification',
+  'op.saria.skill1.desc': 'Stops every enemy in range for a duration.',
+  'op.saria.skill2': 'Pharmacology',
+  'op.saria.skill2.desc': 'Heals allies and grants damage reduction.',
+
+  // ── 参考视图补充文案 ────────────────────────────────────────────
+  'ref.actions.eyebrow': '01 / ACTIONS',
+  'ref.surfaces.eyebrow': '02 / SURFACES',
+  'ref.feedback.eyebrow': '03 / FEEDBACK',
+  'ref.inputs.eyebrow': '04 / INPUTS',
+  'ref.navigation.eyebrow': '05 / NAVIGATION',
+  'ref.effects.eyebrow': '06 / EFFECTS',
+  'ref.gallery.eyebrow': '07 / GALLERY',
+  'ref.site.eyebrow': '08 / SITE',
+  'ref.shell.eyebrow': '09 / SECTION NAVIGATOR',
+  'ref.decor.eyebrow': '10 / DECOR',
+  'ref.arknights.eyebrow': '11 / ARKNIGHTS DATA',
+
+  'card.stripe.title': 'Stripe card',
+  'card.stripe.desc': 'Accent band variant.',
+
+  'notice.code.info': 'RI / INFO',
+  'notice.code.warn': 'RI / WARN',
+  'notice.code.crit': 'RI / CRIT',
+  'notice.code.ok': 'RI / OK',
+
+  'ref.feedback.status.network': 'Network',
+  'ref.feedback.status.networkValue': 'Stable',
+  'ref.feedback.status.reactor': 'Reactor',
+  'ref.feedback.status.reactorValue': '48%',
+  'ref.feedback.status.hull': 'Hull',
+  'ref.feedback.status.hullValue': 'Breach',
+  'ref.feedback.status.relay': 'Relay',
+  'ref.feedback.status.relayValue': 'Down',
+  'ref.feedback.progress.deploy': 'Deploy progress',
+  'ref.feedback.progress.integrity': 'Integrity',
+  'ref.feedback.progress.critical': 'CRITICAL',
+
+  'common.deploy': 'Deploy',
+  'common.heat': 'Heat',
+  'common.percent': 'percent',
+  'common.all': 'All',
+  'common.reset': 'Reset',
+  'common.increase': 'Increase',
+  'common.decrease': 'Decrease',
+  'common.numberField': 'Value',
+  'common.maxLabel': 'Max',
+  'common.minLabel': 'Min',
+
+  'ref.inputs.ground': 'Ground',
+  'ref.inputs.air': 'Air',
+  'ref.inputs.sliderValue': 'Slider value: {n}',
+  'ref.inputs.selected': 'Selected: {value}',
+
+  'ref.navigation.aria': 'Operator dossier',
+  'ref.navigation.eyebrowText': 'DOSSIER / {n}',
+  'ref.navigation.overview': 'Overview',
+  'ref.navigation.overviewDesc': 'General deployment profile.',
+  'ref.navigation.skills': 'Skills',
+  'ref.navigation.skillsDesc': 'Combat and support abilities.',
+  'ref.navigation.archive': 'Archive',
+  'ref.navigation.archiveDesc': 'Restricted background records.',
+  'ref.navigation.panelBody': 'Panel body for {value}.',
+
+  'ref.effects.canvas': 'Canvas particle field — WebGL with a 2D fallback.',
+  'ref.gallery.activeIndex': 'Active index: {n}',
+
+  'media.gallery': 'Media gallery',
+  'media.previous': 'Previous',
+  'media.next': 'Next',
+  'media.expand': 'Expand image',
+  'media.close': 'Close image',
+  'media.empty': 'No items',
+  'media.carousel': 'carousel',
+  'gallery.op01.title': 'OPERATION 01 · Daybreak',
+  'gallery.op01.desc': 'Frontline combat record / DAYBREAK',
+  'gallery.op01.alt': 'Operations record 01',
+  'gallery.op02.title': 'OPERATION 02 · Silence',
+  'gallery.op02.desc': 'Night operation footage / SILENCE',
+  'gallery.op02.alt': 'Operations record 02',
+  'gallery.op03.title': 'OPERATION 03 · Ascension',
+  'gallery.op03.desc': 'Originium arts archive / ASCENSION',
+  'gallery.op03.alt': 'Operations record 03',
+
+  'common.resources': 'Resources',
+  'common.retry': 'Retry',
+  'common.status.idle': 'idle',
+  'common.status.loading': 'loading',
+  'common.status.ready': 'ready',
+  'common.status.error': 'error',
+  'common.status.cancelled': 'cancelled',
+  'common.menu': 'Menu',
+  'common.close': 'Close',
+  'ref.site.openMenu': 'Open mobile menu',
+  'ref.site.menuHint': '(see the dialog rendered below)',
+
+  'ref.shell.command': 'Command',
+  'ref.shell.archive': 'Archive',
+  'ref.shell.relay': 'Relay',
+  'ref.shell.commandTitle': 'COMMAND DECK',
+  'ref.shell.archiveTitle': 'ARCHIVE',
+  'ref.shell.relayTitle': 'RELAY',
+  'ref.shell.commandBody':
+    'Scroll, drag or use the arrow keys — the controller snaps between uniquely identified sections.',
+  'ref.shell.archiveBody': 'Section navigation syncs the hash and drives an entrance animation per section.',
+  'ref.shell.relayBody':
+    '`AkSectionNavigator` requires a viewport plus sections with unique ids — every block below satisfies that contract.',
+  'ref.shell.headerEyebrow': 'AK-UI SITE SHELL',
+  'ref.shell.sections': 'Sections',
+  'ref.shell.sectionLabel': 'SECTION / {label}',
+  'ref.shell.sectionTag': 'Section {n} / {m}',
+
+  'ref.decor.watermark': 'RHODES',
+  'ref.decor.hoverPace': 'Hover me ({n} ms)',
+  'ref.decor.arknightsCn': '明日方舟',
+  'ref.decor.arknightsEn': 'Arknights',
+  'ref.decor.terminalCn': '终端',
+  'ref.decor.terminalEn': 'Terminal',
+
+  // 属性面板刻意保持「拉丁标签 + 中文名」双列，两语言下都同屏，所以这些 key 不随 locale 变。
+  'common.potentialN': 'Potential {n}',
+  'common.mastery3': 'Mastery 3',
+  'common.medicLatin': 'Medic',
+} as const
+
+export type MessageKey = keyof typeof en
+
+/** 中文必须覆盖全部 key —— 缺一条就是编译错误。 */
+const zhCN: Record<MessageKey, string> = {
+  'app.name': 'AK-UI',
+  'app.tagline': '明日方舟风格设计系统',
+  'app.subtitle': 'React 移植版',
+  'app.view.console': '控制台',
+  'app.view.reference': '组件',
+  'app.lang.label': '语言',
+  'app.theme.label': '主题',
+  'app.theme.terminal': '终端',
+  'app.theme.archive': '档案',
+
+  'console.eyebrow': '应用示例',
+  'console.title': '干员控制台',
+  'console.note':
+    '同一套令牌与组件组合成的可用界面——状态栏、干员名单、详情面板与实时日志。这里没有一个是「组件演示」。',
+
+  'console.status.online': '系统',
+  'console.status.detail': '在线',
+  'console.status.degraded': '降级',
+
+  'console.rail.title': '扇区',
+  'console.rail.sector': '扇区',
+  'console.rail.operation': '行动',
+  'console.rail.deploy': '部署',
+  'console.rail.funds': '资金',
+  'console.rail.stability': '稳定度',
+
+  'console.roster.title': '干员名单',
+  'console.roster.filter': '筛选',
+  'console.roster.all': '全部',
+  'console.roster.medic': '医疗',
+  'console.roster.caster': '术师',
+  'console.roster.count': '{n} 名干员',
+  'console.roster.empty': '没有符合筛选条件的干员。',
+
+  'console.detail.title': '干员',
+  'console.detail.select': '从名单中选择一名干员。',
+  'console.detail.attrs': '属性',
+  'console.detail.skills': '技能',
+  'console.detail.potential': '潜能',
+  'console.detail.trust': '信赖',
+  'console.detail.elite': '精英化',
+
+  'console.log.title': '部署日志',
+  'console.log.clear': '清空',
+  'console.log.empty': '暂无记录——先部署一名干员。',
+
+  'console.action.deploy': '部署',
+  'console.action.recall': '撤回',
+  'console.action.deployed': '已部署',
+  'console.action.recalled': '已撤回',
+  'console.action.assign': '已派遣',
+
+  'ref.actions.title': '按钮与标签',
+  'ref.actions.note': '由 variant 驱动的 BEM 类名，与 Vue registry 一一对应。',
+  'ref.surfaces.title': '卡片',
+  'ref.surfaces.note': '`AkCard` 通过 `as` 渲染任意元素，配 header / title / content / footer 插槽。',
+  'ref.feedback.title': '通知、状态、进度与仪表',
+  'ref.feedback.note': '四种状态表达方式，从行内小标到整宽通知。',
+  'ref.inputs.title': '滑块、数字输入与分段控件',
+  'ref.inputs.note': '受控输入统一用 `value` + `onValueChange`，替代 Vue 的 v-model。',
+  'ref.navigation.title': '标签页',
+  'ref.navigation.note': '方向键、Home 与 End 可在标签间移动焦点；面板用 aria-controls 关联。',
+  'ref.effects.title': '数字滚动与粒子场',
+  'ref.effects.note': '两者都驱动 vendored 在 src/ak/core 里的框架无关控制器。',
+  'ref.gallery.title': '媒体画廊',
+  'ref.gallery.note': '控制器驱动的轮播：上一张/下一张、选择器、滑动手势与放大弹窗。',
+  'ref.site.title': '资源加载与移动菜单',
+  'ref.site.note': '站点外壳部件。移动菜单触发器在 48rem 以上会被隐藏。',
+  'ref.shell.title': '站点外壳',
+  'ref.shell.note': '滚动吸附导航，带 hash 同步、逐区块入场动画与可取消的过渡。',
+  'ref.decor.title': '装饰语言',
+  'ref.decor.note':
+    '移植自 prts-design（MIT）。让界面「像明日方舟」的几何语言：警戒斜纹、半调网点、蓝图网格、角标三角、切角与动效节奏。',
+  'ref.arknights.title': '游戏数据',
+  'ref.arknights.note':
+    '移植自 prts-design（MIT）。图标一律由宿主提供——这些组件不自带任何游戏素材。',
+
+  'common.default': '默认',
+  'common.outline': '描边',
+  'common.action': '动作',
+  'common.advanced': '进阶',
+  'common.light': '浅色',
+  'common.tag': '标签',
+  'common.danger': '危险',
+  'common.neutral': '中性',
+  'common.block': '整宽',
+  'common.disabled': '禁用',
+  'common.inspect': '查看',
+  'common.withIcon': '带图标',
+  'common.hoverMe': '悬停我',
+  'common.proceed': '继续',
+  'common.blueBand': '蓝色标题条',
+  'common.inverse': '反转块',
+  'common.rail': '色轨',
+  'common.quick': '快',
+  'common.base': '中',
+  'common.slowEmphasized': '慢 + 强调',
+  'common.overline': '顶标',
+  'common.latin': '拉丁字',
+  'common.terminalRow': '终端',
+  'common.medic': '医疗',
+  'common.caster': '术师',
+  'common.trust200': '信赖 200',
+  // AK 属性标签分两层：label 是拉丁代码（AkAttr 会用大写展示字渲染），
+  // labelCn 是中文注解。两者**不能译成同一个词**，否则 AkAttr 会渲染出「攻击 攻击」。
+  // 拉丁代码在中文界面里保留原文——游戏本身也是这么标的。
+  'common.atk': 'ATK',
+  'common.def': 'DEF',
+  'common.rst': 'RES',
+  'common.attack': '攻击',
+  'common.defense': '防御',
+  'common.resist': '法抗',
+  'common.faction': '所属势力',
+  'common.released': '上线时间',
+  'common.rhodes': '罗德岛',
+  'common.potentialShort': '潜',
+  'common.potential2': '潜能 2',
+  'common.potential3': '潜能 3',
+  'common.potential4': '潜能 4',
+  'common.deployCostMinus': '部署费用 -1',
+  'common.atkPlus': '攻击力 +25',
+  'common.redeployMinus': '再部署 -4s',
+
+  'card.default.title': '默认卡片',
+  'card.default.desc': '标准容器面板。',
+  'card.default.body': '使用共享排版令牌的正文。',
+  'card.outline.title': '描边卡片',
+  'card.outline.desc': '发丝线边框变体。',
+
+  'notice.info.title': '任务简报',
+  'notice.info.body': '全体干员在部署前到指挥层报到。',
+  'notice.warn.title': '注意',
+  'notice.warn.body': '04 扇区源石密度超阈值。',
+  'notice.crit.title': '危急',
+  'notice.crit.body': '检测到船体破损——已启动疏散程序。',
+  'notice.ok.title': '部署完成',
+  'notice.ok.body': '所有小队已抵达指定位置。',
+
+  'app.view.label': '视图',
+  'app.lang.zh-cn': '中文',
+  'app.lang.en': 'EN',
+
+  'console.rail.sectorValue': 'S-04 · 龙门',
+  'console.rail.operationValue': 'OP-07 · 破晓',
+  'console.rail.stabilityValue': '稳定',
+  'console.banner.hazard': '源石密度超过阈值',
+  'console.prof.medic': '医疗',
+  'console.prof.caster': '术师',
+  'console.prof.sniper': '狙击',
+  'console.prof.tank': '重装',
+  'console.prof.pioneer': '先锋',
+  'console.prof.warrior': '近卫',
+  'console.prof.support': '辅助',
+  'console.prof.special': '特种',
+  'console.detail.classLabel': '职业',
+  'console.detail.rarityLabel': '星级',
+  'console.detail.cost': '部署费用',
+  'console.detail.trustValue': '信赖 {n}',
+  'console.detail.eliteTitle': '精英 {n}',
+  'console.log.entry.deploy': '已部署 {name}',
+  'console.log.entry.recall': '已撤回 {name}',
+  'console.log.count': '{n} 条记录',
+  'console.tag.dps': '输出',
+  'console.tag.aoe': '群体',
+  'console.tag.heal': '治疗',
+  'console.tag.defense': '防御',
+  'console.tag.slow': '减速',
+  'common.rarityAria': '{n} 星',
+  'common.skillLevelAria': '技能等级',
+  'ref.inputs.volume': '音量',
+
+  // 干员名是专有名词：两种语言下都同时展示「中 + 英」，所以 `.cn` / `.en`
+  // 在两个字典里取值相同，和当前 locale 无关（AkBilingual 的语义就是这样）。
+  'op.amiya.cn': '阿米娅',
+  'op.amiya.en': 'Amiya',
+  'op.amiya.skill1': '战术咏唱',
+  'op.amiya.skill1.desc': '为附近干员回复技力。',
+  'op.amiya.skill2': '精神爆发',
+  'op.amiya.skill2.desc': '对范围内所有敌人造成法术伤害。',
+  'op.ifrit.cn': '伊芙利特',
+  'op.ifrit.en': 'Ifrit',
+  'op.ifrit.skill1': '灼烧',
+  'op.ifrit.skill1.desc': '持续点燃身前一整条直线。',
+  'op.ifrit.skill2': '灼地',
+  'op.ifrit.skill2.desc': '沿直线持续造成法术伤害。',
+  'op.eyja.cn': '艾雅法拉',
+  'op.eyja.en': 'Eyjafjalla',
+  'op.eyja.skill1': '火山',
+  'op.eyja.skill1.desc': '对大范围造成巨额法术伤害。',
+  'op.eyja.skill2': '炎爆',
+  'op.eyja.skill2.desc': '攻击间隔缩短并附带法术伤害。',
+  'op.kaltsit.cn': '凯尔希',
+  'op.kaltsit.en': 'Kal\'tsit',
+  'op.kaltsit.skill1': '指令：战术协同',
+  'op.kaltsit.skill1.desc': '强化医疗箱范围内的所有友方。',
+  'op.kaltsit.skill2': '指令：结构加固',
+  'op.kaltsit.skill2.desc': '使附近友方获得伤害减免。',
+  'op.silence.cn': '白面鸮',
+  'op.silence.en': 'Ptilopsis',
+  'op.silence.skill1': '战术咏唱',
+  'op.silence.skill1.desc': '为范围内所有干员回复技力。',
+  'op.silence.skill2': '干扰装置',
+  'op.silence.skill2.desc': '降低范围内敌人的攻击速度。',
+  'op.nightingale.cn': '夜莺',
+  'op.nightingale.en': 'Nightingale',
+  'op.nightingale.skill1': '零点协议',
+  'op.nightingale.skill1.desc': '为友方提供法术护盾。',
+  'op.nightingale.skill2': '圣域',
+  'op.nightingale.skill2.desc': '为小队提供大范围伤害减免。',
+  'op.exusiai.cn': '能天使',
+  'op.exusiai.en': 'Exusiai',
+  'op.exusiai.skill1': '冲锋模式',
+  'op.exusiai.skill1.desc': '同时攻击三个目标。',
+  'op.exusiai.skill2': '扫射模式',
+  'op.exusiai.skill2.desc': '快速连续攻击单一目标。',
+  'op.saria.cn': '塞雷娅',
+  'op.saria.en': 'Saria',
+  'op.saria.skill1': '钙质化',
+  'op.saria.skill1.desc': '使范围内敌人短时间无法移动。',
+  'op.saria.skill2': '药物配置',
+  'op.saria.skill2.desc': '治疗友方并给予伤害减免。',
+
+  'ref.actions.eyebrow': '01 / 动作',
+  'ref.surfaces.eyebrow': '02 / 容器',
+  'ref.feedback.eyebrow': '03 / 反馈',
+  'ref.inputs.eyebrow': '04 / 输入',
+  'ref.navigation.eyebrow': '05 / 导航',
+  'ref.effects.eyebrow': '06 / 特效',
+  'ref.gallery.eyebrow': '07 / 画廊',
+  'ref.site.eyebrow': '08 / 站点',
+  'ref.shell.eyebrow': '09 / 区块导航',
+  'ref.decor.eyebrow': '10 / 装饰',
+  'ref.arknights.eyebrow': '11 / 方舟数据',
+
+  'card.stripe.title': '斜纹卡片',
+  'card.stripe.desc': '强调带变体。',
+
+  'notice.code.info': 'RI / 信息',
+  'notice.code.warn': 'RI / 警告',
+  'notice.code.crit': 'RI / 危急',
+  'notice.code.ok': 'RI / 完成',
+
+  'ref.feedback.status.network': '网络',
+  'ref.feedback.status.networkValue': '稳定',
+  'ref.feedback.status.reactor': '反应堆',
+  'ref.feedback.status.reactorValue': '48%',
+  'ref.feedback.status.hull': '船体',
+  'ref.feedback.status.hullValue': '破损',
+  'ref.feedback.status.relay': '中继',
+  'ref.feedback.status.relayValue': '中断',
+  'ref.feedback.progress.deploy': '部署进度',
+  'ref.feedback.progress.integrity': '完整度',
+  'ref.feedback.progress.critical': '危急',
+
+  'common.deploy': '部署',
+  'common.heat': '热量',
+  'common.percent': '百分比',
+  'common.all': '全部',
+  'common.reset': '重置',
+  'common.increase': '增加',
+  'common.decrease': '减少',
+  'common.numberField': '数值',
+  'common.maxLabel': '最多',
+  'common.minLabel': '最少',
+
+  'ref.inputs.ground': '地面',
+  'ref.inputs.air': '空中',
+  'ref.inputs.sliderValue': '滑块值：{n}',
+  'ref.inputs.selected': '已选：{value}',
+
+  'ref.navigation.aria': '干员档案',
+  'ref.navigation.eyebrowText': '档案 / {n}',
+  'ref.navigation.overview': '总览',
+  'ref.navigation.overviewDesc': '通用部署档案。',
+  'ref.navigation.skills': '技能',
+  'ref.navigation.skillsDesc': '战斗与支援能力。',
+  'ref.navigation.archive': '档案',
+  'ref.navigation.archiveDesc': '受限背景记录。',
+  'ref.navigation.panelBody': '{value} 的面板正文。',
+
+  'ref.effects.canvas': 'Canvas 粒子场——WebGL 渲染，带 2D 回退。',
+  'ref.gallery.activeIndex': '当前索引：{n}',
+
+  'media.gallery': '媒体画廊',
+  'media.previous': '上一张',
+  'media.next': '下一张',
+  'media.expand': '放大图片',
+  'media.close': '关闭图片',
+  'media.empty': '暂无内容',
+  'media.carousel': '轮播',
+  'gallery.op01.title': '行动 01 · 破晓',
+  'gallery.op01.desc': '前线作战记录 / DAYBREAK',
+  'gallery.op01.alt': '作战记录 01',
+  'gallery.op02.title': '行动 02 · 静默',
+  'gallery.op02.desc': '夜间行动影像 / SILENCE',
+  'gallery.op02.alt': '作战记录 02',
+  'gallery.op03.title': '行动 03 · 升变',
+  'gallery.op03.desc': '源石技艺档案 / ASCENSION',
+  'gallery.op03.alt': '作战记录 03',
+
+  'common.resources': '资源',
+  'common.retry': '重试',
+  'common.status.idle': '空闲',
+  'common.status.loading': '加载中',
+  'common.status.ready': '就绪',
+  'common.status.error': '出错',
+  'common.status.cancelled': '已取消',
+  'common.menu': '菜单',
+  'common.close': '关闭',
+  'ref.site.openMenu': '打开移动菜单',
+  'ref.site.menuHint': '（见下方渲染出的对话框）',
+
+  'ref.shell.command': '指挥',
+  'ref.shell.archive': '档案',
+  'ref.shell.relay': '中继',
+  'ref.shell.commandTitle': '指挥层',
+  'ref.shell.archiveTitle': '档案库',
+  'ref.shell.relayTitle': '中继站',
+  'ref.shell.commandBody': '滚动、拖拽或使用方向键——控制器会在带唯一标识的区块间吸附切换。',
+  'ref.shell.archiveBody': '区块导航会同步 hash，并为每个区块驱动入场动画。',
+  'ref.shell.relayBody': '`AkSectionNavigator` 需要一个视口加上若干带唯一 id 的区块——下面每个区块都满足这个约定。',
+  'ref.shell.headerEyebrow': 'AK-UI 站点外壳',
+  'ref.shell.sections': '区块',
+  'ref.shell.sectionLabel': '区块 / {label}',
+  'ref.shell.sectionTag': '区块 {n} / {m}',
+
+  'ref.decor.watermark': '罗德岛',
+  'ref.decor.hoverPace': '悬停我（{n} ms）',
+  'ref.decor.arknightsCn': '明日方舟',
+  'ref.decor.arknightsEn': 'Arknights',
+  'ref.decor.terminalCn': '终端',
+  'ref.decor.terminalEn': 'Terminal',
+
+  'common.potentialN': '潜能 {n}',
+  'common.mastery3': '专精三',
+  'common.medicLatin': 'Medic',
+}
+
+const dictionaries: Record<Locale, Record<MessageKey, string>> = { en, 'zh-CN': zhCN }
+
+export const LOCALES: Locale[] = ['zh-CN', 'en']
+
+const STORAGE_KEY = 'ak-demo-locale'
+
+function detectLocale(): Locale {
+  if (typeof window === 'undefined') return 'zh-CN'
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY)
+    if (saved === 'en' || saved === 'zh-CN') return saved
+  } catch {
+    // localStorage 可能被禁用（隐私模式 / 第三方 cookie 策略）——不该因此崩掉整页
+  }
+  return typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en'
+}
+
+export interface I18nValue {
+  locale: Locale
+  setLocale: (locale: Locale) => void
+  /** 取词。`vars` 用于替换字典里的 `{name}` 占位符。 */
+  t: (key: MessageKey, vars?: Record<string, string | number>) => string
+}
+
+const I18nContext = createContext<I18nValue | null>(null)
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocaleState] = useState<Locale>(detectLocale)
+
+  useEffect(() => {
+    // <html lang> 要跟着走，否则读屏和浏览器的断行/字体会按错的语种处理
+    document.documentElement.lang = locale
+    try {
+      window.localStorage.setItem(STORAGE_KEY, locale)
+    } catch {
+      // 存不下就算了，本次会话仍然可用
+    }
+  }, [locale])
+
+  const t = useCallback(
+    (key: MessageKey, vars?: Record<string, string | number>) => {
+      const raw = dictionaries[locale][key] ?? dictionaries.en[key] ?? key
+      if (!vars) return raw
+      return raw.replace(/\{(\w+)\}/g, (match, name: string) =>
+        name in vars ? String(vars[name]) : match,
+      )
+    },
+    [locale],
+  )
+
+  const value = useMemo<I18nValue>(() => ({ locale, setLocale: setLocaleState, t }), [locale, t])
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
+}
+
+export function useI18n(): I18nValue {
+  const value = useContext(I18nContext)
+  if (!value) throw new Error('useI18n must be used inside <I18nProvider>')
+  return value
+}

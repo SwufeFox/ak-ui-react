@@ -2,7 +2,12 @@ import { useEffect, type InputHTMLAttributes } from 'react'
 import { clampRange, finite } from '../../lib/utils'
 
 export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step'> {
+  /** 无障碍名，读屏会念。默认「数值」。 */
   label?: string
+  /** 增加按钮的无障碍名。默认「增加」。 */
+  increaseLabel?: string
+  /** 减少按钮的无障碍名。默认「减少」。 */
+  decreaseLabel?: string
   max?: number
   maxLabel?: string
   min?: number
@@ -14,6 +19,8 @@ export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputEl
 
 export function AkInputNumber({
   disabled = false,
+  increaseLabel = '增加',
+  decreaseLabel = '减少',
   label = '数值',
   max = 99,
   maxLabel = '最多',
@@ -45,7 +52,7 @@ export function AkInputNumber({
       <button
         type="button"
         className="ak-input-number__increase"
-        aria-label="增加"
+        aria-label={increaseLabel}
         disabled={disabled || normalizedValue >= upper}
         onClick={() => updateValue(normalizedValue + normalizedStep)}
       >
@@ -56,7 +63,7 @@ export function AkInputNumber({
       <button
         type="button"
         className="ak-input-number__decrease"
-        aria-label="减少"
+        aria-label={decreaseLabel}
         disabled={disabled || normalizedValue <= lower}
         onClick={() => updateValue(normalizedValue - normalizedStep)}
       >

@@ -20,6 +20,8 @@ export interface AkMediaGalleryProps {
   expandLabel?: string
   closeLabel?: string
   emptyLabel?: string
+  /** 轮播角色的读屏描述。默认 `carousel`。 */
+  roleDescription?: string
   /** Controlled active index. Omit for uncontrolled. */
   value?: number
   onValueChange?: (index: number) => void
@@ -37,6 +39,7 @@ export function AkMediaGallery({
   expandLabel = 'Expand image',
   closeLabel = 'Close image',
   emptyLabel = 'No items',
+  roleDescription = 'carousel',
   value,
   onValueChange,
   renderMedia,
@@ -101,7 +104,7 @@ export function AkMediaGallery({
       className={className ? `ak-gallery ${className}` : 'ak-gallery'}
       role="region"
       aria-label={label}
-      aria-roledescription="carousel"
+      aria-roledescription={roleDescription}
     >
       <div className="ak-gallery__stage" data-ak-gallery-stage>
         {items.map((item, i) => (

@@ -1,3 +1,9 @@
+import type { GalleryItem } from '../ak'
+import type { MessageKey } from './i18n'
+
+/** 取词函数的形状 —— 与 `useI18n().t` 兼容，但不依赖 React。 */
+export type GalleryTranslator = (key: MessageKey, vars?: Record<string, string | number>) => string
+
 /** Inline SVG art so the gallery demo needs no network access. */
 function tile(label: string, from: string, to: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720">
@@ -21,8 +27,55 @@ function tile(label: string, from: string, to: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
-export const galleryItems = [
-  { id: 'op-01', title: 'OPERATION 01 · 破晓', description: '前线作战记录 / DAYBREAK', image: tile('OBS-01', '#1b2a4a', '#0d1626'), alt: 'Operations record 01' },
-  { id: 'op-02', title: 'OPERATION 02 · 静默', description: '夜间行动影像 / SILENCE', image: tile('OBS-02', '#3a1f2b', '#160d14'), alt: 'Operations record 02' },
-  { id: 'op-03', title: 'OPERATION 03 · 升变', description: '源石技艺档案 / ASCENSION', image: tile('OBS-03', '#123a35', '#081a17'), alt: 'Operations record 03' },
-]
+/**
+ * 素材是内联 SVG，没有可读文案；需要本地化的是 title / description / alt，
+ * 所以这里只存 key，真正的字符串在渲染时按当前语言取。
+ */
+const gallerySpec = [
+  {
+    id: 'op-01',
+    label: 'OBS-01',
+    from: '#1b2a4a',
+    to: '#0d1626',
+    title: 'gallery.op01.title',
+    description: 'gallery.op01.desc',
+    alt: 'gallery.op01.alt',
+  },
+  {
+    id: 'op-02',
+    label: 'OBS-02',
+    from: '#3a1f2b',
+    to: '#160d14',
+    title: 'gallery.op02.title',
+    description: 'gallery.op02.desc',
+    alt: 'gallery.op02.alt',
+  },
+  {
+    id: 'op-03',
+    label: 'OBS-03',
+    from: '#123a35',
+    to: '#081a17',
+    title: 'gallery.op03.title',
+    description: 'gallery.op03.desc',
+    alt: 'gallery.op03.alt',
+  },
+] as const satisfies readonly {
+  id: string
+  label: string
+  from: string
+  to: string
+  title: MessageKey
+  description: MessageKey
+  alt: MessageKey
+}[]
+
+/** 按当前语言产出画廊数据。 */
+export function galleryItems(t: GalleryTranslator): GalleryItem[] {
+  return gallerySpec.map((item) => ({
+    id: item.id,
+    title: t(item.title),
+    description: t(item.description),
+    image: tile(item.label, item.from, item.to),
+    alt: t(item.alt),
+  }))
+}
