@@ -33,7 +33,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "llms.txt"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",

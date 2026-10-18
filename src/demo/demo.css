@@ -447,6 +447,46 @@ body {
   padding: var(--ak-space-4, 1rem) var(--ak-space-2, 0.5rem);
 }
 
+/* 景深演示：三层各自不同 depth，指针移动时位移量不同 → 透视感由差异成立。
+   层的可见样式写在这里，位移由 AkDepth 的控制器写入 --ak-layer-x/y。 */
+.demo-depth {
+  position: relative;
+  overflow: hidden;
+  min-height: 11rem;
+  border: 1px solid var(--ak-border);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-depth__grid,
+.demo-depth__glyph,
+.demo-depth__hud {
+  position: absolute;
+}
+
+.demo-depth__grid {
+  inset: 0;
+  background-image: linear-gradient(var(--ak-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ak-grid-color) 1px, transparent 1px);
+  background-size: var(--ak-grid-size) var(--ak-grid-size);
+}
+
+.demo-depth__glyph {
+  left: 12%;
+  top: 22%;
+  color: var(--ak-text-primary);
+}
+
+.demo-depth__hud {
+  right: 10%;
+  top: 18%;
+}
+
+.demo-hint {
+  margin-top: var(--ak-space-2, 0.5rem);
+  color: var(--ak-text-secondary);
+  font-size: 0.78rem;
+}
+
 /* ── 小屏：三栏退回单列堆叠 ────────────────────────────────────────────── */
 
 @media (max-width: 900px) {

@@ -17,6 +17,14 @@ export { AkInputNumber, type AkInputNumberProps } from './ui/input-number/AkInpu
 export { AkSegmented, AkTabs, type AkSegmentedOption, type AkSegmentedProps, type AkTabsItem, type AkTabsProps } from './ui/tabs/AkTabs'
 export { AkCountUp, type AkCountUpHandle, type AkCountUpProps } from './ui/effects/AkCountUp'
 export { AkEntrance, type AkEntranceHandle, type AkEntranceProps } from './ui/effects/AkEntrance'
+// 景深：上游 createDashboardDepth 控制器 + 它的 CSS 消费规则，此前两半没接上
+export {
+  AkDepth,
+  AkDepthLayer,
+  type AkDepthLayerProps,
+  type AkDepthProps,
+  type AkDepthVariant,
+} from './ui/effects/AkDepth'
 // 上游 .ak-fx-* 特效层（真正的 ak-ui 动效语言：呼吸辉光 / 扩散轮廓环 / ±10° 斜切）
 export {
   AkGlow,

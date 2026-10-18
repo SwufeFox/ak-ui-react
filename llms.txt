@@ -1,0 +1,123 @@
+# ak-ui-react
+
+> React port of [ak-ui](https://github.com/YunYouJun/ak-ui) — an Arknights-inspired design
+> system. Framework-agnostic SCSS and DOM controllers are vendored from upstream unchanged; only
+> the component layer is rewritten in React.
+
+Package `@swufefox/ak-ui-react`. React 18 or 19. Works without Tailwind. Styling is plain CSS
+custom properties plus SCSS that ships in the package.
+
+- Repository: https://github.com/SwufeFox/ak-ui-react
+- Showcase: https://ak-ui-react.pages.dev
+- Full docs: README.md at the repository root — this file is an index, not the manual.
+
+## Rules
+
+Read these before writing any component call. Every one of them is a trap that compiles cleanly
+and fails at runtime.
+
+- Import the stylesheet once at your entry. Nothing renders styled without it:
+  `import '@swufefox/ak-ui-react/style.css'`
+- **`npm run build` and "build the site" are different things.** `build` produces the npm package
+  into `dist/`; `build:demo` (`vite build`) produces the showcase into `dist-demo/`. Pointing a
+  deploy at the wrong one ships the wrong artifact.
+- **Components never ship game art.** Every icon-bearing component takes its icon from you
+  (`icon` / `iconSrc` / `children`). Pass nothing and it renders nothing — it will not draw a
+  placeholder, and it will not collapse.
+- **Never write a literal after `{...rest}`** when adding a new prop default. A hardcoded
+  `aria-label` / `title` placed after the spread silently overrides whatever the caller passed,
+  with no type error. The existing components use `rest['aria-label'] ?? fallback`.
+- **Do not hand-roll decoration that already exists here.** Stripes, halftone, grids, corner
+  triangles, brackets, cut corners, glow, outline rings and skew are all components. Reach for
+  them before writing CSS.
+- **Use role-based tokens, not raw values.** `--ak-signal-info`, `--ak-surface-sunken`,
+  `--ak-text-secondary`, `--ak-cut-md`. All 184 are defined in `dist/style.css`.
+- Token overrides from an ancestor must target the **scale** token, not the component's own
+  intermediate. `.ak-cut` declares `--ak-cut-corner` itself, and `.ak-motion` declares
+  `--ak-motion-dur` itself, so an ancestor value for those never arrives. Override `--ak-cut` and
+  `--ak-motion-slow` instead.
+- **Light/dark are inverted from upstream.** Upstream's root is light with a dark override;
+  ak-ui's root is dark. When porting anything with a hardcoded colour, check the direction —
+  `.ak-scanlines` shipped invisible on dark for exactly this reason.
+- `prefers-reduced-motion: reduce` is honoured by `.ak-fx--glow`, `.ak-fx--outline`, `AkEntrance`
+  and `AkCountUp`. Do not disable it.
+- `AkMotion` is **deprecated** — it is a generic transition helper, not part of this library's
+  motion language. Use `AkGlow` / `AkOutline` / `AkSkew` (CSS animation) or `AkEntrance` /
+  `AkCountUp` (Web Animations API).
+
+## Components
+
+Decoration — ported from [prts-design](https://github.com/MooncellWiki/prts-design) (MIT):
+
+- `AkStripes`: hazard stripes. `variant` default | strong | warning | danger | hazard; `bar` for a
+  6px divider.
+- `AkCorner`: corner triangle. `position` tl | tr, `tone` info | yellow | red, `large`.
+- `AkBrackets`: HUD corner brackets, two hairline corners only.
+- `AkGridBackdrop`: blueprint grid / dots / diagonal / scanlines. `variant`.
+- `AkHalftone`: halftone dot field. `variant` default | left | full.
+- `AkBlueBand`: in-game blue title band with halftone.
+- `AkCut`: cut corner. `corner` tr (default) | tl | br | bl | all, `size` sm | md | lg, `radius`.
+  Clips the element's own shadow — wrap it if you need both.
+- `AkDisplay` / `AkNum` / `AkCodeId` / `AkOverline` / `AkEn` / `AkWatermark`: typographic roles.
+  `AkNum` is tabular and belongs in panels, not tables.
+- `AkBilingual`: CJK + Latin title pair. `cn`, `en`, `row`.
+- `AkChevrons`: trailing `»` action marker. Pass `href` to render a link.
+- `AkInverse` / `AkGlyph` / `AkGlyphBox`: inverted block, line-art icon inversion, dark icon box.
+
+Effects — the library's actual motion language (CSS `animation`, not transitions):
+
+- `AkGlow`: breathing box-shadow, 1.5s infinite alternate. `tone` action | info | danger, `color`.
+- `AkOutline`: ring expanding outward and fading, 0.7s infinite. `color`.
+- `AkSkew`: static `skewX(±10deg)` shape language. `direction` left | right.
+
+Arknights game data — icons supplied by the host:
+
+- `AkRarity`: N stars, drawn with clip-path so it needs no art. `level` 1-6, `size`,
+  `variant` white, `count`. Honours a caller-supplied `aria-label`.
+- `AkRarityScope` / `AkRarityChip` / `AkRarityBar`: rarity colour rail — puts `--ak-r` on the
+  subtree so `.ak-r-text` / `.ak-r-bg` / `.ak-r-bar` resolve.
+- `AkProfession` / `AkProfessionLabel`: profession icon frame plus the 8 profession colours.
+- `AkElite` / `AkPotential` / `AkSpec`: elite / potential / specialisation marks.
+- `AkPotList` + `AkPot`: potential breakdown grid; `active` marks the tier in effect.
+- `AkSkillLevels`: 1-7 + M1-M3 selector. Controlled, keyboard accessible.
+- `AkAttrs` + `AkAttr`: attribute panel. `label` is the Latin code, `labelCn` the annotation —
+  keep them different words or you get "ATK ATK". `compact` variant.
+- `AkKv` + `AkKvItem`: key-value table. `variant` default | boxed | inline.
+- `AkTrust`: trust mark; `iconSrc` optional.
+
+Core:
+
+- `AkButton`, `AkTag`, `AkStatus`, `AkNotice`, `AkProgress`, `AkGauge`, `AkSlider`,
+  `AkInputNumber`, `AkTabs`, `AkSegmented`, `AkCard` + its six slots.
+- `AkEntrance` (direction-aware fade + translate), `AkCountUp` (number roll), `AkParticleField`.
+- `AkMediaGallery`, `AkAssetLoader`, `AkMobileMenu`, `AkSectionNavigator`.
+
+## Two components with real contracts
+
+- `AkSectionNavigator` is a full-screen scroll-snap shell, not a page wrapper. It requires a
+  `[data-ak-section-viewport]` containing sections with **unique `id`s**; the controller throws
+  otherwise. Links use `data-ak-section-link` and get `aria-current="location"`.
+- `AkMobileMenu`'s trigger is hidden above `48rem` by the stylesheet — it is a mobile affordance,
+  not a desktop menu.
+
+## Framework-agnostic controllers
+
+Shipped as subpath exports, no React dependency, usable from any framework:
+
+```ts
+import { createSectionNavigation, createMediaGallery } from '@swufefox/ak-ui-react/core'
+import { createCountUp, createEntrance } from '@swufefox/ak-ui-react/core/effects'
+import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
+```
+
+## Known gaps
+
+- `createDashboardDepth` is exported but **has no component and no demo**. It needs a host.
+- These eight tokens are published API but consumed by nothing in the library. They are reserved,
+  not broken — do not assume setting one will do anything:
+  `--ak-bar-w-lg`, `--ak-font-command`, `--ak-radius-subtle`, `--ak-signal-accent`,
+  `--ak-space-5`, `--ak-space-6`, `--ak-type-display-size`, `--ak-type-wide`.
+  Note that `--ak-cut-sm/md/lg` and `--ak-motion-*` **are** wired (via `.ak-cut--sm` etc. and
+  `.ak-motion`), so they do work.
+- There is no props table per component in this file. Read `dist/ui/**/*.d.ts` for exact props —
+  `dist/index.d.ts` only re-exports.

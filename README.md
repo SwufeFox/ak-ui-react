@@ -13,6 +13,8 @@ the *same* controller instances the Vue components did.
 - **Showcase:** https://ak-ui-react.pages.dev
 - **Upstream:** [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (Vue)
 - **Peer deps:** React 18 or 19
+- **For coding agents:** [`llms.txt`](./llms.txt) — component index plus the traps. Point your
+  agent at the raw file so it stops re-deriving the rules below.
 
 ## Install
 
@@ -244,23 +246,32 @@ than that — if you want a glowing panel, use it directly.
 
 ### Reserved tokens
 
-A handful of tokens are part of the published API but **not consumed by any rule in this library**.
-They are kept deliberately (removing them would be a breaking change for a published package) and
-documented here so you can tell "reserved" apart from "we forgot to wire it up":
+Some tokens are part of the published API without being consumed by a rule. They are kept
+deliberately — removing them would be a breaking change for a published package — and listed here
+so "reserved" reads differently from "we forgot to wire it up".
 
-| Token | Status |
+**Consumed by nothing** (measured: zero references anywhere in `src/ak`) — setting one has no
+effect:
+
+| Token | Note |
 | --- | --- |
 | `--ak-space-5` / `--ak-space-6` | Spacing scale beyond what the components use |
-| `--ak-motion-fast` / `--ak-motion-slow` | Wired via `.ak-motion--quick` / `--slow`; reserved if you use tokens directly |
-| `--ak-ease-emphasized` | Wired via `.ak-motion--emphasized` |
 | `--ak-font-command` | Spare type role (currently aliases the serif) |
 | `--ak-type-display-size` / `--ak-type-wide` | Typography scale, not yet consumed |
 | `--ak-radius-subtle` | Reserved radius |
-| `--ak-bar-w-lg` | Thick accent rail (`.ak-r-bar` uses the 4px `--ak-bar-w`) |
+| `--ak-bar-w-lg` | Thick accent rail — `.ak-r-bar` uses the 4px `--ak-bar-w` |
 | `--ak-signal-accent` | Alias of `--ak-color-accent`, reserved |
 
-If you are building on this package, prefer the tokens that are actually wired — check this table
-before assuming a token will do something.
+**Wired, but only through a modifier class** — these do work, in the listed place:
+
+| Token | Reached via |
+| --- | --- |
+| `--ak-cut-sm` / `--ak-cut-md` / `--ak-cut-lg` | `.ak-cut--sm` / `--md` / `--lg`, or `AkCut size` |
+| `--ak-motion-fast` / `--ak-motion-base` / `--ak-motion-slow` | `.ak-motion--quick` / `--base` / `--slow` |
+| `--ak-ease-emphasized` | `.ak-motion--emphasized` |
+
+> The two groups look alike and are not. Overriding a token from the first table is a no-op; the
+> second table is how you retune cut corners or pacing globally.
 
 
 ```bash

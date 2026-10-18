@@ -37,3 +37,5 @@
 // 移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
 @use "scss/ak-decor";
 @use "scss/ak-arknights";
+// 景深：补上「控制器 ↔ CSS 消费」之间缺的那根线（两半上游都有，从没接上）
+@use "scss/ak-depth";

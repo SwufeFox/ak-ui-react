@@ -1,0 +1,51 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 景深层（depth）
+//
+//  这一层的**两半上游都已经有**，只是从没接上：
+//    · core/dashboard-depth.mjs  —— createDashboardDepth 给带 [data-depth] 的元素写
+//                                   --ak-layer-x / --ak-layer-y（按指针位置 × 深度）
+//    · _ak-dashboard.scss:60     —— 早就有消费规则 translate3d(var(--ak-layer-x), var(--ak-layer-y), 0)
+//  缺的只是「把它们接起来的组件」与「可复用的类」。这里补上。
+//
+//  为什么需要它：这就是扁平化之后追回「交互空间深度」的手法（文章原则三）——
+//  指针移动时不同层按各自深度反向位移，透视感由层间的差异位移成立。
+//  纯 CSS 做不到（要读指针），纯 JS 做不到（要 CSS 消费），所以必须成对提供。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-depth {
+  position: relative;
+
+  // 上游的三套透视配方，原样搬过来做档位。三者的原值都来自上游，不是新发明：
+  //   · stage  ← _ak-object.scss 的 .perspective { perspective: 100rem; origin: 50% 125% }
+  //   · tilt   ← _ak-panel.scss 的 .ak-panel-right { perspective(50rem) rotateY(-10deg) }
+  //   · flat   ← 不设透视（默认），只做位移
+  &--stage {
+    perspective: 100rem;
+    perspective-origin: 50% 125%;
+  }
+
+  &--tilt {
+    transform: perspective(50rem) rotateY(-10deg);
+    transform-origin: center right;
+  }
+
+  // 3D 上下文：子层要在同一空间里比较深度时打开（同上游 .ak-dashboard 的 preserve-3d）
+  &--3d {
+    transform-style: preserve-3d;
+  }
+}
+
+// 视差层。控制器把位移写进 --ak-layer-x / --ak-layer-y，这里消费它。
+// 位移量 = 指针偏移 × maxX/maxY × data-depth 的 depth 值，全部由控制器算好。
+.ak-depth__layer {
+  will-change: transform;
+  transform: translate3d(var(--ak-layer-x, 0), var(--ak-layer-y, 0), 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // 控制器在 respectReducedMotion 下会把位移锁在中心（render 里把 clientX/Y 换成 rect 中心），
+  // 那时 --ak-layer-x/y 恒为 0；这里再兜一层，避免有的宿主关掉了那个选项。
+  .ak-depth__layer {
+    transform: none;
+  }
+}

@@ -18,6 +18,8 @@ import {
   AkCorner,
   AkCountUp,
   AkCut,
+  AkDepth,
+  AkDepthLayer,
   AkDisplay,
   AkElite,
   AkEn,
@@ -602,6 +604,26 @@ function ReferenceView() {
           <div className="demo-canvas">
             <AkParticleField count={70} pattern="orbit" renderer="auto" />
             <span className="demo-canvas-label">{t('ref.effects.canvas')}</span>
+          </div>
+
+          {/* 景深：指针驱动的视差。把指针移进这块面板，三层会按各自 depth 反向位移。 */}
+          <div>
+            <AkCodeId>AkDepth</AkCodeId>
+            <AkDepth
+              className="demo-depth"
+              variant="stage"
+              threeD
+              style={{ marginTop: 'var(--ak-space-2, 0.5rem)' }}
+            >
+              <AkDepthLayer className="demo-depth__grid" depth={0.4} />
+              <AkDepthLayer className="demo-depth__glyph" depth={1}>
+                <AkDisplay xl>PRTS</AkDisplay>
+              </AkDepthLayer>
+              <AkDepthLayer className="demo-depth__hud" depth={2}>
+                <AkBrackets style={{ width: '4rem', height: '3rem' }} />
+              </AkDepthLayer>
+            </AkDepth>
+            <div className="demo-hint">{t('ref.effects.depthHint')}</div>
           </div>
         </div>
       </Block>

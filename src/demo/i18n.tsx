@@ -84,8 +84,11 @@ const en = {
   'ref.navigation.title': 'Tabs',
   'ref.navigation.note':
     'Arrow keys, Home and End move focus between tabs; panels are wired with aria-controls.',
-  'ref.effects.title': 'CountUp & ParticleField',
-  'ref.effects.note': 'Both drive the framework-agnostic controllers vendored in src/ak/core.',
+  'ref.effects.title': 'Effects, CountUp & Depth',
+  'ref.effects.note':
+    'The .ak-fx-* layer is the library\'s motion language — CSS animation with `infinite`, not transitions. Below it, the controller layer is vendored from src/ak/core untouched.',
+  'ref.effects.depthHint':
+    'Move the pointer over this panel — the three layers shift by different amounts (depth 0.4 / 1 / 2).',
   'ref.gallery.title': 'MediaGallery',
   'ref.gallery.note':
     'Controller-managed carousel: prev/next, selectors, swipe gestures and an expanded dialog.',
@@ -439,8 +442,11 @@ const zhCN: Record<MessageKey, string> = {
   'ref.inputs.note': '受控输入统一用 `value` + `onValueChange`，替代 Vue 的 v-model。',
   'ref.navigation.title': '标签页',
   'ref.navigation.note': '方向键、Home 与 End 可在标签间移动焦点；面板用 aria-controls 关联。',
-  'ref.effects.title': '数字滚动与粒子场',
-  'ref.effects.note': '两者都驱动 vendored 在 src/ak/core 里的框架无关控制器。',
+  'ref.effects.title': '特效、数字滚动与景深',
+  'ref.effects.note':
+    '`.ak-fx-*` 层才是本库的动效语言——CSS animation 加 `infinite`，不是 transition。其下是 vendored 自 src/ak/core 的控制器层，未作改动。',
+  'ref.effects.depthHint':
+    '把指针移到这块面板上——三层会按各自深度反向位移（depth 0.4 / 1 / 2），透视感就来自这个差量。',
   'ref.gallery.title': '媒体画廊',
   'ref.gallery.note': '控制器驱动的轮播：上一张/下一张、选择器、滑动手势与放大弹窗。',
   'ref.site.title': '资源加载与移动菜单',
