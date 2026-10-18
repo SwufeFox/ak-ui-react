@@ -63,7 +63,21 @@ export function Panel() {
 `AkCountUp` · `AkEntrance` · `AkAssetLoader` · `AkMediaGallery` · `AkMobileMenu` ·
 `AkParticleField` · `AkSectionNavigator`
 
-Every component is typed; all public types are re-exported from the package root.
+Decoration (`decor`) — ported from prts-design:
+
+`AkStripes` · `AkCorner` · `AkBrackets` · `AkGridBackdrop` · `AkHalftone` · `AkBlueBand` ·
+`AkDisplay` · `AkNum` · `AkCodeId` · `AkOverline` · `AkEn` · `AkWatermark` · `AkBilingual` ·
+`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox`
+
+Arknights game data (`arknights`) — ported from prts-design:
+
+`AkRarity` · `AkRarityScope` · `AkRarityChip` · `AkRarityBar` · `AkProfession` ·
+`AkProfessionLabel` · `AkElite` · `AkPotential` · `AkSpec` · `AkPotList` · `AkPot` ·
+`AkSkillLevels` · `AkAttrs` · `AkAttr` · `AkKv` · `AkKvItem` · `AkTrust`
+
+Every component is typed; all public types are re-exported from the package root. Components whose
+upstream form draws a game icon take it as a prop (`icon` / `iconSrc` / `children`) — none of them
+depend on bundled game art.
 
 ### Framework-agnostic controllers
 
@@ -105,7 +119,30 @@ shipped too (`dist/scss/`) if you want to recompile or theme it:
 - **`AkMobileMenu`**'s trigger is hidden above `48rem` by the stylesheet — it is a mobile
   affordance.
 
-## Development
+## Design references
+
+Parts of this library are ported from **[MooncellWiki/prts-design](https://github.com/MooncellWiki/prts-design)**,
+a design system for the Arknights-themed prts.wiki (MIT License, Copyright (c) 2026-present
+MooncellWiki; verified against the repository's `LICENSE` file on 2026-10-18). Two layers were
+brought over:
+
+- **`decor`** — the geometric decoration language (`_ak-decor.scss`, `src/ak/ui/decor/AkDecor.tsx`):
+  hazard stripes, halftone dots, blueprint grids, corner triangles, HUD brackets, uppercase Latin
+  display type, glyph inversion, bilingual headings, chevrons.
+- **`arknights`** — game-data components (`_ak-arknights.scss`, `src/ak/ui/arknights/AkArknights.tsx`):
+  rarity rails, profession colors, elite/potential/specialization marks, potential lists, skill
+  level selectors, attribute panels, key-value tables, trust marks.
+
+Upstream tokens were renamed to this package's existing `--ak-*` conventions rather than copied
+verbatim, and both light and dark values were mapped onto this package's two themes (terminal /
+archive). **No game image assets were ported** — upstream ships its iconography as copyrighted
+game extractions under a separate notice, so every icon-bearing component here takes its icon from
+the host as `children`/`icon` and renders nothing (rather than a placeholder) when none is passed.
+
+An earlier iteration of this port reviewed the same repository while its license status was still
+unresolved and deliberately borrowed only abstract design directions. That restriction is now
+lifted; the note is kept here for context.
+
 
 ```bash
 npm install
@@ -175,3 +212,7 @@ so tab/menu components use an internal `useInstanceId` instead.
 MIT. This repository is a port of [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) and
 retains its license; the design tokens, SCSS and DOM controller sources originate there and
 remain under the original copyright (© 2019 云游君).
+
+The `decor` and `arknights` layers are additionally derived from
+[MooncellWiki/prts-design](https://github.com/MooncellWiki/prts-design), also MIT,
+Copyright (c) 2026-present MooncellWiki. Game image assets from that project were not ported.

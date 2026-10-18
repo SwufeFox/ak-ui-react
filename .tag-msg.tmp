@@ -1,0 +1,3 @@
+v1.1.1
+
+Asset loader double-load fix; remove dead build:lib/build:demo scripts.

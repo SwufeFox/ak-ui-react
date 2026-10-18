@@ -27,7 +27,12 @@ const result = sass.compile(resolve(root, 'src/ak/styles/ak-ui.scss'), {
   loadPaths: [resolve(root, 'src/ak/styles/scss')],
 })
 mkdirSync(dist, { recursive: true })
-writeFileSync(resolve(dist, 'style.css'), result.css, 'utf8')
+// dart-sass 只要输出里含非 ASCII 字符（我们的 .ak-chevrons 有 »）就在开头加一个
+// U+FEFF BOM。用 <link> 加载时浏览器会替我们剥掉，但被宿主内联进 <style> 时
+// BOM 会变成选择器里的 U+FEFF，紧随其后的 :root 规则会整条失效、所有 CSS 变量
+// 归零。发布产物不该带 BOM，这里统一去掉。
+const css = result.css.charCodeAt(0) === 0xfeff ? result.css.slice(1) : result.css
+writeFileSync(resolve(dist, 'style.css'), css, 'utf8')
 cpSync(resolve(root, 'src/ak/styles/scss'), resolve(dist, 'scss'), { recursive: true })
 
 // Ship the framework-agnostic controllers next to the declarations that describe them,

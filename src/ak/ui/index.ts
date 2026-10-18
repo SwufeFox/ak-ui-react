@@ -14,3 +14,45 @@ export { AkMobileMenu } from './site/AkMobileMenu'
 export { AkParticleField } from './site/AkParticleField'
 export { AkSectionNavigator } from './site/AkSectionNavigator'
 
+// decor —— 方舟几何装饰语言（移植自 prts-design, MIT）
+export {
+  AkBilingual,
+  AkBlueBand,
+  AkBrackets,
+  AkChevrons,
+  AkCodeId,
+  AkCorner,
+  AkDisplay,
+  AkEn,
+  AkGlyph,
+  AkGlyphBox,
+  AkGridBackdrop,
+  AkHalftone,
+  AkInverse,
+  AkNum,
+  AkOverline,
+  AkStripes,
+  AkWatermark,
+} from './decor/AkDecor'
+
+// arknights —— 游戏数据组件（移植自 prts-design, MIT）
+export {
+  AkAttr,
+  AkAttrs,
+  AkElite,
+  AkKv,
+  AkKvItem,
+  AkPot,
+  AkPotList,
+  AkPotential,
+  AkProfession,
+  AkProfessionLabel,
+  AkRarity,
+  AkRarityBar,
+  AkRarityChip,
+  AkRarityScope,
+  AkSkillLevels,
+  AkSpec,
+  AkTrust,
+} from './arknights/AkArknights'
+

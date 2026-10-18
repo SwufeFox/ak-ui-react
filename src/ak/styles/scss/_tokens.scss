@@ -10,14 +10,17 @@
   --ak-surface-panel: rgba(253, 253, 251, 0.9);
   --ak-surface-muted: rgba(235, 236, 235, 0.9);
   --ak-surface-raised: rgba(66, 66, 66, 0.92);
-  --ak-surface-inverse: #17191b;
+  // 反色块：相对当前主题取反（暗色主题下是浅底深字，亮色主题下反过来）。
+  // 与 prts-design 的 --ak-bg-inverse / --ak-fg-inverse 同语义，两主题都必须是
+  // 对比色对——注意 --ak-surface-raised 才是深色面板，别混用。
+  --ak-surface-inverse: #fdfdfb;
   --ak-text-primary: #f8f8f5;
   --ak-text-secondary: rgba(248, 248, 245, 0.68);
   --ak-text-inverse: #1b1d1f;
 
   // Functional signals
-  --ak-signal-info: var(--ak-color-primary);
-  --ak-signal-action: var(--ak-color-advanced);
+  --ak-signal-info: #18d1ff;
+  --ak-signal-action: #ffd800;
   --ak-signal-accent: var(--ak-color-accent);
   --ak-signal-success: #46c47c;
   --ak-signal-danger: #e33b3b;
@@ -45,6 +48,68 @@
   --ak-density-control-height: 2.75rem;
   --ak-density-panel-padding: var(--ak-space-5);
 
+  // Borders（移植自 prts-design tokens：--ak-border / --ak-border-subtle / --ak-border-strong）
+  --ak-border: #2f3133;
+  --ak-border-subtle: #262729;
+  --ak-border-strong: #4a4c4f;
+
+  // Sunken surfaces（prts-design 的 --ak-bg-surface / --ak-bg-surface-2；ak-ui 的 panel/muted 是浅色纸面，另开一组下沉面）
+  --ak-surface-sunken: #1a1b1c;
+  --ak-surface-sunken-2: #232425;
+
+  // Rarity palette（游戏内稀有度六档：底轨色 / 文字色）
+  --ak-rarity-1: #bababa;
+  --ak-rarity-1-text: #bababa;
+  --ak-rarity-2: #d3dc35;
+  --ak-rarity-2-text: #d3dc35;
+  --ak-rarity-3: #82c5f5;
+  --ak-rarity-3-text: #82c5f5;
+  --ak-rarity-4: #bf96ed;
+  --ak-rarity-4-text: #bf96ed;
+  --ak-rarity-5: #efd691;
+  --ak-rarity-5-text: #efd691;
+  --ak-rarity-6: #ff9433;
+  --ak-rarity-6-text: #ff9433;
+
+  // Profession palette（八职业，社区常用配色降饱和）
+  --ak-prof-pioneer: #c9a94b;
+  --ak-prof-warrior: #c96a4b;
+  --ak-prof-tank: #5e8fc9;
+  --ak-prof-sniper: #4bb3c9;
+  --ak-prof-caster: #9b6fc9;
+  --ak-prof-medic: #5fc98c;
+  --ak-prof-support: #c95fa2;
+  --ak-prof-special: #8a8f99;
+
+  // Decor（网格 / 斜纹 / 半调网点，方舟几何装饰语言的底纹参数）
+  --ak-grid-color: rgba(255, 255, 255, 0.05);
+  --ak-grid-size: 32px;
+  --ak-stripe-color: rgba(255, 255, 255, 0.07);
+  --ak-stripe-size: 8px;
+  --ak-halftone-color: rgba(255, 255, 255, 0.16);
+  --ak-halftone-size: 6px;
+  --ak-glyph-filter: none;
+  --ak-trust-icon: none;
+  --ak-trust-content: none;
+
+  // Discipline typography（拉丁展示字 / 标签字 / 数据字）
+  --ak-font-display: "Novecento Sans Wide", "Bender", "Oswald", "Michroma", "Arial Narrow", #{$font-sans-serif};
+  --ak-font-label: "Bender", "Chakra Petch", "Rajdhani", "Oswald", #{$font-sans-serif};
+  --ak-fs-xs: 0.75rem;
+  --ak-fs-sm: 0.875rem;
+  --ak-fs-body: 1rem;
+  --ak-fs-h3: 1.25rem;
+  --ak-fs-display: 2.5rem;
+  --ak-fs-display-xl: 3.5rem;
+  --ak-fs-overline: 0.6875rem;
+  --ak-tracking-caps: 0.08em;
+  --ak-tracking-overline: 0.14em;
+  --ak-tracking-display: -0.02em;
+  --ak-lh-display: 1.05;
+  --ak-bar-w: 4px;
+  --ak-bar-w-lg: 8px;
+  --ak-dur-fast: 150ms;
+
   // Geometry and depth
   --ak-line-hairline: 1px;
   --ak-line-strong: 4px;
@@ -65,4 +130,35 @@
   --ak-focus-color: var(--ak-signal-action);
   --ak-focus-width: 3px;
   --ak-focus-offset: 3px;
+}
+
+:root[data-theme="light"],
+[data-ak-theme="archive"] {
+  --ak-signal-info: #0098dc;
+  --ak-signal-action: #c99d00;
+
+  // 亮色主题下反色块翻过来：深底配浅字
+  --ak-surface-inverse: #1b1d1f;
+  --ak-text-inverse: #f8f8f5;
+
+  // 亮底（档案主题）下的移植令牌：来源 prts-design 的 light 主题真值
+  --ak-border: #d9dbdc;
+  --ak-border-subtle: #e8eaeb;
+  --ak-border-strong: #b1b1b1;
+
+  --ak-surface-sunken: #fdfdfb;
+  --ak-surface-sunken-2: #f2f3f4;
+
+  // 亮底上彩色轨对比不足，文字色改用上游的深色变体
+  --ak-rarity-1-text: #6f6f6f;
+  --ak-rarity-2-text: #7f8a00;
+  --ak-rarity-3-text: #1d78b8;
+  --ak-rarity-4-text: #7d4fc2;
+  --ak-rarity-5-text: #a87a00;
+  --ak-rarity-6-text: #d45f00;
+
+  --ak-grid-color: rgba(0, 0, 0, 0.06);
+  --ak-stripe-color: rgba(0, 0, 0, 0.08);
+  --ak-halftone-color: rgba(0, 0, 0, 0.14);
+  --ak-glyph-filter: invert(1);
 }

@@ -1,0 +1,570 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 方舟数据组件层（arknights）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/arknights/
+//
+//  只移植「不依赖游戏图片素材」的部分：稀有度色轨 / 职业色 / 精英化 /
+//  潜能 / 专精 / 潜能提升一览 / 技能等级选择 / 属性面板 / 键值表 / 信赖。
+//  图标一律由宿主传入（children 或 slot），没传就不渲染、也不占位——
+//  上游的 .ak-prof > img 等规则只在宿主真的放了 img 时生效。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 稀有度 Rarity · 星级 & 色阶 ────────────────────────────────────────
+.ak-rarity {
+  --_c: var(--ak-signal-action);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  height: 1em;
+  vertical-align: middle;
+
+  > i {
+    width: 0.9em;
+    height: 0.9em;
+    background: var(--_c);
+    // 五角星，直接 clip-path 画，不用素材
+    clip-path: polygon(
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
+    );
+  }
+
+  &--white {
+    --_c: var(--ak-text-primary);
+  }
+
+  &--r1 {
+    --_c: var(--ak-rarity-1-text);
+  }
+
+  &--r2 {
+    --_c: var(--ak-rarity-2-text);
+  }
+
+  &--r3 {
+    --_c: var(--ak-rarity-3-text);
+  }
+
+  &--r4 {
+    --_c: var(--ak-rarity-4-text);
+  }
+
+  &--r5 {
+    --_c: var(--ak-rarity-5-text);
+  }
+
+  &--r6 {
+    --_c: var(--ak-rarity-6-text);
+  }
+
+  &--lg {
+    font-size: 1.4em;
+  }
+
+  &--sm {
+    font-size: 0.8em;
+  }
+}
+
+// 稀有度色轨：给容器挂 data-rarity，后代用 .ak-r-* 取色
+[data-rarity="1"] {
+  --ak-r: var(--ak-rarity-1);
+  --ak-r-text: var(--ak-rarity-1-text);
+}
+
+[data-rarity="2"] {
+  --ak-r: var(--ak-rarity-2);
+  --ak-r-text: var(--ak-rarity-2-text);
+}
+
+[data-rarity="3"] {
+  --ak-r: var(--ak-rarity-3);
+  --ak-r-text: var(--ak-rarity-3-text);
+}
+
+[data-rarity="4"] {
+  --ak-r: var(--ak-rarity-4);
+  --ak-r-text: var(--ak-rarity-4-text);
+}
+
+[data-rarity="5"] {
+  --ak-r: var(--ak-rarity-5);
+  --ak-r-text: var(--ak-rarity-5-text);
+}
+
+[data-rarity="6"] {
+  --ak-r: var(--ak-rarity-6);
+  --ak-r-text: var(--ak-rarity-6-text);
+}
+
+.ak-r-text {
+  color: var(--ak-r-text);
+}
+
+.ak-r-bg {
+  background: var(--ak-r);
+  color: #1d1f20;
+}
+
+.ak-r-border {
+  border-color: var(--ak-r) !important;
+}
+
+.ak-r-bar {
+  border-left: var(--ak-bar-w) solid var(--ak-r);
+}
+
+.ak-r-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  background: var(--ak-r);
+  color: #1d1f20;
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ak-r-swatch {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.3em;
+  background: var(--ak-r);
+  vertical-align: -0.15em;
+}
+
+// 头像底：透明底的干员头像垫一块稀有度色渐变——一排里混着几种星级时扫一眼底色就能分开
+[data-rarity] {
+  --ak-r-fade: linear-gradient(180deg, transparent, #e6e5e2);
+}
+
+[data-rarity="6"] {
+  --ak-r-fade: linear-gradient(32deg, #eee2b8 22%, transparent);
+}
+
+.ak-r-avatar {
+  background: var(--ak-r, var(--ak-color-gray)) var(--ak-r-fade, none);
+}
+
+// ── 职业 / 分支 Profession ────────────────────────────────────────────
+.ak-prof {
+  --_s: 32px;
+
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--_s);
+  height: var(--_s);
+
+  > img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    filter: var(--ak-glyph-filter);
+  }
+
+  &--box {
+    background: #1d1f20;
+
+    > img {
+      filter: none;
+    }
+  }
+
+  &--sm {
+    --_s: 22px;
+  }
+
+  &--lg {
+    --_s: 48px;
+  }
+
+  &--xl {
+    --_s: 72px;
+  }
+
+  &--outline {
+    border: 1px solid var(--ak-border-strong);
+  }
+}
+
+.ak-subprof {
+  --_s: 26px;
+
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--_s);
+  height: var(--_s);
+
+  > img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    filter: var(--ak-glyph-filter);
+  }
+}
+
+.ak-prof-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+
+  .ak-en {
+    color: var(--ak-text-secondary);
+    font-size: 0.8em;
+  }
+}
+
+// 八职业色（用于图表 / 筛选高亮）
+[data-prof="pioneer"] {
+  --ak-p: var(--ak-prof-pioneer);
+}
+
+[data-prof="warrior"] {
+  --ak-p: var(--ak-prof-warrior);
+}
+
+[data-prof="tank"] {
+  --ak-p: var(--ak-prof-tank);
+}
+
+[data-prof="sniper"] {
+  --ak-p: var(--ak-prof-sniper);
+}
+
+[data-prof="caster"] {
+  --ak-p: var(--ak-prof-caster);
+}
+
+[data-prof="medic"] {
+  --ak-p: var(--ak-prof-medic);
+}
+
+[data-prof="support"] {
+  --ak-p: var(--ak-prof-support);
+}
+
+[data-prof="special"] {
+  --ak-p: var(--ak-prof-special);
+}
+
+// ── 精英化 Elite ──────────────────────────────────────────────────────
+.ak-elite {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+
+  > img {
+    // 定宽框：四枚精英图标原图都是 40×30，按高缩放后宽高不一，文字起点会对不齐
+    width: 22px;
+    height: 16px;
+    object-fit: contain;
+    filter: var(--ak-glyph-filter);
+  }
+
+  &--lg > img {
+    width: 38px;
+    height: 28px;
+  }
+}
+
+// ── 潜能 / 专精 Potential · Specialization ────────────────────────────
+.ak-potential,
+.ak-spec {
+  display: inline-grid;
+  place-items: center;
+  padding: 2px;
+  background: #1d1f20;
+  vertical-align: middle;
+
+  > img {
+    display: block;
+    width: auto;
+    height: 20px;
+  }
+
+  &--bare {
+    padding: 0;
+    background: none;
+  }
+}
+
+// ── 潜能提升一览 Pot list ─────────────────────────────────────────────
+// 分隔线由每格自己往外画 1px：不拿容器底色当线，项排不满一行时末尾空位不会露边框
+.ak-pot-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--ak-surface-sunken);
+  border: 1px solid var(--ak-border);
+}
+
+.ak-pot {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--ak-surface-sunken);
+  box-shadow: 0 0 0 1px var(--ak-border);
+  font-size: var(--ak-fs-sm);
+  line-height: 1.4;
+
+  &__label {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--ak-text-secondary);
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-overline);
+    font-weight: 700;
+    letter-spacing: var(--ak-tracking-overline);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  &.is-on {
+    box-shadow: 0 0 0 1px var(--ak-border), inset 0 3px 0 var(--ak-signal-info);
+
+    .ak-pot__label {
+      color: var(--ak-signal-info);
+    }
+  }
+}
+
+// ── 技能等级选择条 Skill levels · 1-7 + M1-M3 ─────────────────────────
+.ak-skill-levels {
+  display: inline-flex;
+  border: 1px solid var(--ak-border-strong);
+
+  > button {
+    all: unset;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 26px;
+    color: var(--ak-text-secondary);
+    cursor: pointer;
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-xs);
+    font-weight: 700;
+    line-height: 1;
+
+    + button {
+      border-left: 1px solid var(--ak-border);
+    }
+
+    // all: unset 把全局焦点环也清掉了，这里补回来（内缩 2px：按钮挨着，外扩会被邻格盖住）
+    &:focus-visible {
+      outline: 2px solid var(--ak-focus-color);
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    &.is-mastery {
+      color: var(--ak-signal-info);
+
+      > img {
+        height: 14px;
+        filter: var(--ak-glyph-filter);
+      }
+
+      &.is-active {
+        background: var(--ak-color-blue);
+        color: #fff;
+
+        > img {
+          filter: none;
+        }
+      }
+    }
+
+    &.is-active {
+      background: var(--ak-surface-inverse);
+      color: var(--ak-text-inverse);
+    }
+  }
+}
+
+// ── 属性面板 Attributes ───────────────────────────────────────────────
+.ak-attrs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--ak-border);
+  border: 1px solid var(--ak-border);
+
+  &--compact .ak-attr {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 6px 12px;
+  }
+
+  &--compact .ak-attr__value {
+    font-size: var(--ak-fs-body);
+  }
+}
+
+.ak-attr {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--ak-surface-sunken);
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--ak-text-secondary);
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-overline);
+    font-weight: 600;
+    letter-spacing: var(--ak-tracking-overline);
+    line-height: 1;
+    text-transform: uppercase;
+
+    .cn {
+      font-family: var(--ak-font-sans);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+  }
+
+  &__value {
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-h3);
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    line-height: 1.1;
+
+    small {
+      margin-left: 2px;
+      color: var(--ak-text-secondary);
+      font-size: 0.55em;
+      font-weight: 600;
+    }
+  }
+
+  &--accent {
+    border-top: 2px solid var(--ak-signal-info);
+  }
+}
+
+// ── 键值表 Key-value ──────────────────────────────────────────────────
+// dt / dd 都要显式 margin: 0——正文的 dl 规则同优先级，靠顺序压
+.ak-kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0;
+  margin: 0 0 var(--ak-space-4);
+  border-top: 1px solid var(--ak-border);
+  font-size: var(--ak-fs-sm);
+
+  > dt {
+    align-content: center;
+    margin: 0;
+    padding: 6px 12px 6px 0;
+    border-bottom: 1px solid var(--ak-border-subtle);
+    color: var(--ak-text-secondary);
+    font-weight: 600;
+  }
+
+  > dd {
+    align-content: center;
+    margin: 0;
+    padding: 6px 0 6px 12px;
+    border-bottom: 1px solid var(--ak-border-subtle);
+    border-left: 1px solid var(--ak-border-subtle);
+  }
+
+  // 格子里最后一个块不带正文的下外边距
+  > dd > :last-child {
+    margin-bottom: 0;
+  }
+
+  &--boxed {
+    border: 1px solid var(--ak-border);
+
+    > dt {
+      // 框住的那版表头居中（同现网 th）；不带框的档案版标签列保持左对齐
+      padding-left: 12px;
+      background: var(--ak-surface-sunken-2);
+      text-align: center;
+    }
+  }
+
+  // 内联版：两三对短值一行放下，不画格子
+  &--inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    border: 0;
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    dt {
+      margin: 0;
+      color: var(--ak-text-secondary);
+      font-weight: 600;
+    }
+
+    dd {
+      margin: 0;
+    }
+  }
+}
+
+// ── 信赖 Trust ────────────────────────────────────────────────────────
+// 图标经素材接口给（--ak-trust-icon + --ak-trust-content）；没加载接口就不出图标、也不占位
+.ak-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ak-font-label);
+  font-weight: 700;
+
+  &::before {
+    content: var(--ak-trust-content, none);
+    flex: none;
+    width: 14px;
+    height: 14px;
+    background: var(--ak-trust-icon) center / contain no-repeat;
+    filter: var(--ak-trust-filter, none);
+  }
+}
+
+// 强制色下图标改当遮罩用，否则是一个实心方块
+@media (forced-colors: active) {
+  .ak-trust::before {
+    -webkit-mask: var(--ak-trust-icon) center / contain no-repeat;
+    mask: var(--ak-trust-icon) center / contain no-repeat;
+    filter: none;
+  }
+}

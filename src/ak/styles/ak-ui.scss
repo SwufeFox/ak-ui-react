@@ -32,3 +32,8 @@
 @use "scss/ak-site";
 @use "scss/ak-tabs";
 @use "scss/ak-typography";
+
+// decor（方舟几何装饰语言）与 arknights（游戏数据组件）
+// 移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+@use "scss/ak-decor";
+@use "scss/ak-arknights";
