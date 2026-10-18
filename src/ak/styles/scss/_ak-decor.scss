@@ -431,3 +431,63 @@ a.ak-chevrons:hover::after {
     0 var(--ak-cut-corner)
   );
 }
+
+// ── 动效节奏 Motion ──────────────────────────────────────────────────
+// 背景：--ak-motion-fast / -base / -slow 与 --ak-ease-emphasized 四枚令牌此前
+// 零消费者 —— 库里的动画各写各的（.ak-entrance 的 JS 默认 650ms、.ak-fx 写死
+// 1.5s / 0.7s）。节奏语言存在，却没有一条线接上。
+//
+// 这组类把节奏档接到真实过渡上。注意必须同时给出过渡属性：只写
+// transition-duration 而不写 transition-property 是什么都不做的空类，
+// 所以效果修饰符（--fade / --rise / --color）是必须的搭档：
+//
+//   <div class="ak-motion ak-motion--fade ak-motion--slow">…</div>
+//
+// 宿主也可以只取令牌自己写：
+//   .my-panel { transition: opacity var(--ak-motion-dur) var(--ak-motion-ease); }
+.ak-motion {
+  --ak-motion-dur: var(--ak-motion-base);
+  --ak-motion-ease: var(--ak-ease-standard);
+
+  transition-duration: var(--ak-motion-dur);
+  transition-timing-function: var(--ak-motion-ease);
+
+  // 节奏档
+  &--quick {
+    --ak-motion-dur: var(--ak-motion-fast);
+  }
+
+  &--base {
+    --ak-motion-dur: var(--ak-motion-base);
+  }
+
+  &--slow {
+    --ak-motion-dur: var(--ak-motion-slow);
+  }
+
+  // 强调曲线：入场 / 需要重量感的过渡
+  &--emphasized {
+    --ak-motion-ease: var(--ak-ease-emphasized);
+  }
+
+  // 过渡属性（与节奏档搭配使用）
+  &--fade {
+    transition-property: opacity;
+  }
+
+  &--rise {
+    transition-property: opacity, transform;
+  }
+
+  &--color {
+    transition-property: color, background-color, border-color;
+  }
+}
+
+// 尊重系统的减少动态偏好：时长归零，而不是整体取消过渡
+// （免得宿主依赖 transitionend 的逻辑卡住）
+@media (prefers-reduced-motion: reduce) {
+  .ak-motion {
+    --ak-motion-dur: 0ms;
+  }
+}

@@ -307,6 +307,62 @@ export function AkCut({ as: Tag = 'div', corner = 'tr', size = 'md', radius, cla
   )
 }
 
+// ── 动效节奏 ──────────────────────────────────────────────────────────
+
+export type AkMotionPace = 'quick' | 'base' | 'slow'
+export type AkMotionEffect = 'fade' | 'rise' | 'color'
+
+export interface AkMotionProps extends DivProps {
+  as?: ElementType
+  /** 节奏档，取 `--ak-motion-fast/base/slow`（默认 `base`）。 */
+  pace?: AkMotionPace
+  /**
+   * 过渡属性 —— **必须给**，否则节奏档无处生效（只写 transition-duration
+   * 而不写 transition-property 是什么都不做的空类）。
+   */
+  effect?: AkMotionEffect
+  /** 用强调曲线 `--ak-ease-emphasized`（入场 / 需要重量感的过渡）。 */
+  emphasized?: boolean
+}
+
+/**
+ * 动效节奏容器：把 `--ak-motion-*` / `--ak-ease-*` 节奏档接到真实过渡上。
+ *
+ * 这组令牌此前零消费者（库内动画各写各的），所以这个组件也是让它们「活过来」
+ * 的那条线。`effect` 必给：没有过渡属性的节奏档不产生任何效果。
+ *
+ * ```tsx
+ * <AkMotion effect="rise" pace="slow" emphasized>…</AkMotion>
+ * ```
+ */
+export function AkMotion({
+  as: Tag = 'div',
+  pace = 'base',
+  effect,
+  emphasized = false,
+  className,
+  children,
+  ...rest
+}: AkMotionProps) {
+  return (
+    <Tag
+      {...rest}
+      className={cx(
+        'ak-motion',
+        pace !== 'base' && `ak-motion--${pace}`,
+        emphasized && 'ak-motion--emphasized',
+        effect && `ak-motion--${effect}`,
+        className,
+      )}
+      data-slot="ak-motion"
+      data-pace={pace}
+      data-effect={effect ?? 'none'}
+    >
+      {children}
+    </Tag>
+  )
+}
+
 // ── 其他小件 ──────────────────────────────────────────────────────────
 
 export interface AkOverlineProps extends SlotProps<HTMLSpanElement> {

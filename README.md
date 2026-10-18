@@ -67,7 +67,7 @@ Decoration (`decor`) — ported from prts-design:
 
 `AkStripes` · `AkCorner` · `AkBrackets` · `AkGridBackdrop` · `AkHalftone` · `AkBlueBand` ·
 `AkDisplay` · `AkNum` · `AkCodeId` · `AkOverline` · `AkEn` · `AkWatermark` · `AkBilingual` ·
-`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox` · `AkCut`
+`AkChevrons` · `AkInverse` · `AkGlyph` · `AkGlyphBox` · `AkCut` · `AkMotion`
 
 Arknights game data (`arknights`) — ported from prts-design:
 
@@ -109,6 +109,24 @@ shipped too (`dist/scss/`) if you want to recompile or theme it:
   `renderMedia` (AkMediaGallery), and `children`-as-function (AkAssetLoader).
 - **Imperative handles** are used where the original exposed methods via `defineExpose`
   (`AkCountUp`, `AkEntrance`, `AkMobileMenu`, `AkSectionNavigator`) — pass a `ref`.
+- **Token-driven decoration** (`AkCut`, `AkMotion`, `AkStripes`, `AkHalftone`, `AkGridBackdrop`, …)
+  reads `--ak-*` tokens for its geometry or timing, and accepts either a direct prop
+  (`radius` on `AkCut`, `pace` on `AkMotion`) or an inline CSS variable — so you can retune a whole
+  surface from an ancestor instead of threading props through every call site:
+
+  ```css
+  .app-shell {
+    --ak-cut: 4px;           /* every cut corner in this subtree */
+    --ak-motion-slow: 900ms; /* every AkMotion --slow in this subtree */
+    --ak-ease-standard: cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  ```
+
+  ⚠️ **Which variable you override matters.** A component reads the *underlying* token
+  (`--ak-motion-slow`), so overriding that from an ancestor works. The component's own
+  intermediate (`--ak-motion-dur`, which `.ak-motion` declares on the element itself) does **not**
+  inherit from an ancestor — setting it on a parent is a no-op. Set the underlying token on an
+  ancestor, or set the intermediate on the element itself.
 
 ### Two components with real contracts
 
@@ -168,6 +186,83 @@ Set `--ak-cut` on any ancestor to retune every cut surface at once:
 > `clip-path` clips the element's own shadow — that is its semantics, not a bug. For "cut corner
 > **and** drop shadow", put the shadow on a wrapper: `<div style={{boxShadow:…}}><AkCut>…</AkCut></div>`.
 > A background on the element itself still shows, since the clip applies to the painted box.
+
+### Motion pacing (`AkMotion`)
+
+Same story as the cut corners, one layer up. `--ak-motion-fast/base/slow` and
+`--ak-ease-emphasized` had **no consumers** — every animation in the library hardcoded its own
+number (`.ak-entrance`'s controller defaults to `650ms`, `.ak-fx` to `1.5s` / `0.7s`) — so the
+pacing scale existed but nothing was on it.
+
+`AkMotion` wires the scale to a real transition:
+
+```tsx
+<AkMotion effect="rise" pace="slow" emphasized>
+  <AkPanel />
+</AkMotion>
+```
+
+- `pace` — `quick` (120ms) · `base` (200ms) · `slow` (420ms)
+- `effect` — `fade` (`opacity`) · `rise` (`opacity, transform`) · `color` (color/border)
+- `emphasized` — swaps `--ak-ease-standard` for `--ak-ease-emphasized`
+
+`effect` is **required in practice**: `transition-duration` alone does nothing without a
+`transition-property`, so a pace with no effect is an inert class. That is why they ship paired.
+
+`prefers-reduced-motion: reduce` zeroes the duration rather than removing the transition, so hosts
+that rely on `transitionend` are not left hanging.
+
+You can also skip the component and use the tokens directly:
+
+```css
+.my-panel {
+  transition: opacity var(--ak-motion-dur, var(--ak-motion-base)) var(--ak-motion-ease, var(--ak-ease-standard));
+}
+```
+
+**To retune pacing from an ancestor, override the scale token, not `--ak-motion-dur`:**
+
+```css
+.app-shell { --ak-motion-slow: 900ms; }   /* ✅ reaches every AkMotion in the subtree */
+.app-shell { --ak-motion-dur: 90ms; }     /* ❌ no-op — .ak-motion declares it on the element */
+```
+
+The same shape applies to `AkCut`: override `--ak-cut`, not `--ak-cut-corner`
+(`.ak-cut` sets `--ak-cut-corner` itself, so an ancestor value never arrives).
+
+### Signal glow (`--ak-shadow-signal`)
+
+`--ak-shadow-signal` is the shared glow for "this thing is live". `.ak-status__signal` used to
+hardcode its own `box-shadow`; it now reads the token, taking its **colour** from the component's
+signal (`--ak-shadow-signal-color`), so one token serves the info / warning / critical variants:
+
+```css
+/* retune every signal glow in the app, or just the status dot */
+.app-shell { --ak-shadow-signal: 0 0 1.25rem color-mix(in srgb, var(--ak-shadow-signal-color, var(--ak-signal-info)) 70%, transparent); }
+```
+
+Note `--ak-shadow-signal` is consumed by `.ak-status`, but is not applied by any component other
+than that — if you want a glowing panel, use it directly.
+
+### Reserved tokens
+
+A handful of tokens are part of the published API but **not consumed by any rule in this library**.
+They are kept deliberately (removing them would be a breaking change for a published package) and
+documented here so you can tell "reserved" apart from "we forgot to wire it up":
+
+| Token | Status |
+| --- | --- |
+| `--ak-space-5` / `--ak-space-6` | Spacing scale beyond what the components use |
+| `--ak-motion-fast` / `--ak-motion-slow` | Wired via `.ak-motion--quick` / `--slow`; reserved if you use tokens directly |
+| `--ak-ease-emphasized` | Wired via `.ak-motion--emphasized` |
+| `--ak-font-command` | Spare type role (currently aliases the serif) |
+| `--ak-type-display-size` / `--ak-type-wide` | Typography scale, not yet consumed |
+| `--ak-radius-subtle` | Reserved radius |
+| `--ak-bar-w-lg` | Thick accent rail (`.ak-r-bar` uses the 4px `--ak-bar-w`) |
+| `--ak-signal-accent` | Alias of `--ak-color-accent`, reserved |
+
+If you are building on this package, prefer the tokens that are actually wired — check this table
+before assuming a token will do something.
 
 
 ```bash

@@ -31,6 +31,7 @@ import {
   AkKvItem,
   AkMediaGallery,
   AkMobileMenu,
+  AkMotion,
   AkNotice,
   AkNum,
   AkOverline,
@@ -338,6 +339,37 @@ export function App() {
             <div style={{ position: 'relative', paddingBottom: 'var(--ak-space-4)' }}>
               <AkDisplay xl>AK-UI</AkDisplay>
               <AkWatermark>RHODES</AkWatermark>
+            </div>
+            <div className="demo-row" style={{ alignItems: 'stretch' }}>
+              {/* 节奏档：hover 才看得出快 / 中 / 慢的差别 */}
+              <AkMotion
+                className="demo-motion-card"
+                effect="rise"
+                pace="quick"
+                style={{ padding: 'var(--ak-space-3)', background: 'var(--ak-surface-sunken-2)' }}
+              >
+                <AkCodeId>quick</AkCodeId>
+                <div style={{ fontSize: '0.8125rem' }}>hover 我（120ms）</div>
+              </AkMotion>
+              <AkMotion
+                className="demo-motion-card"
+                effect="rise"
+                pace="base"
+                style={{ padding: 'var(--ak-space-3)', background: 'var(--ak-surface-sunken-2)' }}
+              >
+                <AkCodeId>base</AkCodeId>
+                <div style={{ fontSize: '0.8125rem' }}>hover 我（200ms）</div>
+              </AkMotion>
+              <AkMotion
+                className="demo-motion-card"
+                effect="rise"
+                pace="slow"
+                emphasized
+                style={{ padding: 'var(--ak-space-3)', background: 'var(--ak-surface-sunken-2)' }}
+              >
+                <AkCodeId>slow + emphasized</AkCodeId>
+                <div style={{ fontSize: '0.8125rem' }}>hover 我（420ms 强调曲线）</div>
+              </AkMotion>
             </div>
             <div className="demo-row" style={{ alignItems: 'baseline' }}>
               <AkOverline>Overline</AkOverline>

@@ -121,7 +121,10 @@
   --ak-cut-lg: 1.5rem;
   --ak-radius-subtle: 2px;
   --ak-shadow-panel: 0 1rem 2rem rgba(0, 0, 0, 0.32);
-  --ak-shadow-signal: 0 0 1rem color-mix(in srgb, var(--ak-signal-info) 62%, transparent);
+  // 信号色辉光：形状与强度归这枚令牌，颜色跟随 --ak-shadow-signal-color。
+  // 组件（.ak-status）把颜色接到自己的信号色上，于是同一枚令牌能服务
+  // 信息 / 警告 / 危险各档；宿主改这里就能整体重调所有信号辉光。
+  --ak-shadow-signal: 0 0 1rem color-mix(in srgb, var(--ak-shadow-signal-color, var(--ak-signal-info)) 62%, transparent);
   --ak-depth-perspective: 30em;
 
   // Motion and focus

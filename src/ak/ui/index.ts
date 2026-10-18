@@ -30,6 +30,7 @@ export {
   AkGridBackdrop,
   AkHalftone,
   AkInverse,
+  AkMotion,
   AkNum,
   AkOverline,
   AkStripes,

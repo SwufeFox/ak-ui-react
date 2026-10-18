@@ -117,3 +117,16 @@ body {
   margin-top: var(--ak-space-4, 1rem);
   border: 1px solid rgb(255 255 255 / 18%);
 }
+
+/* 动效节奏演示：AkMotion 只声明过渡属性，还需要一个真的会变的值，
+   hover 才看得出 quick / base / slow 的差别。 */
+.demo-motion-card {
+  cursor: pointer;
+  translate: 0 0;
+  opacity: 0.72;
+}
+
+.demo-motion-card:hover {
+  opacity: 1;
+  translate: 0 -6px;
+}
