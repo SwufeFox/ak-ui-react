@@ -18,6 +18,7 @@ type SlotProps<T extends HTMLElement> = HTMLAttributes<T> & { children?: ReactNo
 // ── 拉丁展示字 / 数据字 ────────────────────────────────────────────────
 
 export interface AkDisplayProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 最大号展示字（落地页 / 区块主标题）。 */
   xl?: boolean
@@ -129,6 +130,7 @@ export function AkInverse({ as: Tag = 'div', className, children, ...rest }: AkI
 }
 
 export interface AkGlyphBoxProps extends SlotProps<HTMLSpanElement> {
+  /** 图标内容。深底白线稿，两主题都不反相。 */
   children?: ReactNode
 }
 
@@ -148,6 +150,7 @@ export type AkStripesVariant = 'default' | 'strong' | 'warning' | 'danger' | 'ha
 export interface AkStripesProps extends DivProps {
   /** 条纹高度，默认 6px（等同上游 .ak-stripe-bar）。 */
   bar?: boolean
+  /** 斜纹类型：default / strong / warning / danger / hazard。 */
   variant?: AkStripesVariant
 }
 
@@ -172,7 +175,9 @@ export type AkCornerTone = 'info' | 'yellow' | 'red'
 export interface AkCornerProps extends DivProps {
   /** 大号角标（18px 直角边）。 */
   large?: boolean
+  /** 角标在哪个角：`tl`（默认）或 `tr`。 */
   position?: AkCornerPosition
+  /** 角标色调：`info`（默认）/ `yellow` / `red`。 */
   tone?: AkCornerTone
 }
 
@@ -211,6 +216,7 @@ export function AkBrackets({ className, children, ...rest }: AkBracketsProps) {
 export type AkBackdropVariant = 'grid' | 'dots' | 'diag' | 'scanlines'
 
 export interface AkGridBackdropProps extends DivProps {
+  /** 底纹类型：grid / dots / diag / scanlines。 */
   variant?: AkBackdropVariant
 }
 
@@ -231,6 +237,7 @@ export type AkHalftoneVariant = 'default' | 'left' | 'full'
 export interface AkHalftoneProps extends DivProps {
   /** 网点自身也当容器用时打开（默认只做背景层）。 */
   as?: ElementType
+  /** 网点遮罩方向：default / left / full。 */
   variant?: AkHalftoneVariant
 }
 
@@ -396,6 +403,7 @@ export function AkEn({ as: Tag = 'span', className, children, ...rest }: AkEnPro
 }
 
 export interface AkGlyphProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 亮色主题下不反相。 */
   keep?: boolean

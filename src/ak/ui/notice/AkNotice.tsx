@@ -8,7 +8,9 @@ export interface AkNoticeProps extends Omit<HTMLAttributes<HTMLElement>, 'title'
   code?: ReactNode
   /** Overrides the semantic role derived from `variant`. */
   role?: 'alert' | 'status'
+  /** 通知标题。 */
   title?: ReactNode
+  /** 语义档位，决定左侧色条与路由码颜色。 */
   variant?: AkNoticeVariant
 }
 

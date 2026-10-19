@@ -2,8 +2,11 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { createEntrance, type EntranceController, type EntranceOptions } from '../../core/effects.mjs'
 
 export interface AkEntranceProps extends EntranceOptions {
+  /** 挂载后自动播放。 */
   autoplay?: boolean
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /** 子内容。 */
   children?: React.ReactNode
 }
 

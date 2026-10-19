@@ -4,10 +4,15 @@ import { clampRange, finite } from '../../lib/utils'
 export interface AkSliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> {
   /** Accessible name for the range input. */
   label: string
+  /** 区间下限。 */
   min?: number
+  /** 区间上限。 */
   max?: number
+  /** 步长。 */
   step?: number
+  /** 当前值。 */
   value: number
+  /** 拖动时回调。 */
   onValueChange?: (value: number) => void
 }
 

@@ -8,6 +8,7 @@ export interface AkButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: ReactNode
   /** Stretches the button to the full width of its container. */
   block?: boolean
+  /** 外观档位：default / outline / action / advanced / light。 */
   variant?: AkButtonVariant
 }
 

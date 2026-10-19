@@ -23,6 +23,7 @@ export type AkRaritySize = 'sm' | 'default' | 'lg'
 export interface AkRarityProps extends Omit<SpanProps, 'children'> {
   /** 星级，决定星形颜色（1 灰 → 6 橙）。 */
   level?: AkRarityLevel
+  /** 尺寸档位。 */
   size?: AkRaritySize
   /** `white` 用纯白星，忽略星级配色。 */
   variant?: 'default' | 'white'
@@ -91,6 +92,7 @@ export function AkRarityChip({ level, className, children, ...rest }: AkRarityCh
 }
 
 export interface AkRarityBarProps extends DivProps {
+  /** 左缘色条的稀有度档位。 */
   level: AkRarityLevel
 }
 
@@ -117,6 +119,7 @@ export interface AkProfessionProps extends Omit<SpanProps, 'children'> {
   boxed?: boolean
   /** 加细边框。 */
   outline?: boolean
+  /** 图标框尺寸：sm / default / lg / xl。 */
   size?: AkProfessionSize
 }
 
@@ -154,7 +157,9 @@ export interface AkProfessionLabelProps extends Omit<SpanProps, 'children'> {
   name: ReactNode
   /** 英文职业名（大写拉丁字）。 */
   en?: ReactNode
+  /** 职业图标节点，由宿主传入。 */
   icon?: ReactNode
+  /** 职业名；给出后带上对应的 `--ak-p` 职业色。 */
   prof?: AkProfessionName
 }
 
@@ -229,7 +234,9 @@ export function AkPotential({ icon, bare = false, label, className, ...rest }: A
 export interface AkSpecProps extends Omit<SpanProps, 'children'> {
   /** 专精图标。 */
   icon?: ReactNode
+  /** 去掉深色底框，只留图标。 */
   bare?: boolean
+  /** 无障碍名。 */
   label?: string
 }
 
@@ -296,6 +303,7 @@ const SKILL_LEVELS: AkSkillLevel[] = [1, 2, 3, 4, 5, 6, 7, 'M1', 'M2', 'M3']
 export interface AkSkillLevelsProps {
   /** 当前等级（1-7 或 M1-M3）。 */
   value?: AkSkillLevel
+  /** 等级变化时回调。 */
   onValueChange?: (value: AkSkillLevel) => void
   /** 只显示到这一级为止（例如未精英化时锁 1-7）。 */
   max?: AkSkillLevel
@@ -303,7 +311,9 @@ export interface AkSkillLevelsProps {
   disabled?: boolean
   /** 自定义专精档的图标（M1/M2/M3）。 */
   masteryIcon?: ReactNode
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /** 整组的读屏名，默认「技能等级」。 */
   ariaLabel?: string
 }
 
@@ -433,7 +443,9 @@ export type AkKvVariant = 'default' | 'boxed' | 'inline'
 const KvVariantContext = createContext<AkKvVariant>('default')
 
 export interface AkKvProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
+  /** 版式：default / boxed / inline。 */
   variant?: AkKvVariant
 }
 

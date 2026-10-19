@@ -20,6 +20,7 @@ export type AkGlowTone = 'default' | 'action' | 'info' | 'danger'
 export type AkSkewDirection = 'left' | 'right'
 
 export interface AkGlowProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 辉光色。默认取上游的 `rgba(255,255,255,.3)`；给档位则接信号色令牌。 */
   tone?: AkGlowTone

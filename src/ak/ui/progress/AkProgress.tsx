@@ -5,12 +5,17 @@ export type AkProgressVariant = 'default' | 'warning' | 'danger'
 export type AkGaugeVariant = 'default' | 'warning'
 
 export interface AkProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  /** 名称，同时用于 `aria-label`，默认 `Progress`。 */
   label?: ReactNode
+  /** 区间上限。 */
   max?: number
+  /** 区间下限。 */
   min?: number
+  /** 当前值，会夹到区间内。 */
   value?: number
   /** Custom text for the right-hand value readout. Defaults to the rounded percentage. */
   valueLabel?: ReactNode
+  /** 外观档位。 */
   variant?: AkProgressVariant
 }
 
@@ -45,11 +50,17 @@ export function AkProgress({ label = 'Progress', max = 100, min = 0, value = 0, 
 }
 
 export interface AkGaugeProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  /** 名称，同时用于 `aria-label`，默认 `Deploy`。 */
   label?: ReactNode
+  /** 区间上限。 */
   max?: number
+  /** 区间下限。 */
   min?: number
+  /** 数值单位后缀，默认 `percent`。 */
   unit?: ReactNode
+  /** 当前值，会夹到区间内。 */
   value?: number
+  /** 外观档位。 */
   variant?: AkGaugeVariant
 }
 

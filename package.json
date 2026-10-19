@@ -34,7 +34,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "llms.txt"
+    "llms.txt",
+    "docs"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -66,13 +67,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/build.mjs && node scripts/gen-api.mjs",
     "build:demo": "vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "preview:demo": "vite preview --outDir dist-demo",
     "prepublishOnly": "npm run build",
-    "pack:check": "npm pack --dry-run"
+    "pack:check": "npm pack --dry-run",
+    "build:api": "node scripts/gen-api.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

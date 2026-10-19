@@ -3,8 +3,11 @@ import { createMobileMenu, type MenuController } from '../../core/site.mjs'
 import { useInstanceId } from '../../lib/useId'
 
 export interface AkMobileMenuProps {
+  /** 触发按钮与对话框的读屏名，默认 `Menu`。 */
   label?: string
+  /** 关闭按钮文字，默认 `Close menu`。 */
   closeLabel?: string
+  /** 子内容。 */
   children?: React.ReactNode
 }
 

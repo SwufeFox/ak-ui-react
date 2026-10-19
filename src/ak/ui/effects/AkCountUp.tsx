@@ -2,14 +2,21 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { createCountUp, type CountUpController } from '../../core/effects.mjs'
 
 export interface AkCountUpProps {
+  /** 目标数值。 */
   value: number
+  /** 起始数值。 */
   from?: number
+  /** 滚动时长（毫秒）。 */
   duration?: number
+  /** 开始前延迟（毫秒）。 */
   delay?: number
   /** Clamp of decimal places rendered. */
   decimals?: number
+  /** 为真时直接跳到目标值。 */
   disabled?: boolean
+  /** 挂载后自动播放。 */
   autoplay?: boolean
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
 }
 

@@ -4,9 +4,13 @@ import { createAssetLoader, type AssetController, type AssetState, type AssetTas
 const IDLE: AssetState = { status: 'idle', completed: 0, total: 0, errors: [] }
 
 export interface AkAssetLoaderProps {
+  /** 要执行的异步任务，按顺序跑。 */
   tasks: AssetTask[]
+  /** 进度条读屏名与状态行前缀，默认 `Resources`。 */
   label?: string
+  /** 重试按钮文字，默认 `Retry`。 */
   retryLabel?: string
+  /** 状态变化时回调。 */
   onChange?: (state: AssetState) => void
   /** Renders the status line. Defaults to `label · status · completed/total`. */
   children?: (state: AssetState) => ReactNode
@@ -20,6 +24,7 @@ export interface AkAssetLoaderProps {
    * ```
    */
   statusLabels?: Partial<Record<AssetState['status'], string>>
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
 }
 

@@ -10,13 +10,17 @@ export interface AkTabsItem {
 }
 
 export interface AkTabsProps {
+  /** 读屏标签，默认 `Tabs`。 */
   ariaLabel?: string
+  /** 标签列表；每项含 `value` / `label` / `title`。 */
   items: AkTabsItem[]
   /** Active tab value. Falls back to the first item when unmatched. */
   value?: string
+  /** 切换时回调。 */
   onValueChange?: (value: string) => void
   /** Per-panel content, keyed by tab value. */
   renderPanel?: (item: AkTabsItem) => ReactNode
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
 }
 
@@ -85,10 +89,15 @@ export interface AkSegmentedOption {
 }
 
 export interface AkSegmentedProps {
+  /** 读屏标签，默认 `Options`。 */
   ariaLabel?: string
+  /** 选项列表，每项 `label` + `value`。 */
   options: AkSegmentedOption[]
+  /** 当前选中值；不匹配时回退第一项。 */
   value?: string
+  /** 选中变化时回调。 */
   onValueChange?: (value: string) => void
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
 }
 

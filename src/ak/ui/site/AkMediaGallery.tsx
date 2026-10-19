@@ -12,21 +12,31 @@ export interface GalleryItem {
 }
 
 export interface AkMediaGalleryProps {
+  /** 画廊条目；每项含 `id` 与可选 `title` / `image` / `alt`。 */
   items: GalleryItem[]
+  /** 区域与选择器组的读屏名，默认 `Media gallery`。 */
   label?: string
+  /** 到最后一张后是否回到第一张。 */
   loop?: boolean
+  /** 上一张按钮读屏名。 */
   previousLabel?: string
+  /** 下一张按钮读屏名。 */
   nextLabel?: string
+  /** 放大按钮文字与对话框读屏名。 */
   expandLabel?: string
+  /** 关闭按钮文字。 */
   closeLabel?: string
+  /** 空态占位文字。 */
   emptyLabel?: string
   /** 轮播角色的读屏描述。默认 `carousel`。 */
   roleDescription?: string
   /** Controlled active index. Omit for uncontrolled. */
   value?: number
+  /** 序号变化时回调。 */
   onValueChange?: (index: number) => void
   /** Custom slide media, replacing the default <img>. */
   renderMedia?: (item: GalleryItem, index: number) => ReactNode
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
 }
 

@@ -8,12 +8,19 @@ export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputEl
   increaseLabel?: string
   /** 减少按钮的无障碍名。默认「减少」。 */
   decreaseLabel?: string
+  /** 允许的最大值。 */
   max?: number
+  /** 「最大」按钮文字。 */
   maxLabel?: string
+  /** 允许的最小值。 */
   min?: number
+  /** 「最小」按钮文字。 */
   minLabel?: string
+  /** 每次增减的步长。 */
   step?: number
+  /** 当前值；越界会立刻写回夹紧值。 */
   value?: number
+  /** 值变化时回调。 */
   onValueChange?: (value: number) => void
 }
 

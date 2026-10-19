@@ -22,6 +22,7 @@ import { cx } from '../../lib/utils'
 export type AkBackdropStrength = 'light' | 'heavy'
 
 export interface AkBackdropProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** `light` 对齐上游 dialog 的 3px；`heavy` 12px，用于整层覆盖。 */
   strength?: AkBackdropStrength
@@ -29,6 +30,7 @@ export interface AkBackdropProps extends HTMLAttributes<HTMLElement> {
   blur?: number
   /** 玻璃底色。默认取 `--ak-surface-raised`。 */
   surface?: string
+  /** 子内容。 */
   children?: ReactNode
 }
 
@@ -69,11 +71,13 @@ export function AkBackdrop({
 // ── 暗角 ────────────────────────────────────────────────────────────
 
 export interface AkVignetteProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 内投影扩散范围，默认 22%（令牌 `--ak-vignette-size`）。 */
   size?: string
   /** 暗角色，默认取 `--ak-vignette-color`。 */
   color?: string
+  /** 子内容。 */
   children?: ReactNode
 }
 
@@ -100,11 +104,13 @@ export function AkVignette({ as: Tag = 'div', size, color, className, children, 
 // ── 噪点 ────────────────────────────────────────────────────────────
 
 export interface AkGrainProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 颗粒尺寸，默认 3px。 */
   size?: string
   /** 颗粒色，默认取 `--ak-grain-color`。 */
   color?: string
+  /** 子内容。 */
   children?: ReactNode
 }
 
@@ -129,12 +135,15 @@ export function AkGrain({ as: Tag = 'div', size, color, className, children, ...
 // ── 失同步马赛克 ────────────────────────────────────────────────────
 
 export interface AkMosaicProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 马赛克块尺寸，默认 5px（令牌 `--ak-mosaic-size`）。 */
   size?: string
+  /** 像素块颜色。 */
   color?: string
   /** 让被盖住的内容轻微失焦，更像「信号不稳」而不是「贴了格子」。 */
   blur?: boolean
+  /** 子内容。 */
   children?: ReactNode
 }
 

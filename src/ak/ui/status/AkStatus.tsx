@@ -5,6 +5,7 @@ export type AkTagVariant = 'default' | 'advanced' | 'danger' | 'neutral'
 export type AkStatusVariant = 'default' | 'warning' | 'critical' | 'offline'
 
 export interface AkTagProps extends HTMLAttributes<HTMLSpanElement> {
+  /** 语义档位。 */
   variant?: AkTagVariant
 }
 
@@ -21,6 +22,7 @@ export interface AkStatusProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'ch
   detail?: ReactNode
   /** Primary label. Falls back to `Online`, matching the original registry component. */
   label?: ReactNode
+  /** 语义档位。 */
   variant?: AkStatusVariant
 }
 

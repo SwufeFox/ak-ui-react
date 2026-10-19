@@ -6,6 +6,7 @@ export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place'
 export interface AkCardProps extends HTMLAttributes<HTMLElement> {
   /** Element to render as, e.g. 'div' | 'article' | 'section' | 'li'. */
   as?: ElementType
+  /** 外观档位：default / outline / stripe / place。 */
   variant?: AkCardVariant
 }
 

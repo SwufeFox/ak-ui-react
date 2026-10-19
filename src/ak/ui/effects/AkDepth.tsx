@@ -27,6 +27,7 @@ import { cx } from '../../lib/utils'
 export type AkDepthVariant = 'flat' | 'stage' | 'tilt'
 
 export interface AkDepthProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /**
    * 透视配方，三者都来自上游：
@@ -45,6 +46,7 @@ export interface AkDepthProps extends Omit<HTMLAttributes<HTMLElement>, 'childre
   maxY?: number
   /** 被驱动的层怎么选。默认 `[data-depth]`，与上游控制器一致。 */
   layerSelector?: string
+  /** 若干 `AkDepthLayer`。 */
   children?: ReactNode
 }
 
@@ -99,12 +101,14 @@ export function AkDepth({
 }
 
 export interface AkDepthLayerProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /**
    * 该层的深度。控制器据此算位移：`offset × maxRaw × depth`。
    * 上游默认 `maxX: 130` / `maxY: 70`，所以 `depth: 1` 的满偏量就是那个数。
    */
   depth?: number
+  /** 子内容。 */
   children?: ReactNode
 }
 
