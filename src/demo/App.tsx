@@ -8,6 +8,19 @@ import {
   AkBlueBand,
   AkBrackets,
   AkButton,
+  AkButtonGroup,
+  AkChoice,
+  AkDivider,
+  AkField,
+  AkFieldLabel,
+  AkFormStack,
+  AkInput,
+  AkPagination,
+  AkPopover,
+  AkSelect,
+  AkStatusGroup,
+  AkTagGroup,
+  AkTextarea,
   AkCard,
   AkCardContent,
   AkCardDescription,
@@ -890,6 +903,88 @@ function ReferenceView() {
           </AkKv>
         </div>
       </Block>
+
+        <Block
+          eyebrow={t('ref.controls.eyebrow')}
+          title={t('ref.controls.title')}
+          note={t('ref.controls.note')}
+        >
+          <div className="demo-stack">
+            <AkDivider>{t('common.sectionLabel')}</AkDivider>
+
+            <div className="demo-row">
+              <AkButtonGroup>
+                <AkButton variant="action">A</AkButton>
+                <AkButton variant="outline">B</AkButton>
+                <AkButton variant="outline">C</AkButton>
+              </AkButtonGroup>
+
+              <AkPopover
+                trigger={<AkButton variant="action">{t('common.openPanel')}</AkButton>}
+                eyebrow="RI / INFO"
+                title={t('ref.controls.title')}
+              >
+                {t('ref.controls.note')}
+              </AkPopover>
+            </div>
+
+            <AkTagGroup>
+              <AkTag>ALPHA</AkTag>
+              <AkTag variant="advanced">BRAVO</AkTag>
+              <AkTag variant="danger">CHARLIE</AkTag>
+              <AkTag variant="neutral">DELTA</AkTag>
+            </AkTagGroup>
+
+            <AkStatusGroup>
+              <AkStatus label="NETWORK" detail="Stable" />
+              <AkStatus variant="warning" label="REACTOR" detail="48%" />
+              <AkStatus variant="critical" label="HULL" detail="Breach" />
+              <AkStatus variant="offline" label="RELAY" detail="Down" />
+            </AkStatusGroup>
+
+            <AkPagination
+              page={3}
+              total={12}
+              title={t('common.timeline')}
+              onPageChange={() => undefined}
+            />
+          </div>
+        </Block>
+
+        <Block eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')}>
+          <AkFormStack>
+            <AkField hint={t('common.fieldHint')}>
+              <AkFieldLabel htmlFor="demo-field">{t('common.fieldName')}</AkFieldLabel>
+              <AkInput id="demo-field" placeholder="R001" />
+            </AkField>
+
+            <AkField>
+              <AkSelect aria-label={t('common.selectPlaceholder')} defaultValue="">
+                <option value="" disabled>
+                  {t('common.selectPlaceholder')}
+                </option>
+                <option value="a">Alpha</option>
+                <option value="b">Bravo</option>
+              </AkSelect>
+            </AkField>
+
+            <AkField>
+              <AkTextarea rows={3} placeholder={t('common.textareaPlaceholder')} />
+            </AkField>
+
+            <AkField invalid hint={t('common.fieldHint')}>
+              <AkInput defaultValue="bad!" aria-invalid="true" />
+            </AkField>
+
+            <div className="demo-row">
+              <AkChoice>{t('common.choiceCheck')}</AkChoice>
+              <AkChoice variant="radio" name="demo-deck">
+                {t('common.choiceRadio')}
+              </AkChoice>
+              <AkChoice variant="switch">{t('common.choiceSwitch')}</AkChoice>
+            </div>
+          </AkFormStack>
+        </Block>
     </main>
   )
 }

@@ -10,20 +10,24 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 
 - [`AkAssetLoader`](#akassetloader) · [`AkAttr`](#akattr) · [`AkAttrs`](#akattrs) · [`AkBackdrop`](#akbackdrop)
 - [`AkBilingual`](#akbilingual) · [`AkBlueBand`](#akblueband) · [`AkBrackets`](#akbrackets) · [`AkButton`](#akbutton)
-- [`AkCard`](#akcard) · [`AkCardContent`](#akcardcontent) · [`AkCardDescription`](#akcarddescription) · [`AkCardFooter`](#akcardfooter)
-- [`AkCardHeader`](#akcardheader) · [`AkCardTitle`](#akcardtitle) · [`AkChevrons`](#akchevrons) · [`AkCodeId`](#akcodeid)
-- [`AkCorner`](#akcorner) · [`AkCut`](#akcut) · [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer)
-- [`AkDisplay`](#akdisplay) · [`AkElite`](#akelite) · [`AkEn`](#aken) · [`AkGauge`](#akgauge)
-- [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain)
-- [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse)
-- [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem) · [`AkMediaGallery`](#akmediagallery) · [`AkMosaic`](#akmosaic)
-- [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline)
-- [`AkOverline`](#akoverline) · [`AkParticleField`](#akparticlefield) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
-- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
-- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
-- [`AkSegmented`](#aksegmented) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider)
-- [`AkSpec`](#akspec) · [`AkStatus`](#akstatus) · [`AkStripes`](#akstripes) · [`AkTabs`](#aktabs)
-- [`AkTag`](#aktag) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkButtonGroup`](#akbuttongroup) · [`AkCard`](#akcard) · [`AkCardContent`](#akcardcontent) · [`AkCardDescription`](#akcarddescription)
+- [`AkCardFooter`](#akcardfooter) · [`AkCardHeader`](#akcardheader) · [`AkCardTitle`](#akcardtitle) · [`AkChevrons`](#akchevrons)
+- [`AkChoice`](#akchoice) · [`AkCodeId`](#akcodeid) · [`AkCorner`](#akcorner) · [`AkCut`](#akcut)
+- [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider)
+- [`AkElite`](#akelite) · [`AkEn`](#aken) · [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel)
+- [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph)
+- [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone)
+- [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv)
+- [`AkKvItem`](#akkvitem) · [`AkMediaGallery`](#akmediagallery) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion)
+- [`AkNotice`](#aknotice) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline)
+- [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot)
+- [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel)
+- [`AkProgress`](#akprogress) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip)
+- [`AkRarityScope`](#akrarityscope) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkew`](#akskew)
+- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkStatus`](#akstatus)
+- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTabs`](#aktabs) · [`AkTag`](#aktag)
+- [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
+- [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -102,6 +106,15 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`.
 | `block` | `boolean` | yes | Stretches the button to the full width of its container. |
 | `variant` | `AkButtonVariant` | yes | 外观档位：default / outline / action / advanced / light。 |
 
+## AkButtonGroup
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `variant` | `AkButtonGroupVariant` | yes | — |
+| `children` | `ReactNode` | yes | — |
+
 ## AkCard
 
 Extends `HTMLAttributes<HTMLElement>`.
@@ -139,6 +152,16 @@ Extends `SlotProps<HTMLSpanElement>`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `href` | `string` | yes | 传 href 时渲染成链接，悬停箭头右移。 |
+
+## AkChoice
+
+Extends `InputHTMLAttributes<HTMLInputElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `variant` | `AkChoiceVariant` | yes | 外观：勾选框 / 单选圆点 / 开关滑块。样式表里对应 `.ak-choice--radio` / `--switch`。 |
+| `children` | `ReactNode` | yes | 控件右侧的文字。 |
+| `name` | `string` | yes | 输入控件的 `name`（单选组需要）。 |
 
 ## AkCodeId
 
@@ -203,6 +226,16 @@ Extends `SlotProps<HTMLSpanElement>`.
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `xl` | `boolean` | yes | 最大号展示字（落地页 / 区块主标题）。 |
 
+## AkDivider
+
+分组与分隔组件。 这三样**上游 SCSS 早已写好**（`.ak-divider` / `.ak-button-group` / `.ak-tag-group` / `.ak-status-group`），但一直没有 React 组件暴露它们 —— 属于「有实现、没出口」。 本文件只做包装，不新增任何样式。
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | yes | 居中的标签或图标。不传则只有两条不同宽度的横线。 |
+
 ## AkElite
 
 Extends `Omit<SpanProps, 'children'>`.
@@ -220,6 +253,32 @@ Extends `SlotProps<HTMLSpanElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
+
+## AkField
+
+表单控件。 这一组同样是「上游 SCSS 早已写好、但没有 React 组件」： `.ak-field` / `.ak-label` / `.ak-input` / `.ak-textarea` / `.ak-select` / `.ak-choice` 在 `_ak-form.scss` 里是完整的（含 focus 环、invalid 态、disabled 态、勾选框的 对勾绘制、开关滑块），只是从没被暴露出来。本文件只做包装，不加新样式。 `ak-choice` 的三种外观由样式表的 `&--radio` / `&--switch` 决定， 所以这里也照搬那三个类名，而不是另起一套。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | no | 字段内的控件。 |
+| `hint` | `ReactNode` | yes | 字段下方的提示或错误文字。 |
+| `invalid` | `boolean` | yes | 给出错误时把提示标成错误态，并把信号色接到字段上。 |
+| `className` | `string` | yes | — |
+
+## AkFieldLabel
+
+Extends `LabelHTMLAttributes<HTMLLabelElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | yes | — |
+
+## AkFormStack
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | no | — |
+| `className` | `string` | yes | — |
 
 ## AkGauge
 
@@ -289,6 +348,14 @@ Extends `DivProps`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 网点自身也当容器用时打开（默认只做背景层）。 |
 | `variant` | `AkHalftoneVariant` | yes | 网点遮罩方向：default / left / full。 |
+
+## AkInput
+
+Extends `InputHTMLAttributes<HTMLInputElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | yes | 无障碍名；未给 `id` 与外部标签时用它。 |
 
 ## AkInputNumber
 
@@ -408,6 +475,24 @@ Extends `SlotProps<HTMLSpanElement>`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
+## AkPagination
+
+翻页控件。 上游 SCSS 的 `.ak-pagination` 早已写好（固定 16rem 宽、左上一段时间轴式的 「上一 / 当前 / 下一」三段布局），但一直没有 React 组件 —— 又一个「有实现、没出口」。 结构照样式表来：`.prev` / `.cur`（内含 `.title` + `.label` + `.number`）/ `.next`。
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'title'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `page` | `number` | no | 当前页（从 1 开始）。 |
+| `total` | `number` | no | 总页数。 |
+| `onPageChange` | `(page: number) => void` | yes | 翻页回调，参数是目标页。 |
+| `title` | `ReactNode` | yes | 当前页上方的小标题（`.cur .title`）。 |
+| `previousLabel` | `string` | yes | 上一页按钮的无障碍名。 |
+| `nextLabel` | `string` | yes | 下一页按钮的无障碍名。 |
+| `previousIcon` | `ReactNode` | yes | 替换默认的箭头图标。 |
+| `nextIcon` | `ReactNode` | yes | — |
+| `loop` | `boolean` | yes | 循环：到首/末页时回卷。 |
+
 ## AkParticleField
 
 Extends `ParticleOptions`.
@@ -415,6 +500,14 @@ Extends `ParticleOptions`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+
+## AkPopover
+
+Extends `CommonProps`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `kind` | `'popover' \| 'tooltip'` | yes | 外观：`popover` 是带标题的浮层，`tooltip` 是窄的气泡提示。 |
 
 ## AkPot
 
@@ -523,6 +616,15 @@ Extends `DivProps`.
 | `onValueChange` | `(value: string) => void` | yes | 选中变化时回调。 |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
 
+## AkSelect
+
+Extends `SelectHTMLAttributes<HTMLSelectElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | yes | — |
+| `children` | `ReactNode` | yes | — |
+
 ## AkSkew
 
 Extends `HTMLAttributes<HTMLElement>`.
@@ -577,6 +679,14 @@ Extends `Omit<HTMLAttributes<HTMLSpanElement>, 'children'>`.
 | `label` | `ReactNode` | yes | Primary label. Falls back to `Online`, matching the original registry component. |
 | `variant` | `AkStatusVariant` | yes | 语义档位。 |
 
+## AkStatusGroup
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | yes | — |
+
 ## AkStripes
 
 Extends `DivProps`.
@@ -604,6 +714,22 @@ Extends `HTMLAttributes<HTMLSpanElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `variant` | `AkTagVariant` | yes | 语义档位。 |
+
+## AkTagGroup
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | yes | — |
+
+## AkTextarea
+
+Extends `TextareaHTMLAttributes<HTMLTextAreaElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | yes | — |
 
 ## AkTrust
 

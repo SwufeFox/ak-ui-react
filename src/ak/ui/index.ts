@@ -64,3 +64,8 @@ export {
   AkTrust,
 } from './arknights/AkArknights'
 
+// 上游 SCSS 早已写好、但一直没有组件出口的那批（纯包装，无新样式）
+export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup } from './group/AkGroups'
+export { AkPopover } from './popover/AkPopover'
+export { AkPagination } from './pagination/AkPagination'
+export { AkChoice, AkField, AkFieldLabel, AkFormStack, AkInput, AkSelect, AkTextarea, useFieldId } from './field/AkField'
