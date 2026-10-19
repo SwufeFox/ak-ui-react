@@ -94,3 +94,6 @@ export {
 
 // 上游只有样式、没有组件的那批
 export { AkCommand, AkCommandGrid, AkCommandGroup, type AkCommandGridProps, type AkCommandGroupProps, type AkCommandLayout, type AkCommandProps, type AkCommandTone } from './command/AkCommand'
+
+// Native-popover menu family and disclosure primitives
+export { AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible, AkMenuSeparator, AkMenuGroup, type AkMenuItem, type AkDropdownMenuProps, type AkContextMenuProps, type AkMenubarProps, type AkToolbarProps, type AkCollapsibleProps, type AkMenuGroupProps } from './menu/AkMenu'
