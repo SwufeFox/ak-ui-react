@@ -10,6 +10,7 @@ custom properties plus SCSS that ships in the package.
 - Repository: https://github.com/SwufeFox/ak-ui-react
 - Showcase: https://ak-ui-react.pages.dev
 - Full docs: README.md at the repository root — this file is an index, not the manual.
+- Per-component props: docs/api.md — generated from the .d.ts, so it cannot drift. This file stays an index.
 
 ## Rules
 
