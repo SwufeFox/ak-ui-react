@@ -9,6 +9,8 @@ export { AkSegmented, AkTabs } from './tabs/AkTabs'
 export { AkCountUp } from './effects/AkCountUp'
 // 上游 .ak-fx-* 特效层（glow / outline / skew）——此前只有 CSS，没有组件暴露
 export { AkGlow, AkOutline, AkSkew } from './effects/AkFx'
+// 焦距与底图处理（文章原则二/三/五）——上游 SCSS 零实现，本库增补
+export { AkBackdrop, AkGrain, AkMosaic, AkVignette } from './decor/AkSurfaces'
 // 景深：把上游孤儿控制器 createDashboardDepth 与它的 CSS 消费规则接起来
 export { AkDepth, AkDepthLayer } from './effects/AkDepth'
 export { AkEntrance } from './effects/AkEntrance'

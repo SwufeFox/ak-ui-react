@@ -49,3 +49,57 @@
     transform: none;
   }
 }
+
+
+// ── 毛玻璃 / 亚克力（文章原则二）─────────────────────────────────────
+// 文章讲的「类 Fluent Design 多元质感」核心就是背景模糊：
+//   1) 色彩结合更柔和，与锐化的正文形成对比
+//   2) 覆盖特性 —— 让玩家「窥」见下面的页面被盖住了，从而降低对层级跳转的抗拒
+//
+// ⚠️ 上游 SCSS 里 backdrop-filter **全库只有 1 处**（_ak-dialog.scss:25 的 ::backdrop，
+//    blur(3px)）。所以这层的数值取自那一处，不是我另调的：
+//    模糊半径 3px 与上游一致；只有「盖在什么上面」由宿主决定。
+//    其余 blur( 都是 filter: blur() = 模糊元素自身，与毛玻璃无关，别混。
+//
+// 用 backdrop-filter 而不是 filter：前者模糊的是**背后**的内容（透出下方页面），
+// 后者会把元素自己的内容也糊掉。
+.ak-backdrop {
+  // 糊的是背后那层，半径对齐上游 dialog 的 3px。
+  // ⚠️ 只写标准属性，不写 -webkit- 前缀版：两者并存时，压缩器（esbuild / lightningcss）
+  //    判定后写的会覆盖先写的，于是把「冗余」的标准属性删掉 → 只剩 -webkit- → 现代浏览器读不到。
+  //    上游 dialog 那处也只写标准属性（backdrop-filter: blur(3px)），保持一致。
+  backdrop-filter: blur(var(--ak-backdrop-blur, 3px));
+
+  // 亚克力要有一层自身底色，否则纯透明时背景模糊几乎看不出来
+  background: var(--ak-backdrop-surface, var(--ak-surface-raised));
+  // 饱和度补偿：模糊会拉低色彩浓度，Fluent 的 acrylic 同样会补这一下
+  // （Safari 对 backdrop-filter 叠加 saturate 支持不稳，故用支持度更广的写法）
+  box-shadow: inset 0 0 0 1px var(--ak-backdrop-edge, var(--ak-border-strong));
+}
+
+// 强度档位。上游那处是最轻的一档，所以默认就是它。
+.ak-backdrop--light {
+  --ak-backdrop-blur: 3px;
+}
+
+.ak-backdrop--heavy {
+  --ak-backdrop-blur: 12px;
+  --ak-backdrop-surface: var(--ak-surface-inverse);
+}
+
+// 不支持 backdrop-filter 时的兜底：给一层不透明底色，避免文字直接压在内容上
+// （@supports not 比让背景透出来更安全）
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ak-backdrop {
+    background: var(--ak-surface-canvas);
+  }
+}
+
+// 减少动效偏好下无影响（这不是动画），但强制色模式下要放弃模糊：
+// 高对比度场景里模糊会让前景文字反而难读
+@media (forced-colors: active) {
+  .ak-backdrop {
+    backdrop-filter: none;
+    background: Canvas;
+  }
+}

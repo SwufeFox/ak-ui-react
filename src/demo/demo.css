@@ -508,3 +508,72 @@ body {
     gap: var(--ak-space-2, 0.5rem);
   }
 }
+
+
+/* 焦距与底图演示区 */
+.demo-surface-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--ak-space-4, 1rem);
+  margin-top: var(--ak-space-4, 1rem);
+}
+
+.demo-surface {
+  position: relative;
+  min-height: 9rem;
+  padding: var(--ak-space-3, 0.75rem);
+  background: var(--ak-surface-sunken);
+  border: 1px solid var(--ak-border);
+}
+
+.demo-surface--stack {
+  display: grid;
+  gap: var(--ak-space-2, 0.5rem);
+  align-content: start;
+}
+
+.demo-surface p {
+  margin: var(--ak-space-2, 0.5rem) 0 0;
+  color: var(--ak-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* 马赛克盖在一段文字上，表示「这段数据不稳定」 */
+.demo-mosaic-host {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 3.5rem;
+  background: var(--ak-surface-sunken-2);
+  color: var(--ak-text-primary);
+  font-family: var(--ak-font-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+/* 毛玻璃演示：下层文字被上层玻璃盖住 */
+.demo-backdrop-host {
+  position: relative;
+  min-height: 4.5rem;
+  display: grid;
+  place-items: center;
+  background: var(--ak-surface-canvas);
+}
+
+.demo-backdrop-under {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ak-text-secondary);
+  font-family: var(--ak-font-mono);
+  font-size: 0.8rem;
+}
+
+.demo-backdrop-over {
+  position: relative;
+  padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
+  color: var(--ak-text-inverse);
+  font-size: 0.82rem;
+}

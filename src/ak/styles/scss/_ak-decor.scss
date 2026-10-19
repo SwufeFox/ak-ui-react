@@ -491,3 +491,92 @@ a.ak-chevrons:hover::after {
     --ak-motion-dur: 0ms;
   }
 }
+
+
+// ── 焦距与底图处理（文章原则三 / 五）──────────────────────────────────
+// 上游 SCSS 里这三个词零命中 —— 是本库按《明日方舟 UI 拆解》新增的一层。
+// 三者都遵守与 grid / stripe / halftone / scanline 相同的翻转方式。
+
+// 暗角（vignette / 热点效应）：四周内投影，把视线压向画面中心。
+// 文章里讲的是章节选择页「一圈内投影布于页面周围」——那样能突出中心卡片。
+// 用 ::after 而不是给自己加 box-shadow：不占元素自身的阴影槽，
+// 宿主仍能用 box-shadow 做投影/辉光。
+.ak-vignette {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    // ⚠️ 这里原本写的是 box-shadow: inset 0 0 <size> <size> <color>，
+    // 而 size 默认值是 22%（百分比）。**box-shadow 的模糊/扩散半径只接受长度，
+    // 不接受百分比** —— 整条声明会被静默丢弃（实测 computed 为 none）。
+    // 改用 radial-gradient：百分比合法，而且更贴合文章所说的「热点效应」
+    // （影像中心明度高于四周，而不是一圈矩形内投影）。
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      transparent var(--ak-vignette-size),
+      var(--ak-vignette-color) 100%
+    );
+  }
+
+  // 内容要压在暗角之上，否则会被那层盖住
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+// 噪点（grain）：比半点网更细、密度更低的一层。
+// 文章说网点纸「用在基础组件上可以使留白不显得单薄」——grain 就是这个用途的更细版本。
+// 用两层错位的 repeating-conic 叠加，避免看出规则网格。
+.ak-grain {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.6;
+    background-image:
+      repeating-conic-gradient(
+        var(--ak-grain-color) 0% 25%,
+        transparent 0% 50%
+      );
+    background-size: var(--ak-grain-size) var(--ak-grain-size);
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// 失同步马赛克（文章原则五）：局部「连接不稳定」的暗示，来自《刺客信条》的梗，
+// 方舟在干员报道 / 剿灭作战背景里用过。上游零实现，本库新做。
+// 做法：一个可定位的像素块层，宿主放哪儿就马赛克到哪儿。
+.ak-mosaic {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(90deg, var(--ak-mosaic-color, rgba(255, 255, 255, 0.16)) 0 50%, transparent 50% 100%),
+      repeating-linear-gradient(0deg, var(--ak-mosaic-color, rgba(255, 255, 255, 0.16)) 0 50%, transparent 50% 100%);
+    background-size: var(--ak-mosaic-size) var(--ak-mosaic-size);
+    opacity: 0.7;
+  }
+
+  // 让被盖住的内容「透过马赛克」还看得出轮廓：叠一层自身模糊
+  &--blur > * {
+    filter: blur(1.5px);
+  }
+}

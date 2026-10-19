@@ -3,6 +3,7 @@ import {
   AkAssetLoader,
   AkAttr,
   AkAttrs,
+  AkBackdrop,
   AkBilingual,
   AkBlueBand,
   AkBrackets,
@@ -25,10 +26,12 @@ import {
   AkEn,
   AkGauge,
   AkGlyphBox,
+  AkGrain,
   AkGridBackdrop,
   AkHalftone,
   AkInputNumber,
   AkInverse,
+  AkMosaic,
   AkKv,
   AkKvItem,
   AkMediaGallery,
@@ -59,6 +62,7 @@ import {
   AkTabs,
   AkTag,
   AkTrust,
+  AkVignette,
   AkWatermark,
 } from '../ak'
 import type { AkSkillLevel, GalleryItem } from '../ak'
@@ -788,6 +792,39 @@ function ReferenceView() {
               <AkInverse style={{ padding: '0.375rem 0.75rem' }}>{t('common.skewRight')}</AkInverse>
             </AkSkew>
           </div>
+
+          {/* 焦距与底图处理（文章原则二/三/五）—— 上游 SCSS 零实现，本库增补 */}
+          <div className="demo-surface-row">
+            <AkVignette className="demo-surface">
+              <AkCodeId>AkVignette</AkCodeId>
+              <p>{t('ref.decor.vignetteHint')}</p>
+            </AkVignette>
+
+            <AkGrain className="demo-surface">
+              <AkCodeId>AkGrain</AkCodeId>
+              <p>{t('ref.decor.grainHint')}</p>
+            </AkGrain>
+
+            <div className="demo-surface demo-surface--stack">
+              <AkCodeId>AkMosaic</AkCodeId>
+              <div className="demo-mosaic-host">
+                <AkMosaic style={{ position: 'absolute', inset: 0 }} />
+                <span>SECURE /// 04</span>
+              </div>
+              <p>{t('ref.decor.mosaicHint')}</p>
+            </div>
+
+            <div className="demo-surface demo-surface--stack">
+              <AkCodeId>AkBackdrop</AkCodeId>
+              <div className="demo-backdrop-host">
+                <span className="demo-backdrop-under">{t('ref.decor.backdropUnder')}</span>
+                <AkBackdrop className="demo-backdrop-over" strength="light">
+                  <span>{t('ref.decor.backdropOver')}</span>
+                </AkBackdrop>
+              </div>
+            </div>
+          </div>
+
           <div className="demo-row" style={{ alignItems: 'baseline' }}>
             <AkOverline>{t('common.overline')}</AkOverline>
             <AkNum>1,234,567.89</AkNum>

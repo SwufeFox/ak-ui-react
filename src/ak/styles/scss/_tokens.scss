@@ -92,6 +92,18 @@
   // 默认暗色主题上完全看不见，所以这里做成随主题翻转的令牌。
   --ak-scanline-color: rgba(255, 255, 255, 0.035);
   --ak-glyph-filter: none;
+
+  // 焦距与底图处理（文章原则三 / 五）—— 上游 SCSS 零实现，是本库按文章新增的一层。
+  // 与 grid / stripe / halftone / scanline 同一套翻转方式：暗色白系、亮色黑系。
+  //   vignette —— 四周内投影（热点效应），把注意力推向画面中心
+  //   grain    —— 噪点，让大面积留白不单薄；比半点网更细、密度更低
+  --ak-vignette-color: rgba(0, 0, 0, 0.55);
+  // 中心保持原色的比例；之后的区域渐暗到 --ak-vignette-color
+  --ak-vignette-size: 55%;
+  --ak-grain-color: rgba(255, 255, 255, 0.05);
+  --ak-grain-size: 3px;
+  // 失同步马赛克（文章原则五的「局部不稳定」）—— 上游零实现
+  --ak-mosaic-size: 5px;
   --ak-trust-icon: none;
   --ak-trust-content: none;
 
@@ -168,4 +180,8 @@
   --ak-halftone-color: rgba(0, 0, 0, 0.14);
   --ak-scanline-color: rgba(0, 0, 0, 0.05);
   --ak-glyph-filter: invert(1);
+
+  // 同上，亮底翻成黑系
+  --ak-vignette-color: rgba(0, 0, 0, 0.32);
+  --ak-grain-color: rgba(0, 0, 0, 0.05);
 }

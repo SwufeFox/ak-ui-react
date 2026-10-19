@@ -25,6 +25,19 @@ export {
   type AkDepthProps,
   type AkDepthVariant,
 } from './ui/effects/AkDepth'
+// 焦距与底图处理：暗角 / 噪点 / 失同步马赛克 / 毛玻璃
+// —— 文章原则二/三/五，上游 SCSS 零实现（毛玻璃全库仅 1 处），故为本库增补
+export {
+  AkBackdrop,
+  AkGrain,
+  AkMosaic,
+  AkVignette,
+  type AkBackdropProps,
+  type AkBackdropStrength,
+  type AkGrainProps,
+  type AkMosaicProps,
+  type AkVignetteProps,
+} from './ui/decor/AkSurfaces'
 // 上游 .ak-fx-* 特效层（真正的 ak-ui 动效语言：呼吸辉光 / 扩散轮廓环 / ±10° 斜切）
 export {
   AkGlow,
