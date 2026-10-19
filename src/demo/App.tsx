@@ -35,6 +35,9 @@ import {
   AkCardTitle,
   AkChevrons,
   AkCodeId,
+  AkCommand,
+  AkCommandGrid,
+  AkCommandGroup,
   AkCorner,
   AkCountUp,
   AkCut,
@@ -476,6 +479,7 @@ function ReferenceView() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedCommand, setSelectedCommand] = useState('deploy')
 
   const segmentOptions = [
     { label: t('common.all'), value: 'all' },
@@ -1088,6 +1092,86 @@ function ReferenceView() {
             </div>
           </div>
         </Block>
+
+      <Block eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')}>
+        <div className="demo-stack">
+          <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
+            <AkCommand
+              label={t('common.commandDeploy')}
+              meta="OPERATOR / 01"
+              watermark={<span aria-hidden="true">01</span>}
+              badge={t('common.commandLive')}
+              current={selectedCommand === 'deploy' ? t('common.commandSelected') : undefined}
+              tone="paper"
+              pressed={selectedCommand === 'deploy'}
+              onClick={() => setSelectedCommand('deploy')}
+              aria-label={t('common.commandDeploy')}
+              style={{ minHeight: '7.5rem' }}
+            />
+            <AkCommand
+              label={t('common.commandWithdraw')}
+              meta="OPERATOR / 02"
+              watermark={<span aria-hidden="true">02</span>}
+              tone="dark"
+              pressed={selectedCommand === 'withdraw'}
+              onClick={() => setSelectedCommand('withdraw')}
+              style={{ minHeight: '7.5rem' }}
+            />
+            <AkCommand
+              label={t('common.commandSkill')}
+              meta="SP / 24"
+              watermark={<span aria-hidden="true">SP</span>}
+              tone="cyan"
+              layout="vertical"
+              pressed={selectedCommand === 'skill'}
+              onClick={() => setSelectedCommand('skill')}
+              style={{ minHeight: '7.5rem' }}
+            />
+          </AkCommandGrid>
+
+          <AkCommandGroup variant="recruitment" label={t('common.commandRecruit')}>
+            <AkCommand
+              label={t('common.commandSlot')}
+              meta="TAG / 01"
+              tone="accent"
+              layout="split"
+              pressed={selectedCommand === 'slot-1'}
+              onClick={() => setSelectedCommand('slot-1')}
+              style={{ minHeight: '5rem' }}
+            />
+            <AkCommand
+              label={t('common.commandSlot')}
+              meta="TAG / 02"
+              tone="accent"
+              layout="split"
+              pressed={selectedCommand === 'slot-2'}
+              onClick={() => setSelectedCommand('slot-2')}
+              style={{ minHeight: '5rem' }}
+            />
+          </AkCommandGroup>
+
+          <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
+            <AkCommand
+              label="OPERATION"
+              current="01-07"
+              meta="STORY / CHAPTER 01"
+              tone="paper"
+              layout="wide"
+              pressed={selectedCommand === 'operation'}
+              onClick={() => setSelectedCommand('operation')}
+              style={{ minHeight: '7.5rem' }}
+            />
+            <AkCommand
+              label="ARCHIVE"
+              meta="RECORD / 08"
+              tone="muted"
+              pressed={selectedCommand === 'archive'}
+              onClick={() => setSelectedCommand('archive')}
+              style={{ minHeight: '7.5rem' }}
+            />
+          </AkCommandGrid>
+        </div>
+      </Block>
     </main>
   )
 }

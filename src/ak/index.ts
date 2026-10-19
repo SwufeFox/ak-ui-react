@@ -195,3 +195,15 @@ export {
   type AkScrollAxis,
   type AkThumbnailProps,
 } from './ui/media/AkMediaObjects'
+
+// 上游只有样式、没有组件的那批（纯包装）
+export {
+  AkCommand,
+  AkCommandGrid,
+  AkCommandGroup,
+  type AkCommandGridProps,
+  type AkCommandGroupProps,
+  type AkCommandLayout,
+  type AkCommandProps,
+  type AkCommandTone,
+} from './ui/command/AkCommand'
