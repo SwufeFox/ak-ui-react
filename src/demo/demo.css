@@ -577,3 +577,6 @@ body {
   color: var(--ak-text-inverse);
   font-size: 0.82rem;
 }
+
+.demo-menu-target { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 4rem; padding: 1rem; border: 1px dashed #626a70; color: #bdc4c9; font: 0.78rem var(--ak-font-mono, monospace); cursor: context-menu; }
+.demo-menu-target span { color: var(--ak-signal-action); font-weight: 700; }

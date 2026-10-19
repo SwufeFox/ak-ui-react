@@ -23,6 +23,7 @@ import {
   AkInput,
   AkPagination,
   AkPopover,
+  DropdownMenu, ContextMenu, Menubar, Toolbar, Collapsible,
   AkSelect,
   AkStatusGroup,
   AkTagGroup,
@@ -510,6 +511,33 @@ function ReferenceView() {
             {t('common.block')}
           </AkButton>
           <AkButton disabled>{t('common.disabled')}</AkButton>
+        </div>
+      </Block>
+
+      <Block eyebrow="12 / MENU" title={t('ref.menu.title')} note={t('ref.menu.note')}>
+        <div className="demo-stack">
+          <div className="demo-row">
+            <DropdownMenu label={t('ref.menu.open')} items={[
+              { label: t('ref.menu.inspect'), onSelect: () => setSelectedCommand('inspect') },
+              { label: t('ref.menu.deploy'), onSelect: () => setSelectedCommand('deploy') },
+              { label: t('ref.menu.disabled'), disabled: true },
+              { label: t('ref.menu.cancel'), destructive: true, onSelect: () => setSelectedCommand('cancel') },
+            ]} />
+            <span className="demo-note">{t('ref.menu.context')}</span>
+          </div>
+          <Menubar aria-label={t('ref.menu.scope')}>
+            {(['file', 'edit', 'view'] as const).map((item) => <button key={item} type="button" role="menuitem" onClick={() => setSelectedCommand(item)}>{t(`ref.menu.${item}`)}</button>)}
+          </Menubar>
+          <Toolbar label={t('ref.menu.scope')}>
+            <AkButton variant="outline" onClick={() => setCount((value) => value + 1)}>{t('ref.menu.bold')}</AkButton>
+            <AkButton variant="outline" onClick={() => setSelectedCommand('archive')}>{t('ref.menu.archive')}</AkButton>
+          </Toolbar>
+          <ContextMenu items={[{ label: t('ref.menu.inspect'), onSelect: () => setSelectedCommand('inspect') }, { label: t('ref.menu.archive'), onSelect: () => setSelectedCommand('archive') }]}>
+            <div className="demo-menu-target">{t('ref.menu.context')} <span>{selectedCommand.toUpperCase()}</span></div>
+          </ContextMenu>
+          <Collapsible title={t('ref.menu.disclosure')}>
+            <p>{t('ref.menu.body')}</p>
+          </Collapsible>
         </div>
       </Block>
 

@@ -156,6 +156,7 @@ export {
 // 上游 SCSS 早已写好、但一直没有组件出口的那批（纯包装，无新样式）
 export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup } from './ui/group/AkGroups'
 export { AkPopover } from './ui/popover/AkPopover'
+export { DropdownMenu, ContextMenu, Menubar, Toolbar, Collapsible, MenuSeparator, MenuGroup, type MenuItem, type DropdownMenuProps, type ContextMenuProps, type MenubarProps, type ToolbarProps, type CollapsibleProps } from './ui/menu/AkMenu'
 export { AkPagination } from './ui/pagination/AkPagination'
 export { AkChoice, AkField, AkFieldLabel, AkFormStack, AkInput, AkSelect, AkTextarea } from './ui/field/AkField'
 
