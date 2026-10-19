@@ -1,0 +1,188 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 头像 / 缩略图 / 横滑区（media objects）
+//
+//  ⚠️ 上游没有 avatar / thumbnail / scroll-area 的独立规则
+//  （只有 .ak-r-avatar —— 那是稀有度色轨垫在头像下的那一层，本层会复用它）。
+//  所以这一层是本库补的，但同样只用既有语汇：
+//    · 直角、发丝边框、无圆角        → 全库一致的几何
+//    · 切角                          → 复用 --ak-cut（与 dialog/tag 同一旋钮）
+//    · 图案底                        → 复用 .ak-bg-diag 的斜线令牌
+//    · 拉丁首字母                    → 同 .ak-en 的排版
+//  ⚠️ 刻意**不做圆形头像**：本库的几何语言是直角（见 decor 层注释
+//     「不做圆角，不做辉光」）。圆头像是通用后台语汇，不属于这里。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 头像 ────────────────────────────────────────────────────────────
+
+.ak-avatar {
+  --ak-avatar-size: 2.5rem;
+
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--ak-avatar-size);
+  height: var(--ak-avatar-size);
+  // 直角，不是圆形 —— 与全库几何一致
+  border: 1px solid var(--ak-border-strong);
+  background: var(--ak-surface-sunken-2);
+  color: var(--ak-text-secondary);
+  font-family: var(--ak-font-label);
+  font-weight: 700;
+  line-height: 1;
+  overflow: hidden;
+  user-select: none;
+}
+
+.ak-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+// 首字母回退：拉丁大写，字号随尺寸缩放宽高各半
+.ak-avatar__fallback {
+  font-size: calc(var(--ak-avatar-size) * 0.4);
+  letter-spacing: var(--ak-tracking-caps);
+  text-transform: uppercase;
+}
+
+// 尺寸档
+.ak-avatar--sm { --ak-avatar-size: 1.75rem; }
+.ak-avatar--lg { --ak-avatar-size: 3.5rem; }
+.ak-avatar--xl { --ak-avatar-size: 5rem; }
+
+// 切角变体：复用全局 --ak-cut
+.ak-avatar--cut {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ak-cut, 0.5rem)) 0,
+    100% var(--ak-cut, 0.5rem),
+    100% 100%,
+    0 100%
+  );
+}
+
+// 信号色描边（在线/告警）—— 只在需要时用，不加辉光
+.ak-avatar--accent {
+  border-color: var(--ak-signal-action);
+}
+
+.ak-avatar--muted {
+  opacity: 0.55;
+}
+
+// 叠放组（同 .ak-tag-group 的 flex 思路，但负外边距形成叠压）
+.ak-avatar-group {
+  display: inline-flex;
+  align-items: center;
+
+  .ak-avatar + .ak-avatar {
+    margin-left: calc(var(--ak-avatar-size, 2.5rem) * -0.3);
+  }
+
+  // 后面的压前面的，顺序与视觉层级一致
+  .ak-avatar {
+    z-index: 1;
+    background: var(--ak-surface-sunken);
+  }
+}
+
+// ── 缩略图 ──────────────────────────────────────────────────────────
+
+.ak-thumbnail {
+  --ak-thumb-size: 4rem;
+
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--ak-thumb-size);
+  height: var(--ak-thumb-size);
+  border: 1px solid var(--ak-border);
+  // 缺图时的底：复用斜纹令牌，让它明显是「占位」而不是「图」
+  background-image: repeating-linear-gradient(-45deg, transparent 0 6px, var(--ak-grid-color) 6px 7px);
+  background-color: var(--ak-surface-sunken-2);
+  color: var(--ak-text-secondary);
+  overflow: hidden;
+}
+
+.ak-thumbnail__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ak-thumbnail--cut {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ak-cut, 0.75rem)) 0,
+    100% var(--ak-cut, 0.75rem),
+    100% 100%,
+    0 100%
+  );
+}
+
+.ak-thumbnail--wide { --ak-thumb-size: 6rem; }
+.ak-thumbnail--lg { --ak-thumb-size: 5rem; }
+
+// 角标位：复用 .ak-r-chip 的观感（左下角编号那种）
+.ak-thumbnail__badge {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  padding: 0.1rem 0.35rem;
+  background: var(--ak-surface-inverse);
+  color: var(--ak-text-inverse);
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+// ── 横滑区 ──────────────────────────────────────────────────────────
+
+.ak-scroll-area {
+  overflow: auto;
+  // 主题化滚动条（Firefox 走这两个属性）
+  scrollbar-color: var(--ak-border-strong) transparent;
+  scrollbar-width: thin;
+  // 让滚动更接近原生手感，不做自绘滚动条 —— 自绘很容易做差且要接管键盘
+  overscroll-behavior: contain;
+}
+
+// WebKit 下再细一点；只改外观，不改层
+.ak-scroll-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.ak-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ak-scroll-area::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background-color: var(--ak-border-strong);
+}
+
+.ak-scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ak-text-secondary);
+}
+
+// 只在需要时给一个最大高，避免内容把容器撑爆
+.ak-scroll-area--y { max-height: var(--ak-scroll-max, 20rem); }
+.ak-scroll-area--x { overflow-y: hidden; }
+.ak-scroll-area--both { max-height: var(--ak-scroll-max, 20rem); }
+
+@media (forced-colors: active) {
+  .ak-avatar,
+  .ak-thumbnail {
+    border: 1px solid CanvasText;
+  }
+}

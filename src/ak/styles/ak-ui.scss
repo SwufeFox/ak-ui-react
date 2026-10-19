@@ -41,3 +41,7 @@
 @use "scss/ak-depth";
 // 骨架占位（上游无此层，本库补的形状）
 @use "scss/ak-skeleton";
+// 上游没有的几层：表格 / 媒体对象（头像、缩略图、横滑区）/ 面包屑
+@use "scss/ak-table";
+@use "scss/ak-media-object";
+@use "scss/ak-breadcrumb";

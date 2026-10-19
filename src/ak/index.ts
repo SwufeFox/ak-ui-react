@@ -171,3 +171,27 @@ export {
   type AkSkeletonProps,
   type AkSpinnerProps,
 } from './ui/data/AkData'
+
+// 上游没有、本库补的那批（用既有语汇，非新造视觉）
+export {
+  AkTable,
+  type AkTableColumn,
+  type AkTableProps,
+  type AkTableRow,
+  type AkTableSortDirection,
+} from './ui/table/AkTable'
+export {
+  AkAvatar,
+  AkAvatarGroup,
+  AkBreadcrumb,
+  AkScrollArea,
+  AkThumbnail,
+  type AkAvatarGroupProps,
+  type AkAvatarProps,
+  type AkAvatarSize,
+  type AkBreadcrumbItem,
+  type AkBreadcrumbProps,
+  type AkScrollAreaProps,
+  type AkScrollAxis,
+  type AkThumbnailProps,
+} from './ui/media/AkMediaObjects'

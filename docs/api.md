@@ -8,27 +8,28 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 
 ## Index
 
-- [`AkAssetLoader`](#akassetloader) · [`AkAttr`](#akattr) · [`AkAttrs`](#akattrs) · [`AkBackdrop`](#akbackdrop)
-- [`AkBilingual`](#akbilingual) · [`AkBlueBand`](#akblueband) · [`AkBrackets`](#akbrackets) · [`AkButton`](#akbutton)
-- [`AkButtonGroup`](#akbuttongroup) · [`AkCard`](#akcard) · [`AkCardContent`](#akcardcontent) · [`AkCardDescription`](#akcarddescription)
-- [`AkCardFooter`](#akcardfooter) · [`AkCardHeader`](#akcardheader) · [`AkCardTitle`](#akcardtitle) · [`AkChevrons`](#akchevrons)
-- [`AkChoice`](#akchoice) · [`AkCodeId`](#akcodeid) · [`AkCorner`](#akcorner) · [`AkCounter`](#akcounter)
-- [`AkCut`](#akcut) · [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDialog`](#akdialog)
-- [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider) · [`AkElite`](#akelite) · [`AkEn`](#aken)
-- [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge)
-- [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain)
-- [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber)
-- [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem) · [`AkLevel`](#aklevel)
-- [`AkMediaGallery`](#akmediagallery) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice)
-- [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination)
-- [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
-- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
-- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
+- [`AkAssetLoader`](#akassetloader) · [`AkAttr`](#akattr) · [`AkAttrs`](#akattrs) · [`AkAvatar`](#akavatar)
+- [`AkAvatarGroup`](#akavatargroup) · [`AkBackdrop`](#akbackdrop) · [`AkBilingual`](#akbilingual) · [`AkBlueBand`](#akblueband)
+- [`AkBrackets`](#akbrackets) · [`AkBreadcrumb`](#akbreadcrumb) · [`AkButton`](#akbutton) · [`AkButtonGroup`](#akbuttongroup)
+- [`AkCard`](#akcard) · [`AkCardContent`](#akcardcontent) · [`AkCardDescription`](#akcarddescription) · [`AkCardFooter`](#akcardfooter)
+- [`AkCardHeader`](#akcardheader) · [`AkCardTitle`](#akcardtitle) · [`AkChevrons`](#akchevrons) · [`AkChoice`](#akchoice)
+- [`AkCodeId`](#akcodeid) · [`AkCorner`](#akcorner) · [`AkCounter`](#akcounter) · [`AkCut`](#akcut)
+- [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDialog`](#akdialog) · [`AkDisplay`](#akdisplay)
+- [`AkDivider`](#akdivider) · [`AkElite`](#akelite) · [`AkEn`](#aken) · [`AkField`](#akfield)
+- [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge) · [`AkGlow`](#akglow)
+- [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop)
+- [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse)
+- [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem) · [`AkLevel`](#aklevel) · [`AkMediaGallery`](#akmediagallery)
+- [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice) · [`AkNum`](#aknum)
+- [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield)
+- [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential)
+- [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress) · [`AkRarity`](#akrarity)
+- [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope) · [`AkScrollArea`](#akscrollarea)
 - [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
 - [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
-- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTabs`](#aktabs)
-- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkTrust`](#aktrust)
-- [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable)
+- [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea)
+- [`AkThumbnail`](#akthumbnail) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -63,6 +64,28 @@ Extends `DivProps`.
 | --- | --- | --- | --- |
 | `compact` | `boolean` | yes | 压成「标签 \| 值」两端对齐的一行行，而不是竖排大数字。 |
 
+## AkAvatar
+
+Extends `Omit<HTMLAttributes<HTMLSpanElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | yes | 图片地址。给了就渲染 `<img>`，否则用 `fallback`。 |
+| `alt` | `string` | yes | 图片替代文字，同时作为无障碍名。 |
+| `fallback` | `ReactNode` | yes | 无图时的回退内容（通常是一个拉丁首字母）。 |
+| `size` | `AkAvatarSize` | yes | — |
+| `cut` | `boolean` | yes | 右上角切角（复用全局 `--ak-cut`）。 |
+| `accent` | `boolean` | yes | 信号色描边（在线/告警那种）。 |
+| `muted` | `boolean` | yes | 压淡（离线/失效）。 |
+
+## AkAvatarGroup
+
+Extends `HTMLAttributes<HTMLSpanElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | yes | — |
+
 ## AkBackdrop
 
 Extends `HTMLAttributes<HTMLElement>`.
@@ -96,6 +119,15 @@ Extends `SlotProps<HTMLSpanElement>`.
 ## AkBrackets
 
 _(no props of its own)_
+
+## AkBreadcrumb
+
+Extends `Omit<HTMLAttributes<HTMLElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `items` | `AkBreadcrumbItem[]` | no | — |
+| `ariaLabel` | `string` | yes | 读屏名。 |
 
 ## AkButton
 
@@ -646,6 +678,16 @@ Extends `DivProps`.
 | --- | --- | --- | --- |
 | `level` | `AkRarityLevel` | no | 给后代开启 `--ak-r` / `--ak-r-text` 色轨。 |
 
+## AkScrollArea
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `axis` | `AkScrollAxis` | yes | 哪个方向可滚。默认 `y`。 |
+| `maxHeight` | `string` | yes | `y` / `both` 时的最大高度，默认 20rem（令牌 `--ak-scroll-max`）。 |
+| `children` | `ReactNode` | yes | — |
+
 ## AkSegmented
 
 | Prop | Type | Optional | Description |
@@ -756,6 +798,18 @@ Extends `DivProps`.
 | `bar` | `boolean` | yes | 条纹高度，默认 6px（等同上游 .ak-stripe-bar）。 |
 | `variant` | `AkStripesVariant` | yes | 斜纹类型：default / strong / warning / danger / hazard。 |
 
+## AkTable
+
+Extends `Omit<HTMLAttributes<HTMLTableElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `columns` | `AkTableColumn[]` | no | — |
+| `rows` | `AkTableRow[]` | no | — |
+| `footer` | `Record<string, ReactNode>` | yes | 表尾汇总行（与 columns 对齐）。 |
+| `emptyLabel` | `ReactNode` | yes | 无数据时的占位文字。 |
+| `scrollable` | `boolean` | yes | 外层是否套一层横滑容器（列多时建议开）。 |
+
 ## AkTabs
 
 | Prop | Type | Optional | Description |
@@ -790,6 +844,19 @@ Extends `TextareaHTMLAttributes<HTMLTextAreaElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `label` | `string` | yes | — |
+
+## AkThumbnail
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | yes | — |
+| `alt` | `string` | yes | — |
+| `fallback` | `ReactNode` | yes | 无图时显示的内容。不传则只有斜纹底（明显是占位）。 |
+| `badge` | `ReactNode` | yes | 左下角角标（编号那种）。 |
+| `cut` | `boolean` | yes | 右上角切角。 |
+| `size` | `'default' \| 'wide' \| 'lg'` | yes | — |
 
 ## AkTrust
 

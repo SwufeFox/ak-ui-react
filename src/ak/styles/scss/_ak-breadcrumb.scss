@@ -1,0 +1,58 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 面包屑（breadcrumb）
+//
+//  ⚠️ 上游没有 breadcrumb 规则（.ak-nav 是站点导航，不是层级路径）。本层是本库补的。
+//  语汇全部取自既有规则：
+//    · 分隔符用拉丁双箭头 »   → 与 .ak-chevrons 同一个字符（方舟的动作标记）
+//    · 当前项不做高亮色块      → 与 .ak-table__head 的表头一样只用 muted 区分
+//    · 字号与字距              → 同 .ak-overline / .ak-attr__label
+//  刻意**不用「/」或「>」** —— 「»」是本库已经在用的路径/动作符号（chevrons）。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-overline);
+  letter-spacing: var(--ak-tracking-overline);
+  text-transform: uppercase;
+}
+
+.ak-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  // 除第一项外，前面都加一个拉丁双箭头
+  + .ak-breadcrumb__item::before {
+    content: "»";
+    color: var(--ak-text-secondary);
+    opacity: 0.7;
+  }
+}
+
+.ak-breadcrumb__link {
+  color: var(--ak-text-secondary);
+  text-decoration: none;
+  transition: color var(--ak-motion-fast) var(--ak-ease-standard);
+
+  &:hover {
+    color: var(--ak-text-primary);
+  }
+
+  &:focus-visible {
+    outline: var(--ak-focus-width) solid var(--ak-focus-color);
+    outline-offset: var(--ak-focus-offset);
+  }
+}
+
+// 当前页：不是链接，颜色提到正文级（与表头/标签相反的方向，表示「你在这」）
+.ak-breadcrumb__current {
+  color: var(--ak-text-primary);
+  font-weight: 700;
+}

@@ -73,3 +73,21 @@ export { AkChoice, AkField, AkFieldLabel, AkFormStack, AkInput, AkSelect, AkText
 // 上游 SCSS 已有、但一直没有组件出口的第二批
 export { AkDialog } from './dialog/AkDialog'
 export { AkCounter, AkLevel, AkSkeleton, AkSpinner } from './data/AkData'
+
+// 上游没有、本库补的那批（用既有语汇，非新造视觉）
+export { AkTable, type AkTableColumn, type AkTableProps, type AkTableRow, type AkTableSortDirection } from './table/AkTable'
+export {
+  AkAvatar,
+  AkAvatarGroup,
+  AkBreadcrumb,
+  AkScrollArea,
+  AkThumbnail,
+  type AkAvatarGroupProps,
+  type AkAvatarProps,
+  type AkAvatarSize,
+  type AkBreadcrumbItem,
+  type AkBreadcrumbProps,
+  type AkScrollAreaProps,
+  type AkScrollAxis,
+  type AkThumbnailProps,
+} from './media/AkMediaObjects'

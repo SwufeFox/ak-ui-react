@@ -1,0 +1,142 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 数据表（table）
+//
+//  ⚠️ 上游**没有** `_ak-table.scss`（全库零 table 类）。这一层是本库补的。
+//  但补的是**排布**，不是新的视觉语汇 —— 每条几何都取自本库既有的规则：
+//    · 直角、发丝分隔线        → 同 .ak-kv（border-top: 1px + 每行 border-bottom）
+//    · 表头大写拉丁字 + 加宽字距 → 同 .ak-overline / .ak-attr__label
+//    · 数字等宽对齐            → 同 .ak-num（tabular-nums）
+//    · 选中行左缘信号色        → 同 .ak-pot.is-on / .ak-r-bar 的做法
+//    · 行悬停                  → 同 .ak-card:hover 的极轻提亮
+//  颜色一律走令牌，所以亮/暗两套主题自动跟随，不需要为亮色另写一遍。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid var(--ak-border);
+  font-family: var(--ak-font-sans);
+  font-size: var(--ak-fs-sm);
+  text-align: start;
+}
+
+// 表头：大写拉丁标签，与 .ak-overline / .ak-attr__label 同一套排版
+.ak-table__head {
+  th {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--ak-border);
+    color: var(--ak-text-secondary);
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-overline);
+    font-weight: 700;
+    letter-spacing: var(--ak-tracking-overline);
+    line-height: 1.2;
+    text-align: start;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  // 可排序的表头：整格可点，箭头用伪元素，不占额外列宽
+  th[aria-sort] {
+    cursor: pointer;
+    user-select: none;
+
+    &::after {
+      content: "↕";
+      display: inline-block;
+      margin-left: 0.35em;
+      opacity: 0.45;
+    }
+
+    &[aria-sort="ascending"]::after {
+      content: "↑";
+      opacity: 1;
+      color: var(--ak-signal-info);
+    }
+
+    &[aria-sort="descending"]::after {
+      content: "↓";
+      opacity: 1;
+      color: var(--ak-signal-info);
+    }
+
+    &:hover {
+      color: var(--ak-text-primary);
+    }
+  }
+}
+
+.ak-table__body {
+  td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--ak-border-subtle);
+    color: var(--ak-text-primary);
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: color-mix(in srgb, var(--ak-text-primary) 4%, transparent);
+  }
+}
+
+// 数字列：等宽数位右对齐（同 .ak-num 的意图，但表格里要右对齐才好比大小）
+// ⚠️ 必须用复合选择器：`.ak-table__body td` 是 (0,1,1)，而裸的 `.ak-table__cell--num`
+//    只有 (0,1,0) —— 会被前者压掉，text-align 静默失效（实测 computed=start）。
+.ak-table__head th.ak-table__cell--num,
+.ak-table__body td.ak-table__cell--num,
+.ak-table__foot td.ak-table__cell--num {
+  font-family: var(--ak-font-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: end;
+}
+
+// 选中行：左缘信号色（与 .ak-pot.is-on 的 3px 顶条同一手法，换成左缘）
+.ak-table__row--selected {
+  td:first-child {
+    box-shadow: inset var(--ak-bar-w) 0 0 var(--ak-signal-info);
+  }
+
+  td {
+    background: color-mix(in srgb, var(--ak-signal-info) 7%, transparent);
+  }
+}
+
+// 行禁用/失效
+.ak-table__row--muted td {
+  opacity: 0.5;
+}
+
+// 表尾（汇总行）
+.ak-table__foot {
+  td {
+    padding: 0.55rem 0.75rem;
+    border-top: 1px solid var(--ak-border);
+    color: var(--ak-text-secondary);
+    font-weight: 700;
+  }
+
+  .ak-table__cell--num {
+    color: var(--ak-text-primary);
+  }
+}
+
+// 没数据时占位
+.ak-table__empty {
+  padding: 1.5rem 0.75rem;
+  color: var(--ak-text-secondary);
+  text-align: center;
+}
+
+// 横向溢出时外层横滑（样式表不假设外层是谁，给一个可选的包装类）
+.ak-table-scroll {
+  overflow-x: auto;
+  // 滚动条本身也走主题，避免亮色主题下露出深色槽
+  scrollbar-color: var(--ak-border-strong) transparent;
+}
+
+@media (forced-colors: active) {
+  .ak-table__row--selected td {
+    outline: 1px solid Highlight;
+  }
+}
