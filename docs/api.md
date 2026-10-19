@@ -12,22 +12,23 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkBilingual`](#akbilingual) · [`AkBlueBand`](#akblueband) · [`AkBrackets`](#akbrackets) · [`AkButton`](#akbutton)
 - [`AkButtonGroup`](#akbuttongroup) · [`AkCard`](#akcard) · [`AkCardContent`](#akcardcontent) · [`AkCardDescription`](#akcarddescription)
 - [`AkCardFooter`](#akcardfooter) · [`AkCardHeader`](#akcardheader) · [`AkCardTitle`](#akcardtitle) · [`AkChevrons`](#akchevrons)
-- [`AkChoice`](#akchoice) · [`AkCodeId`](#akcodeid) · [`AkCorner`](#akcorner) · [`AkCut`](#akcut)
-- [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider)
-- [`AkElite`](#akelite) · [`AkEn`](#aken) · [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel)
-- [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph)
-- [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone)
-- [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv)
-- [`AkKvItem`](#akkvitem) · [`AkMediaGallery`](#akmediagallery) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion)
-- [`AkNotice`](#aknotice) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline)
-- [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot)
-- [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel)
-- [`AkProgress`](#akprogress) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip)
-- [`AkRarityScope`](#akrarityscope) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkew`](#akskew)
-- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkStatus`](#akstatus)
-- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTabs`](#aktabs) · [`AkTag`](#aktag)
-- [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
-- [`AkWatermark`](#akwatermark)
+- [`AkChoice`](#akchoice) · [`AkCodeId`](#akcodeid) · [`AkCorner`](#akcorner) · [`AkCounter`](#akcounter)
+- [`AkCut`](#akcut) · [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDialog`](#akdialog)
+- [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider) · [`AkElite`](#akelite) · [`AkEn`](#aken)
+- [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge)
+- [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain)
+- [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber)
+- [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem) · [`AkLevel`](#aklevel)
+- [`AkMediaGallery`](#akmediagallery) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice)
+- [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination)
+- [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
+- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
+- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
+- [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
+- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
+- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTabs`](#aktabs)
+- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkTrust`](#aktrust)
+- [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -181,6 +182,18 @@ Extends `DivProps`.
 | `position` | `AkCornerPosition` | yes | 角标在哪个角：`tl`（默认）或 `tr`。 |
 | `tone` | `AkCornerTone` | yes | 角标色调：`info`（默认）/ `yellow` / `red`。 |
 
+## AkCounter
+
+读数与状态小件。 这一组同样来自「上游 SCSS 早已写好、但没有组件出口」： `.ak-counter` / `.ak-level` / `.ak-loading` / `.ak-loading-track` 在样式表里是完整的 （含动画、旋转、字号层级），只是从没被暴露出来。本文件不加新样式。 注意 `.ak-loading` 是**方舟自己的加载形状**——一个旋转 45° 的方框 + `ak-radio` 动画， 不是通用的圆环 spinner。所以它叫 `AkSpinner` 但外观是上游那套。
+
+Extends `Omit<HTMLAttributes<HTMLSpanElement>, 'prefix'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `prefixIcon` | `ReactNode` | yes | 前置图标节点（`.ak-counter__prefix`）。 |
+| `value` | `ReactNode` | yes | 主数值。 |
+| `suffixIcon` | `ReactNode` | yes | 后置图标节点（`.ak-counter__suffix`），常用于加减按钮。 |
+
 ## AkCut
 
 Extends `DivProps`.
@@ -216,6 +229,23 @@ Extends `HTMLAttributes<HTMLElement>`.
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `depth` | `number` | yes | 该层的深度。控制器据此算位移：`offset × maxRaw × depth`。 上游默认 `maxX: 130` / `maxY: 70`，所以 `depth: 1` 的满偏量就是那个数。 |
 | `children` | `ReactNode` | yes | 子内容。 |
+
+## AkDialog
+
+模态对话框。 上游用**原生 `<dialog>`**（`_ak-dialog.scss` 通篇 `&[open]` 与 `&::backdrop`， 含 `transition-behavior: allow-discrete` + `@starting-style` 的进场过渡）， 所以这里也用 `showModal()` / `close()`，不手写遮罩、焦点陷阱与 Esc —— 浏览器负责置顶层、惰性化背景、Esc 关闭、焦点回归。 上游的几何：右上角切角（`--ak-cut`）、顶部 4px 信号条、`::backdrop` 半透明黑 + 3px 背景模糊。 全部来自样式表，本组件不加新样式。
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | no | 受控开合。 |
+| `onOpenChange` | `(open: boolean) => void` | yes | 开合变化回调。Esc 与点击遮罩关闭时也会触发（原生 dialog 的 cancel/close 事件）。 |
+| `eyebrow` | `ReactNode` | yes | 顶部小标与标题，对应样式表的 `__eyebrow` / `__title`。 |
+| `title` | `ReactNode` | yes | — |
+| `footer` | `ReactNode` | yes | 底部操作区。 |
+| `closeOnBackdrop` | `boolean` | yes | 点遮罩是否关闭。默认 true。 |
+| `disableEscape` | `boolean` | yes | 是否禁用 Esc 关闭。默认 false。 |
+| `children` | `ReactNode` | yes | — |
 
 ## AkDisplay
 
@@ -397,6 +427,16 @@ Extends `HTMLAttributes<HTMLElement>`.
 | --- | --- | --- | --- |
 | `label` | `ReactNode` | no | 键（标签列）。 |
 | `children` | `ReactNode` | yes | 值。 |
+
+## AkLevel
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | yes | 上方的标签文字（`.ak-level__label`，样式表默认值是 `OPERATION`）。 |
+| `children` | `ReactNode` | yes | 主内容，通常是等级数字或关卡代号。 |
+| `prefixIcon` | `ReactNode` | yes | 内容前的图标位（`.ak-level__prefix-icon`）。 |
 
 ## AkMediaGallery
 
@@ -625,6 +665,17 @@ Extends `SelectHTMLAttributes<HTMLSelectElement>`.
 | `label` | `string` | yes | — |
 | `children` | `ReactNode` | yes | — |
 
+## AkSkeleton
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `variant` | `'text' \| 'block' \| 'track'` | yes | 占位形状。`text` 一行高，`block` 一个方块，`track` 用上游的进度轨占位。 |
+| `lines` | `number` | yes | 行数（仅 `text`）。 |
+| `width` | `string` | yes | — |
+| `height` | `string` | yes | — |
+
 ## AkSkew
 
 Extends `HTMLAttributes<HTMLElement>`.
@@ -668,6 +719,15 @@ Extends `Omit<SpanProps, 'children'>`.
 | `icon` | `ReactNode` | yes | 专精图标。 |
 | `bare` | `boolean` | yes | 去掉深色底框，只留图标。 |
 | `label` | `string` | yes | 无障碍名。 |
+
+## AkSpinner
+
+Extends `HTMLAttributes<HTMLSpanElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `color` | `string` | yes | 颜色，喂给 `--ak-loading-color`。 |
+| `label` | `string` | yes | 无障碍名。默认 `Loading`。 |
 
 ## AkStatus
 

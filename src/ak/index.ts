@@ -158,3 +158,16 @@ export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup } from './ui/group/
 export { AkPopover } from './ui/popover/AkPopover'
 export { AkPagination } from './ui/pagination/AkPagination'
 export { AkChoice, AkField, AkFieldLabel, AkFormStack, AkInput, AkSelect, AkTextarea } from './ui/field/AkField'
+
+// 上游 SCSS 已有、但一直没有组件出口的第二批（纯包装）
+export { AkDialog, type AkDialogProps } from './ui/dialog/AkDialog'
+export {
+  AkCounter,
+  AkLevel,
+  AkSkeleton,
+  AkSpinner,
+  type AkCounterProps,
+  type AkLevelProps,
+  type AkSkeletonProps,
+  type AkSpinnerProps,
+} from './ui/data/AkData'

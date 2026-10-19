@@ -39,3 +39,5 @@
 @use "scss/ak-arknights";
 // 景深：补上「控制器 ↔ CSS 消费」之间缺的那根线（两半上游都有，从没接上）
 @use "scss/ak-depth";
+// 骨架占位（上游无此层，本库补的形状）
+@use "scss/ak-skeleton";

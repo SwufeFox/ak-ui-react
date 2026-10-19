@@ -1,0 +1,75 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 骨架占位（skeleton）
+//
+//  ⚠️ 上游**没有**通用 skeleton 样式（`.ak-skeleton*` 全库零命中）。
+//  这一层是本库补的 —— 但补的是**形状**，颜色与节奏全部复用已有令牌，
+//  没有新造一套视觉语汇：
+//    · 底色用 --ak-surface-sunken（已有）
+//    · 动画用与 .ak-loading-track 同一套「扫描」节奏（见 _ak-loading.scss）
+//  只有 `track` 变体是上游真身（.ak-loading-track）。
+// ══════════════════════════════════════════════════════════════════════════
+
+%ak-skeleton-scan {
+  position: relative;
+  overflow: hidden;
+  background: var(--ak-surface-sunken);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--ak-text-primary) 8%, transparent) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: ak-skeleton-scan 1.4s ease-in-out infinite;
+  }
+}
+
+.ak-skeleton-block {
+  @extend %ak-skeleton-scan;
+
+  min-height: 1rem;
+}
+
+.ak-skeleton-text {
+  display: grid;
+  gap: 0.5rem;
+
+  &__line {
+    @extend %ak-skeleton-scan;
+
+    display: block;
+    height: 0.9rem;
+
+    // 末行短一点，像真段落
+    &:last-child:not(:only-child) {
+      width: 62%;
+    }
+  }
+}
+
+@keyframes ak-skeleton-scan {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+// 减少动效：停掉扫描，只留静态底色（骨架本来就是「占位」不是「表演」）
+@media (prefers-reduced-motion: reduce) {
+  .ak-skeleton-block::after,
+  .ak-skeleton-text__line::after {
+    animation: none;
+  }
+}
+
+// 强制色：给实色描边，否则高对比度下骨架与背景分不开
+@media (forced-colors: active) {
+  .ak-skeleton-block,
+  .ak-skeleton-text__line {
+    border: 1px solid CanvasText;
+  }
+}

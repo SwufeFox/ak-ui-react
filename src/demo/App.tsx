@@ -32,6 +32,11 @@ import {
   AkCorner,
   AkCountUp,
   AkCut,
+  AkCounter,
+  AkDialog,
+  AkLevel,
+  AkSkeleton,
+  AkSpinner,
   AkDepth,
   AkDepthLayer,
   AkDisplay,
@@ -464,6 +469,7 @@ function ReferenceView() {
   const [count, setCount] = useState(1280)
   const [menuOpen, setMenuOpen] = useState(false)
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const segmentOptions = [
     { label: t('common.all'), value: 'all' },
@@ -984,6 +990,48 @@ function ReferenceView() {
               <AkChoice variant="switch">{t('common.choiceSwitch')}</AkChoice>
             </div>
           </AkFormStack>
+        </Block>
+
+        <Block eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')}>
+          <div className="demo-stack">
+            <div className="demo-row" style={{ alignItems: 'center' }}>
+              <AkCounter
+                prefixIcon={<span aria-hidden="true">◆</span>}
+                value="1280"
+                suffixIcon={<span aria-hidden="true">+</span>}
+              />
+              <AkLevel label={t('common.levelLabel')}>01-07</AkLevel>
+              <AkSpinner />
+            </div>
+
+            <AkSkeleton lines={3} />
+            <AkSkeleton variant="block" height="4rem" />
+            <AkSkeleton variant="track" height="6px" />
+
+            <div>
+              <AkButton variant="action" onClick={() => setDialogOpen(true)}>
+                {t('common.openDialog')}
+              </AkButton>
+              <AkDialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                eyebrow="RI / CONFIRM"
+                title={t('common.dialogTitle')}
+                footer={
+                  <>
+                    <AkButton variant="outline" onClick={() => setDialogOpen(false)}>
+                      {t('common.cancel')}
+                    </AkButton>
+                    <AkButton variant="action" onClick={() => setDialogOpen(false)}>
+                      {t('common.confirm')}
+                    </AkButton>
+                  </>
+                }
+              >
+                <p>{t('common.dialogBody')}</p>
+              </AkDialog>
+            </div>
+          </div>
         </Block>
     </main>
   )
