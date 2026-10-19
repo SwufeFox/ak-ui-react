@@ -39,6 +39,7 @@ export function AkDisplay({ as: Tag = 'span', xl = false, className, children, .
 }
 
 export interface AkNumProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 
@@ -52,6 +53,7 @@ export function AkNum({ as: Tag = 'span', className, children, ...rest }: AkNumP
 }
 
 export interface AkCodeIdProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 
@@ -65,6 +67,7 @@ export function AkCodeId({ as: Tag = 'span', className, children, ...rest }: AkC
 }
 
 export interface AkWatermarkProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 
@@ -101,6 +104,7 @@ export function AkBilingual({ cn, en, row = false, className, ...rest }: AkBilin
 // ── 交互装饰 ──────────────────────────────────────────────────────────
 
 export interface AkChevronsProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 传 href 时渲染成链接，悬停箭头右移。 */
   href?: string
@@ -117,6 +121,7 @@ export function AkChevrons({ as, href, className, children, ...rest }: AkChevron
 }
 
 export interface AkInverseProps extends SlotProps<HTMLDivElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 
@@ -261,6 +266,7 @@ export function AkHalftone({ as: Tag = 'div', variant = 'default', className, ch
 }
 
 export interface AkBlueBandProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 
@@ -279,6 +285,7 @@ export type AkCutCorner = 'tr' | 'tl' | 'br' | 'bl' | 'all'
 export type AkCutSize = 'sm' | 'md' | 'lg'
 
 export interface AkCutProps extends DivProps {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 切哪个角，默认右上（方舟面板的常规斜切方向）。`all` 四角全切。 */
   corner?: AkCutCorner
@@ -320,6 +327,7 @@ export type AkMotionPace = 'quick' | 'base' | 'slow'
 export type AkMotionEffect = 'fade' | 'rise' | 'color'
 
 export interface AkMotionProps extends DivProps {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 节奏档，取 `--ak-motion-fast/base/slow`（默认 `base`）。 */
   pace?: AkMotionPace
@@ -377,6 +385,7 @@ export function AkMotion({
 // ── 其他小件 ──────────────────────────────────────────────────────────
 
 export interface AkOverlineProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 
@@ -390,6 +399,7 @@ export function AkOverline({ as: Tag = 'span', className, children, ...rest }: A
 }
 
 export interface AkEnProps extends SlotProps<HTMLSpanElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
 }
 

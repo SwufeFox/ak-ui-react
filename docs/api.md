@@ -86,7 +86,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## AkBrackets
 
@@ -137,7 +137,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `href` | `string` | yes | 传 href 时渲染成链接，悬停箭头右移。 |
 
 ## AkCodeId
@@ -146,7 +146,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## AkCorner
 
@@ -164,7 +164,7 @@ Extends `DivProps`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `corner` | `AkCutCorner` | yes | 切哪个角，默认右上（方舟面板的常规斜切方向）。`all` 四角全切。 |
 | `size` | `AkCutSize` | yes | 半径档位，取 `--ak-cut-sm/md/lg`（默认 `md`）。 |
 | `radius` | `string` | yes | 直接给半径，覆盖 `size`（例如 `'1.25rem'`）。 |
@@ -219,7 +219,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## AkGauge
 
@@ -313,7 +313,7 @@ Extends `SlotProps<HTMLDivElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## AkKv
 
@@ -367,7 +367,7 @@ Extends `DivProps`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `pace` | `AkMotionPace` | yes | 节奏档，取 `--ak-motion-fast/base/slow`（默认 `base`）。 |
 | `effect` | `AkMotionEffect` | yes | 过渡属性 —— **必须给**，否则节奏档无处生效（只写 transition-duration 而不写 transition-property 是什么都不做的空类）。 |
 | `emphasized` | `boolean` | yes | 用强调曲线 `--ak-ease-emphasized`（入场 / 需要重量感的过渡）。 |
@@ -389,7 +389,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## AkOutline
 
@@ -397,7 +397,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `color` | `string` | yes | 轮廓色。默认灰色。 |
 
 ## AkOverline
@@ -406,7 +406,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## AkParticleField
 
@@ -414,7 +414,7 @@ Extends `ParticleOptions`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `className` | `string` | yes | — |
+| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
 
 ## AkPot
 
@@ -529,7 +529,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 | `direction` | `AkSkewDirection` | yes | 倾斜方向：left = -10deg，right = +10deg。 |
 
 ## AkSkillLevels
@@ -631,7 +631,7 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | — |
+| `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
 ## Additional prop types
 

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createParticleField, type ParticleController, type ParticleOptions } from '../../core/site.mjs'
 
 export interface AkParticleFieldProps extends ParticleOptions {
+  /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
 }
 

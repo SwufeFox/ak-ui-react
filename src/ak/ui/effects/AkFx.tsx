@@ -58,6 +58,7 @@ export function AkGlow({ as: Tag = 'span', tone = 'default', color, className, c
 }
 
 export interface AkOutlineProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 轮廓色。默认灰色。 */
   color?: string
@@ -81,6 +82,7 @@ export function AkOutline({ as: Tag = 'span', color, className, children, ...res
 }
 
 export interface AkSkewProps extends HTMLAttributes<HTMLElement> {
+  /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
   /** 倾斜方向：left = -10deg，right = +10deg。 */
   direction?: AkSkewDirection
