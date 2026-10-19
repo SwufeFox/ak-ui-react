@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   AkAssetLoader,
+  AkAvatar,
+  AkAvatarGroup,
+  AkBreadcrumb,
+  AkScrollArea,
+  AkTable,
+  AkThumbnail,
   AkAttr,
   AkAttrs,
   AkBackdrop,
@@ -1030,6 +1036,55 @@ function ReferenceView() {
               >
                 <p>{t('common.dialogBody')}</p>
               </AkDialog>
+            </div>
+          </div>
+        </Block>
+
+        <Block eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')}>
+          <div className="demo-stack">
+            <AkBreadcrumb
+              items={[
+                { label: t('common.breadcrumbHome'), href: '#shell-archive' },
+                { label: t('common.breadcrumbRoster'), href: '#shell-archive' },
+                { label: t('common.breadcrumbAmiya') },
+              ]}
+            />
+
+            <AkTable
+              scrollable
+              columns={[
+                { key: 'name', header: t('common.colName') },
+                { key: 'atk', header: t('common.colAtk'), numeric: true, sort: 'descending' },
+                { key: 'def', header: t('common.colDef'), numeric: true },
+              ]}
+              rows={[
+                { id: 'r1', cells: { name: 'Amiya', atk: '512', def: '128' }, selected: true },
+                { id: 'r2', cells: { name: 'Kaltsit', atk: '480', def: '210' } },
+                { id: 'r3', cells: { name: 'Ifrit', atk: '620', def: '90' } },
+              ]}
+              footer={{ name: t('common.total'), atk: '1612', def: '428' }}
+            />
+
+            <div className="demo-row" style={{ alignItems: 'center' }}>
+              <AkAvatar fallback="A" />
+              <AkAvatar fallback="K" size="lg" cut />
+              <AkAvatar fallback="I" accent size="sm" />
+              <AkAvatarGroup>
+                <AkAvatar fallback="A" />
+                <AkAvatar fallback="B" />
+                <AkAvatar fallback="C" />
+              </AkAvatarGroup>
+              <AkThumbnail badge="R001" />
+              <AkThumbnail cut size="wide" />
+            </div>
+
+            <div>
+              <AkCodeId>{t('common.scrollHint')}</AkCodeId>
+              <AkScrollArea axis="y" maxHeight="6rem" style={{ border: '1px solid var(--ak-border)', marginTop: '0.5rem' }}>
+                <div style={{ height: '20rem', padding: '0.75rem' }}>
+                  <AkOverline>tall content</AkOverline>
+                </div>
+              </AkScrollArea>
             </div>
           </div>
         </Block>
