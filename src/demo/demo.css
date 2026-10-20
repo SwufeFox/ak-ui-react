@@ -4,7 +4,7 @@
 /* 档案（亮色）主题下整页底色也要跟着翻，否则面板是亮的、页面还是黑的。 */
 :root {
   --demo-canvas: #0b0d0f;
-  --demo-canvas-glow: rgb(25 209 255 / 8%);
+  --demo-canvas-glow: rgb(25 209 255 / 4%);
   --demo-hairline: rgb(255 255 255 / 18%);
   --demo-topbar: rgb(12 14 16 / 92%);
   --demo-text: #d2d2d2;
@@ -48,11 +48,10 @@ body {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--ak-space-4, 1rem);
-  min-height: 5rem;
+  min-height: 4.25rem;
   padding: 0 clamp(1rem, 3vw, 2.5rem);
   border-bottom: 1px solid var(--demo-hairline);
-  background: var(--demo-topbar);
-  backdrop-filter: blur(8px);
+  background: var(--demo-canvas);
 }
 
 .demo-topbar__brand {
@@ -85,15 +84,22 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--ak-space-3, 0.75rem);
+  gap: 0.5rem;
 }
 
-/* ── 控制台视图：三栏主体 + 底部日志 ───────────────────────────────────── */
+.demo-topbar__settings .ak-menu__trigger {
+  background: transparent;
+  color: var(--demo-text-muted);
+  font-size: 0.7rem;
+}
+
+/* ── 控制台视图：资源摘要 + 名单/详情 + 可折叠日志 ───────────────────────── */
 
 .demo-console {
   display: grid;
   gap: var(--ak-space-4, 1rem);
   width: min(100%, 96rem);
+  box-sizing: border-box;
   margin: 0 auto;
   padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.5rem) 3rem;
 }
@@ -105,51 +111,55 @@ body {
   font-size: clamp(1.5rem, 3vw, 2.25rem);
 }
 
-.demo-console__status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ak-space-3, 0.75rem);
+.demo-console__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  align-items: stretch;
+  border: 1px solid var(--demo-hairline);
+  background: var(--demo-topbar);
 }
 
-.demo-console__hazard {
-  flex: 1 1 10rem;
-  min-width: 8rem;
+.demo-summary__item {
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  border-right: 1px solid var(--demo-hairline);
 }
+
+.demo-summary__item strong {
+  overflow: hidden;
+  color: var(--demo-text-strong);
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo-console__summary > .ak-status { margin: 0 1rem; align-self: center; }
 
 .demo-console__body {
   display: grid;
-  grid-template-columns: minmax(15rem, 1fr) minmax(20rem, 1.6fr) minmax(20rem, 1.5fr);
+  grid-template-columns: minmax(0, 1.8fr) minmax(18rem, 1fr);
   align-items: start;
   gap: var(--ak-space-4, 1rem);
 }
 
-/* 切角面板：clip-path 会裁掉自己的阴影，所以投影放外层容器上 */
 .demo-panel {
   position: relative;
   display: grid;
+  align-content: start;
   gap: var(--ak-space-3, 0.75rem);
+  min-width: 0;
   padding: var(--ak-space-4, 1rem);
+  border: 1px solid var(--demo-hairline);
   background: var(--ak-surface-sunken);
-  box-shadow: var(--ak-shadow-panel, 0 0 10px rgb(0 0 0 / 20%));
 }
 
-.demo-panel__halftone,
-.demo-panel__backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.demo-panel > :not(.demo-panel__halftone):not(.demo-panel__backdrop):not(.demo-panel__corner) {
-  position: relative;
-  z-index: 1;
-}
-
-.demo-console__rail .ak-kv {
-  margin-bottom: 0;
-}
+.demo-console__roster { border-inline-start: 2px solid var(--ak-signal-info); }
+.demo-console__detail { min-width: 0; }
+.demo-console__log { grid-column: 1 / -1; }
+.demo-log__surface { padding: 0; border: 0; background: transparent; box-shadow: none; }
 
 .demo-console__roster,
 .demo-console__detail,
@@ -190,9 +200,8 @@ body {
 }
 
 .demo-roster__row.is-selected {
-  box-shadow:
-    inset 0 0 0 1px var(--ak-signal-action),
-    0 0 12px rgb(255 216 0 / 22%);
+  box-shadow: inset 0 0 0 1px var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-signal-info) 5%, var(--ak-surface-sunken-2));
 }
 
 /* AkCard 默认是 inline-block + 自带内边距，名单里让它铺满一行 */
@@ -280,6 +289,10 @@ body {
 
 .demo-detail .ak-kv {
   margin-bottom: 0;
+}
+
+.demo-detail .ak-attrs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .demo-section {
@@ -487,26 +500,32 @@ body {
   font-size: 0.78rem;
 }
 
-/* ── 小屏：三栏退回单列堆叠 ────────────────────────────────────────────── */
-
 @media (max-width: 900px) {
   .demo-topbar {
     grid-template-columns: minmax(0, 1fr);
     padding-block: var(--ak-space-3, 0.75rem);
   }
 
-  .demo-topbar__controls {
-    justify-content: flex-start;
-  }
+  .demo-topbar__controls { justify-content: flex-start; }
+  .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .demo-console__summary > .ak-status { grid-column: 1 / -1; margin: 0; padding: 0.75rem 1rem; }
+  .demo-summary__item:nth-child(even) { border-right: 0; }
+  .demo-console__body { grid-template-columns: minmax(0, 1fr); }
+  .demo-console__roster { grid-row: auto; }
+  .demo-console__detail { grid-column: auto; }
+  .demo-console__log { grid-column: auto; }
+  .demo-log__row { grid-template-columns: auto minmax(0, 1fr); gap: var(--ak-space-2, 0.5rem); }
+  .demo-log__row > :nth-child(3) { grid-column: 1; }
+  .demo-log__text { grid-column: 2; grid-row: 1 / span 2; white-space: normal; }
+}
 
-  .demo-console__body {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .demo-log__row {
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--ak-space-2, 0.5rem);
-  }
+@media (max-width: 560px) {
+  .demo-console { padding-inline: 0.75rem; }
+  .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .demo-summary__item { border-right: 0; border-bottom: 1px solid var(--demo-hairline); }
+  .demo-roster__head { align-items: flex-start; }
+  .demo-roster__head .ak-segmented { max-width: 100%; overflow-x: auto; }
+  .demo-roster__count { margin-left: 0; }
 }
 
 

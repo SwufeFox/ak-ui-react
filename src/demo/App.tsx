@@ -95,7 +95,7 @@ import {
 } from '../ak'
 import type { AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
-import { LOCALES, useI18n, type Locale, type MessageKey } from './i18n'
+import { useI18n, type MessageKey } from './i18n'
 import { operators, POTENTIAL_STEPS, PROFESSION_KEYS, type Operator, type RosterFilter } from './operators'
 import './demo.css'
 
@@ -114,15 +114,9 @@ function Block({ eyebrow, title, note, children }: { eyebrow: string; title: str
   )
 }
 
-/** 带切角 / 半调网点 / 角标的控制台面板：整个控制台的视觉基底。 */
-function Panel({ className, tone = 'yellow', children }: { className: string; tone?: 'yellow' | 'red'; children: ReactNode }) {
-  return (
-    <AkCut size="lg" className={`demo-panel ${className}`}>
-      <AkHalftone variant="full" className="demo-panel__halftone" aria-hidden="true" />
-      <AkCorner position="tr" tone={tone} className="demo-panel__corner" />
-      {children}
-    </AkCut>
-  )
+/** A quiet console surface; decorative treatments belong to individual content, not every panel. */
+function Panel({ className, children }: { className: string; children: ReactNode }) {
+  return <section className={`demo-panel ${className}`}>{children}</section>
 }
 
 /** 时间戳固定用 24 小时制，避免 12 小时制下的 AM/PM 混进界面文案。 */
@@ -189,32 +183,27 @@ function ConsoleView() {
         <p className="demo-note">{t('console.note')}</p>
       </header>
 
-      <div className="demo-console__status">
+        <div className="demo-console__summary" role="group" aria-label={t('console.summary.label')}>
+        <div className="demo-summary__item">
+          <AkOverline>{locale === 'zh-CN' ? '扇区 / SECTOR' : 'SECTOR / 扇区'}</AkOverline>
+          <strong>{t('console.rail.sectorValue')}</strong>
+        </div>
+        <div className="demo-summary__item">
+          <AkOverline>{locale === 'zh-CN' ? '行动 / OPERATION' : 'OPERATION / 行动'}</AkOverline>
+          <strong>{t('console.rail.operationValue')}</strong>
+        </div>
+        <div className="demo-summary__item">
+          <AkOverline>{locale === 'zh-CN' ? '部署 / DEPLOYED' : 'DEPLOYED / 部署'}</AkOverline>
+          <strong><AkNum>{deployed.length}</AkNum> / <AkNum>{operators.length}</AkNum></strong>
+        </div>
+        <div className="demo-summary__item">
+          <AkOverline>{locale === 'zh-CN' ? '调度点 / COST' : 'COST / 调度点'}</AkOverline>
+          <strong><AkNum>{funds}</AkNum></strong>
+        </div>
         <AkStatus label={t('console.status.online')} detail={t('console.status.detail')} />
-        <AkStatus variant="warning" label={t('console.status.degraded')} detail={t('console.banner.hazard')} />
-        <AkStripes bar variant="warning" className="demo-console__hazard" />
       </div>
 
       <div className="demo-console__body">
-        {/* 左：读数板 */}
-        <Panel className="demo-console__rail">
-          <AkGridBackdrop variant="dots" className="demo-panel__backdrop" aria-hidden="true" />
-          <AkOverline>{t('console.rail.title')}</AkOverline>
-          <AkKv>
-            <AkKvItem label={t('console.rail.sector')}>{t('console.rail.sectorValue')}</AkKvItem>
-            <AkKvItem label={t('console.rail.operation')}>{t('console.rail.operationValue')}</AkKvItem>
-            <AkKvItem label={t('console.rail.deploy')}>
-              <AkNum>{deployed.length}</AkNum> / <AkNum>{operators.length}</AkNum>
-            </AkKvItem>
-            <AkKvItem label={t('console.rail.funds')}>
-              <AkNum>{funds}</AkNum>
-            </AkKvItem>
-            <AkKvItem label={t('console.rail.stability')}>{t('console.rail.stabilityValue')}</AkKvItem>
-          </AkKv>
-          <AkWatermark>{t('app.name')}</AkWatermark>
-        </Panel>
-
-        {/* 中：干员名单 */}
         <Panel className="demo-console__roster">
           <div className="demo-roster__head">
             <AkOverline>{t('console.roster.title')}</AkOverline>
@@ -245,7 +234,7 @@ function ConsoleView() {
                         as="button"
                         className="demo-roster__card"
                         aria-pressed={isSelected}
-                        onClick={() => setSelectedId(isSelected ? null : op.id)}
+                        onClick={() => setSelectedId(op.id)}
                       >
                         <span className="demo-roster__line">
                           <AkRarity level={op.rarity} aria-label={t('common.rarityAria', { n: op.rarity })} />
@@ -274,7 +263,7 @@ function ConsoleView() {
         </Panel>
 
         {/* 右：详情 */}
-        <Panel className="demo-console__detail" tone="red">
+        <Panel className="demo-console__detail">
           <AkOverline>{t('console.detail.title')}</AkOverline>
           {selected ? (
             <div className="demo-detail">
@@ -329,18 +318,12 @@ function ConsoleView() {
                 />
               </div>
 
-              <div className="demo-section">
-                <AkOverline>{t('console.detail.potential')}</AkOverline>
+              <AkCollapsible title={t('console.detail.potential')}>
                 <AkPotList>
                   {POTENTIAL_STEPS.map((step) => (
                     <AkPot
                       key={step.label}
-                      index={
-                        <b>
-                          {t('common.potentialShort')}
-                          {step.n}
-                        </b>
-                      }
+                      index={<b>{t('common.potentialShort')}{step.n}</b>}
                       label={t(step.label)}
                       active={step.active}
                     >
@@ -348,7 +331,7 @@ function ConsoleView() {
                     </AkPot>
                   ))}
                 </AkPotList>
-              </div>
+              </AkCollapsible>
 
               <div className="demo-detail__actions">
                 <AkButton variant="action" disabled={deployed.includes(selected.id)} onClick={() => deploy(selected)}>
@@ -365,40 +348,40 @@ function ConsoleView() {
         </Panel>
       </div>
 
-      {/* 底：部署日志 */}
-      <Panel className="demo-console__log" tone="red">
-        <div className="demo-log__head">
-          <AkOverline>{t('console.log.title')}</AkOverline>
-          <span className="demo-log__count">{t('console.log.count', { n: log.length })}</span>
-          <AkButton variant="outline" disabled={log.length === 0} onClick={() => setLog([])}>
-            {t('console.log.clear')}
-          </AkButton>
-        </div>
+      <AkCollapsible title={t('console.log.title')} className="demo-console__log">
+        <Panel className="demo-log__surface">
+          <div className="demo-log__head">
+            <span className="demo-log__count">{t('console.log.count', { n: log.length })}</span>
+            <AkButton variant="outline" disabled={log.length === 0} onClick={() => setLog([])}>
+              {t('console.log.clear')}
+            </AkButton>
+          </div>
 
-        {log.length === 0 ? (
-          <p className="demo-empty ak-text">{t('console.log.empty')}</p>
-        ) : (
-          <ol className="demo-log__list">
-            {log.map((entry, index) => {
-              const op = operators.find((item) => item.id === entry.operatorId)
-              return (
-                <li className="demo-log__row" key={entry.id}>
-                  <AkNum className="demo-log__index">{String(index + 1).padStart(2, '0')}</AkNum>
-                  <AkNum className="demo-log__time">{entry.time}</AkNum>
-                  <AkTag variant={entry.kind === 'deploy' ? 'advanced' : 'neutral'}>
-                    {t(entry.kind === 'deploy' ? 'console.action.deployed' : 'console.action.recalled')}
-                  </AkTag>
-                  <span className="demo-log__text">
-                    {t(entry.kind === 'deploy' ? 'console.log.entry.deploy' : 'console.log.entry.recall', {
-                      name: op ? nameOf(op) : entry.operatorId,
-                    })}
-                  </span>
-                </li>
-              )
-            })}
-          </ol>
-        )}
-      </Panel>
+          {log.length === 0 ? (
+            <p className="demo-empty ak-text">{t('console.log.empty')}</p>
+          ) : (
+            <ol className="demo-log__list">
+              {log.map((entry, index) => {
+                const op = operators.find((item) => item.id === entry.operatorId)
+                return (
+                  <li className="demo-log__row" key={entry.id}>
+                    <AkNum className="demo-log__index">{String(index + 1).padStart(2, '0')}</AkNum>
+                    <AkNum className="demo-log__time">{entry.time}</AkNum>
+                    <AkTag variant={entry.kind === 'deploy' ? 'advanced' : 'neutral'}>
+                      {t(entry.kind === 'deploy' ? 'console.action.deployed' : 'console.action.recalled')}
+                    </AkTag>
+                    <span className="demo-log__text">
+                      {t(entry.kind === 'deploy' ? 'console.log.entry.deploy' : 'console.log.entry.recall', {
+                        name: op ? nameOf(op) : entry.operatorId,
+                      })}
+                    </span>
+                  </li>
+                )
+              })}
+            </ol>
+          )}
+        </Panel>
+      </AkCollapsible>
     </div>
   )
 }
@@ -1235,26 +1218,15 @@ export function App() {
             onValueChange={(next) => setView(next === 'reference' ? 'reference' : 'console')}
           />
 
-          <AkSegmented
-            ariaLabel={t('app.lang.label')}
-            options={LOCALES.map((value) => ({
-              label: t(value === 'zh-CN' ? 'app.lang.zh-cn' : 'app.lang.en'),
-              value,
-            }))}
-            value={locale}
-            onValueChange={(next) => {
-              if (next === 'en' || next === 'zh-CN') setLocale(next as Locale)
-            }}
-          />
-
-          <AkSegmented
-            ariaLabel={t('app.theme.label')}
-            options={[
-              { label: t('app.theme.terminal'), value: 'terminal' },
-              { label: t('app.theme.archive'), value: 'archive' },
+          <AkDropdownMenu
+            className="demo-topbar__settings"
+            label={`${t('app.settings.label')} · ${locale === 'zh-CN' ? t('app.lang.zh-cn') : t('app.lang.en')} · ${t(theme === 'terminal' ? 'app.theme.terminal' : 'app.theme.archive')}`}
+            items={[
+              { label: t('app.lang.zh-cn'), onSelect: () => setLocale('zh-CN') },
+              { label: t('app.lang.en'), onSelect: () => setLocale('en') },
+              { label: t('app.theme.terminal'), onSelect: () => setTheme('terminal') },
+              { label: t('app.theme.archive'), onSelect: () => setTheme('archive') },
             ]}
-            value={theme}
-            onValueChange={(next) => setTheme(next === 'archive' ? 'archive' : 'terminal')}
           />
         </div>
       </header>

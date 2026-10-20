@@ -25,14 +25,16 @@ const en = {
   'app.view.reference': 'Components',
   'app.lang.label': 'Language',
   'app.theme.label': 'Theme',
+  'app.settings.label': 'SETTINGS',
   'app.theme.terminal': 'Terminal',
   'app.theme.archive': 'Archive',
 
   // ── 应用示例（Consoles 视图）─────────────────────────────────────
   'console.eyebrow': 'APPLICATION EXAMPLE',
+  'console.summary.label': 'Operation summary',
   'console.title': 'Operator console',
   'console.note':
-    'The same tokens and components composed into a working surface — status rail, roster, detail panel and a live log. Nothing here is a component demo.',
+    'The deployment desk: operator roster, resource budget, and a live action log.',
 
   'console.status.online': 'SYSTEM',
   'console.status.detail': 'Online',
@@ -454,13 +456,15 @@ const zhCN: Record<MessageKey, string> = {
   'app.view.reference': '组件',
   'app.lang.label': '语言',
   'app.theme.label': '主题',
+  'app.settings.label': '偏好设置',
   'app.theme.terminal': '终端',
   'app.theme.archive': '档案',
 
   'console.eyebrow': '应用示例',
+  'console.summary.label': '行动摘要',
   'console.title': '干员控制台',
   'console.note':
-    '同一套令牌与组件组合成的可用界面——状态栏、干员名单、详情面板与实时日志。这里没有一个是「组件演示」。',
+    '部署作战台：编组名单、调度资源与实时行动记录。',
 
   'console.status.online': '系统',
   'console.status.detail': '在线',
