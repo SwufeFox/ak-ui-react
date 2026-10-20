@@ -773,6 +773,8 @@ Extends `Omit<SpanProps, 'children'>`.
 | `name` | `ReactNode` | no | 中文职业名。 |
 | `en` | `ReactNode` | yes | 英文职业名（大写拉丁字）。 |
 | `icon` | `ReactNode` | yes | 职业图标节点，由宿主传入。 |
+| `subProf` | `ReactNode` | yes | 子职业图标；给出后会套上 `.ak-subprof`（26px 的图标槽，图缩到 90% 并套 `--ak-glyph-filter`）。与 `icon` 是**两个不同的槽**，可以同时出现。 |
+| `subProfLabel` | `string` | yes | 子职业槽的无障碍名（槽本身是装饰性的，给了才播报）。 |
 | `prof` | `AkProfessionName` | yes | 职业名；给出后带上对应的 `--ak-p` 职业色。 |
 
 ## AkProgress

@@ -159,12 +159,28 @@ export interface AkProfessionLabelProps extends Omit<SpanProps, 'children'> {
   en?: ReactNode
   /** 职业图标节点，由宿主传入。 */
   icon?: ReactNode
+  /**
+   * 子职业图标；给出后会套上 `.ak-subprof`（26px 的图标槽，图缩到 90% 并套
+   * `--ak-glyph-filter`）。与 `icon` 是**两个不同的槽**，可以同时出现。
+   */
+  subProf?: ReactNode
+  /** 子职业槽的无障碍名（槽本身是装饰性的，给了才播报）。 */
+  subProfLabel?: string
   /** 职业名；给出后带上对应的 `--ak-p` 职业色。 */
   prof?: AkProfessionName
 }
 
-/** 职业标签：图标 + 中文名 + 英文名。 */
-export function AkProfessionLabel({ name, en, icon, prof, className, ...rest }: AkProfessionLabelProps) {
+/** 职业标签：图标 + 中文名 + 英文名，可带子职业图标槽。 */
+export function AkProfessionLabel({
+  name,
+  en,
+  icon,
+  subProf,
+  subProfLabel,
+  prof,
+  className,
+  ...rest
+}: AkProfessionLabelProps) {
   return (
     <span
       {...rest}
@@ -173,6 +189,16 @@ export function AkProfessionLabel({ name, en, icon, prof, className, ...rest }: 
       {...(prof ? { 'data-prof': prof } : {})}
     >
       {icon}
+      {/*
+        `.ak-subprof` 是固定的 26px 图标槽，样式挂在它自己身上（含 > img 的 90% 缩放）。
+        ⚠️ 它**不是** `.ak-prof-label` 的修饰符，所以必须真的多一层元素；
+        把图标直接塞进 label 不会得到那个尺寸。
+      */}
+      {subProf ? (
+        <span className="ak-subprof" aria-label={subProfLabel} aria-hidden={subProfLabel ? undefined : true}>
+          {subProf}
+        </span>
+      ) : null}
       {name}
       {en ? <span className="ak-en">{en}</span> : null}
     </span>

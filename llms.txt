@@ -113,7 +113,16 @@ import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
 
 ## Known gaps
 
-- `createDashboardDepth` is exported but **has no component and no demo**. It needs a host.
+- `createDashboardDepth` **does** have a component now: `AkDepth` / `AkDepthLayer` (+ `_ak-depth.scss`
+  as the consumer of `--ak-layer-x/y`). They are exported and used in the showcase. The controller still
+  needs a host that gives each layer a `data-depth` attribute — the component does not invent one.
+- `border-color` helpers `.ak-r-border` and `.ak-r-swatch` have **no component on purpose**, and are
+  unlikely to get one: both are one-declaration presentational classes (`border-color: var(--ak-r) !important`
+  and a 1em `background: var(--ak-r)` block). Apply them to your own element. Wrapping them in a component
+  would add a prop surface without adding capability. `.ak-r-border` is `!important`, so it wins over your own
+  border colour — that is the point of it, not a bug.
+- `.ak-media` is also album-only: there are no rules on a bare `.ak-media` root, every rule lives under
+  `.ak-media--album`. Always emit both classes (`AkMediaAlbum` does).
 - These eight tokens are published API but consumed by nothing in the library. They are reserved,
   not broken — do not assume setting one will do anything:
   `--ak-bar-w-lg`, `--ak-font-command`, `--ak-radius-subtle`, `--ak-signal-accent`,

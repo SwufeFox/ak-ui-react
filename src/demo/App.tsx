@@ -1094,7 +1094,13 @@ function ReferenceView() {
           <div className="demo-row" style={{ alignItems: 'center' }}>
             <AkProfession name="medic" boxed size="lg" icon={<span aria-hidden="true">+</span>} />
             <AkProfession name="caster" outline icon={<span aria-hidden="true">◇</span>} />
-            <AkProfessionLabel name={t('common.medic')} en={t('common.medicLatin')} prof="medic" />
+            <AkProfessionLabel
+              name={t('common.medic')}
+              en={t('common.medicLatin')}
+              prof="medic"
+              subProf={<span aria-hidden="true">✚</span>}
+              subProfLabel={t('ref.arknights.subProf')}
+            />
             <AkElite level={2} icon={<b>E2</b>} title={t('console.detail.eliteTitle', { n: 2 })} />
             <AkPotential label={t('common.potentialN', { n: 6 })} icon={<b>S3</b>} />
             <AkSpec label={t('common.mastery3')} icon={<b>S3</b>} bare />
