@@ -21,18 +21,19 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox)
 - [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput)
 - [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem)
-- [`AkLevel`](#aklevel) · [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup) · [`AkMenuSeparator`](#akmenuseparator)
-- [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice)
-- [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination)
-- [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
-- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
-- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
-- [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented)
-- [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels)
-- [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus)
-- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable) · [`AkTabs`](#aktabs)
-- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail)
-- [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup)
+- [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion)
+- [`AkNotice`](#aknotice) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline)
+- [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot)
+- [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel)
+- [`AkProgress`](#akprogress) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip)
+- [`AkRarityScope`](#akrarityscope) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea)
+- [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
+- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
+- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable)
+- [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea)
+- [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
+- [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -543,6 +544,22 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `label` | `ReactNode` | yes | 上方的标签文字（`.ak-level__label`，样式表默认值是 `OPERATION`）。 |
 | `children` | `ReactNode` | yes | 主内容，通常是等级数字或关卡代号。 |
 | `prefixIcon` | `ReactNode` | yes | 内容前的图标位（`.ak-level__prefix-icon`）。 |
+
+## AkLoadingScreen
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `state` | `AkLoadingScreenState` | yes | 当前状态，写入 `data-state`（样式表认的就是这个属性）。 |
+| `backdrop` | `string` | yes | 背景图 URL，走 `.ak-loading-screen__backdrop`（会自动模糊 + 压暗 + 放大 1.015）。 |
+| `tip` | `ReactNode` | yes | 左上角提示语（`.ak-loading-screen__tip`）。 |
+| `brand` | `ReactNode` | no | 主标题，渲染成 `strong`（样式表的元素选择器认标签）。 |
+| `brandSuffix` | `ReactNode` | yes | 主标题后缀，渲染成 `small`。 |
+| `mark` | `ReactNode` | yes | 标记图形（`.ak-loading-screen__mark`），需自行带 `.ak-icon` 类。 |
+| `markLabel` | `ReactNode` | yes | 标记下方小字。 |
+| `progressLabel` | `ReactNode` | yes | 进度条右侧标签。 |
+| `label` | `string` | yes | 无障碍名；加载中会以 `role="status"` 播报。 |
 
 ## AkMediaGallery
 

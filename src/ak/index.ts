@@ -173,6 +173,13 @@ export {
   type AkSpinnerProps,
 } from './ui/data/AkData'
 
+// 全屏加载画面：_ak-loading.scss 里唯一没有出口的那块
+export {
+  AkLoadingScreen,
+  type AkLoadingScreenProps,
+  type AkLoadingScreenState,
+} from './ui/loading/AkLoadingScreen'
+
 // 理智（SAN）部件：_ak-san.scss 有 431 行完整样式，此前零组件出口
 export {
   AkSan,

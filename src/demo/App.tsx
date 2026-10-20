@@ -44,6 +44,7 @@ import {
   AkCut,
   AkCounter,
   AkSanContainer,
+  AkLoadingScreen,
   AkDialog,
   AkLevel,
   AkSkeleton,
@@ -523,6 +524,7 @@ function ReferenceView() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
   // 理智计数器：加号按钮真的能加，上限用满后不再涨（避免演示看起来像假的）
+  const [loadingReady, setLoadingReady] = useState(false)
   const [sanCurrent, setSanCurrent] = useState(41)
   const sanLimit = 135
   const [sanTotal] = useState(135)
@@ -1205,6 +1207,36 @@ function ReferenceView() {
             <AkSkeleton lines={3} />
             <AkSkeleton variant="block" height="4rem" />
             <AkSkeleton variant="track" height="6px" />
+
+            {/*
+              全屏加载画面。它 `position:absolute; inset:0; z-index:30` +
+              `container-type:size`，所以必须给**有定位且高度确定**的容器，
+              否则内部 cqh/cqw 会塌成 0。这里用 16/9 的固定比例框当舞台。
+            */}
+            <div>
+              <AkButton variant="outline" onClick={() => setLoadingReady((v) => !v)}>
+                {loadingReady ? t('ref.loading.replay') : t('ref.loading.finish')}
+              </AkButton>
+              <div
+                style={{
+                  position: 'relative',
+                  marginTop: 'var(--ak-space-3, 0.75rem)',
+                  aspectRatio: '16 / 9',
+                  overflow: 'hidden',
+                }}
+              >
+                <AkLoadingScreen
+                  state={loadingReady ? 'ready' : 'loading'}
+                  label={t('ref.loading.label')}
+                  tip={t('ref.loading.tip')}
+                  brand="AK-UI"
+                  brandSuffix="REACT"
+                  mark={<span className="ak-icon" aria-hidden="true">◆</span>}
+                  markLabel="RHODES"
+                  progressLabel={loadingReady ? 'READY' : 'LOADING'}
+                />
+              </div>
+            </div>
 
             <div>
               <AkButton variant="action" onClick={() => setDialogOpen(true)}>
