@@ -505,6 +505,7 @@ body {
     grid-template-columns: minmax(0, 1fr);
     padding-block: var(--ak-space-3, 0.75rem);
   }
+  .demo-section-nav { top: 6.5rem; }
 
   .demo-topbar__controls { justify-content: flex-start; }
   .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -599,3 +600,48 @@ body {
 
 .demo-menu-target { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 4rem; padding: 1rem; border: 1px dashed #626a70; color: #bdc4c9; font: 0.78rem var(--ak-font-mono, monospace); cursor: context-menu; }
 .demo-menu-target span { color: var(--ak-signal-action); font-weight: 700; }
+
+.demo-reference__intro {
+  padding-block: 1rem 2rem;
+}
+
+.demo-reference__intro h1 {
+  margin: 0.5rem 0;
+  color: var(--demo-text-strong);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.demo-section-nav {
+  position: sticky;
+  top: 4.25rem;
+  z-index: 4;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--demo-hairline) transparent;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--demo-hairline);
+  background: var(--demo-canvas);
+}
+
+.demo-section-nav::-webkit-scrollbar { height: 0.35rem; }
+.demo-section-nav::-webkit-scrollbar-track { background: transparent; }
+.demo-section-nav::-webkit-scrollbar-thumb { background: var(--demo-hairline); }
+
+.demo-section-nav a {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--demo-hairline);
+  color: var(--demo-text);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.demo-section-nav a:hover,
+.demo-section-nav a:focus-visible {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-text-strong);
+}
+
+.demo-block { scroll-margin-top: 8rem; }

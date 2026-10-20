@@ -103,11 +103,11 @@ type View = 'console' | 'reference'
 type Theme = 'terminal' | 'archive'
 
 /** 参考视图的区块外壳。`note` 是可选的说明段。 */
-function Block({ eyebrow, title, note, children }: { eyebrow: string; title: string; note?: ReactNode; children: ReactNode }) {
+function Block({ id, eyebrow, title, note, children }: { id: string; eyebrow: string; title: string; note?: ReactNode; children: ReactNode }) {
   return (
-    <section className="demo-block">
+    <section id={id} className="demo-block" aria-labelledby={`${id}-title`}>
       <span className="demo-eyebrow">{eyebrow}</span>
-      <h2>{title}</h2>
+      <h2 id={`${id}-title`}>{title}</h2>
       {note ? <p className="demo-note">{note}</p> : null}
       {children}
     </section>
@@ -474,7 +474,24 @@ function ReferenceView() {
 
   return (
     <main className="demo-main">
-      <Block eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')}>
+      <header className="demo-reference__intro">
+        <span className="demo-eyebrow">{t('app.view.reference')}</span>
+        <h1>{t('app.name')} / {t('app.view.reference')}</h1>
+        <p className="demo-note">{t('app.tagline')} | {t('app.subtitle')}</p>
+      </header>
+      <nav className="demo-section-nav" aria-label={t('ref.shell.sections')}>
+        {[
+          ['components-1', 'ref.actions.title'], ['components-2', 'ref.menu.title'], ['components-3', 'ref.surfaces.title'],
+          ['components-4', 'ref.feedback.title'], ['components-5', 'ref.inputs.title'], ['components-6', 'ref.navigation.title'],
+          ['components-7', 'ref.effects.title'], ['components-8', 'ref.gallery.title'], ['components-9', 'ref.site.title'],
+          ['components-10', 'ref.shell.title'], ['components-11', 'ref.decor.title'], ['components-12', 'ref.arknights.title'],
+          ['components-13', 'ref.controls.title'], ['components-14', 'ref.form.title'], ['components-15', 'ref.data.title'],
+          ['components-16', 'ref.collection.title'], ['components-17', 'ref.command.title'],
+        ].map(([id, key]) => (
+          <a key={id} href={'#' + id}>{t(key as MessageKey)}</a>
+        ))}
+      </nav>
+      <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')}>
         <div className="demo-row">
           <AkButton>{t('common.default')}</AkButton>
           <AkButton variant="outline">{t('common.outline')}</AkButton>
@@ -497,7 +514,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow="12 / MENU" title={t('ref.menu.title')} note={t('ref.menu.note')}>
+      <Block id="components-2" eyebrow="12 / MENU" title={t('ref.menu.title')} note={t('ref.menu.note')}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkDropdownMenu label={t('ref.menu.open')} items={[
@@ -524,7 +541,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')}>
+      <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')}>
         <div className="demo-grid">
           <AkCard as="article">
             <AkCardHeader>
@@ -554,7 +571,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')}>
+      <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')}>
         <div className="demo-stack">
           <AkNotice title={t('notice.info.title')} code={t('notice.code.info')}>
             {t('notice.info.body')}
@@ -590,7 +607,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')}>
+      <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')}>
         <div className="demo-stack">
           <AkSlider label={t('ref.inputs.volume')} value={slider} onValueChange={(v) => setSlider(Number.isFinite(v) ? v : 0)} />
           <span className="ak-text">{t('ref.inputs.sliderValue', { n: slider })}</span>
@@ -616,7 +633,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')}>
+      <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')}>
         <AkTabs
           ariaLabel={t('ref.navigation.aria')}
           items={tabSpec.map((item, index) => ({
@@ -632,7 +649,7 @@ function ReferenceView() {
         />
       </Block>
 
-      <Block eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')}>
+      <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')}>
         <div className="demo-stack">
           <div className="demo-row">
             <span style={{ fontSize: '2rem' }}>
@@ -672,7 +689,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')}>
+      <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')}>
         <AkMediaGallery
           items={items}
           value={galleryIndex}
@@ -690,7 +707,7 @@ function ReferenceView() {
         </p>
       </Block>
 
-      <Block eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')}>
+      <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')}>
         <div className="demo-stack">
           <AkAssetLoader
             label={t('common.resources')}
@@ -730,11 +747,11 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.shell.eyebrow')} title={t('ref.shell.title')} note={t('ref.shell.note')}>
+      <Block id="components-10" eyebrow={t('ref.shell.eyebrow')} title={t('ref.shell.title')} note={t('ref.shell.note')}>
         <SiteShellDemo />
       </Block>
 
-      <Block eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')}>
+      <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkStripes bar variant="warning" style={{ width: '8rem' }} />
@@ -875,7 +892,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')}>
+      <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')}>
         <div className="demo-stack">
           <div className="demo-row" style={{ alignItems: 'center' }}>
             <AkRarity level={6} aria-label={t('common.rarityAria', { n: 6 })} />
@@ -932,6 +949,7 @@ function ReferenceView() {
       </Block>
 
         <Block
+          id="components-13"
           eyebrow={t('ref.controls.eyebrow')}
           title={t('ref.controls.title')}
           note={t('ref.controls.note')}
@@ -978,7 +996,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-        <Block eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')}>
+        <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')}>
           <AkFormStack>
             <AkField hint={t('common.fieldHint')}>
               <AkFieldLabel htmlFor="demo-field">{t('common.fieldName')}</AkFieldLabel>
@@ -1013,7 +1031,7 @@ function ReferenceView() {
           </AkFormStack>
         </Block>
 
-        <Block eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')}>
+        <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')}>
           <div className="demo-stack">
             <div className="demo-row" style={{ alignItems: 'center' }}>
               <AkCounter
@@ -1055,7 +1073,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-        <Block eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')}>
+        <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')}>
           <div className="demo-stack">
             <AkBreadcrumb
               items={[
@@ -1104,7 +1122,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-      <Block eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')}>
+      <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')}>
         <div className="demo-stack">
           <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
             <AkCommand
@@ -1191,7 +1209,7 @@ function ReferenceView() {
 
 export function App() {
   const { locale, setLocale, t } = useI18n()
-  const [view, setView] = useState<View>('console')
+  const [view, setView] = useState<View>('reference')
   const [theme, setTheme] = useState<Theme>('terminal')
 
   useEffect(() => {
@@ -1211,8 +1229,8 @@ export function App() {
           <AkSegmented
             ariaLabel={t('app.view.label')}
             options={[
-              { label: t('app.view.console'), value: 'console' },
               { label: t('app.view.reference'), value: 'reference' },
+              { label: t('app.view.console'), value: 'console' },
             ]}
             value={view}
             onValueChange={(next) => setView(next === 'reference' ? 'reference' : 'console')}
