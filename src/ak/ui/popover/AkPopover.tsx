@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type HTMLAttributes, type ReactNode } from 'react'
+import { cloneElement, isValidElement, useEffect, useId, useRef, useState, type HTMLAttributes, type ReactElement, type ReactNode } from 'react'
 import { cx } from '../../lib/utils'
 
 /**
@@ -102,18 +102,39 @@ export function AkPopover({
 
   const panelClass = kind === 'tooltip' ? 'ak-tooltip' : 'ak-popover'
 
+  /*
+    触发器：把 popoverTarget 挂到触发元素本身，而不是再套一层 <button>。
+
+    早先的写法是无条件 `<button>{trigger}</button>`，于是
+    `trigger={<AkButton/>}`（文档里就是这么示范的）会渲染成 button 套 button ——
+    非法 HTML，两个可聚焦目标，点一次会触发两次。React 会报
+    “In HTML, <button> cannot be a descendant of <button>”。
+
+    这里判断 trigger 是否本身就是一个元素：
+      · 是元素 → clone 它，把 popover 属性合并上去（调用方自己给的 className/props 优先）
+      · 否则（纯文本等）→ 才包一层 <button>
+  */
+  const anchorProps = {
+    // React 19 原生支持 popoverTarget（小写 popovertarget 会触发 unknown-prop 警告）
+    popoverTarget: panelId,
+    'data-slot': 'ak-popover-trigger',
+    'aria-expanded': shown,
+  }
+
+  const anchor = isValidElement(trigger) ? (
+    cloneElement(trigger as ReactElement<Record<string, unknown>>, {
+      ...anchorProps,
+      className: cx(triggerClassName, (trigger.props as { className?: string }).className),
+    })
+  ) : (
+    <button type="button" {...anchorProps} className={cx(triggerClassName)}>
+      {trigger}
+    </button>
+  )
+
   return (
     <>
-      <button
-        type="button"
-        // React 19 原生支持 popoverTarget（小写 popovertarget 会触发 unknown-prop 警告）
-        popoverTarget={panelId}
-        className={cx(triggerClassName)}
-        data-slot="ak-popover-trigger"
-        aria-expanded={shown}
-      >
-        {trigger}
-      </button>
+      {anchor}
 
       <div
         {...rest}
