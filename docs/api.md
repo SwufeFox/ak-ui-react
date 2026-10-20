@@ -27,12 +27,12 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
 - [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
 - [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
-- [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton)
-- [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec)
-- [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes)
-- [`AkTable`](#aktable) · [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup)
-- [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust)
-- [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented)
+- [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels)
+- [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus)
+- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable) · [`AkTabs`](#aktabs)
+- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail)
+- [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -774,6 +774,39 @@ Extends `DivProps`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `level` | `AkRarityLevel` | no | 给后代开启 `--ak-r` / `--ak-r-text` 色轨。 |
+
+## AkSan
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `current` | `number \| string` | no | 当前理智值。 |
+| `total` | `number \| string` | yes | 理智上限；用于 `role="meter"` 的 `aria-valuemax`。 |
+| `limit` | `number` | yes | `total` 缺省时给读屏用的上限，不影响渲染。 |
+| `onAdd` | `() => void` | yes | 加号按钮的动作。不传则不渲染按钮，避免出现「看着能点其实没反应」的假 UI。 |
+| `addLabel` | `string` | yes | 加号按钮的无障碍名，默认「增加理智」。 |
+| `figure` | `ReactNode` | yes | 图形层内容（`.ak-san__figure`），通常传一个图标。 |
+| `label` | `string` | yes | 部件的无障碍名。 |
+
+## AkSanContainer
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `variant` | `AkSanVariant` | yes | 外观，见 {@link AkSanVariant}。默认 `compact`。 |
+| `eyebrow` | `ReactNode` | yes | 顶部小标（`.ak-san-container__eyebrow`，仅 compact 有）。 |
+| `title` | `ReactNode` | yes | 标题（`.ak-san-container__title`，仅 compact 有）。 |
+| `meta` | `ReactNode` | yes | 标题下方一行，通常放 `AkLevel` 等读数（仅 compact 有）。 |
+| `status` | `ReactNode` | yes | 状态文字（`.ak-san-container__status`，仅 compact 有）。 |
+| `watermark` | `ReactNode` | yes | 水印图形（`.ak-san-container__watermark`，仅 terminal 有）。 |
+| `current` | `number \| string` | no | 计数器的当前值。 |
+| `total` | `number \| string` | yes | 计数器上限。 |
+| `limit` | `number` | yes | `total` 缺省或非数字时给读屏用的上限（透传给内部 `AkSan`）。 |
+| `onAdd` | `() => void` | yes | 计数器的加号动作。 |
+| `addLabel` | `string` | yes | 加号按钮的无障碍名。 |
+| `figure` | `ReactNode` | yes | 计数器图形层。 |
 
 ## AkScrollArea
 

@@ -43,6 +43,7 @@ import {
   AkCountUp,
   AkCut,
   AkCounter,
+  AkSanContainer,
   AkDialog,
   AkLevel,
   AkSkeleton,
@@ -521,6 +522,10 @@ function ReferenceView() {
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
+  // 理智计数器：加号按钮真的能加，上限用满后不再涨（避免演示看起来像假的）
+  const [sanCurrent, setSanCurrent] = useState(41)
+  const sanLimit = 135
+  const [sanTotal] = useState(135)
 
   /**
    * 当前激活的分类。初始值从 hash 推导，所以 `#components-14` 这样的深链接可以直接落到对应面板。
@@ -1163,6 +1168,38 @@ function ReferenceView() {
               />
               <AkLevel label={t('common.levelLabel')}>01-07</AkLevel>
               <AkSpinner />
+            </div>
+
+            {/* 理智部件：_ak-san.scss 的两代结构里，这里展示现代版（compact / terminal） */}
+            <div className="demo-row" style={{ alignItems: 'flex-start' }}>
+              <AkSanContainer
+                eyebrow={t('ref.san.eyebrow')}
+                title={t('ref.san.title')}
+                current={sanCurrent}
+                total={sanTotal}
+                limit={sanLimit}
+                onAdd={() => setSanCurrent((v) => Math.min(sanLimit, v + 1))}
+                addLabel={t('ref.san.add')}
+                meta={<AkLevel label={t('common.levelLabel')}>01-07</AkLevel>}
+                status={t('ref.san.status')}
+              />
+              {/*
+                terminal 变体是 `container-type: size` 容器，内部几何全用 cqh，
+                所以**必须由父级给出确定高度**（上游挂在 .ak-dashboard__right-menu 下就是如此）。
+                这里用 grid 让子元素拉伸填满 —— 早先只写 blockSize，容器高度算出来是 0，
+                于是 3.35cqh 的黄条塌成 0px。图形层也要带 .ak-icon，样式是挂在这个类上的。
+              */}
+              <div style={{ display: 'grid', inlineSize: 'min(22rem, 100%)', blockSize: '12rem' }}>
+                <AkSanContainer
+                  variant="terminal"
+                  current={sanCurrent}
+                  total={sanTotal}
+                  onAdd={() => setSanCurrent((v) => Math.min(sanLimit, v + 1))}
+                  addLabel={t('ref.san.add')}
+                  figure={<span className="ak-icon" aria-hidden="true">◆</span>}
+                  watermark={<span aria-hidden="true">RHODES</span>}
+                />
+              </div>
             </div>
 
             <AkSkeleton lines={3} />

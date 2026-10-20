@@ -173,6 +173,15 @@ export {
   type AkSpinnerProps,
 } from './ui/data/AkData'
 
+// 理智（SAN）部件：_ak-san.scss 有 431 行完整样式，此前零组件出口
+export {
+  AkSan,
+  AkSanContainer,
+  type AkSanProps,
+  type AkSanContainerProps,
+  type AkSanVariant,
+} from './ui/san/AkSan'
+
 // 上游没有、本库补的那批（用既有语汇，非新造视觉）
 export {
   AkTable,
