@@ -391,8 +391,10 @@ body {
 .demo-block > h2 {
   margin: 0.6rem 0 0.5rem;
   color: var(--demo-text-strong);
+  font-family: Georgia, 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
   font-size: clamp(1.4rem, 3vw, 2.1rem);
-  letter-spacing: -0.03em;
+  font-weight: 900;
+  letter-spacing: -0.045em;
 }
 
 .demo-note {
@@ -505,7 +507,7 @@ body {
     grid-template-columns: minmax(0, 1fr);
     padding-block: var(--ak-space-3, 0.75rem);
   }
-  .demo-section-nav { top: 6.5rem; }
+  .demo-section-nav { top: 6.5rem; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
 
   .demo-topbar__controls { justify-content: flex-start; }
   .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -608,7 +610,10 @@ body {
 .demo-reference__intro h1 {
   margin: 0.5rem 0;
   color: var(--demo-text-strong);
+  font-family: Georgia, 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
 }
 
 .demo-section-nav {
@@ -616,8 +621,9 @@ body {
   top: 4.25rem;
   z-index: 4;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  overflow-x: auto;
+  overflow: visible;
   scrollbar-width: thin;
   scrollbar-color: var(--demo-hairline) transparent;
   padding: 0.75rem 0;
@@ -644,4 +650,4 @@ body {
   color: var(--demo-text-strong);
 }
 
-.demo-block { scroll-margin-top: 8rem; }
+.demo-block { scroll-margin-top: 12rem; }
