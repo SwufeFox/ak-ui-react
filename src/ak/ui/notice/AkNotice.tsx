@@ -32,3 +32,17 @@ export function AkNotice({ code = 'RI / INFO', role, title = '', variant = 'info
     </aside>
   )
 }
+
+/**
+ * 通知堆叠容器（`.ak-notice-stack`：grid + min(40rem, 100%) + 0.9rem 间距）。
+ *
+ * 只是布局壳 —— 别在它身上加语义：每条 `AkNotice` 自己已经是 `role="status"|"alert"`，
+ * 外壳再声明一次会把同一件事播报两遍。
+ */
+export function AkNoticeStack({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div {...rest} className={cx('ak-notice-stack', className)} data-slot="ak-notice-stack">
+      {children}
+    </div>
+  )
+}

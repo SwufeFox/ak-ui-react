@@ -91,3 +91,15 @@ export function AkGauge({ label = 'Deploy', max = 100, min = 0, unit = 'percent'
     </div>
   )
 }
+
+/**
+ * 进度堆叠容器（`.ak-progress-stack`：grid + min(32rem, 100%) + 1rem 间距）。
+ * 同 `AkNoticeStack`，纯布局壳，不加语义。
+ */
+export function AkProgressStack({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div {...rest} className={cx('ak-progress-stack', className)} data-slot="ak-progress-stack">
+      {children}
+    </div>
+  )
+}

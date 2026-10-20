@@ -23,17 +23,17 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem)
 - [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup)
 - [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion)
-- [`AkNotice`](#aknotice) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline)
-- [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot)
-- [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel)
-- [`AkProgress`](#akprogress) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip)
-- [`AkRarityScope`](#akrarityscope) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea)
-- [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
-- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
-- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable)
-- [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea)
-- [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
-- [`AkWatermark`](#akwatermark)
+- [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice) · [`AkNoticeStack`](#aknoticestack) · [`AkNum`](#aknum)
+- [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield)
+- [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential)
+- [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress) · [`AkProgressStack`](#akprogressstack)
+- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
+- [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented)
+- [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels)
+- [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus)
+- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable) · [`AkTabs`](#aktabs)
+- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail)
+- [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -625,6 +625,16 @@ Extends `DivProps`.
 | `effect` | `AkMotionEffect` | yes | 过渡属性 —— **必须给**，否则节奏档无处生效（只写 transition-duration 而不写 transition-property 是什么都不做的空类）。 |
 | `emphasized` | `boolean` | yes | 用强调曲线 `--ak-ease-emphasized`（入场 / 需要重量感的过渡）。 |
 
+## AkNewsList
+
+Extends `Omit<HTMLAttributes<HTMLUListElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `items` | `readonly AkNewsListItem[]` | no | 列表项，按顺序渲染。 |
+| `empty` | `ReactNode` | yes | 空态文案；`items` 为空时显示。 |
+| `label` | `string` | yes | 列表的无障碍名。 |
+
 ## AkNotice
 
 Extends `Omit<HTMLAttributes<HTMLElement>, 'title'>`.
@@ -635,6 +645,10 @@ Extends `Omit<HTMLAttributes<HTMLElement>, 'title'>`.
 | `role` | `'alert' \| 'status'` | yes | Overrides the semantic role derived from `variant`. |
 | `title` | `ReactNode` | yes | 通知标题。 |
 | `variant` | `AkNoticeVariant` | yes | 语义档位，决定左侧色条与路由码颜色。 |
+
+## AkNoticeStack
+
+_(no props of its own)_
 
 ## AkNum
 
@@ -756,6 +770,10 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
 | `value` | `number` | yes | 当前值，会夹到区间内。 |
 | `valueLabel` | `ReactNode` | yes | Custom text for the right-hand value readout. Defaults to the rounded percentage. |
 | `variant` | `AkProgressVariant` | yes | 外观档位。 |
+
+## AkProgressStack
+
+_(no props of its own)_
 
 ## AkRarity
 

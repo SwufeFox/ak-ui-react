@@ -45,6 +45,9 @@ import {
   AkCounter,
   AkSanContainer,
   AkLoadingScreen,
+  AkNewsList,
+  AkNoticeStack,
+  AkProgressStack,
   AkDialog,
   AkLevel,
   AkSkeleton,
@@ -734,6 +737,28 @@ function ReferenceView() {
           <AkGauge label={t('common.deploy')} value={64} unit={t('common.percent')} />
           <AkGauge label={t('common.heat')} value={88} unit={t('common.percent')} variant="warning" />
         </div>
+
+        {/* 两个 stack 只是布局壳；这里用它们把上面两类东西各自成组，顺便证明能混装 */}
+        <div style={{ marginTop: 'var(--ak-space-4)' }}>
+          <span className="demo-eyebrow">{t('ref.feedback.stack')}</span>
+          <AkNoticeStack style={{ marginTop: 'var(--ak-space-3, 0.75rem)' }}>
+            <AkNotice title={t('notice.info.title')} code={t('notice.code.info')}>
+              {t('notice.info.body')}
+            </AkNotice>
+            <AkNotice variant="danger" title={t('notice.crit.title')} code={t('notice.code.crit')}>
+              {t('notice.crit.body')}
+            </AkNotice>
+          </AkNoticeStack>
+          <AkProgressStack style={{ marginTop: 'var(--ak-space-4)' }}>
+            <AkProgress label={t('ref.feedback.progress.deploy')} value={72} />
+            <AkProgress
+              label={t('ref.feedback.progress.integrity')}
+              value={18}
+              variant="danger"
+              valueLabel={t('ref.feedback.progress.critical')}
+            />
+          </AkProgressStack>
+        </div>
       </Block>
 
       <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')}>
@@ -1309,6 +1334,34 @@ function ReferenceView() {
                   <AkOverline>tall content</AkOverline>
                 </div>
               </AkScrollArea>
+            </div>
+
+            {/*
+              公告列表：容器查询控制的 3 列 → 单列降级。
+              外面套一个窄盒子，好让人一眼看到它在 34rem 以下会换成单列。
+            */}
+            <div>
+              <AkOverline>{t('ref.news.title')}</AkOverline>
+              <AkNewsList
+                label={t('ref.news.label')}
+                empty={t('ref.news.empty')}
+                style={{ marginTop: 'var(--ak-space-3, 0.75rem)', maxWidth: '34rem' }}
+                items={[
+                  {
+                    category: t('ref.news.catNotice'),
+                    title: t('ref.news.item1'),
+                    time: '10-20',
+                    dateTime: '2026-10-20',
+                  },
+                  {
+                    category: t('ref.news.catEvent'),
+                    title: t('ref.news.item2'),
+                    time: '10-19',
+                    dateTime: '2026-10-19',
+                  },
+                  { category: t('ref.news.catNotice'), title: t('ref.news.item3'), time: '10-18', dateTime: '2026-10-18' },
+                ]}
+              />
             </div>
           </div>
         </Block>

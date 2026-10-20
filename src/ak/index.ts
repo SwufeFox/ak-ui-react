@@ -10,8 +10,8 @@ export {
   type AkCardVariant,
 } from './ui/card/AkCard'
 export { AkStatus, AkTag, type AkStatusProps, type AkStatusVariant, type AkTagProps, type AkTagVariant } from './ui/status/AkStatus'
-export { AkNotice, type AkNoticeProps, type AkNoticeVariant } from './ui/notice/AkNotice'
-export { AkGauge, AkProgress, type AkGaugeProps, type AkGaugeVariant, type AkProgressProps, type AkProgressVariant } from './ui/progress/AkProgress'
+export { AkNotice, AkNoticeStack, type AkNoticeProps, type AkNoticeVariant } from './ui/notice/AkNotice'
+export { AkGauge, AkProgress, AkProgressStack, type AkGaugeProps, type AkGaugeVariant, type AkProgressProps, type AkProgressVariant } from './ui/progress/AkProgress'
 export { AkSlider, type AkSliderProps } from './ui/slider/AkSlider'
 export { AkInputNumber, type AkInputNumberProps } from './ui/input-number/AkInputNumber'
 export { AkSegmented, AkTabs, type AkSegmentedOption, type AkSegmentedProps, type AkTabsItem, type AkTabsProps } from './ui/tabs/AkTabs'
@@ -172,6 +172,9 @@ export {
   type AkSkeletonProps,
   type AkSpinnerProps,
 } from './ui/data/AkData'
+
+// 公告列表：_ak-news-list.scss 规格完整（含容器查询降级），此前无出口
+export { AkNewsList, type AkNewsListProps, type AkNewsListItem } from './ui/news/AkNewsList'
 
 // 全屏加载画面：_ak-loading.scss 里唯一没有出口的那块
 export {
