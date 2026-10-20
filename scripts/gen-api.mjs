@@ -91,10 +91,17 @@ for (const f of files) {
   const rel = path.relative(path.join(root, 'dist'), f)
 
   // 每个 export interface Ak* { ... }（extends 可选）
-  const re = /(?:^|\n)((?:\/\*\*[\s\S]*?\*\/\s*)?)export interface (Ak\w+)(?:\s+extends\s+([^{]+?))?\s*\{([\s\S]*?)\n\}/g
+  const re = /(?:^|\n)[ \t]*export interface (Ak\w+)(?:\s+extends\s+([^{]+?))?\s*\{([\s\S]*?)\n\}/g
   let m
   while ((m = re.exec(src))) {
-    const [, lead, name, ext, body] = m
+    const [, name, ext, body] = m
+    const exportStart = m.index + m[0].indexOf('export interface')
+    const prefix = src.slice(0, exportStart)
+    const leadEnd = prefix.lastIndexOf('*/')
+    const leadStart = prefix.lastIndexOf('/**', leadEnd)
+    const lead = leadEnd >= 0 && leadStart >= 0 && /^\s*$/.test(prefix.slice(leadEnd + 2))
+      ? prefix.slice(leadStart, leadEnd + 2)
+      : ''
     const doc = lead ? flattenDoc(lead.replace(/^\/\*\*|\*\/$/g, '').split('\n')) : ''
     interfaces.push({ name, extends: (ext || '').trim(), doc, props: parseInterfaceBody(body), file: rel })
   }

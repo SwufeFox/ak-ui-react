@@ -1,27 +1,210 @@
 @use "variables" as *;
 
-.ak-menu-anchor { position: relative; display: inline-flex; }
-.ak-menu__trigger { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.5rem; padding: .5rem .8rem; border: 1px solid var(--ak-border, #626a70); border-left: 3px solid var(--ak-signal-action, #{$yellow}); background: var(--ak-surface, #171a1d); color: var(--ak-text, #f3f4ef); font: 700 .78rem $font-monospace; letter-spacing: .04em; cursor: pointer; }
-.ak-menu__trigger:focus-visible, .ak-menu__item:focus-visible { outline: 2px solid var(--ak-signal-info, #{$blue}); outline-offset: 2px; }
-.ak-menu { box-sizing: border-box; min-width: 12rem; max-width: min(20rem, calc(100vw - 2rem)); max-height: min(24rem, calc(100vh - 2rem)); overflow: auto; margin: .35rem 0; padding: .3rem; border: 1px solid #626a70; border-top: 3px solid var(--ak-signal-action, #{$yellow}); border-radius: 0; background: #171a1d; color: #f3f4ef; box-shadow: 0 1rem 3rem #0008; font-family: $font-monospace; }
-.ak-menu:popover-open { animation: ak-popover-enter 120ms ease-out; }
-.ak-menu__item { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; width: 100%; min-height: 2.35rem; padding: .55rem .7rem; border: 0; background: transparent; color: inherit; text-align: left; font: inherit; font-size: .76rem; cursor: pointer; }
-.ak-menu__item:hover:not(:disabled), .ak-menu__item:focus-visible { background: #ffffff12; color: var(--ak-signal-action, #{$yellow}); }
-.ak-menu__item[data-destructive] { color: var(--ak-signal-danger, #e85b55); }
-.ak-menu__item:disabled { opacity: .45; cursor: not-allowed; }
-.ak-menu__item kbd { color: #9da5aa; font-size: .65rem; }
-.ak-menu__separator { height: 0; margin: .25rem .55rem; border: 0; border-top: 1px solid #ffffff25; }
-.ak-menu__group + .ak-menu__group { margin-top: .25rem; padding-top: .25rem; border-top: 1px solid #ffffff25; }
-.ak-menubar, .ak-toolbar { display: flex; align-items: center; gap: .25rem; flex-wrap: wrap; padding: .35rem; border: 1px solid #626a70; border-left: 3px solid var(--ak-signal-info, #{$blue}); background: #171a1d; }
-.ak-menubar [role="menuitem"], .ak-toolbar > button { min-height: 2.35rem; padding: .5rem .75rem; border: 1px solid transparent; background: transparent; color: #f3f4ef; font: 700 .75rem $font-monospace; cursor: pointer; }
-.ak-menubar [role="menuitem"]:hover, .ak-toolbar > button:hover { border-color: #626a70; color: var(--ak-signal-action, #{$yellow}); }
-.ak-menubar :focus-visible, .ak-toolbar :focus-visible { outline: 2px solid var(--ak-signal-info, #{$blue}); outline-offset: 1px; }
-.ak-collapsible { border: 1px solid #626a70; border-left: 3px solid var(--ak-signal-action, #{$yellow}); background: #171a1d; color: #f3f4ef; }
-.ak-collapsible > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1rem; font: 700 .78rem $font-monospace; cursor: pointer; list-style: none; }
-.ak-collapsible > summary::-webkit-details-marker { display: none; }
-.ak-collapsible > summary span { color: var(--ak-signal-action, #{$yellow}); }
-.ak-collapsible[open] > summary span { transform: rotate(45deg); }
-.ak-collapsible__content { padding: 0 1rem 1rem; color: #bdc4c9; font-size: .85rem; line-height: 1.6; }
-.ak-context-menu { display: contents; }
-@media (max-width: 32rem) { .ak-menubar, .ak-toolbar { align-items: stretch; } .ak-menubar [role="menuitem"], .ak-toolbar > button { flex: 1 1 auto; } }
-@media (prefers-reduced-motion: reduce) { .ak-menu:popover-open { animation: none; } }
+.ak-menu-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.ak-menu__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--ak-border-strong, #626a70);
+  border-inline-start: 3px solid var(--ak-signal-action, #{$yellow});
+  background: var(--ak-surface-raised, #171a1d);
+  color: var(--ak-text-primary, #f3f4ef);
+  font: 700 0.78rem $font-monospace;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.ak-menu__trigger:focus-visible,
+.ak-menu__item:focus-visible {
+  outline: 2px solid var(--ak-signal-info, #{$blue});
+  outline-offset: 2px;
+}
+
+.ak-menu {
+  box-sizing: border-box;
+  min-width: 12rem;
+  max-width: min(20rem, calc(100vw - 2rem));
+  max-height: min(24rem, calc(100vh - 2rem));
+  overflow: auto;
+  padding: 0.3rem;
+  border: 1px solid var(--ak-border-strong, #626a70);
+  border-block-start: 3px solid var(--ak-signal-action, #{$yellow});
+  border-radius: 0;
+  background: var(--ak-surface-raised, #171a1d);
+  color: var(--ak-text-primary, #f3f4ef);
+  box-shadow: 0 1rem 3rem #0008;
+  font-family: $font-monospace;
+}
+
+// `popoverTarget` makes its trigger the implicit CSS anchor. The browser flips
+// the menu when it would cross a viewport edge; the popover remains in the top layer.
+.ak-menu--anchored {
+  position: fixed;
+  inset: auto;
+  margin: 0.35rem 0;
+  position-area: block-end span-inline-start;
+  position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+}
+
+.ak-menu--context {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+}
+
+.ak-menu:popover-open {
+  animation: ak-popover-enter 120ms ease-out;
+}
+
+.ak-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.ak-menu__item:hover:not(:disabled),
+.ak-menu__item:focus-visible {
+  background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
+  color: var(--ak-signal-action, #{$yellow});
+}
+
+.ak-menu__item[data-destructive] {
+  color: var(--ak-signal-danger, #e85b55);
+}
+
+.ak-menu__item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ak-menu__item kbd {
+  color: var(--ak-text-secondary, #9da5aa);
+  font-size: 0.65rem;
+}
+
+.ak-menu__separator {
+  height: 0;
+  margin: 0.25rem 0.55rem;
+  border: 0;
+  border-block-start: 1px solid var(--ak-border-subtle, #ffffff25);
+}
+
+.ak-menu__group + .ak-menu__group {
+  margin-block-start: 0.25rem;
+  padding-block-start: 0.25rem;
+  border-block-start: 1px solid var(--ak-border-subtle, #ffffff25);
+}
+
+.ak-menubar,
+.ak-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  padding: 0.35rem;
+  border: 1px solid var(--ak-border-strong, #626a70);
+  border-inline-start: 3px solid var(--ak-signal-info, #{$blue});
+  background: var(--ak-surface-raised, #171a1d);
+}
+
+.ak-menubar [role="menuitem"],
+.ak-toolbar > button {
+  min-height: 2.35rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ak-text-primary, #f3f4ef);
+  font: 700 0.75rem $font-monospace;
+  cursor: pointer;
+}
+
+.ak-menubar [role="menuitem"]:hover,
+.ak-toolbar > button:hover {
+  border-color: var(--ak-border-strong, #626a70);
+  color: var(--ak-signal-action, #{$yellow});
+}
+
+.ak-menubar :focus-visible,
+.ak-toolbar :focus-visible {
+  outline: 2px solid var(--ak-signal-info, #{$blue});
+  outline-offset: 1px;
+}
+
+.ak-collapsible {
+  border: 1px solid var(--ak-border-strong, #626a70);
+  border-inline-start: 3px solid var(--ak-signal-action, #{$yellow});
+  background: var(--ak-surface-raised, #171a1d);
+  color: var(--ak-text-primary, #f3f4ef);
+}
+
+.ak-collapsible > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  font: 700 0.78rem $font-monospace;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ak-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ak-collapsible > summary span {
+  color: var(--ak-signal-action, #{$yellow});
+  transition: transform var(--ak-motion-fast) var(--ak-ease-standard);
+}
+
+.ak-collapsible[open] > summary span {
+  transform: rotate(45deg);
+}
+
+.ak-collapsible__content {
+  padding: 0 1rem 1rem;
+  color: var(--ak-text-secondary, #bdc4c9);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.ak-context-menu {
+  display: contents;
+}
+
+@media (max-width: 32rem) {
+  .ak-menubar,
+  .ak-toolbar {
+    align-items: stretch;
+  }
+
+  .ak-menubar [role="menuitem"],
+  .ak-toolbar > button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ak-menu:popover-open,
+  .ak-collapsible > summary span {
+    animation: none;
+    transition: none;
+  }
+}

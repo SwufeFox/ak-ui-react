@@ -151,13 +151,15 @@ export function AkDropdownMenu({ label, items, className }: AkDropdownMenuProps)
   return (
     <span className={cx('ak-menu-anchor', className)}>
       <button
+        id={`${menuId}-trigger`}
         ref={triggerRef}
         type="button"
         className="ak-menu__trigger"
+        popoverTarget={menuId}
+        popoverTargetAction="toggle"
         aria-haspopup="menu"
         aria-controls={menuId}
         aria-expanded={open}
-        onClick={() => open ? setOpen(false) : openAndFocus()}
         onKeyDown={(event) => {
           if (event.key === 'ArrowDown') { event.preventDefault(); openAndFocus() }
           if (event.key === 'ArrowUp') { event.preventDefault(); openAndFocus(true) }
@@ -165,7 +167,7 @@ export function AkDropdownMenu({ label, items, className }: AkDropdownMenuProps)
       >
         {label}<span aria-hidden="true">▾</span>
       </button>
-      <MenuSurface id={menuId} surfaceRef={panelRef} returnFocusRef={triggerRef} open={open} onOpenChange={onOpenChange} onKeyDown={moveFocus}>
+      <MenuSurface id={menuId} className="ak-menu--anchored" aria-labelledby={`${menuId}-trigger`} surfaceRef={panelRef} returnFocusRef={triggerRef} open={open} onOpenChange={onOpenChange} onKeyDown={moveFocus}>
         <MenuEntries items={items} close={() => setOpen(false)} />
       </MenuSurface>
     </span>
@@ -204,6 +206,22 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
     requestAnimationFrame(() => panelRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus())
   }
 
+  useEffect(() => {
+    if (!open) return
+    const frame = requestAnimationFrame(() => {
+      const rect = panelRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setPoint((current) => {
+        const x = Math.max(8, Math.min(current.x, window.innerWidth - rect.width - 8))
+        const y = current.y + rect.height + 8 <= window.innerHeight
+          ? current.y
+          : Math.max(8, current.y - rect.height)
+        return x === current.x && y === current.y ? current : { x, y }
+      })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [open])
+
   return (
     <div
       ref={regionRef}
@@ -211,13 +229,14 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
       role="group"
       aria-haspopup="menu"
       aria-controls={menuId}
+      aria-expanded={open}
       className={cx('ak-context-menu', className)}
       onContextMenu={(event) => {
         event.preventDefault()
         openAt(event.clientX, event.clientY)
       }}
       onKeyDown={(event) => {
-        if ((event.shiftKey && event.key === 'F10') || event.key === 'AkContextMenu') {
+        if ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') {
           event.preventDefault()
           const box = event.currentTarget.getBoundingClientRect()
           openAt(box.left, box.bottom)
@@ -227,6 +246,7 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
       {children}
       <MenuSurface
         id={menuId}
+        className="ak-menu--context"
         surfaceRef={panelRef}
         returnFocusRef={regionRef}
         open={open}
@@ -251,33 +271,41 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
   )
 }
 
+function setRovingTabStop(root: HTMLElement, selector: string, active?: HTMLElement) {
+  const items = [...root.querySelectorAll<HTMLElement>(selector)].filter((item) => !item.hasAttribute('disabled') && item.getAttribute('aria-disabled') !== 'true')
+  const current = active && items.includes(active) ? active : items.find((item) => item.tabIndex === 0) ?? items[0]
+  items.forEach((item) => { item.tabIndex = item === current ? 0 : -1 })
+}
+
 /** Props for the ARIA menubar container. Its child controls should use role="menuitem". */
 export interface AkMenubarProps extends HTMLAttributes<HTMLDivElement> {
   /** Menu item controls. */
   children: ReactNode
 }
 
-/** A horizontal menubar with arrow and Home/End focus movement. */
+/** A horizontal menubar with a single tab stop and arrow/Home/End focus movement. */
 export function AkMenubar({ children, className, ...props }: AkMenubarProps) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (rootRef.current) setRovingTabStop(rootRef.current, '[role="menuitem"]') }, [children])
   return (
-    <div
-      {...props}
-      role="menubar"
-      className={cx('ak-menubar', className)}
+    <div {...props} ref={rootRef} role="menubar" className={cx('ak-menubar', className)}
+      onFocusCapture={(event) => {
+        props.onFocusCapture?.(event)
+        if (event.target instanceof HTMLElement) setRovingTabStop(event.currentTarget, '[role="menuitem"]', event.target)
+      }}
       onKeyDown={(event) => {
         props.onKeyDown?.(event)
         if (event.defaultPrevented) return
-        const buttons = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])')]
-        const i = buttons.indexOf(document.activeElement as HTMLElement)
+        const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]')]
+        const i = items.indexOf(document.activeElement as HTMLElement)
         if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
           event.preventDefault()
-          buttons[(i + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length]?.focus()
+          items[(i + (event.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length]?.focus()
         } else if (event.key === 'Home' || event.key === 'End') {
           event.preventDefault()
-          buttons[event.key === 'Home' ? 0 : buttons.length - 1]?.focus()
+          items[event.key === 'Home' ? 0 : items.length - 1]?.focus()
         }
-      }}
-    >
+      }}>
       {children}
     </div>
   )
@@ -287,22 +315,25 @@ export function AkMenubar({ children, className, ...props }: AkMenubarProps) {
 export interface AkToolbarProps extends HTMLAttributes<HTMLDivElement> {
   /** Accessible name required for the toolbar landmark. */
   label: string
-  /** AkToolbar controls. */
+  /** Toolbar controls. */
   children: ReactNode
 }
 
-/** A horizontal toolbar with arrow and Home/End focus movement. */
+/** A horizontal toolbar with one tab stop and arrow/Home/End focus movement. */
 export function AkToolbar({ children, label, className, ...props }: AkToolbarProps) {
+  const rootRef = useRef<HTMLDivElement>(null)
+  const selector = 'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [role="button"]'
+  useEffect(() => { if (rootRef.current) setRovingTabStop(rootRef.current, selector) }, [children])
   return (
-    <div
-      {...props}
-      role="toolbar"
-      aria-label={label}
-      className={cx('ak-toolbar', className)}
+    <div {...props} ref={rootRef} role="toolbar" aria-label={label} className={cx('ak-toolbar', className)}
+      onFocusCapture={(event) => {
+        props.onFocusCapture?.(event)
+        if (event.target instanceof HTMLElement) setRovingTabStop(event.currentTarget, selector, event.target)
+      }}
       onKeyDown={(event) => {
         props.onKeyDown?.(event)
         if (event.defaultPrevented) return
-        const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), [tabindex="0"]')]
+        const controls = [...event.currentTarget.querySelectorAll<HTMLElement>(selector)]
         const i = controls.indexOf(document.activeElement as HTMLElement)
         const forward = event.key === 'ArrowRight' || event.key === 'ArrowDown'
         const backward = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
@@ -313,8 +344,7 @@ export function AkToolbar({ children, label, className, ...props }: AkToolbarPro
           event.preventDefault()
           controls[event.key === 'Home' ? 0 : controls.length - 1]?.focus()
         }
-      }}
-    >
+      }}>
       {children}
     </div>
   )
@@ -324,25 +354,25 @@ export function AkToolbar({ children, label, className, ...props }: AkToolbarPro
 export interface AkCollapsibleProps extends Omit<HTMLAttributes<HTMLDetailsElement>, 'title' | 'onToggle'> {
   /** Summary shown while the disclosure is open or closed. */
   title: ReactNode
-  /** AkCollapsible content. */
+  /** Collapsible content. */
   children: ReactNode
   /** Initial open state for uncontrolled use. */
   defaultOpen?: boolean
-  /** Controlled open state. When provided, pair with `onOpenChange`. */
+  /** Controlled open state. When provided, pair with onOpenChange. */
   open?: boolean
   /** Called when the native disclosure changes state. */
   onOpenChange?: (open: boolean) => void
 }
 
-/** A native `<details>` disclosure; supports both controlled and uncontrolled state. */
+/** A native details disclosure; supports controlled and uncontrolled state. */
 export function AkCollapsible({ title, children, defaultOpen, open, onOpenChange, className, ...props }: AkCollapsibleProps) {
   return (
-    <details
-      {...props}
-      className={cx('ak-collapsible', className)}
-      open={open ?? defaultOpen}
-      onToggle={(event) => onOpenChange?.(event.currentTarget.open)}
-    >
+    <details {...props} className={cx('ak-collapsible', className)} open={open ?? defaultOpen}
+      onToggle={(event) => {
+        const next = event.currentTarget.open
+        onOpenChange?.(next)
+        if (open !== undefined && next !== open) event.currentTarget.open = open
+      }}>
       <summary>{title}<span aria-hidden="true">+</span></summary>
       <div className="ak-collapsible__content">{children}</div>
     </details>

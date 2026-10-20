@@ -13,24 +13,26 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkBrackets`](#akbrackets) · [`AkBreadcrumb`](#akbreadcrumb) · [`AkButton`](#akbutton) · [`AkButtonGroup`](#akbuttongroup)
 - [`AkCard`](#akcard) · [`AkCardContent`](#akcardcontent) · [`AkCardDescription`](#akcarddescription) · [`AkCardFooter`](#akcardfooter)
 - [`AkCardHeader`](#akcardheader) · [`AkCardTitle`](#akcardtitle) · [`AkChevrons`](#akchevrons) · [`AkChoice`](#akchoice)
-- [`AkCodeId`](#akcodeid) · [`AkCommand`](#akcommand) · [`AkCommandGrid`](#akcommandgrid) · [`AkCommandGroup`](#akcommandgroup)
-- [`AkCorner`](#akcorner) · [`AkCounter`](#akcounter) · [`AkCut`](#akcut) · [`AkDepth`](#akdepth)
-- [`AkDepthLayer`](#akdepthlayer) · [`AkDialog`](#akdialog) · [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider)
-- [`AkElite`](#akelite) · [`AkEn`](#aken) · [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel)
-- [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph)
-- [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone)
-- [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv)
-- [`AkKvItem`](#akkvitem) · [`AkLevel`](#aklevel) · [`AkMediaGallery`](#akmediagallery) · [`AkMosaic`](#akmosaic)
-- [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline)
-- [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover)
-- [`AkPot`](#akpot) · [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession)
-- [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar)
-- [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope) · [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented)
-- [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels)
-- [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus)
-- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable) · [`AkTabs`](#aktabs)
-- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail)
-- [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkCodeId`](#akcodeid) · [`AkCollapsible`](#akcollapsible) · [`AkCommand`](#akcommand) · [`AkCommandGrid`](#akcommandgrid)
+- [`AkCommandGroup`](#akcommandgroup) · [`AkContextMenu`](#akcontextmenu) · [`AkCorner`](#akcorner) · [`AkCounter`](#akcounter)
+- [`AkCut`](#akcut) · [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDialog`](#akdialog)
+- [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider) · [`AkDropdownMenu`](#akdropdownmenu) · [`AkElite`](#akelite)
+- [`AkEn`](#aken) · [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack)
+- [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox)
+- [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput)
+- [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem)
+- [`AkLevel`](#aklevel) · [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup) · [`AkMenuSeparator`](#akmenuseparator)
+- [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNotice`](#aknotice)
+- [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination)
+- [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
+- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
+- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
+- [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton)
+- [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec)
+- [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes)
+- [`AkTable`](#aktable) · [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup)
+- [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust)
+- [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -205,6 +207,20 @@ Extends `SlotProps<HTMLSpanElement>`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
+## AkCollapsible
+
+Props for a native disclosure element.
+
+Extends `Omit<HTMLAttributes<HTMLDetailsElement>, 'title' | 'onToggle'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | no | Summary shown while the disclosure is open or closed. |
+| `children` | `ReactNode` | no | Collapsible content. |
+| `defaultOpen` | `boolean` | yes | Initial open state for uncontrolled use. |
+| `open` | `boolean` | yes | Controlled open state. When provided, pair with onOpenChange. |
+| `onOpenChange` | `(open: boolean) => void` | yes | Called when the native disclosure changes state. |
+
 ## AkCommand
 
 Extends `Omit<HTMLAttributes<HTMLElement>, 'children'>`.
@@ -240,6 +256,17 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `variant` | `'default' \| 'recruitment'` | yes | `recruitment` 是那条带标题栏的青色双列组（干员招募面板那种）。 |
 | `label` | `ReactNode` | yes | 组标题（`.ak-command-group__label`，仅 `recruitment` 有位置）。 |
 | `children` | `ReactNode` | yes | — |
+
+## AkContextMenu
+
+Props for a right-click or keyboard-invoked context menu.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | no | Region on which the context menu is available. |
+| `items` | `readonly AkMenuItem[]` | no | Menu entries, rendered in order. |
+| `label` | `string` | yes | Accessible name for the menu. Defaults to “Context menu”. |
+| `className` | `string` | yes | Extra class for the context-sensitive region. |
 
 ## AkCorner
 
@@ -334,6 +361,16 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | yes | 居中的标签或图标。不传则只有两条不同宽度的横线。 |
+
+## AkDropdownMenu
+
+Props for the native-popover dropdown menu.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | no | Trigger label. |
+| `items` | `readonly AkMenuItem[]` | no | Menu entries, rendered in order. |
+| `className` | `string` | yes | Extra class for the trigger-and-menu wrapper. |
 
 ## AkElite
 
@@ -524,6 +561,29 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `onValueChange` | `(index: number) => void` | yes | 序号变化时回调。 |
 | `renderMedia` | `(item: GalleryItem, index: number) => ReactNode` | yes | Custom slide media, replacing the default <img>. |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+
+## AkMenuGroup
+
+Props for a labelled menu group.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | no | Entries in the group. |
+| `label` | `string` | yes | Optional accessible name for this group. |
+
+## AkMenuSeparator
+
+_(no props of its own)_
+
+## AkMenubar
+
+Props for the ARIA menubar container. Its child controls should use role="menuitem".
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | no | Menu item controls. |
 
 ## AkMosaic
 
@@ -894,6 +954,17 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
 | `badge` | `ReactNode` | yes | 左下角角标（编号那种）。 |
 | `cut` | `boolean` | yes | 右上角切角。 |
 | `size` | `'default' \| 'wide' \| 'lg'` | yes | — |
+
+## AkToolbar
+
+Props for the ARIA toolbar.
+
+Extends `HTMLAttributes<HTMLDivElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | no | Accessible name required for the toolbar landmark. |
+| `children` | `ReactNode` | no | Toolbar controls. |
 
 ## AkTrust
 
