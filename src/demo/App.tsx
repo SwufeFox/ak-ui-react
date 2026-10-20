@@ -135,6 +135,12 @@ const CATEGORIES = [
 const StageContext = createContext<{ active: string; select: (id: string) => void } | null>(null)
 
 /**
+ * `selectedCommand` 是全局共用的一份状态，菜单、工具栏、指令面板都会写它。
+ * 只有下面这几个值在字典里有 `ref.menu.*` 键，回显时据此过滤。
+ */
+const MENU_ACTIONS = new Set(['inspect', 'deploy', 'cancel', 'archive', 'file', 'edit', 'view'])
+
+/**
  * 参考视图的分类面板。
  *
  * 关键行为：**只有激活的那一块真正渲染**（互斥面板，对应方舟「原位替换而非窗口堆叠」），
@@ -622,17 +628,34 @@ function ReferenceView() {
               { label: t('ref.menu.disabled'), disabled: true },
               { label: t('ref.menu.cancel'), destructive: true, onSelect: () => setSelectedCommand('cancel') },
             ]} />
-            <span className="demo-note">{t('ref.menu.context')}</span>
+            {/* 读一条“最近操作”，否则点菜单什么也不会发生，演示等于死的。
+                selectedCommand 也被别的区块复用（slot-1 / operation …），
+                那些值在字典里没有对应键，直接拼接会渲染成 undefined，所以只在白名单内回显。 */}
+            {MENU_ACTIONS.has(selectedCommand) ? (
+              <span className="demo-note">
+                {t('ref.menu.lastAction')}: {t(`ref.menu.${selectedCommand}` as MessageKey)}
+              </span>
+            ) : null}
           </div>
+          {/* menubar：一条 roving tab stop + 方向键/Home/End 移动焦点（组件已实现） */}
           <AkMenubar aria-label={t('ref.menu.scope')}>
-            {(['file', 'edit', 'view'] as const).map((item) => <button key={item} type="button" role="menuitem" onClick={() => setSelectedCommand(item)}>{t(`ref.menu.${item}`)}</button>)}
+            {(['file', 'edit', 'view'] as const).map((item) => (
+              <button key={item} type="button" role="menuitem" onClick={() => setSelectedCommand(item)}>
+                {t(`ref.menu.${item}`)}
+              </button>
+            ))}
           </AkMenubar>
+          {/* toolbar：工具条内的按钮也是 roving tab stop，但保留普通按钮语义 */}
           <AkToolbar label={t('ref.menu.scope')}>
             <AkButton variant="outline" onClick={() => setCount((value) => value + 1)}>{t('ref.menu.bold')}</AkButton>
             <AkButton variant="outline" onClick={() => setSelectedCommand('archive')}>{t('ref.menu.archive')}</AkButton>
+            <span className="demo-note">{t('ref.menu.toolbarCount', { n: count })}</span>
           </AkToolbar>
           <AkContextMenu items={[{ label: t('ref.menu.inspect'), onSelect: () => setSelectedCommand('inspect') }, { label: t('ref.menu.archive'), onSelect: () => setSelectedCommand('archive') }]}>
-            <div className="demo-menu-target">{t('ref.menu.context')} <span>{selectedCommand.toUpperCase()}</span></div>
+            <div className="demo-menu-target">
+              <span>{t('ref.menu.context')}</span>
+              <em>{t('ref.menu.contextHint')}</em>
+            </div>
           </AkContextMenu>
           <AkCollapsible title={t('ref.menu.disclosure')}>
             <p>{t('ref.menu.body')}</p>
