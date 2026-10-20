@@ -31,10 +31,14 @@ body {
 
 /* ── 应用外壳：顶栏 + 视图 ──────────────────────────────────────────────── */
 
-.demo-app {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 100vh;
+  .demo-app {
+    display: grid;
+    /* 列必须显式给 1fr。只写 grid-template-rows 时，隐式列是 auto，
+       而 auto 轨道里的块级子元素会**收缩到适应内容**（这里约 742px），
+       于是 .demo-main 再怎么写 max-width 也填不满整行 —— 这就是「很窄」的真因。 */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
   background:
     radial-gradient(circle at 15% 0%, var(--demo-canvas-glow), transparent 45%),
     var(--demo-canvas);
@@ -377,8 +381,20 @@ body {
 
 /* ── 参考视图 ──────────────────────────────────────────────────────────── */
 
+/*
+  主容器不再把自己收成一条窄列。
+  76rem 在宽屏上只用了半屏，配上分类栏后舞台被压到 ~480px —— 控件只能挤在里面。
+  放宽到 96rem，把多出来的宽度交给舞台。
+*/
 .demo-main {
-  max-width: 76rem;
+  /* width:100% 是必需的：.demo-main 是 grid item，而 auto 的 margin-inline
+     会让它按 fit-content 收缩、不再拉伸（实测卡在 742px，容器却有 1265px）。
+     显式 width + justify-self 之后，max-width 才真正成为唯一的宽度上限。 */
+  /* border-box 必需：否则 width:100% 之上再加左右 padding，整行会溢出视口。 */
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 96rem;
+  justify-self: center;
   margin: 0 auto;
   padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem) 6rem;
 }
@@ -418,10 +434,15 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 }
 
+/*
+  Stack 原来被限死在 34rem（544px）。在宽屏舞台上那是刻意的窄栏，
+  但分类栏一上，有效宽度本来就 ~480px，这层再收一次就只剩挤压。
+  改成「宽屏不设限、窄屏撑满」，把宽度决定权交回容器。
+*/
 .demo-stack {
   display: grid;
   gap: var(--ak-space-4, 1rem);
-  max-width: 34rem;
+  max-width: 100%;
 }
 
 .demo-canvas {
@@ -619,10 +640,11 @@ body {
 
 /* 组件目录：左侧分类栏 + 右侧原位舞台。
    对应方舟「浅而广」—— 用分类栏承载广度，用互斥面板避免纵向堆叠。 */
+/* 分类栏宽度收一档：它只放 01–17 的短标签，272px 是浪费，省下来的都给舞台。 */
 .demo-catalogue {
   display: grid;
-  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
-  gap: clamp(1.25rem, 3vw, 2.5rem);
+  grid-template-columns: minmax(11.5rem, 14rem) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
   align-items: start;
 }
 
