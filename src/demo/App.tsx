@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   AkAssetLoader,
   AkAvatar,
@@ -102,11 +102,62 @@ import './demo.css'
 type View = 'console' | 'reference'
 type Theme = 'terminal' | 'archive'
 
-/** 参考视图的区块外壳。`note` 是可选的说明段。 */
+/**
+ * 组件目录的分类清单。顺序即编号顺序（01…17），也是「上一组 / 下一组」的遍历顺序。
+ * id 与各 `Block` 的锚点一一对应，深链接 `#components-N` 仍然可用。
+ */
+const CATEGORIES = [
+  { id: 'components-1', title: 'ref.actions.title' },
+  { id: 'components-2', title: 'ref.menu.title' },
+  { id: 'components-3', title: 'ref.surfaces.title' },
+  { id: 'components-4', title: 'ref.feedback.title' },
+  { id: 'components-5', title: 'ref.inputs.title' },
+  { id: 'components-6', title: 'ref.navigation.title' },
+  { id: 'components-7', title: 'ref.effects.title' },
+  { id: 'components-8', title: 'ref.gallery.title' },
+  { id: 'components-9', title: 'ref.site.title' },
+  { id: 'components-10', title: 'ref.shell.title' },
+  { id: 'components-11', title: 'ref.decor.title' },
+  { id: 'components-12', title: 'ref.arknights.title' },
+  { id: 'components-13', title: 'ref.controls.title' },
+  { id: 'components-14', title: 'ref.form.title' },
+  { id: 'components-15', title: 'ref.data.title' },
+  { id: 'components-16', title: 'ref.collection.title' },
+  { id: 'components-17', title: 'ref.command.title' },
+] as const satisfies readonly { id: string; title: MessageKey }[]
+
+/**
+ * 舞台上下文：当前激活的分类 id + 切换函数。
+ *
+ * 用 context 而不是把 `active` 逐层透传，是因为 17 个 `Block` 是平铺在 JSX 里的
+ * （有的还包了闭包变量），透传会改动每一个调用点。context 让调用点保持原样。
+ */
+const StageContext = createContext<{ active: string; select: (id: string) => void } | null>(null)
+
+/**
+ * 参考视图的分类面板。
+ *
+ * 关键行为：**只有激活的那一块真正渲染**（互斥面板，对应方舟「原位替换而非窗口堆叠」），
+ * 其余 16 块完全不进 DOM —— 这正是「浅而广」里那个「广」字的落点：
+ * 单屏信息密度靠分类栏承载，而不是靠把 17 个区块摞成一万五千像素的长页。
+ */
 function Block({ id, eyebrow, title, note, children }: { id: string; eyebrow: string; title: string; note?: ReactNode; children: ReactNode }) {
+  const stage = useContext(StageContext)
+  if (stage && stage.active !== id) return null
+
+  /*
+    编号只认一个真相来源：`CATEGORIES` 里的顺序（也就是左侧分类栏显示的那个）。
+    字典里的 eyebrow 还带着早期顺序的硬编码编号（06 之后直接跳 12），
+    两套编号同屏打架会让「13 / 表单」和「14 表单控件」互相矛盾。
+    这里把字典里的旧编号剥掉，改用 CATEGORIES 的顺序重新生成，漂移从此不可能发生。
+  */
+  const index = CATEGORIES.findIndex((category) => category.id === id)
+  const displayEyebrow =
+    index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow.replace(/^\s*\d+\s*\/\s*/, '')}`
+
   return (
     <section id={id} className="demo-block" aria-labelledby={`${id}-title`}>
-      <span className="demo-eyebrow">{eyebrow}</span>
+      <span className="demo-eyebrow">{displayEyebrow}</span>
       <h2 id={`${id}-title`}>{title}</h2>
       {note ? <p className="demo-note">{note}</p> : null}
       {children}
@@ -465,6 +516,47 @@ function ReferenceView() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
 
+  /**
+   * 当前激活的分类。初始值从 hash 推导，所以 `#components-14` 这样的深链接可以直接落到对应面板。
+   * 注意这里读的是**初始值**，不是每次 hash 变化都跟随 —— 面板切换本身会写 hash，
+   * 若再反向同步会形成回环。
+   */
+  const [active, setActive] = useState<string>(() => {
+    if (typeof window === 'undefined') return CATEGORIES[0].id
+    const hash = window.location.hash.replace(/^#/, '')
+    return CATEGORIES.some((c) => c.id === hash) ? hash : CATEGORIES[0].id
+  })
+  const activeIndex = Math.max(0, CATEGORIES.findIndex((c) => c.id === active))
+  const stageRef = useRef<HTMLDivElement>(null)
+  const stageValue = useMemo(() => ({ active, select: setActive }), [active])
+
+  /** 切换分类：写 hash（可分享）并把舞台滚回顶部（原位替换而不是继承上一块的滚动位置）。 */
+  const selectCategory = useCallback((id: string) => {
+    setActive(id)
+    const url = `${window.location.pathname}${window.location.search}#${id}`
+    window.history.replaceState(null, '', url)
+    // 面板顶部对齐：区块标题不该被吸顶栏压住，靠 .demo-stage 的 scroll-margin 兜住
+    stageRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
+  }, [])
+
+  const step = useCallback(
+    (delta: number) => {
+      const next = CATEGORIES[activeIndex + delta]
+      if (next) selectCategory(next.id)
+    },
+    [activeIndex, selectCategory],
+  )
+
+  /** 浏览器前进/后退或者直接改 hash 时跟随。（只处理落在已知分类上的 hash。） */
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace(/^#/, '')
+      if (CATEGORIES.some((c) => c.id === hash)) setActive(hash)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
   const segmentOptions = [
     { label: t('common.all'), value: 'all' },
     { label: t('ref.inputs.ground'), value: 'ground' },
@@ -475,22 +567,29 @@ function ReferenceView() {
   return (
     <main className="demo-main">
       <header className="demo-reference__intro">
-        <span className="demo-eyebrow">{t('app.view.reference')}</span>
-        <h1>{t('app.name')} / {t('app.view.reference')}</h1>
-        <p className="demo-note">{t('app.tagline')} | {t('app.subtitle')}</p>
+        <span className="demo-eyebrow">{t('ref.catalogue.eyebrow')}</span>
+        <h1>{t('ref.catalogue.title')}</h1>
+        <p className="demo-note">{t('ref.catalogue.note')}</p>
       </header>
-      <nav className="demo-section-nav" aria-label={t('ref.shell.sections')}>
-        {[
-          ['components-1', 'ref.actions.title'], ['components-2', 'ref.menu.title'], ['components-3', 'ref.surfaces.title'],
-          ['components-4', 'ref.feedback.title'], ['components-5', 'ref.inputs.title'], ['components-6', 'ref.navigation.title'],
-          ['components-7', 'ref.effects.title'], ['components-8', 'ref.gallery.title'], ['components-9', 'ref.site.title'],
-          ['components-10', 'ref.shell.title'], ['components-11', 'ref.decor.title'], ['components-12', 'ref.arknights.title'],
-          ['components-13', 'ref.controls.title'], ['components-14', 'ref.form.title'], ['components-15', 'ref.data.title'],
-          ['components-16', 'ref.collection.title'], ['components-17', 'ref.command.title'],
-        ].map(([id, key]) => (
-          <a key={id} href={'#' + id}>{t(key as MessageKey)}</a>
-        ))}
-      </nav>
+
+      <div className="demo-catalogue">
+        <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
+          {CATEGORIES.map((category, index) => (
+            <button
+              key={category.id}
+              type="button"
+              className="demo-rail__item"
+              aria-current={active === category.id ? 'true' : undefined}
+              onClick={() => selectCategory(category.id)}
+            >
+              <span className="demo-rail__index">{String(index + 1).padStart(2, '0')}</span>
+              <span className="demo-rail__label">{t(category.title)}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="demo-stage" ref={stageRef}>
+          <StageContext.Provider value={stageValue}>
       <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')}>
         <div className="demo-row">
           <AkButton>{t('common.default')}</AkButton>
@@ -1201,6 +1300,23 @@ function ReferenceView() {
           </AkCommandGrid>
         </div>
       </Block>
+          </StageContext.Provider>
+
+          <div className="demo-stage__foot">
+            <span className="demo-note">
+              {t('ref.catalogue.position', { n: activeIndex + 1, m: CATEGORIES.length })}
+            </span>
+            <div className="demo-row">
+              <AkButton variant="outline" disabled={activeIndex === 0} onClick={() => step(-1)}>
+                {t('ref.catalogue.previous')}
+              </AkButton>
+              <AkButton variant="outline" disabled={activeIndex === CATEGORIES.length - 1} onClick={() => step(1)}>
+                {t('ref.catalogue.next')}
+              </AkButton>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   )
 }

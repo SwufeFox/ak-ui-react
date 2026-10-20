@@ -507,8 +507,6 @@ body {
     grid-template-columns: minmax(0, 1fr);
     padding-block: var(--ak-space-3, 0.75rem);
   }
-  .demo-section-nav { top: 6.5rem; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; }
-
   .demo-topbar__controls { justify-content: flex-start; }
   .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .demo-console__summary > .ak-status { grid-column: 1 / -1; margin: 0; padding: 0.75rem 1rem; }
@@ -616,38 +614,119 @@ body {
   letter-spacing: -0.05em;
 }
 
-.demo-section-nav {
+/* 组件目录：左侧分类栏 + 右侧原位舞台。
+   对应方舟「浅而广」—— 用分类栏承载广度，用互斥面板避免纵向堆叠。 */
+.demo-catalogue {
+  display: grid;
+  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+.demo-rail {
   position: sticky;
-  top: 4.25rem;
-  z-index: 4;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  overflow: visible;
+  top: 5.5rem;
+  display: grid;
+  gap: 2px;
+  max-height: calc(100vh - 7.5rem);
+  overflow-y: auto;
+  padding-right: 0.35rem;
   scrollbar-width: thin;
   scrollbar-color: var(--demo-hairline) transparent;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--demo-hairline);
-  background: var(--demo-canvas);
 }
 
-.demo-section-nav::-webkit-scrollbar { height: 0.35rem; }
-.demo-section-nav::-webkit-scrollbar-track { background: transparent; }
-.demo-section-nav::-webkit-scrollbar-thumb { background: var(--demo-hairline); }
+.demo-rail::-webkit-scrollbar { width: 0.35rem; }
+.demo-rail::-webkit-scrollbar-track { background: transparent; }
+.demo-rail::-webkit-scrollbar-thumb { background: var(--demo-hairline); }
 
-.demo-section-nav a {
-  flex: 0 0 auto;
-  padding: 0.4rem 0.65rem;
-  border: 1px solid var(--demo-hairline);
+.demo-rail__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: transparent;
   color: var(--demo-text);
-  font-size: 0.75rem;
-  text-decoration: none;
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
 }
 
-.demo-section-nav a:hover,
-.demo-section-nav a:focus-visible {
-  border-color: var(--ak-signal-info);
+.demo-rail__item:hover,
+.demo-rail__item:focus-visible {
+  background: var(--ak-surface-sunken-2, rgb(255 255 255 / 4%));
   color: var(--demo-text-strong);
 }
 
+/* 选中态用左缘信号条 + 高亮文字，与库内 .ak-pot.is-on 同一手法。 */
+.demo-rail__item[aria-current='true'] {
+  border-left-color: var(--ak-signal-info);
+  background: var(--ak-surface-sunken-2, rgb(255 255 255 / 4%));
+  color: var(--demo-text-strong);
+}
+
+.demo-rail__index {
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.demo-rail__item[aria-current='true'] .demo-rail__index { color: var(--ak-signal-info); }
+
+/* 与顶栏（约 4.25rem）留一点呼吸即可；太大会在切换分类后留下一片空白。 */
+.demo-stage {
+  min-width: 0;
+  scroll-margin-top: 5.5rem;
+}
+
+/* 面板底部：分组读数 + 就近的上一组/下一组。 */
+.demo-stage__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ak-space-3, 0.75rem);
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  padding-top: 1rem;
+  border-top: 1px solid var(--demo-hairline);
+}
+
 .demo-block { scroll-margin-top: 12rem; }
+
+/*
+  窄屏的分类栏回退。
+  ⚠️ 这段必须放在上面那些 .demo-rail / .demo-catalogue 基础规则**之后**：
+  媒体查询不提升特异性，同特异性下靠源码顺序决胜。放在文件上半部分会被
+  下面这些基础规则原样盖掉（我第一版就踩了这个坑——390px 下网格仍是两列、页面横向溢出）。
+*/
+@media (max-width: 900px) {
+  .demo-catalogue { grid-template-columns: minmax(0, 1fr); }
+
+  .demo-rail {
+    position: static;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--demo-hairline);
+  }
+
+  .demo-rail__item {
+    flex: 0 0 auto;
+    width: auto;
+    border: 1px solid var(--demo-hairline);
+  }
+
+  .demo-rail__item[aria-current='true'] {
+    border-color: var(--ak-signal-info);
+  }
+}

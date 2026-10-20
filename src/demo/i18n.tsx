@@ -432,6 +432,16 @@ const en = {
   'ref.shell.sectionLabel': 'SECTION / {label}',
   'ref.shell.sectionTag': 'Section {n} / {m}',
 
+  // ── 组件目录（左侧分类栏 + 原位互斥面板）─────────────────────────────
+  'ref.catalogue.eyebrow': 'CATALOGUE',
+  'ref.catalogue.title': 'Component catalogue',
+  'ref.catalogue.note':
+    'Pick a category on the left — the stage swaps in place instead of stacking, so you always see one control set with all of its variants.',
+  'ref.catalogue.rail': 'Categories',
+  'ref.catalogue.position': 'GROUP {n} / {m}',
+  'ref.catalogue.previous': 'Previous',
+  'ref.catalogue.next': 'Next',
+
   'ref.decor.watermark': 'RHODES',
   'ref.decor.hoverPace': 'Hover me ({n} ms)',
   'ref.decor.arknightsCn': '明日方舟',
@@ -851,6 +861,15 @@ const zhCN: Record<MessageKey, string> = {
   'ref.shell.sections': '区块',
   'ref.shell.sectionLabel': '区块 / {label}',
   'ref.shell.sectionTag': '区块 {n} / {m}',
+
+  'ref.catalogue.eyebrow': '目录',
+  'ref.catalogue.title': '组件目录',
+  'ref.catalogue.note':
+    '在左侧选一个分类——舞台是原位替换而不是纵向堆叠，所以每次只专注一组控件及其全部变体。',
+  'ref.catalogue.rail': '分类',
+  'ref.catalogue.position': '分组 {n} / {m}',
+  'ref.catalogue.previous': '上一组',
+  'ref.catalogue.next': '下一组',
 
   'ref.decor.watermark': '罗德岛',
   'ref.decor.hoverPace': '悬停我（{n} ms）',
