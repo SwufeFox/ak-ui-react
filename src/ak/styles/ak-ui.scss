@@ -45,3 +45,8 @@
 @use "scss/ak-table";
 @use "scss/ak-media-object";
 @use "scss/ak-breadcrumb";
+// 菜单族：dropdown / context menu / menubar / toolbar / collapsible。
+// ⚠️ 这一行曾经漏了 —— 只有遗留副本 src/ak/styles/scss/ak-ui.scss 引用它，
+// 而构建编译的是本文件（scripts/build.mjs）→ _ak-menu.scss 从未进入任何产物。
+// 症状是菜单能开但四个条目横排成一条 38px 的带子（全靠 UA 默认样式）。
+@use "scss/ak-menu";
