@@ -68,6 +68,7 @@ import {
   AkKv,
   AkKvItem,
   AkMediaGallery,
+  AkMediaAlbum,
   AkMobileMenu,
   AkGlow,
   AkOutline,
@@ -579,6 +580,8 @@ function ReferenceView() {
     { label: t('ref.inputs.air'), value: 'air' },
   ]
   const items: GalleryItem[] = galleryItems(t)
+  // 相册演示复用画廊素材；显式取两项并守卫（noUncheckedIndexedAccess 下 items[0] 是可能 undefined 的）
+  const [albumFront, albumBack] = items
 
   return (
     <main className="demo-main">
@@ -859,6 +862,35 @@ function ReferenceView() {
         <p className="demo-note" style={{ marginTop: 'var(--ak-space-4)', marginBottom: 0 }}>
           {t('ref.gallery.activeIndex', { n: galleryIndex })}
         </p>
+
+        {/*
+          拍立得相册：同一份素材，左边旧版（底片是伪元素画的纯色块）、
+          右边新版（layered + splitEnter，两片各走独立动画时间线）。
+          两侧并排是为了让人一眼看出「底片能不能换图」这个区别。
+        */}
+        <div style={{ marginTop: 'var(--ak-space-5, 1.5rem)' }}>
+          <AkOverline>{t('ref.album.title')}</AkOverline>
+          {/* 显式守卫而不是 `?? ''`：空 src 会让浏览器去请求页面自身 */}
+          {albumFront?.image ? (
+            <div className="demo-row" style={{ marginTop: 'var(--ak-space-3, 0.75rem)', alignItems: 'flex-start' }}>
+              <figure style={{ margin: 0 }}>
+                <AkMediaAlbum src={albumFront.image} alt={albumFront.alt} style={{ width: '11rem' }} />
+                <figcaption className="demo-note">{t('ref.album.legacy')}</figcaption>
+              </figure>
+              <figure style={{ margin: 0 }}>
+                <AkMediaAlbum
+                  src={albumFront.image}
+                  alt={albumFront.alt}
+                  backSrc={albumBack?.image}
+                  layered
+                  splitEnter
+                  style={{ width: '11rem' }}
+                />
+                <figcaption className="demo-note">{t('ref.album.layered')}</figcaption>
+              </figure>
+            </div>
+          ) : null}
+        </div>
       </Block>
 
       <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')}>

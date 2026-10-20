@@ -21,19 +21,20 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox)
 - [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput)
 - [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem)
-- [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup)
-- [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion)
-- [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice) · [`AkNoticeStack`](#aknoticestack) · [`AkNum`](#aknum)
-- [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield)
-- [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential)
-- [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress) · [`AkProgressStack`](#akprogressstack)
-- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
-- [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented)
-- [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels)
-- [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus)
-- [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable) · [`AkTabs`](#aktabs)
-- [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail)
-- [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMediaAlbum`](#akmediaalbum) · [`AkMediaGallery`](#akmediagallery)
+- [`AkMenuGroup`](#akmenugroup) · [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic)
+- [`AkMotion`](#akmotion) · [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice) · [`AkNoticeStack`](#aknoticestack)
+- [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination)
+- [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
+- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
+- [`AkProgressStack`](#akprogressstack) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip)
+- [`AkRarityScope`](#akrarityscope) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea)
+- [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
+- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
+- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable)
+- [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea)
+- [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
+- [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -560,6 +561,22 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
 | `markLabel` | `ReactNode` | yes | 标记下方小字。 |
 | `progressLabel` | `ReactNode` | yes | 进度条右侧标签。 |
 | `label` | `string` | yes | 无障碍名；加载中会以 `role="status"` 播报。 |
+
+## AkMediaAlbum
+
+拍立得相册 / 图层媒体。 `_ak-media.scss` 134 行、两代结构，一个 React 组件都没有。这里按样式表原样接出来。 ⚠️ 两代结构的区别（照样式表，不是照直觉）： · **旧版（默认）**：底片与白边都是根元素的伪元素画的 （`::before` = 歪斜的底片、`::after` = 前景白边）。**没有子元素**。 底片是**纯色**（`--ak-media-album-bgcolor`），不是图 —— 所以 `backSrc` 在这代里无处可用。 · **新版（`--layered`）**：伪元素被 `content: none` 关掉，改用真实子元素 `.ak-media__sheet--front` / `--back`。前片扛布局、后片绝对定位垫在后面， 两张各有独立的动画时间线（`--split-enter`）。 ⚠️ 入场动画的互斥：`--enter` 是「整册一起入场」，`--split-enter` 是「两片各自入场」。 样式表里 `--split-enter` 会把根元素 `animation` 置为 none（优先级高于 `--enter`）， 但两者同时挂上会先跑一轮再被覆盖，所以这里在组件层就做成互斥： `splitEnter` 隐含 `layered`，并且不再输出 `--enter`。
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | no | 前景图。 |
+| `alt` | `string` | yes | 前景图的 alt。**默认空串（当装饰）** —— 有信息量的图请显式传。 |
+| `backSrc` | `string` | yes | 底片图。**只在 `layered` 下有效**：旧版的底片是伪元素画的纯色块，塞不进图。 |
+| `backAlt` | `string` | yes | 底片图的 alt，默认空串（底片通常纯装饰）。 |
+| `layered` | `boolean` | yes | 启用真实双片结构（`.ak-media--layered`），才能分别给前后片上图。 |
+| `enter` | `boolean` | yes | 整册入场动画（`.ak-media--enter`）。与 `splitEnter` 互斥。 |
+| `splitEnter` | `boolean` | yes | 分层入场：两片各走独立时间线（`.ak-media--split-enter`）。隐含 `layered`。 |
 
 ## AkMediaGallery
 

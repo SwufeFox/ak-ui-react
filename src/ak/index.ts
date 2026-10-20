@@ -173,6 +173,9 @@ export {
   type AkSpinnerProps,
 } from './ui/data/AkData'
 
+// 拍立得相册：_ak-media.scss 134 行两代结构，此前无出口
+export { AkMediaAlbum, type AkMediaAlbumProps } from './ui/media/AkMediaAlbum'
+
 // 公告列表：_ak-news-list.scss 规格完整（含容器查询降级），此前无出口
 export { AkNewsList, type AkNewsListProps, type AkNewsListItem } from './ui/news/AkNewsList'
 
