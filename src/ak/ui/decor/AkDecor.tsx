@@ -244,10 +244,25 @@ export interface AkHalftoneProps extends DivProps {
   as?: ElementType
   /** 网点遮罩方向：default / left / full。 */
   variant?: AkHalftoneVariant
+  /** 额外叠上 `.ak-halftone-fade` 的渐隐遮罩（与 variant 正交）。 */
+  fade?: boolean
 }
 
-/** 半调网点底纹（游戏内蓝色标题条的网点渐变）。 */
-export function AkHalftone({ as: Tag = 'div', variant = 'default', className, children, ...rest }: AkHalftoneProps) {
+/**
+ * 半调网点底纹（游戏内蓝色标题条的网点渐变）。
+ *
+ * `fade` 挂的是**另一条类** `.ak-halftone-fade`：它不画网点，而是给元素本身叠一组
+ * `mask-image`（径向点阵 ∩ 横向渐隐，`mask-composite: intersect`），
+ * 用于让内容朝右侧淡出。它和上面的 variant 是正交的两件事，可以同时给。
+ */
+export function AkHalftone({
+  as: Tag = 'div',
+  variant = 'default',
+  fade = false,
+  className,
+  children,
+  ...rest
+}: AkHalftoneProps) {
   return (
     <Tag
       {...rest}
@@ -255,6 +270,7 @@ export function AkHalftone({ as: Tag = 'div', variant = 'default', className, ch
         'ak-halftone',
         variant === 'left' && 'ak-halftone--l',
         variant === 'full' && 'ak-halftone--full',
+        fade && 'ak-halftone-fade',
         className,
       )}
       data-slot="ak-halftone"

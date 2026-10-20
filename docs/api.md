@@ -31,10 +31,10 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkRarityScope`](#akrarityscope) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea)
 - [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
 - [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
-- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable)
-- [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea)
-- [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
-- [`AkWatermark`](#akwatermark)
+- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripeEdge`](#akstripeedge) · [`AkStripes`](#akstripes)
+- [`AkTable`](#aktable) · [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup)
+- [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust)
+- [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -486,6 +486,7 @@ Extends `DivProps`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 网点自身也当容器用时打开（默认只做背景层）。 |
 | `variant` | `AkHalftoneVariant` | yes | 网点遮罩方向：default / left / full。 |
+| `fade` | `boolean` | yes | 额外叠上 `.ak-halftone-fade` 的渐隐遮罩（与 variant 正交）。 |
 
 ## AkInput
 
@@ -972,6 +973,15 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | yes | — |
+
+## AkStripeEdge
+
+Extends `HTMLAttributes<HTMLElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `as` | `ElementType` | yes | 当容器用时指定标签，默认 `div`。 |
+| `children` | `ReactNode` | yes | 子内容。 |
 
 ## AkStripes
 

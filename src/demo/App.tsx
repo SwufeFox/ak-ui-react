@@ -69,6 +69,7 @@ import {
   AkKvItem,
   AkMediaGallery,
   AkMediaAlbum,
+  AkStripeEdge,
   AkMobileMenu,
   AkGlow,
   AkOutline,
@@ -979,6 +980,19 @@ function ReferenceView() {
             <AkHalftone variant="full" style={{ padding: 'var(--ak-space-3)' }}>
               <AkGlyphBox style={{ padding: '0.25rem' }}>G</AkGlyphBox>
             </AkHalftone>
+            {/* fade 是正交的另一条类：不画网点，而是让内容朝右渐隐 */}
+            <AkHalftone fade style={{ padding: 'var(--ak-space-3)' }}>
+              <AkGlyphBox style={{ padding: '0.25rem' }}>FADE</AkGlyphBox>
+            </AkHalftone>
+          </div>
+          {/* 左缘警戒斜纹：8px 斜纹条用 --ak-signal-action，所以是动作语义 */}
+          <div className="demo-row" style={{ alignItems: 'stretch', marginTop: 'var(--ak-space-4)' }}>
+            <AkStripeEdge style={{ padding: '0.75rem 0.75rem 0.75rem 1.25rem', background: 'var(--ak-surface-sunken-2)' }}>
+              {t('ref.decor.stripeEdge')}
+            </AkStripeEdge>
+            <AkStripeEdge as="aside" style={{ padding: '0.75rem 0.75rem 0.75rem 1.25rem', background: 'var(--ak-surface-sunken-2)' }}>
+              {t('ref.decor.stripeEdgeAs')}
+            </AkStripeEdge>
           </div>
           <div className="demo-row" style={{ alignItems: 'flex-end' }}>
             {/* AkCut: clip-path 会裁掉自己的阴影，所以投影放外层 */}

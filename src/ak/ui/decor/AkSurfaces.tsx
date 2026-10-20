@@ -171,3 +171,36 @@ export function AkMosaic({ as: Tag = 'div', size, color, blur = false, className
     </Tag>
   )
 }
+
+// ── 斜纹边条 ────────────────────────────────────────────────────────
+
+export interface AkStripeEdgeProps extends HTMLAttributes<HTMLElement> {
+  /** 当容器用时指定标签，默认 `div`。 */
+  as?: ElementType
+  /** 子内容。 */
+  children?: ReactNode
+}
+
+/**
+ * 左缘警戒斜纹（`.ak-stripe-edge`）。
+ *
+ * 只有在宿主自己是 `position: relative` 时才对 —— 条本身是 `::before` 绝对定位在左缘，
+ * 宽 8px、`repeating-linear-gradient(-45deg, --ak-signal-action 0 5px, #1d1f20 5px 10px)`。
+ * 所以这个组件会自动补上 `position: relative`，避免条跑到别的定位祖先上去。
+ *
+ * ⚠️ 用的是 `--ak-signal-action`（而非 info），因此它是**动作/警戒**语义，
+ * 与 `.ak-status__signal` 那套信号色同源。要换色改这个令牌。
+ */
+export function AkStripeEdge({ as: Tag = 'div', className, style, children, ...rest }: AkStripeEdgeProps) {
+  return (
+    <Tag
+      {...rest}
+      className={cx('ak-stripe-edge', className)}
+      data-slot="ak-stripe-edge"
+      // 条是绝对定位的伪元素，宿主必须自己有定位上下文
+      style={{ position: 'relative', ...style }}
+    >
+      {children}
+    </Tag>
+  )
+}

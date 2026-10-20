@@ -31,11 +31,13 @@ export {
   AkBackdrop,
   AkGrain,
   AkMosaic,
+  AkStripeEdge,
   AkVignette,
   type AkBackdropProps,
   type AkBackdropStrength,
   type AkGrainProps,
   type AkMosaicProps,
+  type AkStripeEdgeProps,
   type AkVignetteProps,
 } from './ui/decor/AkSurfaces'
 // 上游 .ak-fx-* 特效层（真正的 ak-ui 动效语言：呼吸辉光 / 扩散轮廓环 / ±10° 斜切）
