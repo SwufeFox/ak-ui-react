@@ -5,7 +5,7 @@
   border: 5px solid var(--ak-loading-color, white);
   transform: rotate(-45deg);
   display: inline-block;
-  margin: 66px;
+  margin: var(--ak-loading-margin, 1.25rem);
 
   &::after {
     content: "";

@@ -10,12 +10,12 @@
   --ak-field-signal: #{$text-color};
 
   display: grid;
-  color: #111315;
+  color: var(--ak-text-primary, #f8f8f5);
   font-family: $font-sans-serif;
   gap: 0.5rem;
 
   &__hint {
-    color: #6d757a;
+    color: var(--ak-text-secondary, rgba(248, 248, 245, 0.65));
     font-family: $font-monospace;
     font-size: 0.72rem;
     letter-spacing: 0.02em;
@@ -24,7 +24,7 @@
 }
 
 .ak-label {
-  color: #2b3034;
+  color: var(--ak-text-secondary, #c5cbd0);
   font-family: $font-monospace;
   font-size: 0.72rem;
   font-weight: 700;
@@ -41,13 +41,13 @@
   width: 100%;
   min-height: 3rem;
   padding: 0.72rem 0.88rem;
-  border: 1px solid #aeb4b9;
-  border-left-width: 4px;
+  border: 1px solid var(--ak-border, #4a4c4f);
+  border-left: 4px solid var(--ak-field-signal, var(--ak-signal-info, #{$blue}));
   border-radius: 0;
   outline: none;
-  color: #111315;
-  background-color: #f3f4ef;
-  caret-color: var(--ak-field-signal, #{$text-color});
+  color: var(--ak-text-primary, #f3f4ef);
+  background-color: var(--ak-surface-sunken, #171a1d);
+  caret-color: var(--ak-field-signal, #{$blue});
   font-family: $font-sans-serif;
   font-size: 1rem;
   line-height: 1.4;
@@ -88,9 +88,9 @@
 .ak-select {
   padding-right: 3.25rem;
   appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, #111315 50%),
-    linear-gradient(135deg, #111315 50%, transparent 50%),
-    linear-gradient(to right, #c4c9c5, #c4c9c5);
+  background-image: linear-gradient(45deg, transparent 50%, var(--ak-text-primary, #f3f4ef) 50%),
+    linear-gradient(135deg, var(--ak-text-primary, #f3f4ef) 50%, transparent 50%),
+    linear-gradient(to right, var(--ak-border, #4a4c4f), var(--ak-border, #4a4c4f));
   background-position: calc(100% - 1.25rem) 1.3rem, calc(100% - 0.95rem) 1.3rem, calc(100% - 2.65rem) 0.7rem;
   background-repeat: no-repeat;
   background-size: 0.32rem 0.32rem, 0.32rem 0.32rem, 1px 1.6rem;
@@ -104,7 +104,7 @@
 
   display: inline-grid;
   align-items: center;
-  color: #202428;
+  color: var(--ak-text-primary, #f8f8f5);
   cursor: pointer;
   font-family: $font-sans-serif;
   grid-template-columns: 1.5rem minmax(0, 1fr);
@@ -117,11 +117,11 @@
     width: 1.5rem;
     height: 1.5rem;
     margin: 0;
-    border: 2px solid #697177;
+    border: 2px solid var(--ak-border-strong, #697177);
     border-radius: 0;
     appearance: none;
     place-items: center;
-    background: #f3f4ef;
+    background: var(--ak-surface-sunken-2, #1a1b1d);
     cursor: inherit;
     transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
 
@@ -233,9 +233,11 @@
     padding: 0 120px;
     border: none;
     outline: none;
-    color: #333;
-    background-color: lightgray;
-    font-family: "Roboto Mono", monospace;
+    color: var(--ak-text-primary, #f8f8f5);
+    background-color: var(--ak-surface-sunken-2, #1a1b1d);
+    border: 1px solid var(--ak-border, #4a4c4f);
+    font-family: var(--ak-font-mono, "Roboto Mono", monospace);
+    font-variant-numeric: tabular-nums;
     font-size: 1rem;
     text-align: center;
 
@@ -263,19 +265,41 @@
 
   & &__max,
   & &__min {
-    background-color: #444;
+    background-color: var(--ak-surface-sunken, #23272b);
+    border: 1px solid var(--ak-border, #4a4c4f);
+    color: var(--ak-text-secondary, #9da5aa);
     box-shadow: 0 0 2px rgba(black, 0.3);
-    font-family: Roboto, sans-serif;
+    font-family: var(--ak-font-label, Roboto, sans-serif);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color var(--ak-motion-fast) ease, color var(--ak-motion-fast) ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--ak-border-strong, #4a4c4f);
+      color: var(--ak-text-primary, #fff);
+    }
   }
 
   & &__increase,
   & &__decrease {
-    background-color: #333;
+    background-color: var(--ak-surface-raised, #2c3238);
+    border: 1px solid var(--ak-border, #4a4c4f);
+    color: var(--ak-text-primary, #f8f8f5);
+    cursor: pointer;
+    transition: background-color var(--ak-motion-fast) ease, color var(--ak-motion-fast) ease;
 
     .ak-icon {
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 1.25rem;
+      height: 1.25rem;
       fill: currentcolor;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: var(--ak-signal-info, #2bf);
+      color: #000;
     }
   }
 

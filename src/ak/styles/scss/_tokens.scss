@@ -152,6 +152,12 @@
 
 :root[data-theme="light"],
 [data-ak-theme="archive"] {
+  --ak-surface-canvas: #eef0f1;
+  --ak-surface-panel: rgba(253, 253, 251, 0.96);
+  --ak-surface-muted: rgba(228, 230, 232, 0.92);
+  --ak-surface-raised: #ffffff;
+  --ak-text-primary: #1b1d1f;
+  --ak-text-secondary: rgba(27, 29, 31, 0.68);
   --ak-signal-info: #0098dc;
   --ak-signal-action: #c99d00;
 

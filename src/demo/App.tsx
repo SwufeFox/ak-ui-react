@@ -23,7 +23,7 @@ import {
   AkInput,
   AkPagination,
   AkPopover,
-  AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible,
+  AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible, AkMenuSeparator, AkMenuGroup,
   AkSelect,
   AkStatusGroup,
   AkTagGroup,
@@ -43,6 +43,7 @@ import {
   AkCountUp,
   AkCut,
   AkCounter,
+  AkSan,
   AkSanContainer,
   AkLoadingScreen,
   AkNewsList,
@@ -52,18 +53,21 @@ import {
   AkLevel,
   AkSkeleton,
   AkSpinner,
+  AkEntrance,
   AkDepth,
   AkDepthLayer,
   AkDisplay,
   AkElite,
   AkEn,
   AkGauge,
+  AkGlyph,
   AkGlyphBox,
   AkGrain,
   AkGridBackdrop,
   AkHalftone,
   AkInputNumber,
   AkInverse,
+  AkMotion,
   AkMosaic,
   AkKv,
   AkKvItem,
@@ -87,6 +91,7 @@ import {
   AkRarity,
   AkRarityBar,
   AkRarityChip,
+  AkRarityScope,
   AkSectionNavigator,
   AkSegmented,
   AkSkillLevels,
@@ -100,7 +105,7 @@ import {
   AkVignette,
   AkWatermark,
 } from '../ak'
-import type { AkSkillLevel, GalleryItem } from '../ak'
+import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
 import { useI18n, type MessageKey } from './i18n'
 import { operators, POTENTIAL_STEPS, PROFESSION_KEYS, type Operator, type RosterFilter } from './operators'
@@ -546,6 +551,7 @@ function ReferenceView() {
   })
   const activeIndex = Math.max(0, CATEGORIES.findIndex((c) => c.id === active))
   const stageRef = useRef<HTMLDivElement>(null)
+  const entranceRef = useRef<AkEntranceHandle>(null)
   const stageValue = useMemo(() => ({ active, select: setActive }), [active])
 
   /** 切换分类：写 hash（可分享）并把舞台滚回顶部（原位替换而不是继承上一块的滚动位置）。 */
@@ -633,7 +639,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-2" eyebrow="12 / MENU" title={t('ref.menu.title')} note={t('ref.menu.note')}>
+      <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkDropdownMenu label={t('ref.menu.open')} items={[
@@ -671,6 +677,29 @@ function ReferenceView() {
               <em>{t('ref.menu.contextHint')}</em>
             </div>
           </AkContextMenu>
+
+          {/* 结构化菜单项：分组与分割线 */}
+          <div className="demo-panel" style={{ maxWidth: '22rem' }}>
+            <AkMenuGroup label={t('ref.menu.group')}>
+              <div style={{ display: 'grid', gap: '2px' }}>
+                <button type="button" role="menuitem" className="ak-menu__item" onClick={() => setSelectedCommand('inspect')}>
+                  <span>{t('ref.menu.inspect')}</span>
+                  <kbd>⌘I</kbd>
+                </button>
+                <button type="button" role="menuitem" className="ak-menu__item" onClick={() => setSelectedCommand('deploy')}>
+                  <span>{t('ref.menu.deploy')}</span>
+                  <kbd>⌘D</kbd>
+                </button>
+              </div>
+            </AkMenuGroup>
+            <AkMenuSeparator />
+            <AkMenuGroup>
+              <button type="button" role="menuitem" className="ak-menu__item" data-destructive onClick={() => setSelectedCommand('cancel')}>
+                <span>{t('ref.menu.cancel')}</span>
+                <kbd>⎋</kbd>
+              </button>
+            </AkMenuGroup>
+          </div>
           <AkCollapsible title={t('ref.menu.disclosure')}>
             <p>{t('ref.menu.body')}</p>
           </AkCollapsible>
@@ -823,6 +852,24 @@ function ReferenceView() {
           <div className="demo-canvas">
             <AkParticleField count={70} pattern="orbit" renderer="auto" />
             <span className="demo-canvas-label">{t('ref.effects.canvas')}</span>
+          </div>
+
+          {/* 入场动效：支持 ref 控制器重播 */}
+          <div className="demo-panel">
+            <div className="demo-row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+              <AkCodeId>AkEntrance</AkCodeId>
+              <AkButton variant="outline" onClick={() => entranceRef.current?.replay()} style={{ minWidth: 'auto', height: '2.25rem', padding: '0 0.85rem' }}>
+                {t('ref.effects.replay')}
+              </AkButton>
+            </div>
+            <AkEntrance ref={entranceRef} style={{ marginTop: 'var(--ak-space-2, 0.5rem)' }}>
+              <div style={{ padding: '0.85rem 1rem', borderLeft: '3px solid var(--ak-signal-info)', background: 'var(--ak-surface-sunken-2)' }}>
+                <AkDisplay>PRTS // TACTICAL ENTRANCE</AkDisplay>
+                <p style={{ margin: '0.35rem 0 0', color: 'var(--ak-text-secondary)', fontSize: '0.82rem' }}>
+                  {t('ref.effects.entrance')}
+                </p>
+              </div>
+            </AkEntrance>
           </div>
 
           {/* 景深：指针驱动的视差。把指针移进这块面板，三层会按各自 depth 反向位移。 */}
@@ -984,6 +1031,16 @@ function ReferenceView() {
             <AkHalftone fade style={{ padding: 'var(--ak-space-3)' }}>
               <AkGlyphBox style={{ padding: '0.25rem' }}>FADE</AkGlyphBox>
             </AkHalftone>
+            <div className="demo-row" style={{ alignItems: 'center', gap: '0.5rem' }}>
+              <AkGlyph white style={{ padding: '0.2rem 0.5rem', background: 'var(--ak-surface-sunken-2)' }}>◆</AkGlyph>
+              <AkGlyph keep style={{ padding: '0.2rem 0.5rem', background: 'var(--ak-surface-sunken-2)', color: 'var(--ak-signal-info)' }}>▲</AkGlyph>
+              <AkMotion effect="rise" pace="base">
+                <AkInverse style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>RISE</AkInverse>
+              </AkMotion>
+              <AkMotion effect="fade" pace="slow">
+                <AkInverse style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>FADE</AkInverse>
+              </AkMotion>
+            </div>
           </div>
           {/* 左缘警戒斜纹：8px 斜纹条用 --ak-signal-action，所以是动作语义 */}
           <div className="demo-row" style={{ alignItems: 'stretch', marginTop: 'var(--ak-space-4)' }}>
@@ -1103,6 +1160,10 @@ function ReferenceView() {
             <AkRarityBar level={4} style={{ padding: 'var(--ak-space-2)', backgroundColor: 'var(--ak-surface-sunken)' }}>
               <span className="ak-r-text">R4 {t('common.rail')}</span>
             </AkRarityBar>
+            <AkRarityScope level={6} className="demo-row" style={{ alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.5rem', background: 'var(--ak-surface-sunken)' }}>
+              <span className="ak-r-text" style={{ fontWeight: 800, fontSize: '0.8rem' }}>★6</span>
+              <span className="ak-r-text" style={{ fontSize: '0.78rem' }}>{t('ref.arknights.rarityScope')}</span>
+            </AkRarityScope>
           </div>
 
           <div className="demo-row" style={{ alignItems: 'center' }}>
@@ -1249,8 +1310,19 @@ function ReferenceView() {
               <AkSpinner />
             </div>
 
-            {/* 理智部件：_ak-san.scss 的两代结构里，这里展示现代版（compact / terminal） */}
+            {/* 理智部件：独立仪表与完整外壳容器 */}
             <div className="demo-row" style={{ alignItems: 'flex-start' }}>
+              <div className="demo-panel" style={{ width: 'auto', padding: '0.75rem 1rem' }}>
+                <span className="demo-eyebrow">{t('ref.data.sanStandalone')}</span>
+                <AkSan
+                  current={sanCurrent}
+                  total={sanTotal}
+                  limit={sanLimit}
+                  onAdd={() => setSanCurrent((v) => Math.min(sanLimit, v + 1))}
+                  addLabel={t('ref.san.add')}
+                  style={{ marginTop: '0.5rem' }}
+                />
+              </div>
               <AkSanContainer
                 eyebrow={t('ref.san.eyebrow')}
                 title={t('ref.san.title')}

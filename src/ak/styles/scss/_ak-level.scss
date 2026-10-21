@@ -11,7 +11,15 @@
   .label {
     background-color: var(--level-label-bgcolor, black);
     width: 100%;
-    &::before {
+    color: white;
+    font-family: var(--ak-font-label, $font-monospace);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.4;
+
+    &:empty::before {
       display: block;
       content: var(--level-label-text, "OPERATION");
       color: white;

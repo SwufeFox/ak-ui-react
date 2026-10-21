@@ -1116,7 +1116,8 @@ Extends `EntranceOptions`.
 | --- | --- | --- | --- |
 | `autoplay` | `boolean` | yes | 挂载后自动播放。 |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
-| `children` | `React.ReactNode` | yes | 子内容。 |
+| `style` | `CSSProperties` | yes | 根节点行内样式。 |
+| `children` | `ReactNode` | yes | 子内容。 |
 
 ## AkMobileMenuProps
 

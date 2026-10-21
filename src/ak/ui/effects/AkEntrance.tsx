@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, type CSSProperties, type ReactNode } from 'react'
 import { createEntrance, type EntranceController, type EntranceOptions } from '../../core/effects.mjs'
 
 export interface AkEntranceProps extends EntranceOptions {
@@ -6,8 +6,10 @@ export interface AkEntranceProps extends EntranceOptions {
   autoplay?: boolean
   /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /** 根节点行内样式。 */
+  style?: CSSProperties
   /** 子内容。 */
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 export interface AkEntranceHandle {
@@ -15,7 +17,7 @@ export interface AkEntranceHandle {
 }
 
 export const AkEntrance = forwardRef<AkEntranceHandle, AkEntranceProps>(function AkEntrance(
-  { autoplay = true, className, children, ...options },
+  { autoplay = true, className, style, children, ...options },
   ref,
 ) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -46,7 +48,7 @@ export const AkEntrance = forwardRef<AkEntranceHandle, AkEntranceProps>(function
   }), [])
 
   return (
-    <div ref={rootRef} className={className ? `ak-entrance ${className}` : 'ak-entrance'}>
+    <div ref={rootRef} style={style} className={className ? `ak-entrance ${className}` : 'ak-entrance'}>
       {children}
     </div>
   )

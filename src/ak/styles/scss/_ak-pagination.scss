@@ -19,10 +19,30 @@
     justify-content: center;
     box-shadow: 0 5px 10px rgba(black, 0.6);
     cursor: pointer;
+    border: none;
+    outline: none;
+    color: inherit;
+    font: inherit;
+    transition: background-color var(--ak-motion-fast, 120ms) ease, opacity var(--ak-motion-fast, 120ms) ease;
 
     .ak-icon {
       width: 2rem;
       height: 2rem;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: #444;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ak-signal-info, #2bf);
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+      background-color: #222;
     }
 
     @include active-darken;
@@ -52,6 +72,8 @@
   }
 
   .number {
+    font-family: var(--ak-font-mono, monospace);
+    font-variant-numeric: tabular-nums;
     font-size: 1.9rem;
     line-height: 1;
   }
