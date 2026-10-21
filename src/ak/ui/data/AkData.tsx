@@ -57,7 +57,11 @@ export interface AkLevelProps extends HTMLAttributes<HTMLDivElement> {
 export function AkLevel({ label, children, prefixIcon, className, ...rest }: AkLevelProps) {
   return (
     <div {...rest} className={cx('ak-level', className)} data-slot="ak-level">
-      {label ? <div className="ak-level__label">{label}</div> : null}
+      {/*
+        标签带必须永远渲染：样式表用 `.ak-level__label:empty::before` 在无 label 时
+        兜底显示默认的 "OPERATION"。条件渲染掉它会让兜底永远落空。
+      */}
+      <div className="ak-level__label">{label}</div>
       <div className="ak-level__content">
         {prefixIcon ? <span className="ak-level__prefix-icon">{prefixIcon}</span> : null}
         {children}
