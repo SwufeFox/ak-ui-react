@@ -97,3 +97,8 @@ export { AkCommand, AkCommandGrid, AkCommandGroup, type AkCommandGridProps, type
 
 // Native-popover menu family and disclosure primitives
 export { AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible, AkMenuSeparator, AkMenuGroup, type AkMenuItem, type AkDropdownMenuProps, type AkContextMenuProps, type AkMenubarProps, type AkToolbarProps, type AkCollapsibleProps, type AkMenuGroupProps } from './menu/AkMenu'
+
+// 终端功能大屏、干员槽位与材料方块（同步自 YunYouJun/ak-ui 最新更新）
+export { AkItem, type AkItemProps, type AkItemTier } from './item/AkItem'
+export { AkSlot, type AkSlotProps, type AkSlotRarity, type AkSlotRole } from './slot/AkSlot'
+export { AkScreen, type AkScreenProps, type AkScreenTone } from './screen/AkScreen'

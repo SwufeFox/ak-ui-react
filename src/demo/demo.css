@@ -1,22 +1,23 @@
 /* Demo-only layout helpers. Deliberately outside src/ak/styles so the library stylesheet
    stays a faithful 1:1 port of the upstream SCSS. */
 
-/* 档案（亮色）主题下整页底色也要跟着翻，否则面板是亮的、页面还是黑的。 */
 :root {
   --demo-canvas: #0b0d0f;
-  --demo-canvas-glow: rgb(25 209 255 / 4%);
-  --demo-hairline: rgb(255 255 255 / 18%);
-  --demo-topbar: rgb(12 14 16 / 92%);
+  --demo-canvas-glow: rgb(25 209 255 / 6%);
+  --demo-grid-line: rgb(255 255 255 / 3.5%);
+  --demo-hairline: rgb(255 255 255 / 14%);
+  --demo-topbar: rgb(12 14 16 / 88%);
   --demo-text: #d2d2d2;
   --demo-text-strong: #fff;
-  --demo-text-muted: rgb(210 210 210 / 74%);
+  --demo-text-muted: rgb(210 210 210 / 68%);
 }
 
 :root[data-ak-theme='archive'] {
-  --demo-canvas: #eef0f1;
+  --demo-canvas: #edf0f2;
   --demo-canvas-glow: rgb(0 152 220 / 8%);
+  --demo-grid-line: rgb(0 0 0 / 4%);
   --demo-hairline: rgb(0 0 0 / 14%);
-  --demo-topbar: rgb(250 250 249 / 94%);
+  --demo-topbar: rgb(248 249 250 / 92%);
   --demo-text: #2b2d2f;
   --demo-text-strong: #141516;
   --demo-text-muted: rgb(43 45 47 / 72%);
@@ -31,56 +32,86 @@ body {
 
 /* ── 应用外壳：顶栏 + 视图 ──────────────────────────────────────────────── */
 
-  .demo-app {
-    display: grid;
-    /* 列必须显式给 1fr。只写 grid-template-rows 时，隐式列是 auto，
-       而 auto 轨道里的块级子元素会**收缩到适应内容**（这里约 742px），
-       于是 .demo-main 再怎么写 max-width 也填不满整行 —— 这就是「很窄」的真因。 */
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    min-height: 100vh;
-  background:
-    radial-gradient(circle at 15% 0%, var(--demo-canvas-glow), transparent 45%),
-    var(--demo-canvas);
+.demo-app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  background-color: var(--demo-canvas);
+  background-image:
+    radial-gradient(circle at 50% 0%, var(--demo-canvas-glow), transparent 60%),
+    linear-gradient(to right, var(--demo-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--demo-grid-line) 1px, transparent 1px);
+  background-size: 100% 100%, 36px 36px, 36px 36px;
 }
 
 .demo-topbar {
   position: sticky;
   top: 0;
-  z-index: 5;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: var(--ak-space-4, 1rem);
   min-height: 4.25rem;
-  padding: 0 clamp(1rem, 3vw, 2.5rem);
+  padding: 0.6rem clamp(1rem, 3vw, 2.5rem);
   border-bottom: 1px solid var(--demo-hairline);
-  background: var(--demo-canvas);
+  background: var(--demo-topbar);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .demo-topbar__brand {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 0.75rem;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+}
+
+.demo-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 12%, transparent);
+  color: var(--ak-signal-info, #4aabea);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.demo-brand-badge__emblem {
+  font-size: 0.6rem;
+  animation: demo-status-pulse 2.2s ease-in-out infinite;
 }
 
 .demo-topbar__brand .ak-display {
   color: var(--demo-text-strong);
-  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
 }
 
 .demo-topbar__tagline {
-  color: var(--demo-text-strong);
-  font-size: 0.85rem;
+  color: var(--demo-text-muted);
+  font-size: 0.8rem;
 }
 
-.demo-topbar__subtitle {
-  color: var(--demo-text-muted);
-  font-family: var(--ak-font-mono, ui-monospace, monospace);
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.demo-topbar__version {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--demo-hairline);
+  color: var(--ak-signal-info, #4aabea);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .demo-topbar__controls {
@@ -88,562 +119,121 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
-.demo-topbar__settings .ak-menu__trigger {
+.demo-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid rgba(70, 196, 124, 0.35);
+  background: rgba(70, 196, 124, 0.08);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #46c47c;
+}
+
+.demo-status-pill__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #46c47c;
+  box-shadow: 0 0 8px #46c47c;
+  animation: demo-status-pulse 2s ease-in-out infinite;
+}
+
+@keyframes demo-status-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.demo-topbar__group {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken, rgba(0, 0, 0, 0.25));
+}
+
+.demo-tactical-btn {
+  padding: 0.32rem 0.65rem;
+  border: 0;
   background: transparent;
   color: var(--demo-text-muted);
-  font-size: 0.7rem;
-}
-
-/* ── 控制台视图：资源摘要 + 名单/详情 + 可折叠日志 ───────────────────────── */
-
-.demo-console {
-  display: grid;
-  gap: var(--ak-space-4, 1rem);
-  width: min(100%, 96rem);
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.5rem) 3rem;
-}
-
-.demo-console__head .ak-display {
-  display: block;
-  margin: 0.4rem 0 0.35rem;
-  color: var(--demo-text-strong);
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-}
-
-.demo-console__summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
-  align-items: stretch;
-  border: 1px solid var(--demo-hairline);
-  background: var(--demo-topbar);
-}
-
-.demo-summary__item {
-  display: grid;
-  align-content: center;
-  gap: 0.35rem;
-  min-width: 0;
-  padding: 0.8rem 1rem;
-  border-right: 1px solid var(--demo-hairline);
-}
-
-.demo-summary__item strong {
-  overflow: hidden;
-  color: var(--demo-text-strong);
-  font-size: 0.95rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.demo-console__summary > .ak-status { margin: 0 1rem; align-self: center; }
-
-.demo-console__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(18rem, 1fr);
-  align-items: start;
-  gap: var(--ak-space-4, 1rem);
-}
-
-.demo-panel {
-  position: relative;
-  display: grid;
-  align-content: start;
-  gap: var(--ak-space-3, 0.75rem);
-  min-width: 0;
-  padding: var(--ak-space-4, 1rem);
-  border: 1px solid var(--demo-hairline);
-  background: var(--ak-surface-sunken);
-}
-
-.demo-console__roster { border-inline-start: 2px solid var(--ak-signal-info); }
-.demo-console__detail { min-width: 0; }
-.demo-console__log { grid-column: 1 / -1; }
-.demo-log__surface { padding: 0; border: 0; background: transparent; box-shadow: none; }
-
-.demo-console__roster,
-.demo-console__detail,
-.demo-console__log {
-  min-width: 0;
-}
-
-/* ── 干员名单 ──────────────────────────────────────────────────────────── */
-
-.demo-roster__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ak-space-3, 0.75rem);
-}
-
-.demo-roster__count {
-  margin-left: auto;
-  color: var(--demo-text-muted);
-  font-family: var(--ak-font-mono, ui-monospace, monospace);
-  font-size: 0.75rem;
-}
-
-.demo-roster {
-  display: grid;
-  gap: var(--ak-space-2, 0.5rem);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* 左缘色条 = 稀有度；选中态再叠一层边框与底色 */
-.demo-roster__row {
-  display: block;
-  background: var(--ak-surface-sunken-2);
-  box-shadow: inset 0 0 0 1px var(--ak-border-subtle);
-  transition: box-shadow var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease);
-}
-
-.demo-roster__row.is-selected {
-  box-shadow: inset 0 0 0 1px var(--ak-signal-info);
-  background: color-mix(in srgb, var(--ak-signal-info) 5%, var(--ak-surface-sunken-2));
-}
-
-/* AkCard 默认是 inline-block + 自带内边距，名单里让它铺满一行 */
-.demo-roster__card {
-  display: grid;
-  gap: 0.35rem;
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  box-shadow: none;
-  cursor: pointer;
-  text-align: start;
-  /* <button> 不继承祖先的 color，UA 默认给近黑色；名单行底是深灰
-     (--ak-surface-sunken-2)，黑字在上面几乎不可见。显式给文字色。 */
-  color: var(--demo-text-strong);
-}
-
-/* .ak-bilingual__cn 在库里只有 font-weight / font-size，没有颜色，
-   于是它继承上面的 UA 黑。这里补上，否则干员名会被深底吃掉。
-   （英文副标题由库的 .ak-bilingual__en 自己给 muted 色，不用管。） */
-.demo-roster__card .ak-bilingual__cn {
-  color: var(--demo-text-strong);
-}
-
-.demo-roster__card:hover {
-  background: rgb(255 255 255 / 5%);
-}
-
-.demo-roster__card:focus-visible {
-  outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #ffd800);
-  outline-offset: -3px;
-}
-
-.demo-roster__line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.demo-roster__meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--demo-text-muted);
-}
-
-.demo-roster__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.demo-empty {
-  margin: 0;
-  padding: var(--ak-space-4, 1rem);
-  border: 1px dashed var(--ak-border);
-  color: var(--demo-text-muted);
-}
-
-/* ── 详情面板 ──────────────────────────────────────────────────────────── */
-
-.demo-detail {
-  display: grid;
-  gap: var(--ak-space-3, 0.75rem);
-}
-
-.demo-detail__id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ak-space-3, 0.75rem);
-}
-
-.demo-detail__id .ak-bilingual__cn {
-  color: var(--demo-text-strong);
-  font-size: 1.15rem;
-}
-
-.demo-detail__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ak-space-3, 0.75rem);
-}
-
-.demo-detail .ak-kv {
-  margin-bottom: 0;
-}
-
-.demo-detail .ak-attrs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.demo-section {
-  display: grid;
-  gap: var(--ak-space-2, 0.5rem);
-}
-
-.demo-skill {
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.5rem 0.75rem;
-  border-left: 2px solid var(--ak-signal-info);
-  background: var(--ak-surface-sunken-2);
-}
-
-.demo-skill__name {
-  color: var(--demo-text-strong);
-  font-size: 0.85rem;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all var(--ak-motion-fast, 120ms) ease;
 }
 
-.demo-skill__desc {
-  color: var(--demo-text-muted);
-  font-size: 0.8rem;
-}
-
-.demo-detail__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ak-space-2, 0.5rem);
-}
-
-.demo-detail__actions .ak-button {
-  flex: 1 1 7rem;
-}
-
-/* ── 部署日志 ──────────────────────────────────────────────────────────── */
-
-.demo-log__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ak-space-3, 0.75rem);
-}
-
-.demo-log__count {
-  margin-right: auto;
-  color: var(--demo-text-muted);
-  font-size: 0.8rem;
-}
-
-.demo-log__list {
-  display: grid;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.demo-log__row {
-  display: grid;
-  grid-template-columns: auto auto auto minmax(0, 1fr);
-  align-items: center;
-  gap: var(--ak-space-3, 0.75rem);
-  padding: 0.4rem 0.6rem;
-  background: var(--ak-surface-sunken-2);
-}
-
-.demo-log__index,
-.demo-log__time {
-  color: var(--demo-text-muted);
-  font-size: 0.75rem;
-}
-
-.demo-log__text {
-  overflow: hidden;
+.demo-tactical-btn:hover {
   color: var(--demo-text-strong);
-  font-size: 0.85rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.06);
 }
 
-/* ── 参考视图 ──────────────────────────────────────────────────────────── */
+.demo-tactical-btn.is-active {
+  color: #111315;
+  background: var(--ak-signal-action, #ffd800);
+  font-weight: 900;
+}
 
-/*
-  主容器不再把自己收成一条窄列。
-  76rem 在宽屏上只用了半屏，配上分类栏后舞台被压到 ~480px —— 控件只能挤在里面。
-  放宽到 96rem，把多出来的宽度交给舞台。
-*/
+.demo-github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken, rgba(0, 0, 0, 0.2));
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transition: all var(--ak-motion-fast, 120ms) ease;
+}
+
+.demo-github-btn:hover {
+  border-color: var(--ak-signal-info, #4aabea);
+  color: var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 10%, transparent);
+}
+
+.demo-github-btn .demo-arrow {
+  color: var(--ak-signal-info, #4aabea);
+}
+
+/* ── 参考视图（主文档流）──────────────────────────────────────────────── */
+
 .demo-main {
-  /* width:100% 是必需的：.demo-main 是 grid item，而 auto 的 margin-inline
-     会让它按 fit-content 收缩、不再拉伸（实测卡在 742px，容器却有 1265px）。
-     显式 width + justify-self 之后，max-width 才真正成为唯一的宽度上限。 */
-  /* border-box 必需：否则 width:100% 之上再加左右 padding，整行会溢出视口。 */
-  box-sizing: border-box;
   width: 100%;
   max-width: 96rem;
-  justify-self: center;
+  box-sizing: border-box;
   margin: 0 auto;
-  padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem) 6rem;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.5rem) 4rem;
 }
-
-.demo-block {
-  padding-block: clamp(1.75rem, 4vw, 3rem);
-  border-top: 1px solid var(--demo-hairline);
-}
-
-.demo-block > h2 {
-  margin: 0.6rem 0 0.5rem;
-  color: var(--demo-text-strong);
-  font-family: Georgia, 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
-  font-size: clamp(1.4rem, 3vw, 2.1rem);
-  font-weight: 900;
-  letter-spacing: -0.045em;
-}
-
-.demo-note {
-  margin: 0 0 1.5rem;
-  max-width: 60ch;
-  color: var(--demo-text-muted);
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-.demo-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ak-space-3, 0.75rem);
-}
-
-.demo-grid {
-  display: grid;
-  gap: var(--ak-space-4, 1rem);
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-/*
-  Stack 原来被限死在 34rem（544px）。在宽屏舞台上那是刻意的窄栏，
-  但分类栏一上，有效宽度本来就 ~480px，这层再收一次就只剩挤压。
-  改成「宽屏不设限、窄屏撑满」，把宽度决定权交回容器。
-*/
-.demo-stack {
-  display: grid;
-  gap: var(--ak-space-4, 1rem);
-  max-width: 100%;
-}
-
-.demo-canvas {
-  position: relative;
-  height: 12rem;
-  overflow: hidden;
-  border: 1px solid var(--demo-hairline);
-  background: var(--ak-surface-sunken);
-}
-
-.demo-canvas-label {
-  position: relative;
-  display: inline-block;
-  padding: var(--ak-space-4, 1rem);
-  color: var(--demo-text-muted);
-  font-size: 0.85rem;
-}
-
-.demo-inline-value {
-  color: var(--ak-signal-info);
-  font-family: var(--ak-font-mono, ui-monospace, monospace);
-}
-
-/* The site shell paints its own dark surface, so give it breathing room in the page. */
-.demo-shell {
-  position: relative;
-  margin-top: var(--ak-space-4, 1rem);
-  border: 1px solid var(--demo-hairline);
-}
-
-/* 特效演示：AkGlow / AkOutline / AkSkew 自身就是可见的（CSS animation infinite +
-   静态倾斜），不需要额外 hover 规则去「让它动起来」。 */
-.demo-fx-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ak-space-5, 1.5rem);
-  padding: var(--ak-space-4, 1rem) var(--ak-space-2, 0.5rem);
-}
-
-/* 景深演示：三层各自不同 depth，指针移动时位移量不同 → 透视感由差异成立。
-   层的可见样式写在这里，位移由 AkDepth 的控制器写入 --ak-layer-x/y。 */
-.demo-depth {
-  position: relative;
-  overflow: hidden;
-  min-height: 11rem;
-  border: 1px solid var(--ak-border);
-  background: var(--ak-surface-sunken);
-}
-
-.demo-depth__grid,
-.demo-depth__glyph,
-.demo-depth__hud {
-  position: absolute;
-}
-
-.demo-depth__grid {
-  inset: 0;
-  background-image: linear-gradient(var(--ak-grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ak-grid-color) 1px, transparent 1px);
-  background-size: var(--ak-grid-size) var(--ak-grid-size);
-}
-
-.demo-depth__glyph {
-  left: 12%;
-  top: 22%;
-  color: var(--ak-text-primary);
-}
-
-.demo-depth__hud {
-  right: 10%;
-  top: 18%;
-}
-
-.demo-hint {
-  margin-top: var(--ak-space-2, 0.5rem);
-  color: var(--ak-text-secondary);
-  font-size: 0.78rem;
-}
-
-@media (max-width: 900px) {
-  .demo-topbar {
-    grid-template-columns: minmax(0, 1fr);
-    padding-block: var(--ak-space-3, 0.75rem);
-  }
-  .demo-topbar__controls { justify-content: flex-start; }
-  .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .demo-console__summary > .ak-status { grid-column: 1 / -1; margin: 0; padding: 0.75rem 1rem; }
-  .demo-summary__item:nth-child(even) { border-right: 0; }
-  .demo-console__body { grid-template-columns: minmax(0, 1fr); }
-  .demo-console__roster { grid-row: auto; }
-  .demo-console__detail { grid-column: auto; }
-  .demo-console__log { grid-column: auto; }
-  .demo-log__row { grid-template-columns: auto minmax(0, 1fr); gap: var(--ak-space-2, 0.5rem); }
-  .demo-log__row > :nth-child(3) { grid-column: 1; }
-  .demo-log__text { grid-column: 2; grid-row: 1 / span 2; white-space: normal; }
-}
-
-@media (max-width: 560px) {
-  .demo-console { padding-inline: 0.75rem; }
-  .demo-console__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .demo-summary__item { border-right: 0; border-bottom: 1px solid var(--demo-hairline); }
-  .demo-roster__head { align-items: flex-start; }
-  .demo-roster__head .ak-segmented { max-width: 100%; overflow-x: auto; }
-  .demo-roster__count { margin-left: 0; }
-}
-
-
-/* 焦距与底图演示区 */
-.demo-surface-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--ak-space-4, 1rem);
-  margin-top: var(--ak-space-4, 1rem);
-}
-
-.demo-surface {
-  position: relative;
-  min-height: 9rem;
-  padding: var(--ak-space-3, 0.75rem);
-  background: var(--ak-surface-sunken);
-  border: 1px solid var(--ak-border);
-}
-
-.demo-surface--stack {
-  display: grid;
-  gap: var(--ak-space-2, 0.5rem);
-  align-content: start;
-}
-
-.demo-surface p {
-  margin: var(--ak-space-2, 0.5rem) 0 0;
-  color: var(--ak-text-secondary);
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
-/* 马赛克盖在一段文字上，表示「这段数据不稳定」 */
-.demo-mosaic-host {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 3.5rem;
-  background: var(--ak-surface-sunken-2);
-  color: var(--ak-text-primary);
-  font-family: var(--ak-font-label);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-/* 毛玻璃演示：下层文字被上层玻璃盖住 */
-.demo-backdrop-host {
-  position: relative;
-  min-height: 4.5rem;
-  display: grid;
-  place-items: center;
-  background: var(--ak-surface-canvas);
-}
-
-.demo-backdrop-under {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--ak-text-secondary);
-  font-family: var(--ak-font-mono);
-  font-size: 0.8rem;
-}
-
-.demo-backdrop-over {
-  position: relative;
-  padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
-  color: var(--ak-text-inverse);
-  font-size: 0.82rem;
-}
-
-.demo-menu-target { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 4rem; padding: 1rem; border: 1px dashed #626a70; color: #bdc4c9; font: 0.78rem var(--ak-font-mono, monospace); cursor: context-menu; }
-.demo-menu-target span { color: var(--ak-signal-action); font-weight: 700; }
-/* 前面的 · 同时给读屏软件一个停顿，否则两句会连读成 “panelor press” */
-.demo-menu-target em { color: var(--demo-text-muted); font-style: normal; }
-.demo-menu-target em::before { content: '· '; }
 
 .demo-reference__intro {
-  padding-block: 1rem 2rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--demo-hairline);
 }
 
 .demo-reference__intro h1 {
-  margin: 0.5rem 0;
+  margin: 0.35rem 0 0.5rem;
   color: var(--demo-text-strong);
-  font-family: Georgia, 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
   font-weight: 900;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.02em;
 }
 
-/* 组件目录：左侧分类栏 + 右侧原位舞台。
-   对应方舟「浅而广」—— 用分类栏承载广度，用互斥面板避免纵向堆叠。 */
-/* 分类栏宽度收一档：它只放 01–17 的短标签，272px 是浪费，省下来的都给舞台。 */
 .demo-catalogue {
   display: grid;
-  grid-template-columns: minmax(11.5rem, 14rem) minmax(0, 1fr);
+  grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
   gap: clamp(1.5rem, 3vw, 3rem);
   align-items: start;
 }
@@ -655,7 +245,7 @@ body {
   gap: 2px;
   max-height: calc(100vh - 7.5rem);
   overflow-y: auto;
-  padding-right: 0.35rem;
+  padding-right: 0.4rem;
   scrollbar-width: thin;
   scrollbar-color: var(--demo-hairline) transparent;
 }
@@ -664,21 +254,47 @@ body {
 .demo-rail::-webkit-scrollbar-track { background: transparent; }
 .demo-rail::-webkit-scrollbar-thumb { background: var(--demo-hairline); }
 
+.demo-rail__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem 0.65rem;
+  border-bottom: 1px solid var(--demo-hairline);
+  margin-bottom: 0.35rem;
+}
+
+.demo-rail__eyebrow {
+  color: var(--ak-signal-info, #4aabea);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.demo-rail__count {
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+
 .demo-rail__item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.6rem;
+  gap: 0.65rem;
   align-items: baseline;
   width: 100%;
-  padding: 0.5rem 0.65rem;
+  padding: 0.55rem 0.75rem;
   border: 0;
-  border-left: 2px solid transparent;
+  border-left: 3px solid transparent;
   background: transparent;
   color: var(--demo-text);
   font: inherit;
   font-size: 0.82rem;
   text-align: left;
   cursor: pointer;
+  transition: all var(--ak-motion-fast, 120ms) ease;
 }
 
 .demo-rail__item:hover,
@@ -687,11 +303,11 @@ body {
   color: var(--demo-text-strong);
 }
 
-/* 选中态用左缘信号条 + 高亮文字，与库内 .ak-pot.is-on 同一手法。 */
 .demo-rail__item[aria-current='true'] {
   border-left-color: var(--ak-signal-info);
   background: var(--ak-surface-sunken-2, rgb(255 255 255 / 4%));
   color: var(--demo-text-strong);
+  font-weight: 700;
 }
 
 .demo-rail__index {
@@ -703,13 +319,11 @@ body {
 
 .demo-rail__item[aria-current='true'] .demo-rail__index { color: var(--ak-signal-info); }
 
-/* 与顶栏（约 4.25rem）留一点呼吸即可；太大会在切换分类后留下一片空白。 */
 .demo-stage {
   min-width: 0;
   scroll-margin-top: 5.5rem;
 }
 
-/* 面板底部：分组读数 + 就近的上一组/下一组。 */
 .demo-stage__foot {
   display: flex;
   flex-wrap: wrap;
@@ -721,14 +335,198 @@ body {
   border-top: 1px solid var(--demo-hairline);
 }
 
-.demo-block { scroll-margin-top: 12rem; }
+.demo-block {
+  position: relative;
+  display: grid;
+  gap: var(--ak-space-4, 1rem);
+  padding: clamp(1.2rem, 2.5vw, 2rem);
+  border: 1px solid var(--demo-hairline);
+  background: color-mix(in srgb, var(--ak-surface-sunken) 70%, transparent);
+  scroll-margin-top: 6rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
 
-/*
-  窄屏的分类栏回退。
-  ⚠️ 这段必须放在上面那些 .demo-rail / .demo-catalogue 基础规则**之后**：
-  媒体查询不提升特异性，同特异性下靠源码顺序决胜。放在文件上半部分会被
-  下面这些基础规则原样盖掉（我第一版就踩了这个坑——390px 下网格仍是两列、页面横向溢出）。
-*/
+.demo-block::before {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 0.75rem;
+  height: 0.75rem;
+  content: "";
+  border-top: 2px solid var(--ak-signal-info, #4aabea);
+  border-left: 2px solid var(--ak-signal-info, #4aabea);
+  pointer-events: none;
+}
+
+.demo-block::after {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 0.75rem;
+  height: 0.75rem;
+  content: "";
+  border-bottom: 2px solid var(--ak-signal-info, #4aabea);
+  border-right: 2px solid var(--ak-signal-info, #4aabea);
+  pointer-events: none;
+}
+
+.demo-eyebrow {
+  display: block;
+  color: var(--ak-signal-info);
+  font-family: var(--ak-font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.demo-block h2 {
+  margin: 0.3rem 0 0.5rem;
+  color: var(--demo-text-strong);
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 900;
+}
+
+.demo-note {
+  margin: 0;
+  color: var(--demo-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-stack {
+  display: grid;
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+.demo-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--ak-space-3, 0.75rem);
+}
+
+/* ── 组件文档切换：预览 / 代码 / 属性 ────────────────────────────────────── */
+
+.demo-block__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: var(--ak-space-4, 1rem);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--demo-hairline);
+}
+
+.demo-block__tabs {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--ak-surface-sunken-2);
+  border: 1px solid var(--ak-border);
+  padding: 3px;
+}
+
+.demo-doc-tab {
+  padding: 0.38rem 0.85rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 0.45rem) 0, 100% 0.45rem, 100% 100%, 0 100%);
+  transition: all var(--ak-motion-fast, 120ms) ease;
+}
+
+.demo-doc-tab:hover {
+  color: var(--demo-text-strong);
+  border-color: var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 8%, transparent);
+}
+
+.demo-doc-tab.is-active {
+  color: #111315;
+  background: var(--ak-signal-action, #ffd800);
+  border-color: var(--ak-signal-action, #ffd800);
+  box-shadow: 0 0 12px rgba(255, 216, 0, 0.35);
+}
+
+.demo-code-container {
+  display: grid;
+  border: 1px solid var(--demo-hairline);
+  background: #0d0f11;
+  overflow: hidden;
+}
+
+[data-ak-theme="archive"] .demo-code-container {
+  background: #181b1e;
+}
+
+.demo-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #14171a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--ak-signal-info, #4aabea);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.demo-copy-btn {
+  padding: 0.25rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #fff;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all var(--ak-motion-fast, 120ms) ease;
+}
+
+.demo-copy-btn:hover {
+  border-color: var(--ak-signal-action, #ffd800);
+  color: var(--ak-signal-action, #ffd800);
+}
+
+.demo-code-box {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #d8e0e6;
+  background: transparent;
+}
+
+.demo-api-container {
+  overflow-x: auto;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-api-container .ak-table {
+  width: 100%;
+  margin: 0;
+  border: none;
+}
+
 @media (max-width: 900px) {
   .demo-catalogue { grid-template-columns: minmax(0, 1fr); }
 

@@ -94,7 +94,8 @@
   --ak-segmented-signal: var(--ak-signal-action, var(--ak-color-advanced, #f1c644));
   display: inline-flex;
   padding: 0.25rem;
-  background: rgba(17, 19, 21, 0.9);
+  background: var(--ak-surface-sunken, rgba(17, 19, 21, 0.9));
+  border: 1px solid var(--ak-border, rgba(255, 255, 255, 0.08));
 
   &__item {
     min-width: 5.5rem;
@@ -139,5 +140,25 @@
   .ak-segmented__item {
     min-width: 0;
     flex: 1;
+  }
+}
+
+
+[data-ak-theme="archive"] .ak-segmented {
+  background: var(--ak-surface-sunken, #e4e7e9);
+  border-color: var(--ak-border, #d2d5d7);
+
+  &__item {
+    color: var(--ak-text-secondary, #50565b);
+
+    &:hover:not([aria-pressed="true"]) {
+      color: var(--ak-text-primary, #111315);
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    &[aria-pressed="true"] {
+      color: #111315;
+      background: var(--ak-segmented-signal);
+    }
   }
 }

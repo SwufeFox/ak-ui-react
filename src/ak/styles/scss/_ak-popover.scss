@@ -15,7 +15,7 @@
   --ak-popover-info: var(--ak-signal-info, var(--ak-color-primary, #{$blue}));
   --ak-popover-signal: var(--ak-signal-action, var(--ak-color-advanced, #{$yellow}));
 
-  width: min(calc(100% - 2rem), 22rem);
+  width: min(calc(100% - 2rem), calc(100vw - 32px), 22rem);
   padding: 1rem 1.1rem;
   border: 1px solid #626a70;
   border-top: 4px solid var(--ak-popover-signal);
@@ -55,7 +55,7 @@
 .ak-tooltip {
   --ak-tooltip-signal: var(--ak-signal-info, var(--ak-color-primary, #{$blue}));
 
-  max-width: min(calc(100% - 2rem), 18rem);
+  max-width: min(calc(100% - 2rem), calc(100vw - 32px), 18rem);
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--ak-tooltip-signal);
   color: #f3f4ef;

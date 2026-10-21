@@ -126,6 +126,13 @@ const en = {
     'Ported from prts-design (MIT). Icons are supplied by the host — none of these components ship game art.',
 
   // ── 共享部件文案 ──────────────────────────────────────────────────
+  'common.preview': 'PREVIEW',
+  'common.code': 'CODE',
+  'common.apiDocs': 'API DOCS',
+  'common.propName': 'Prop',
+  'common.propType': 'Type',
+  'common.propDefault': 'Default',
+  'common.propDesc': 'Description',
   'common.default': 'Default',
   'common.outline': 'Outline',
   'common.action': 'Action',
@@ -594,6 +601,13 @@ const zhCN: Record<MessageKey, string> = {
   'ref.arknights.note':
     '移植自 prts-design（MIT）。图标一律由宿主提供——这些组件不自带任何游戏素材。',
 
+  'common.preview': '预览',
+  'common.code': '代码',
+  'common.apiDocs': '属性文档',
+  'common.propName': '属性',
+  'common.propType': '类型',
+  'common.propDefault': '默认值',
+  'common.propDesc': '说明',
   'common.default': '默认',
   'common.outline': '描边',
   'common.action': '动作',

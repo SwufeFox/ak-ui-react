@@ -20,21 +20,22 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkEn`](#aken) · [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack)
 - [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox)
 - [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkInput`](#akinput)
-- [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem)
-- [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMediaAlbum`](#akmediaalbum) · [`AkMediaGallery`](#akmediagallery)
-- [`AkMenuGroup`](#akmenugroup) · [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar) · [`AkMosaic`](#akmosaic)
-- [`AkMotion`](#akmotion) · [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice) · [`AkNoticeStack`](#aknoticestack)
-- [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination)
-- [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot) · [`AkPotList`](#akpotlist)
-- [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress)
-- [`AkProgressStack`](#akprogressstack) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip)
-- [`AkRarityScope`](#akrarityscope) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer) · [`AkScrollArea`](#akscrollarea)
-- [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect) · [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew)
-- [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner)
-- [`AkStatus`](#akstatus) · [`AkStatusGroup`](#akstatusgroup) · [`AkStripeEdge`](#akstripeedge) · [`AkStripes`](#akstripes)
-- [`AkTable`](#aktable) · [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup)
-- [`AkTextarea`](#aktextarea) · [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust)
-- [`AkVignette`](#akvignette) · [`AkWatermark`](#akwatermark)
+- [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkItem`](#akitem) · [`AkKv`](#akkv)
+- [`AkKvItem`](#akkvitem) · [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMediaAlbum`](#akmediaalbum)
+- [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup) · [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar)
+- [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice)
+- [`AkNoticeStack`](#aknoticestack) · [`AkNum`](#aknum) · [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline)
+- [`AkPagination`](#akpagination) · [`AkParticleField`](#akparticlefield) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot)
+- [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel)
+- [`AkProgress`](#akprogress) · [`AkProgressStack`](#akprogressstack) · [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar)
+- [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer)
+- [`AkScreen`](#akscreen) · [`AkScrollArea`](#akscrollarea) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect)
+- [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkillLevels`](#akskilllevels) · [`AkSlider`](#akslider)
+- [`AkSlot`](#akslot) · [`AkSpec`](#akspec) · [`AkSpinner`](#akspinner) · [`AkStatus`](#akstatus)
+- [`AkStatusGroup`](#akstatusgroup) · [`AkStripeEdge`](#akstripeedge) · [`AkStripes`](#akstripes) · [`AkTable`](#aktable)
+- [`AkTabs`](#aktabs) · [`AkTag`](#aktag) · [`AkTagGroup`](#aktaggroup) · [`AkTextarea`](#aktextarea)
+- [`AkThumbnail`](#akthumbnail) · [`AkToolbar`](#aktoolbar) · [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette)
+- [`AkWatermark`](#akwatermark)
 
 ## AkAssetLoader
 
@@ -521,6 +522,20 @@ Extends `SlotProps<HTMLDivElement>`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
 
+## AkItem
+
+Extends `Omit<ButtonHTMLAttributes<HTMLElement>, 'name'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `as` | `ElementType` | yes | 渲染标签，默认为 'button'。 |
+| `tier` | `AkItemTier` | yes | 品质/稀有度等级（1 到 6 档）。对应样式表 `--ak-rarity-*`。 |
+| `icon` | `ReactNode` | yes | 物品图标节点；若缺省且无子节点，自动绘制 45° 旋转晶体。 |
+| `name` | `ReactNode` | yes | 物品名称。 |
+| `count` | `ReactNode` | yes | 右上角数量角标。 |
+| `price` | `ReactNode` | yes | 价格（商店场景）。 |
+| `sold` | `boolean` | yes | 是否处于已售罄或置灰状态。 |
+
 ## AkKv
 
 Extends `HTMLAttributes<HTMLElement>`.
@@ -863,6 +878,22 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
 | `addLabel` | `string` | yes | 加号按钮的无障碍名。 |
 | `figure` | `ReactNode` | yes | 计数器图形层。 |
 
+## AkScreen
+
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `tone` | `AkScreenTone` | yes | 终端色调修饰符，对应命令色彩方案：'dark' \| 'paper' \| 'muted' \| 'cyan'。 |
+| `title` | `ReactNode` | no | 顶栏主标题。 |
+| `eyebrow` | `ReactNode` | yes | 标题上方的小标/分类代码。 |
+| `meta` | `ReactNode` | yes | 顶栏右侧的资源信息槽位（理智、龙门币、合成玉等读数）。 |
+| `backLabel` | `ReactNode` | yes | 返回按钮标签，默认为 'BACK'。 |
+| `onBack` | `() => void` | yes | 点击返回按钮的回调。若不传则不渲染返回按钮。 |
+| `watermark` | `ReactNode` | yes | 右下角装饰水印。 |
+| `leaving` | `boolean` | yes | 正在退场状态（播放离场动画）。 |
+| `children` | `ReactNode` | yes | 屏幕内部主体内容。 |
+
 ## AkScrollArea
 
 Extends `HTMLAttributes<HTMLDivElement>`.
@@ -936,6 +967,24 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'typ
 | `step` | `number` | yes | 步长。 |
 | `value` | `number` | no | 当前值。 |
 | `onValueChange` | `(value: number) => void` | yes | 拖动时回调。 |
+
+## AkSlot
+
+Extends `HTMLAttributes<HTMLElement>`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `as` | `ElementType` | yes | 渲染标签，默认为 'button'。 |
+| `name` | `ReactNode` | yes | 干员名字。 |
+| `code` | `ReactNode` | yes | 职业代码大字水印（如 VNG / GRD / MED / CAS）。 |
+| `rarity` | `AkSlotRarity` | yes | 稀有度等级（1 到 6 档）。 |
+| `role` | `AkSlotRole` | yes | 职业类别，决定底部特征信号条颜色。 |
+| `meta` | `ReactNode` | yes | 副信息（如等级 LV.50、代号等）。 |
+| `rarityLabel` | `ReactNode` | yes | 稀有度文字标识（左上角星级小字）。 |
+| `empty` | `boolean` | yes | 是否为空槽位（未编队/占位）。 |
+| `reveal` | `boolean` | yes | 是否播放翻牌显现入场动画。 |
+| `index` | `number` | yes | 动画延迟阶梯索引（乘 80ms）。 |
+| `pressed` | `boolean` | yes | 是否为选中状态。 |
 
 ## AkSpec
 

@@ -133,3 +133,26 @@
     transition: none;
   }
 }
+
+
+[data-ak-theme="archive"] .ak-dialog {
+  color: var(--ak-text-primary, #111315);
+  background: var(--ak-surface-panel, #f4f5f2);
+  border-color: var(--ak-border, #d2d5d7);
+
+  .ak-dialog__header {
+    border-bottom-color: var(--ak-border-subtle, #e2e4e6);
+  }
+
+  .ak-dialog__title {
+    color: var(--ak-text-primary, #111315);
+  }
+
+  .ak-dialog__body {
+    color: var(--ak-text-secondary, #3b4146);
+  }
+
+  &::backdrop {
+    background: rgba(30, 32, 35, 0.45);
+  }
+}

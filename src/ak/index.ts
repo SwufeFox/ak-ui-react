@@ -232,3 +232,8 @@ export {
   type AkCommandProps,
   type AkCommandTone,
 } from './ui/command/AkCommand'
+
+// 同步自 YunYouJun/ak-ui 最新更新：终端功能大屏、干员槽位卡与材料方块
+export { AkItem, type AkItemProps, type AkItemTier } from './ui/item/AkItem'
+export { AkSlot, type AkSlotProps, type AkSlotRarity, type AkSlotRole } from './ui/slot/AkSlot'
+export { AkScreen, type AkScreenProps, type AkScreenTone } from './ui/screen/AkScreen'

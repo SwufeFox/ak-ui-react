@@ -45,6 +45,9 @@ import {
   AkCounter,
   AkSan,
   AkSanContainer,
+  AkItem,
+  AkSlot,
+  AkScreen,
   AkLoadingScreen,
   AkNewsList,
   AkNoticeStack,
@@ -108,10 +111,9 @@ import {
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
 import { useI18n, type MessageKey } from './i18n'
-import { operators, POTENTIAL_STEPS, PROFESSION_KEYS, type Operator, type RosterFilter } from './operators'
+import { DOC_REGISTRY, type BlockPropDoc } from './doc-data'
 import './demo.css'
 
-type View = 'console' | 'reference'
 type Theme = 'terminal' | 'archive'
 
 /**
@@ -159,301 +161,127 @@ const MENU_ACTIONS = new Set(['inspect', 'deploy', 'cancel', 'archive', 'file', 
  * 其余 16 块完全不进 DOM —— 这正是「浅而广」里那个「广」字的落点：
  * 单屏信息密度靠分类栏承载，而不是靠把 17 个区块摞成一万五千像素的长页。
  */
-function Block({ id, eyebrow, title, note, children }: { id: string; eyebrow: string; title: string; note?: ReactNode; children: ReactNode }) {
+function Block({
+  id,
+  eyebrow,
+  title,
+  note,
+  code,
+  api,
+  children,
+}: {
+  id: string
+  eyebrow: string
+  title: string
+  note?: ReactNode
+  code?: string
+  api?: BlockPropDoc[]
+  children: ReactNode
+}) {
   const stage = useContext(StageContext)
+  const { t } = useI18n()
+  const [tab, setTab] = useState<'preview' | 'code' | 'api'>('preview')
+  const [copied, setCopied] = useState(false)
+
   if (stage && stage.active !== id) return null
 
-  /*
-    编号只认一个真相来源：`CATEGORIES` 里的顺序（也就是左侧分类栏显示的那个）。
-    字典里的 eyebrow 还带着早期顺序的硬编码编号（06 之后直接跳 12），
-    两套编号同屏打架会让「13 / 表单」和「14 表单控件」互相矛盾。
-    这里把字典里的旧编号剥掉，改用 CATEGORIES 的顺序重新生成，漂移从此不可能发生。
-  */
   const index = CATEGORIES.findIndex((category) => category.id === id)
   const displayEyebrow =
     index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow.replace(/^\s*\d+\s*\/\s*/, '')}`
 
+  const copyCode = () => {
+    if (!code) return
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <section id={id} className="demo-block" aria-labelledby={`${id}-title`}>
-      <span className="demo-eyebrow">{displayEyebrow}</span>
-      <h2 id={`${id}-title`}>{title}</h2>
-      {note ? <p className="demo-note">{note}</p> : null}
-      {children}
+      <div className="demo-block__header">
+        <div>
+          <span className="demo-eyebrow">{displayEyebrow}</span>
+          <h2 id={`${id}-title`}>{title}</h2>
+          {note ? <p className="demo-note">{note}</p> : null}
+        </div>
+        {(code || api) ? (
+          <div className="demo-block__tabs" role="tablist">
+            <button
+              type="button"
+              className={`demo-doc-tab ${tab === 'preview' ? 'is-active' : ''}`}
+              onClick={() => setTab('preview')}
+            >
+              {t('common.preview')}
+            </button>
+            {code ? (
+              <button
+                type="button"
+                className={`demo-doc-tab ${tab === 'code' ? 'is-active' : ''}`}
+                onClick={() => setTab('code')}
+              >
+                {t('common.code')}
+              </button>
+            ) : null}
+            {api ? (
+              <button
+                type="button"
+                className={`demo-doc-tab ${tab === 'api' ? 'is-active' : ''}`}
+                onClick={() => setTab('api')}
+              >
+                {t('common.apiDocs')}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      {tab === 'preview' && children}
+
+      {tab === 'code' && code && (
+        <div className="demo-code-container">
+          <div className="demo-code-header">
+            <span>JSX / TSX</span>
+            <button type="button" className="demo-copy-btn" onClick={copyCode}>
+              {copied ? '✓ COPIED' : 'COPY'}
+            </button>
+          </div>
+          <pre className="demo-code-box"><code>{code}</code></pre>
+        </div>
+      )}
+
+      {tab === 'api' && api && (
+        <div className="demo-api-container">
+          <table className="ak-table">
+            <thead className="ak-table__head">
+              <tr>
+                <th>{t('common.propName')}</th>
+                <th>{t('common.propType')}</th>
+                <th>{t('common.propDefault')}</th>
+                <th>{t('common.propDesc')}</th>
+              </tr>
+            </thead>
+            <tbody className="ak-table__body">
+              {api.map((item) => (
+                <tr key={item.name}>
+                  <td><code>{item.name}</code></td>
+                  <td><code style={{ color: 'var(--ak-signal-info)' }}>{item.type}</code></td>
+                  <td><code>{item.default ?? '—'}</code></td>
+                  <td>{item.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   )
 }
 
-/** A quiet console surface; decorative treatments belong to individual content, not every panel. */
-function Panel({ className, children }: { className: string; children: ReactNode }) {
-  return <section className={`demo-panel ${className}`}>{children}</section>
-}
-
-/** 时间戳固定用 24 小时制，避免 12 小时制下的 AM/PM 混进界面文案。 */
-function stamp(): string {
-  return new Date().toLocaleTimeString('en-GB', { hour12: false })
-}
-
-// ── 控制台视图 ────────────────────────────────────────────────────────
-
-interface LogEntry {
-  id: number
-  time: string
-  kind: 'deploy' | 'recall'
-  operatorId: string
-}
-
-function ConsoleView() {
-  const { locale, t } = useI18n()
-  const [filter, setFilter] = useState<RosterFilter>('all')
-  const [selectedId, setSelectedId] = useState<string | null>(operators[0]?.id ?? null)
-  const [deployed, setDeployed] = useState<string[]>([])
-  const [log, setLog] = useState<LogEntry[]>([])
-  const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(operators[0]?.skillLevel ?? 1)
-
-  const selected = operators.find((op) => op.id === selectedId) ?? null
-
-  const roster = filter === 'all' ? operators : operators.filter((op) => op.profession === filter)
-
-  // 换干员时把技能等级同步到该干员自己的档位（否则会带着上一人的 M3 过去）。
-  useEffect(() => {
-    setSkillLevel(selected?.skillLevel ?? 1)
-  }, [selected?.id, selected?.skillLevel])
-
-  const funds = useMemo(
-    () => operators.reduce((total, op) => (deployed.includes(op.id) ? total - op.cost : total), 1280),
-    [deployed],
-  )
-
-  function nameOf(op: Operator): string {
-    return locale === 'zh-CN' ? t(op.nameCn) : t(op.nameEn)
-  }
-
-  function appendLog(kind: LogEntry['kind'], operatorId: string) {
-    setLog((entries) => [...entries, { id: entries.length + 1, time: stamp(), kind, operatorId }])
-  }
-
-  function deploy(op: Operator) {
-    if (deployed.includes(op.id)) return
-    setDeployed((ids) => [...ids, op.id])
-    appendLog('deploy', op.id)
-  }
-
-  function recall(op: Operator) {
-    if (!deployed.includes(op.id)) return
-    setDeployed((ids) => ids.filter((id) => id !== op.id))
-    appendLog('recall', op.id)
-  }
-
-  return (
-    <div className="demo-console">
-      <header className="demo-console__head">
-        <span className="demo-eyebrow">{t('console.eyebrow')}</span>
-        <AkDisplay as="h2">{t('console.title')}</AkDisplay>
-        <p className="demo-note">{t('console.note')}</p>
-      </header>
-
-        <div className="demo-console__summary" role="group" aria-label={t('console.summary.label')}>
-        <div className="demo-summary__item">
-          <AkOverline>{locale === 'zh-CN' ? '扇区 / SECTOR' : 'SECTOR / 扇区'}</AkOverline>
-          <strong>{t('console.rail.sectorValue')}</strong>
-        </div>
-        <div className="demo-summary__item">
-          <AkOverline>{locale === 'zh-CN' ? '行动 / OPERATION' : 'OPERATION / 行动'}</AkOverline>
-          <strong>{t('console.rail.operationValue')}</strong>
-        </div>
-        <div className="demo-summary__item">
-          <AkOverline>{locale === 'zh-CN' ? '部署 / DEPLOYED' : 'DEPLOYED / 部署'}</AkOverline>
-          <strong><AkNum>{deployed.length}</AkNum> / <AkNum>{operators.length}</AkNum></strong>
-        </div>
-        <div className="demo-summary__item">
-          <AkOverline>{locale === 'zh-CN' ? '调度点 / COST' : 'COST / 调度点'}</AkOverline>
-          <strong><AkNum>{funds}</AkNum></strong>
-        </div>
-        <AkStatus label={t('console.status.online')} detail={t('console.status.detail')} />
-      </div>
-
-      <div className="demo-console__body">
-        <Panel className="demo-console__roster">
-          <div className="demo-roster__head">
-            <AkOverline>{t('console.roster.title')}</AkOverline>
-            <AkSegmented
-              ariaLabel={t('console.roster.filter')}
-              options={[
-                { label: t('console.roster.all'), value: 'all' },
-                { label: t('console.roster.medic'), value: 'medic' },
-                { label: t('console.roster.caster'), value: 'caster' },
-              ]}
-              value={filter}
-              onValueChange={(next) => setFilter(next === 'medic' || next === 'caster' ? next : 'all')}
-            />
-            <span className="demo-roster__count">{t('console.roster.count', { n: roster.length })}</span>
-          </div>
-
-          {roster.length === 0 ? (
-            <p className="demo-empty ak-text">{t('console.roster.empty')}</p>
-          ) : (
-            <ul className="demo-roster">
-              {roster.map((op) => {
-                const isSelected = op.id === selectedId
-                return (
-                  <li key={op.id}>
-                    <AkRarityBar level={op.rarity} className={isSelected ? 'demo-roster__row is-selected' : 'demo-roster__row'}>
-                      {/* `as="button"` 让整条名单成为一个可聚焦的选块；不在表单里，默认 submit 无副作用 */}
-                      <AkCard
-                        as="button"
-                        className="demo-roster__card"
-                        aria-pressed={isSelected}
-                        onClick={() => setSelectedId(op.id)}
-                      >
-                        <span className="demo-roster__line">
-                          <AkRarity level={op.rarity} aria-label={t('common.rarityAria', { n: op.rarity })} />
-                          <AkCodeId>{op.code}</AkCodeId>
-                        </span>
-                        <AkBilingual cn={t(op.nameCn)} en={t(op.nameEn)} row />
-                        <span className="demo-roster__meta">
-                          <AkProfession name={op.profession} icon={<b>{op.glyph}</b>} outline size="sm" />
-                          <AkEn>{t(PROFESSION_KEYS[op.profession])}</AkEn>
-                          <AkNum>{op.cost}</AkNum>
-                        </span>
-                        <span className="demo-roster__tags">
-                          {op.tags.map((tag) => (
-                            <AkTag key={tag} variant="neutral">
-                              {t(tag)}
-                            </AkTag>
-                          ))}
-                        </span>
-                      </AkCard>
-                    </AkRarityBar>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </Panel>
-
-        {/* 右：详情 */}
-        <Panel className="demo-console__detail">
-          <AkOverline>{t('console.detail.title')}</AkOverline>
-          {selected ? (
-            <div className="demo-detail">
-              <div className="demo-detail__id">
-                <AkBilingual cn={t(selected.nameCn)} en={t(selected.nameEn)} />
-                <AkRarity level={selected.rarity} aria-label={t('common.rarityAria', { n: selected.rarity })} />
-              </div>
-
-              <div className="demo-detail__meta">
-                <AkProfession name={selected.profession} icon={<b>{selected.glyph}</b>} boxed />
-                <AkTag variant="advanced">{t(PROFESSION_KEYS[selected.profession])}</AkTag>
-                <AkElite
-                  level={selected.elite}
-                  icon={<b>{`E${selected.elite}`}</b>}
-                  title={t('console.detail.eliteTitle', { n: selected.elite })}
-                />
-                <AkTrust value={t('console.detail.trustValue', { n: selected.trust })} />
-              </div>
-
-              <AkKv variant="inline">
-                <AkKvItem label={t('console.detail.classLabel')}>{t(PROFESSION_KEYS[selected.profession])}</AkKvItem>
-                <AkKvItem label={t('console.detail.rarityLabel')}>
-                  <AkNum>{selected.rarity}</AkNum>
-                </AkKvItem>
-                <AkKvItem label={t('console.detail.cost')}>
-                  <AkNum>{selected.cost}</AkNum>
-                </AkKvItem>
-              </AkKv>
-
-              <div className="demo-section">
-                <AkOverline>{t('console.detail.attrs')}</AkOverline>
-                <AkAttrs>
-                  <AkAttr label={t('common.atk')} labelCn={t('common.attack')} value={<AkNum>{selected.stats.atk}</AkNum>} accent />
-                  <AkAttr label={t('common.def')} labelCn={t('common.defense')} value={<AkNum>{selected.stats.def}</AkNum>} />
-                  <AkAttr label={t('common.rst')} labelCn={t('common.resist')} value={<AkNum>{selected.stats.res}</AkNum>} />
-                </AkAttrs>
-              </div>
-
-              <div className="demo-section">
-                <AkOverline>{t('console.detail.skills')}</AkOverline>
-                {selected.skills.map((skill) => (
-                  <div className="demo-skill" key={skill.name}>
-                    <span className="demo-skill__name">{t(skill.name)}</span>
-                    <span className="demo-skill__desc">{t(skill.desc)}</span>
-                  </div>
-                ))}
-                <AkSkillLevels
-                  value={skillLevel}
-                  onValueChange={setSkillLevel}
-                  max="M3"
-                  ariaLabel={t('common.skillLevelAria')}
-                />
-              </div>
-
-              <AkCollapsible title={t('console.detail.potential')}>
-                <AkPotList>
-                  {POTENTIAL_STEPS.map((step) => (
-                    <AkPot
-                      key={step.label}
-                      index={<b>{t('common.potentialShort')}{step.n}</b>}
-                      label={t(step.label)}
-                      active={step.active}
-                    >
-                      {t(step.body)}
-                    </AkPot>
-                  ))}
-                </AkPotList>
-              </AkCollapsible>
-
-              <div className="demo-detail__actions">
-                <AkButton variant="action" disabled={deployed.includes(selected.id)} onClick={() => deploy(selected)}>
-                  {t('console.action.deploy')}
-                </AkButton>
-                <AkButton variant="outline" disabled={!deployed.includes(selected.id)} onClick={() => recall(selected)}>
-                  {t('console.action.recall')}
-                </AkButton>
-              </div>
-            </div>
-          ) : (
-            <p className="demo-empty ak-text">{t('console.detail.select')}</p>
-          )}
-        </Panel>
-      </div>
-
-      <AkCollapsible title={t('console.log.title')} className="demo-console__log">
-        <Panel className="demo-log__surface">
-          <div className="demo-log__head">
-            <span className="demo-log__count">{t('console.log.count', { n: log.length })}</span>
-            <AkButton variant="outline" disabled={log.length === 0} onClick={() => setLog([])}>
-              {t('console.log.clear')}
-            </AkButton>
-          </div>
-
-          {log.length === 0 ? (
-            <p className="demo-empty ak-text">{t('console.log.empty')}</p>
-          ) : (
-            <ol className="demo-log__list">
-              {log.map((entry, index) => {
-                const op = operators.find((item) => item.id === entry.operatorId)
-                return (
-                  <li className="demo-log__row" key={entry.id}>
-                    <AkNum className="demo-log__index">{String(index + 1).padStart(2, '0')}</AkNum>
-                    <AkNum className="demo-log__time">{entry.time}</AkNum>
-                    <AkTag variant={entry.kind === 'deploy' ? 'advanced' : 'neutral'}>
-                      {t(entry.kind === 'deploy' ? 'console.action.deployed' : 'console.action.recalled')}
-                    </AkTag>
-                    <span className="demo-log__text">
-                      {t(entry.kind === 'deploy' ? 'console.log.entry.deploy' : 'console.log.entry.recall', {
-                        name: op ? nameOf(op) : entry.operatorId,
-                      })}
-                    </span>
-                  </li>
-                )
-              })}
-            </ol>
-          )}
-        </Panel>
-      </AkCollapsible>
-    </div>
-  )
-}
+const POTENTIAL_STEPS: { n: number; label: MessageKey; body: MessageKey; active?: boolean }[] = [
+  { n: 2, label: 'common.potential2', body: 'common.deployCostMinus', active: true },
+  { n: 3, label: 'common.potential3', body: 'common.atkPlus' },
+  { n: 4, label: 'common.potential4', body: 'common.redeployMinus' },
+]
 
 // ── 参考视图（原来的 11 个区块）───────────────────────────────────────
 
@@ -535,6 +363,7 @@ function ReferenceView() {
   const [selectedCommand, setSelectedCommand] = useState('deploy')
   // 理智计数器：加号按钮真的能加，上限用满后不再涨（避免演示看起来像假的）
   const [loadingReady, setLoadingReady] = useState(false)
+  const [screenOpen, setScreenOpen] = useState(false)
   const [sanCurrent, setSanCurrent] = useState(41)
   const sanLimit = 135
   const [sanTotal] = useState(135)
@@ -600,6 +429,10 @@ function ReferenceView() {
 
       <div className="demo-catalogue">
         <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
+          <div className="demo-rail__head">
+            <span className="demo-rail__eyebrow">CATALOGUE // 索引</span>
+            <span className="demo-rail__count">{CATEGORIES.length} MODULES</span>
+          </div>
           {CATEGORIES.map((category, index) => (
             <button
               key={category.id}
@@ -616,7 +449,7 @@ function ReferenceView() {
 
         <div className="demo-stage" ref={stageRef}>
           <StageContext.Provider value={stageValue}>
-      <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')}>
+      <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')} code={DOC_REGISTRY['components-1']?.code} api={DOC_REGISTRY['components-1']?.api}>
         <div className="demo-row">
           <AkButton>{t('common.default')}</AkButton>
           <AkButton variant="outline">{t('common.outline')}</AkButton>
@@ -639,7 +472,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')}>
+      <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')} code={DOC_REGISTRY['components-2']?.code} api={DOC_REGISTRY['components-2']?.api}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkDropdownMenu label={t('ref.menu.open')} items={[
@@ -706,7 +539,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')}>
+      <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')} code={DOC_REGISTRY['components-3']?.code} api={DOC_REGISTRY['components-3']?.api}>
         <div className="demo-grid">
           <AkCard as="article">
             <AkCardHeader>
@@ -736,7 +569,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')}>
+      <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')} code={DOC_REGISTRY['components-4']?.code} api={DOC_REGISTRY['components-4']?.api}>
         <div className="demo-stack">
           <AkNotice title={t('notice.info.title')} code={t('notice.code.info')}>
             {t('notice.info.body')}
@@ -794,7 +627,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')}>
+      <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')} code={DOC_REGISTRY['components-5']?.code} api={DOC_REGISTRY['components-5']?.api}>
         <div className="demo-stack">
           <AkSlider label={t('ref.inputs.volume')} value={slider} onValueChange={(v) => setSlider(Number.isFinite(v) ? v : 0)} />
           <span className="ak-text">{t('ref.inputs.sliderValue', { n: slider })}</span>
@@ -820,7 +653,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')}>
+      <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} code={DOC_REGISTRY['components-6']?.code} api={DOC_REGISTRY['components-6']?.api}>
         <AkTabs
           ariaLabel={t('ref.navigation.aria')}
           items={tabSpec.map((item, index) => ({
@@ -836,7 +669,7 @@ function ReferenceView() {
         />
       </Block>
 
-      <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')}>
+      <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')} code={DOC_REGISTRY['components-7']?.code} api={DOC_REGISTRY['components-7']?.api}>
         <div className="demo-stack">
           <div className="demo-row">
             <span style={{ fontSize: '2rem' }}>
@@ -894,7 +727,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')}>
+      <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')} code={DOC_REGISTRY['components-8']?.code} api={DOC_REGISTRY['components-8']?.api}>
         <AkMediaGallery
           items={items}
           value={galleryIndex}
@@ -941,7 +774,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')}>
+      <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')} code={DOC_REGISTRY['components-9']?.code} api={DOC_REGISTRY['components-9']?.api}>
         <div className="demo-stack">
           <AkAssetLoader
             label={t('common.resources')}
@@ -981,11 +814,11 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-10" eyebrow={t('ref.shell.eyebrow')} title={t('ref.shell.title')} note={t('ref.shell.note')}>
+      <Block id="components-10" eyebrow={t('ref.shell.eyebrow')} title={t('ref.shell.title')} note={t('ref.shell.note')} code={DOC_REGISTRY['components-10']?.code} api={DOC_REGISTRY['components-10']?.api}>
         <SiteShellDemo />
       </Block>
 
-      <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')}>
+      <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')} code={DOC_REGISTRY['components-11']?.code} api={DOC_REGISTRY['components-11']?.api}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkStripes bar variant="warning" style={{ width: '8rem' }} />
@@ -1149,7 +982,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')}>
+      <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')} code={DOC_REGISTRY['components-12']?.code} api={DOC_REGISTRY['components-12']?.api}>
         <div className="demo-stack">
           <div className="demo-row" style={{ alignItems: 'center' }}>
             <AkRarity level={6} aria-label={t('common.rarityAria', { n: 6 })} />
@@ -1220,7 +1053,7 @@ function ReferenceView() {
           eyebrow={t('ref.controls.eyebrow')}
           title={t('ref.controls.title')}
           note={t('ref.controls.note')}
-        >
+         code={DOC_REGISTRY['components-13']?.code} api={DOC_REGISTRY['components-13']?.api}>
           <div className="demo-stack">
             <AkDivider>{t('common.sectionLabel')}</AkDivider>
 
@@ -1263,7 +1096,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-        <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')}>
+        <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')} code={DOC_REGISTRY['components-14']?.code} api={DOC_REGISTRY['components-14']?.api}>
           <AkFormStack>
             <AkField hint={t('common.fieldHint')}>
               <AkFieldLabel htmlFor="demo-field">{t('common.fieldName')}</AkFieldLabel>
@@ -1298,7 +1131,7 @@ function ReferenceView() {
           </AkFormStack>
         </Block>
 
-        <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')}>
+        <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} code={DOC_REGISTRY['components-15']?.code} api={DOC_REGISTRY['components-15']?.api}>
           <div className="demo-stack">
             <div className="demo-row" style={{ alignItems: 'center' }}>
               <AkCounter
@@ -1413,7 +1246,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-        <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')}>
+        <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} code={DOC_REGISTRY['components-16']?.code} api={DOC_REGISTRY['components-16']?.api}>
           <div className="demo-stack">
             <AkBreadcrumb
               items={[
@@ -1490,7 +1323,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-      <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')}>
+      <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} code={DOC_REGISTRY['components-17']?.code} api={DOC_REGISTRY['components-17']?.api}>
         <div className="demo-stack">
           <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
             <AkCommand
@@ -1567,6 +1400,72 @@ function ReferenceView() {
               style={{ minHeight: '7.5rem' }}
             />
           </AkCommandGrid>
+
+          {/* 干员槽位卡 (AkSlot) */}
+          <div>
+            <AkOverline>OPERATOR SLOTS // 干员卡位</AkOverline>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(8.5rem, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <AkSlot name="SILVERASH" role="guard" rarity={6} code="GRD" meta="LV.90 // S3" reveal index={0} />
+              <AkSlot name="AMIYA" role="caster" rarity={5} code="CAS" meta="LV.80 // S2" reveal index={1} />
+              <AkSlot name="SARIA" role="defender" rarity={6} code="DEF" meta="LV.90 // S1" reveal index={2} pressed />
+              <AkSlot name="EYJA" role="caster" rarity={6} code="CAS" meta="LV.90 // S3" reveal index={3} />
+              <AkSlot empty><span>+ ASSIGN</span></AkSlot>
+            </div>
+          </div>
+
+          {/* 材料与道具方块 (AkItem) */}
+          <div>
+            <AkOverline>DEPOT MATERIAL TILES // 材料与道具方块</AkOverline>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(6rem, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <AkItem tier={5} name="D32钢" count="x4" />
+              <AkItem tier={5} name="双极纳米片" count="x6" />
+              <AkItem tier={4} name="改量装置" count="x12" />
+              <AkItem tier={3} name="锰矿" count="x28" />
+              <AkItem tier={2} name="糖" count="x84" />
+              <AkItem tier={4} name="龙门币" price="5,000" sold />
+            </div>
+          </div>
+
+          {/* 终端大屏交互 (AkScreen) */}
+          <div>
+            <AkOverline>FUNCTION SCREEN // 终端大屏模态</AkOverline>
+            <div style={{ marginTop: '0.5rem' }}>
+              <AkButton variant="action" icon={<span>⤢</span>} onClick={() => setScreenOpen(true)}>
+                OPEN TERMINAL SCREEN // 打开终端功能大屏
+              </AkButton>
+            </div>
+
+            {screenOpen ? (
+              <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
+                <AkScreen
+                  tone="dark"
+                  title="DEPOT // 仓库物资"
+                  eyebrow="MANAGEMENT // 01"
+                  watermark="DEPOT"
+                  meta={<AkCounter value="42,850" prefixIcon={<span>◆</span>} />}
+                  onBack={() => setScreenOpen(false)}
+                  backLabel="RETURN"
+                >
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <AkOverline>CATEGORY // ELITE MATERIALS</AkOverline>
+                      <AkButton variant="outline" onClick={() => setScreenOpen(false)} style={{ height: '2rem', minWidth: 'auto' }}>
+                        CLOSE ⎋
+                      </AkButton>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(7rem, 1fr))', gap: '0.75rem' }}>
+                      <AkItem tier={5} name="D32钢" count="x4" />
+                      <AkItem tier={5} name="双极纳米片" count="x6" />
+                      <AkItem tier={5} name="聚合剂" count="x3" />
+                      <AkItem tier={4} name="改量装置" count="x12" />
+                      <AkItem tier={4} name="三水锰矿" count="x8" />
+                      <AkItem tier={3} name="固源岩组" count="x142" />
+                    </div>
+                  </div>
+                </AkScreen>
+              </div>
+            ) : null}
+          </div>
         </div>
       </Block>
           </StageContext.Provider>
@@ -1594,7 +1493,6 @@ function ReferenceView() {
 
 export function App() {
   const { locale, setLocale, t } = useI18n()
-  const [view, setView] = useState<View>('reference')
   const [theme, setTheme] = useState<Theme>('terminal')
 
   useEffect(() => {
@@ -1605,36 +1503,68 @@ export function App() {
     <div className="demo-app">
       <header className="demo-topbar">
         <div className="demo-topbar__brand">
+          <div className="demo-brand-badge">
+            <span className="demo-brand-badge__emblem">◆</span>
+            <span className="demo-brand-badge__label">PRTS // OS</span>
+          </div>
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
-          <span className="demo-topbar__subtitle">{t('app.subtitle')}</span>
+          <span className="demo-topbar__version">v1.2.0</span>
         </div>
 
         <div className="demo-topbar__controls">
-          <AkSegmented
-            ariaLabel={t('app.view.label')}
-            options={[
-              { label: t('app.view.reference'), value: 'reference' },
-              { label: t('app.view.console'), value: 'console' },
-            ]}
-            value={view}
-            onValueChange={(next) => setView(next === 'reference' ? 'reference' : 'console')}
-          />
+          <div className="demo-status-pill">
+            <span className="demo-status-pill__dot" />
+            <span className="demo-status-pill__text">SYSTEM NORMAL</span>
+          </div>
 
-          <AkDropdownMenu
-            className="demo-topbar__settings"
-            label={`${t('app.settings.label')} · ${locale === 'zh-CN' ? t('app.lang.zh-cn') : t('app.lang.en')} · ${t(theme === 'terminal' ? 'app.theme.terminal' : 'app.theme.archive')}`}
-            items={[
-              { label: t('app.lang.zh-cn'), onSelect: () => setLocale('zh-CN') },
-              { label: t('app.lang.en'), onSelect: () => setLocale('en') },
-              { label: t('app.theme.terminal'), onSelect: () => setTheme('terminal') },
-              { label: t('app.theme.archive'), onSelect: () => setTheme('archive') },
-            ]}
-          />
+          <div className="demo-topbar__group">
+            <button
+              type="button"
+              className={`demo-tactical-btn ${theme === 'terminal' ? 'is-active' : ''}`}
+              onClick={() => setTheme('terminal')}
+            >
+              TERMINAL
+            </button>
+            <button
+              type="button"
+              className={`demo-tactical-btn ${theme === 'archive' ? 'is-active' : ''}`}
+              onClick={() => setTheme('archive')}
+            >
+              ARCHIVE
+            </button>
+          </div>
+
+          <div className="demo-topbar__group">
+            <button
+              type="button"
+              className={`demo-tactical-btn ${locale === 'zh-CN' ? 'is-active' : ''}`}
+              onClick={() => setLocale('zh-CN')}
+            >
+              中文
+            </button>
+            <button
+              type="button"
+              className={`demo-tactical-btn ${locale === 'en' ? 'is-active' : ''}`}
+              onClick={() => setLocale('en')}
+            >
+              EN
+            </button>
+          </div>
+
+          <a
+            href="https://github.com/swufefox/ak-ui-react"
+            target="_blank"
+            rel="noreferrer"
+            className="demo-github-btn"
+          >
+            <span>GITHUB</span>
+            <span className="demo-arrow">↗</span>
+          </a>
         </div>
       </header>
 
-      {view === 'console' ? <ConsoleView /> : <ReferenceView />}
+      <ReferenceView />
     </div>
   )
 }
