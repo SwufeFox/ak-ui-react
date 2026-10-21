@@ -1525,7 +1525,7 @@ export function App() {
           </div>
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
-          <span className="demo-topbar__version">v1.2.0</span>
+          <span className="demo-topbar__version">v1.3.0</span>
         </div>
 
         <div className="demo-topbar__controls">

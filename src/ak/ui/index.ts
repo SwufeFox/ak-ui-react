@@ -1,16 +1,16 @@
 export { AkButton } from './button/AkButton'
 export { AkCard, AkCardContent, AkCardDescription, AkCardFooter, AkCardHeader, AkCardTitle } from './card/AkCard'
 export { AkStatus, AkTag } from './status/AkStatus'
-export { AkNotice } from './notice/AkNotice'
-export { AkGauge, AkProgress } from './progress/AkProgress'
+export { AkNotice, AkNoticeStack } from './notice/AkNotice'
+export { AkGauge, AkProgress, AkProgressStack } from './progress/AkProgress'
 export { AkSlider } from './slider/AkSlider'
 export { AkInputNumber } from './input-number/AkInputNumber'
 export { AkSegmented, AkTabs } from './tabs/AkTabs'
 export { AkCountUp } from './effects/AkCountUp'
 // 上游 .ak-fx-* 特效层（glow / outline / skew）——此前只有 CSS，没有组件暴露
 export { AkGlow, AkOutline, AkSkew } from './effects/AkFx'
-// 焦距与底图处理（文章原则二/三/五）——上游 SCSS 零实现，本库增补
-export { AkBackdrop, AkGrain, AkMosaic, AkVignette } from './decor/AkSurfaces'
+// 焦距与底图处理
+export { AkBackdrop, AkGrain, AkMosaic, AkStripeEdge, AkVignette } from './decor/AkSurfaces'
 // 景深：把上游孤儿控制器 createDashboardDepth 与它的 CSS 消费规则接起来
 export { AkDepth, AkDepthLayer } from './effects/AkDepth'
 export { AkEntrance } from './effects/AkEntrance'
@@ -102,3 +102,8 @@ export { AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible, AkM
 export { AkItem, type AkItemProps, type AkItemTier } from './item/AkItem'
 export { AkSlot, type AkSlotProps, type AkSlotRarity, type AkSlotRole } from './slot/AkSlot'
 export { AkScreen, type AkScreenProps, type AkScreenTone } from './screen/AkScreen'
+
+export { AkMediaAlbum } from './media/AkMediaAlbum'
+export { AkNewsList } from './news/AkNewsList'
+export { AkLoadingScreen } from './loading/AkLoadingScreen'
+export { AkSan, AkSanContainer } from './san/AkSan'

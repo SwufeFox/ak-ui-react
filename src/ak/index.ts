@@ -26,7 +26,6 @@ export {
   type AkDepthVariant,
 } from './ui/effects/AkDepth'
 // 焦距与底图处理：暗角 / 噪点 / 失同步马赛克 / 毛玻璃
-// —— 文章原则二/三/五，上游 SCSS 零实现（毛玻璃全库仅 1 处），故为本库增补
 export {
   AkBackdrop,
   AkGrain,
