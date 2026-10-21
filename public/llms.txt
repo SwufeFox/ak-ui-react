@@ -1,0 +1,525 @@
+# ak-ui-react
+
+> React port of [ak-ui](https://github.com/YunYouJun/ak-ui) and [prts-design](https://github.com/MooncellWiki/prts-design) — an Arknights-inspired industrial / tactical terminal design system for React.
+> Framework-agnostic SCSS and DOM controllers are vendored from upstream; components are implemented in modern React (18 & 19).
+
+Package: `@swufefox/ak-ui-react`
+- Repository: https://github.com/SwufeFox/ak-ui-react
+- Showcase: https://ak-ui-react.pages.dev
+- Generated API Reference: `docs/api.md` (109 components, 115 interfaces)
+- Stylesheet: `@swufefox/ak-ui-react/style.css`
+
+---
+
+## 1. Quick Start
+
+### Installation
+
+```bash
+npm install @swufefox/ak-ui-react
+# or
+pnpm add @swufefox/ak-ui-react
+# or
+bun add @swufefox/ak-ui-react
+```
+
+### Import Stylesheet
+
+Import the stylesheet once at your app's root entry file (`main.tsx` or `App.tsx`):
+
+```tsx
+import '@swufefox/ak-ui-react/style.css'
+```
+
+---
+
+## 2. Core Design Rules & Principles
+
+1. **Terminal Root is Dark by Default**:
+   Unlike generic design systems, the canonical Arknights PRTS aesthetic is a high-contrast dark industrial tactical terminal (`#0b0d0f` canvas, `#171a1d` raised panels, `#f8f8f5` text). The library supports light archive mode via `[data-ak-theme="archive"]` or `:root[data-theme="light"]`.
+2. **Sharp Geometries & Cut Corners, No Pill Shapes**:
+   Never use generic iOS/macOS 16px/24px rounded corners or bubble buttons. Everything in Arknights is rectangular, chamfered (`AkCut`, `clip-path`), bracketed (`AkBrackets`), or tagged with corner markers (`AkCorner`).
+3. **Typography Disciplines**:
+   - Technical numbers and readouts use monospace/tabular numerals: `--ak-font-mono`, `AkNum`, `.tabular-nums`.
+   - Headers and Latin tactical display words use geometric sans: `AkDisplay`, Novecento style.
+   - Bilingual pairs (CJK + English subtext): `AkBilingual`.
+4. **Signal Colors & Semantic Tokens**:
+   - Info / Rhodes Island Cyan: `--ak-signal-info` (`#18d1ff` dark / `#0098dc` light)
+   - Action / Hazard Yellow: `--ak-signal-action` (`#ffd800` dark / `#c99d00` light)
+   - Danger / Crimson: `--ak-signal-danger` (`#e33b3b`)
+   - Accent / Orange: `--ak-color-accent` (`#f6540e`)
+   - Surfaces: `--ak-surface-canvas`, `--ak-surface-panel`, `--ak-surface-sunken`, `--ak-surface-raised`
+   - Role Palette: `--ak-role-vanguard`, `--ak-role-guard`, `--ak-role-defender`, `--ak-role-sniper`, `--ak-role-caster`, `--ak-role-medic`, `--ak-role-supporter`, `--ak-role-specialist`
+   - Terminal Command Tone Palette: `--ak-terminal-paper`, `--ak-terminal-muted`, `--ak-terminal-dark`, `--ak-terminal-cyan`, `--ak-terminal-accent`
+5. **Components Never Ship Game Art**:
+   Every icon-bearing component receives its icon from caller props (`icon`, `prefixIcon`, or `children`). No hidden bundled image dependencies.
+
+---
+
+## 3. Component Categories & Documentation
+
+### 3.1 Actions & Buttons
+
+#### `AkButton`
+Industrial tactile button featuring an animated sweeping light-band highlight on hover, active scale depression, and focus rings.
+
+```tsx
+import { AkButton } from '@swufefox/ak-ui-react'
+
+// Variants: 'default' | 'outline' | 'action' | 'advanced' | 'light'
+<AkButton variant="action" icon={<span>◆</span>} onClick={() => deploy()}>
+  CONFIRM DEPLOYMENT
+</AkButton>
+
+<AkButton variant="outline" block>FULL WIDTH</AkButton>
+<AkButton disabled>UNAVAILABLE</AkButton>
+```
+
+Props:
+- `variant?: 'default' | 'outline' | 'action' | 'advanced' | 'light'` (default: `'default'`)
+- `icon?: ReactNode`: Leading inline icon slot
+- `block?: boolean` (default: `false`): Stretches to 100% width
+- `disabled?: boolean`: Native disabled state
+
+#### `AkButtonGroup`
+Horizontal cluster wrapper with unified borders and segment flow.
+
+```tsx
+<AkButtonGroup>
+  <AkButton variant="outline">PREV</AkButton>
+  <AkButton variant="outline">NEXT</AkButton>
+</AkButtonGroup>
+```
+
+#### `AkTag` / `AkTagGroup`
+Tactical status tags with cut chamfer corners and colored signal indicators. Supports button selection state (`aria-pressed`).
+
+```tsx
+import { AkTag, AkTagGroup } from '@swufefox/ak-ui-react'
+
+<AkTag variant="advanced">MELEE</AkTag>
+<AkTag variant="danger">CROWD CONTROL</AkTag>
+// As selectable filter button:
+<AkTag as="button" aria-pressed={isSelected} onClick={() => toggle()}>SURVIVAL</AkTag>
+```
+
+---
+
+### 3.2 Menus & Disclosure
+
+Backed by the native browser Popover API. Esc, outside click, and top-layer stacking are handled automatically by the platform.
+
+```tsx
+import {
+  AkDropdownMenu,
+  AkContextMenu,
+  AkMenubar,
+  AkToolbar,
+  AkCollapsible,
+  AkMenuGroup,
+  AkMenuSeparator,
+} from '@swufefox/ak-ui-react'
+
+// Dropdown Menu:
+<AkDropdownMenu
+  label="TACTICAL MENU"
+  items={[
+    { label: 'Inspect Sector', onSelect: () => inspect(), shortcut: '⌘I' },
+    { label: 'Deploy Squad', onSelect: () => deploy(), shortcut: '⌘D' },
+    { label: 'Abort Operation', destructive: true, onSelect: () => abort() }
+  ]}
+/>
+
+// Context Menu (Right Click):
+<AkContextMenu items={[{ label: 'Archive', onSelect: () => archive() }]}>
+  <div className="panel">Right click here</div>
+</AkContextMenu>
+
+// Menubar & Toolbar:
+<AkMenubar aria-label="Editor Menu">
+  <button type="button" role="menuitem">FILE</button>
+  <button type="button" role="menuitem">EDIT</button>
+</AkMenubar>
+
+// Collapsible disclosure:
+<AkCollapsible title="OPERATIONAL BRIEFING">
+  <p>Target coordinates confirmed.</p>
+</AkCollapsible>
+```
+
+---
+
+### 3.3 Cards & Surfaces
+
+#### `AkCard`
+Layered rectangular panel with structured header, content, and footer slots.
+
+```tsx
+import {
+  AkCard,
+  AkCardHeader,
+  AkCardTitle,
+  AkCardDescription,
+  AkCardContent,
+  AkCardFooter,
+} from '@swufefox/ak-ui-react'
+
+<AkCard as="article" variant="default">
+  <AkCardHeader>
+    <AkCardTitle>MISSION 01-07</AkCardTitle>
+    <AkCardDescription>Sub-surface Originium veins</AkCardDescription>
+  </AkCardHeader>
+  <AkCardContent>
+    Defend all critical extraction gates.
+  </AkCardContent>
+  <AkCardFooter>
+    <AkButton variant="action">START</AkButton>
+  </AkCardFooter>
+</AkCard>
+```
+
+#### Surface Treatments
+- `AkBackdrop`: Frosted / blurred glass HUD panel with `strength` ('subtle' | 'base' | 'deep')
+- `AkGrain`: Procedural noise overlay for vast empty dark fields
+- `AkMosaic`: Data de-sync pixelation block for corrupted/classified data
+- `AkVignette`: Darkened corner gradient pushing visual focus inward
+- `AkStripeEdge`: High-visibility left hazard stripe edge
+
+---
+
+### 3.4 Feedback & Status
+
+```tsx
+import { AkNotice, AkStatus, AkProgress, AkGauge } from '@swufefox/ak-ui-react'
+
+// Notices with cut corners and technical status code:
+<AkNotice title="SYSTEM ALERT" code="PRTS.ERR" variant="danger">
+  Catastrophe precursor detected in Sector 4.
+</AkNotice>
+
+// Pulse indicator status readout:
+<AkStatus label="SYSTEM" detail="Online" variant="info" />
+<AkStatus label="COMMS" detail="Degraded" variant="warning" />
+
+// Progress bars and segmented gauges:
+<AkProgress value={75} max={100} label="STABILIZING" />
+<AkGauge value={4} max={5} label="DIFFICULTY" />
+```
+
+---
+
+### 3.5 Inputs & Form
+
+Dark-terminal native inputs with cyan indicators, monospace labels, and custom switch/radio shapes.
+
+```tsx
+import {
+  AkFormStack,
+  AkField,
+  AkFieldLabel,
+  AkInput,
+  AkSelect,
+  AkTextarea,
+  AkChoice,
+  AkSlider,
+  AkInputNumber,
+  AkSegmented,
+} from '@swufefox/ak-ui-react'
+
+<AkFormStack>
+  <AkField hint="ENTER OPERATOR ID">
+    <AkFieldLabel htmlFor="op-id">CODE</AkFieldLabel>
+    <AkInput id="op-id" placeholder="R001" value={code} onChange={e => setCode(e.target.value)} />
+  </AkField>
+
+  <AkField>
+    <AkSelect value={role} onChange={e => setRole(e.target.value)}>
+      <option value="caster">Caster</option>
+      <option value="medic">Medic</option>
+    </AkSelect>
+  </AkField>
+
+  <AkChoice checked={live} onChange={e => setLive(e.target.checked)}>CHECKLIST CONFIRMED</AkChoice>
+  <AkChoice variant="switch" checked={comms} onChange={e => setComms(e.target.checked)}>RADIO LINK</AkChoice>
+</AkFormStack>
+
+// Slider & Stepper:
+<AkSlider value={volume} onValueChange={setVolume} label="AUDIO GAIN" />
+<AkInputNumber value={quantity} onValueChange={setQuantity} min={1} max={99} />
+<AkSegmented options={['ALL', 'ELITE 1', 'ELITE 2']} value={stage} onValueChange={setStage} />
+```
+
+---
+
+### 3.6 Navigation
+
+```tsx
+import { AkTabs, AkBreadcrumb } from '@swufefox/ak-ui-react'
+
+<AkTabs
+  value={activeTab}
+  onValueChange={setActiveTab}
+  items={[
+    { id: 'ops', label: 'OPERATIONS', eyebrow: 'STAGE / 01', content: <div>Combat Stages</div> },
+    { id: 'roster', label: 'ROSTER', eyebrow: 'PERSONNEL', content: <div>Operator List</div> },
+  ]}
+/>
+
+<AkBreadcrumb
+  items={[
+    { label: 'RHODES ISLAND', href: '#' },
+    { label: 'TERMINAL', href: '#' },
+    { label: 'INFRASTRUCTURE' }
+  ]}
+/>
+```
+
+---
+
+### 3.7 Effects & Depth
+
+Motion language built with CSS animations and Web Animations API controllers:
+
+```tsx
+import {
+  AkEntrance,
+  AkCountUp,
+  AkDepth,
+  AkDepthLayer,
+  AkParticleField,
+  AkGlow,
+  AkOutline,
+  AkSkew,
+} from '@swufefox/ak-ui-react'
+
+// Entrance animation controller with replay():
+const entranceRef = useRef<AkEntranceHandle>(null)
+<AkEntrance ref={entranceRef}>
+  <div>Panel animating in on mount</div>
+</AkEntrance>
+entranceRef.current?.replay()
+
+// Rolling numeric readout:
+<AkCountUp value={2048} duration={800} />
+
+// Mouse-tracking 3D parallax depth:
+<AkDepth variant="stage" threeD>
+  <AkDepthLayer depth={0.4} className="bg-grid" />
+  <AkDepthLayer depth={1.0} className="main-content"><AkDisplay xl>PRTS</AkDisplay></AkDepthLayer>
+  <AkDepthLayer depth={2.0} className="hud-brackets" />
+</AkDepth>
+
+// Tactical micro-effects:
+<AkGlow tone="action"><AkButton>BREATHING GLOW</AkButton></AkGlow>
+<AkOutline color="#18d1ff"><AkButton>EXPANDING RING</AkButton></AkOutline>
+<AkSkew direction="left"><AkInverse>10 DEGREE SKEW</AkInverse></AkSkew>
+```
+
+---
+
+### 3.8 Arknights Game Data Components
+
+Dedicated primitives for Rhodes Island game metrics, ported from MooncellWiki/prts-design:
+
+```tsx
+import {
+  AkRarity,
+  AkRarityScope,
+  AkRarityChip,
+  AkRarityBar,
+  AkProfession,
+  AkProfessionLabel,
+  AkElite,
+  AkPotential,
+  AkSpec,
+  AkTrust,
+  AkSkillLevels,
+  AkPotList,
+  AkPot,
+  AkAttrs,
+  AkAttr,
+  AkKv,
+  AkKvItem,
+} from '@swufefox/ak-ui-react'
+
+// Star rating (1-6 stars, drawn with CSS clip-path):
+<AkRarity level={6} />
+
+// Rarity scope: cascades --ak-r and --ak-r-text to all child elements:
+<AkRarityScope level={6}>
+  <AkRarityChip level={6}>6★</AkRarityChip>
+  <AkRarityBar level={6}><span className="ak-r-text">SIX STAR PROFILE</span></AkRarityBar>
+</AkRarityScope>
+
+// Profession badges:
+<AkProfession name="caster" boxed size="lg" icon={<span>◇</span>} />
+<AkProfessionLabel name="术师" en="CASTER" prof="caster" subProf={<span>✦</span>} subProfLabel="扩散术师" />
+
+// Progression:
+<AkElite level={2} icon={<b>E2</b>} />
+<AkPotential label="POTENTIAL 6" icon={<b>P6</b>} />
+<AkSpec label="MASTERY 3" icon={<b>M3</b>} />
+<AkTrust value="200%" />
+<AkSkillLevels value={level} onValueChange={setLevel} max="M3" />
+
+// Attributes & KV Tables:
+<AkAttrs>
+  <AkAttr label="ATK" labelCn="攻击力" value="1280" hint="+95" accent />
+  <AkAttr label="DEF" labelCn="防御力" value="450" />
+</AkAttrs>
+
+<AkKv>
+  <AkKvItem label="FACTION">Rhodes Island</AkKvItem>
+  <AkKvItem label="CLASS">Core Caster</AkKvItem>
+</AkKv>
+```
+
+---
+
+### 3.9 Readouts & Sanity (SAN)
+
+```tsx
+import { AkCounter, AkLevel, AkSpinner, AkSan, AkSanContainer, AkSkeleton } from '@swufefox/ak-ui-react'
+
+// Resource counter with prefix/suffix icons:
+<AkCounter value="42,000" prefixIcon={<span>◆</span>} />
+
+// Stage / Operation badge (with auto-handled "OPERATION" fallback):
+<AkLevel label="STAGE">01-07</AkLevel>
+
+// Arknights 45° diamond spinner:
+<AkSpinner color="#ffd800" />
+
+// Standalone Sanity meter:
+<AkSan current={120} total={135} onAdd={() => refill()} />
+
+// Full Sanity panel container:
+<AkSanContainer
+  variant="compact"
+  eyebrow="RHODES ISLAND"
+  title="SANITY"
+  current={120}
+  total={135}
+  onAdd={() => refill()}
+  meta={<AkLevel>01-07</AkLevel>}
+  status="RESTORED"
+/>
+```
+
+---
+
+### 3.10 Collections & Tables
+
+```tsx
+import {
+  AkTable,
+  AkAvatar,
+  AkAvatarGroup,
+  AkThumbnail,
+  AkScrollArea,
+  AkNewsList,
+} from '@swufefox/ak-ui-react'
+
+// Tactical table with hairline dividers, overline headers, and selection rails:
+<AkTable
+  columns={[
+    { key: 'id', title: 'OPERATOR ID' },
+    { key: 'name', title: 'NAME' },
+    { key: 'level', title: 'LEVEL', align: 'end' },
+  ]}
+  data={[
+    { id: 'R001', name: 'Amiya', level: 80 },
+    { id: 'R002', name: 'Kal\'tsit', level: 90 },
+  ]}
+  selectedKey="R001"
+  onRowClick={row => handleSelect(row)}
+/>
+
+// Sharp cut avatars (no generic circles!):
+<AkAvatarGroup>
+  <AkAvatar fallback="AMIYA" cut />
+  <AkAvatar fallback="KAL" cut />
+</AkAvatarGroup>
+```
+
+---
+
+### 3.11 Command Deck, Screens, Slots & Items (Upstream New Additions)
+
+Synchronized with `YunYouJun/ak-ui` terminal and item architecture:
+
+```tsx
+import {
+  AkCommandGrid,
+  AkCommand,
+  AkSlot,
+  AkItem,
+  AkScreen,
+} from '@swufefox/ak-ui-react'
+
+// Terminal Command Grid:
+<AkCommandGrid>
+  <AkCommand label="OPERATIONS" meta="COMBAT // 01-07" tone="danger" onClick={() => openScreen('combat')} />
+  <AkCommand label="SQUAD" meta="FORMATION" tone="action" onClick={() => openScreen('squad')} />
+  <AkCommand label="DEPOT" meta="SUPPLY" tone="info" onClick={() => openScreen('depot')} />
+</AkCommandGrid>
+
+// Operator Card Slot:
+<AkSlot
+  name="AMIYA"
+  role="caster"
+  rarity={5}
+  code="CAS"
+  meta="LV.80"
+  rarityLabel="★★★★★"
+  onClick={() => inspect()}
+/>
+
+<AkSlot empty><span>+ ASSIGN</span></AkSlot>
+
+// Material Item Tile (T1 to T6):
+<AkItem tier={5} name="D32 STEEL" count="x4" onClick={() => viewItem()} />
+<AkItem tier={3} name="MANGANESE" count="x12" />
+<AkItem tier={4} name="LMD" price="5,000" sold />
+
+// Function Screen (Full-page terminal panel with shutter entrance and tone styling):
+<AkScreen
+  tone="dark" // 'dark' | 'paper' | 'muted' | 'cyan'
+  title="DEPOT"
+  eyebrow="MANAGEMENT // 01"
+  backLabel="RETURN"
+  onBack={() => closeScreen()}
+  meta={<span>LMD: 42,000 ◆</span>}
+  watermark="RHODES"
+>
+  <div className="ak-screen__grid">
+    <AkItem tier={5} name="D32 STEEL" count="x4" />
+    <AkItem tier={4} name="ORUNDUM" count="x1,800" />
+  </div>
+</AkScreen>
+```
+
+---
+
+## 4. Subpath Exports & Controllers
+
+Framework-agnostic controllers are accessible via subpaths without React dependencies:
+
+```ts
+import { createSectionNavigation, createMediaGallery } from '@swufefox/ak-ui-react/core'
+import { createCountUp, createEntrance } from '@swufefox/ak-ui-react/core/effects'
+import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
+```
+
+---
+
+## 5. Summary of Common Mistakes to Avoid
+
+| Anti-pattern | Recommended Pattern | Reason |
+| :--- | :--- | :--- |
+| Round avatars (`border-radius: 50%`) | Rectangular or chamfer cut avatars (`<AkAvatar cut />`) | Arknights design language strictly forbids bubbly round cards/avatars |
+| Hardcoded `#fff` or `#000` colors | `var(--ak-text-primary)`, `var(--ak-surface-canvas)` | Breaks theme inversion between Terminal (dark) and Archive (light) |
+| Fixed widths on buttons (`width: 150px`) | `min-width: 120px; width: auto;` (built into `AkButton`) | Avoids text clipping on longer phrases and CJK/English labels |
+| Hand-rolled CSS diagonal stripes | `<AkStripes variant="hazard" />` or `<AkGridBackdrop />` | Reuses canonical vector-math SVG/CSS tokens across the system |
+| Generic spinner icons | `<AkSpinner />` | Retains Arknights 45-degree rotating diamond radio-wave indicator |
+| Unstyled tooltips/popovers sticking out on mobile | `<AkPopover />` | Built-in `min(calc(100vw - 32px), ...)` prevents mobile viewport blowout |

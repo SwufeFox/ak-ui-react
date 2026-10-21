@@ -112,6 +112,8 @@ import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
 import { useI18n, type MessageKey } from './i18n'
 import { DOC_REGISTRY, type BlockPropDoc } from './doc-data'
+import llmsRawText from '../../llms.txt?raw'
+import type { AkMobileMenuHandle } from '../ak/ui/site/AkMobileMenu'
 import './demo.css'
 
 type Theme = 'terminal' | 'archive'
@@ -140,27 +142,13 @@ const CATEGORIES = [
   { id: 'components-17', title: 'ref.command.title' },
 ] as const satisfies readonly { id: string; title: MessageKey }[]
 
-/**
- * 舞台上下文：当前激活的分类 id + 切换函数。
- *
- * 用 context 而不是把 `active` 逐层透传，是因为 17 个 `Block` 是平铺在 JSX 里的
- * （有的还包了闭包变量），透传会改动每一个调用点。context 让调用点保持原样。
- */
+/** 舞台上下文：当前激活的分类 id + 切换函数。 */
 const StageContext = createContext<{ active: string; select: (id: string) => void } | null>(null)
 
-/**
- * `selectedCommand` 是全局共用的一份状态，菜单、工具栏、指令面板都会写它。
- * 只有下面这几个值在字典里有 `ref.menu.*` 键，回显时据此过滤。
- */
+/** 菜单与指令共享动作集。 */
 const MENU_ACTIONS = new Set(['inspect', 'deploy', 'cancel', 'archive', 'file', 'edit', 'view'])
 
-/**
- * 参考视图的分类面板。
- *
- * 关键行为：**只有激活的那一块真正渲染**（互斥面板，对应方舟「原位替换而非窗口堆叠」），
- * 其余 16 块完全不进 DOM —— 这正是「浅而广」里那个「广」字的落点：
- * 单屏信息密度靠分类栏承载，而不是靠把 17 个区块摞成一万五千像素的长页。
- */
+/** 组件分类面板容器。 */
 function Block({
   id,
   eyebrow,
@@ -357,13 +345,13 @@ function ReferenceView() {
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [slider, setSlider] = useState(42)
   const [count, setCount] = useState(1280)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
-  // 理智计数器：加号按钮真的能加，上限用满后不再涨（避免演示看起来像假的）
+  // 理智计数演示状态
   const [loadingReady, setLoadingReady] = useState(false)
   const [screenOpen, setScreenOpen] = useState(false)
+  const mobileMenuRef = useRef<AkMobileMenuHandle>(null)
   const [sanCurrent, setSanCurrent] = useState(41)
   const sanLimit = 135
   const [sanTotal] = useState(135)
@@ -388,7 +376,7 @@ function ReferenceView() {
     setActive(id)
     const url = `${window.location.pathname}${window.location.search}#${id}`
     window.history.replaceState(null, '', url)
-    // 面板顶部对齐：区块标题不该被吸顶栏压住，靠 .demo-stage 的 scroll-margin 兜住
+    // 滚动回分类顶部
     stageRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
   }, [])
 
@@ -416,7 +404,7 @@ function ReferenceView() {
     { label: t('ref.inputs.air'), value: 'air' },
   ]
   const items: GalleryItem[] = galleryItems(t)
-  // 相册演示复用画廊素材；显式取两项并守卫（noUncheckedIndexedAccess 下 items[0] 是可能 undefined 的）
+  // 画廊素材展示项
   const [albumFront, albumBack] = items
 
   return (
@@ -433,6 +421,15 @@ function ReferenceView() {
             <span className="demo-rail__eyebrow">CATALOGUE // 索引</span>
             <span className="demo-rail__count">{CATEGORIES.length} MODULES</span>
           </div>
+          <button
+            type="button"
+            className="demo-rail__llm-banner"
+            onClick={() => window.dispatchEvent(new CustomEvent('ak:open-llm-spec'))}
+          >
+            <span className="demo-rail__llm-tag">AI SPEC</span>
+            <span className="demo-rail__llm-title">llms.txt</span>
+            <span className="demo-rail__llm-desc">SPECIFICATION ↗</span>
+          </button>
           {CATEGORIES.map((category, index) => (
             <button
               key={category.id}
@@ -793,21 +790,26 @@ function ReferenceView() {
             ]}
           />
           <div>
-            <AkButton variant="outline" onClick={() => setMenuOpen(true)}>
-              {t('ref.site.openMenu')}
+            <AkButton variant="action" icon={<span>☰</span>} onClick={() => mobileMenuRef.current?.open()}>
+              {t('ref.site.openMenu')} // OPEN MOBILE MENU
             </AkButton>
-            {menuOpen ? <span className="ak-text"> {t('ref.site.menuHint')}</span> : null}
           </div>
           <div>
-            <AkMobileMenu label={t('common.menu')} closeLabel={t('common.close')}>
-              <a className="ak-nav__link" href="#shell-command">
-                {t('ref.shell.command')}
+            <AkMobileMenu ref={mobileMenuRef} label={t('common.menu')} closeLabel={t('common.close')}>
+              <a className="ak-nav__link" href="#components-1" onClick={() => { selectCategory('components-1'); mobileMenuRef.current?.close(); }}>
+                01 // ACTIONS & BUTTONS
               </a>
-              <a className="ak-nav__link" href="#shell-archive">
-                {t('ref.shell.archive')}
+              <a className="ak-nav__link" href="#components-2" onClick={() => { selectCategory('components-2'); mobileMenuRef.current?.close(); }}>
+                02 // MENUS & POPOVERS
               </a>
-              <a className="ak-nav__link" href="#shell-relay">
-                {t('ref.shell.relay')}
+              <a className="ak-nav__link" href="#components-4" onClick={() => { selectCategory('components-4'); mobileMenuRef.current?.close(); }}>
+                04 // FEEDBACK & PROGRESS
+              </a>
+              <a className="ak-nav__link" href="#components-9" onClick={() => { selectCategory('components-9'); mobileMenuRef.current?.close(); }}>
+                09 // SITE SHELL & LOADERS
+              </a>
+              <a className="ak-nav__link" href="#components-17" onClick={() => { selectCategory('components-17'); mobileMenuRef.current?.close(); }}>
+                17 // COMMAND & SCREENS
               </a>
             </AkMobileMenu>
           </div>
@@ -1494,10 +1496,24 @@ function ReferenceView() {
 export function App() {
   const { locale, setLocale, t } = useI18n()
   const [theme, setTheme] = useState<Theme>('terminal')
+  const [llmModalOpen, setLlmModalOpen] = useState(false)
+  const [llmCopied, setLlmCopied] = useState(false)
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
   }, [theme])
+
+  useEffect(() => {
+    const handleOpen = () => setLlmModalOpen(true)
+    window.addEventListener('ak:open-llm-spec', handleOpen)
+    return () => window.removeEventListener('ak:open-llm-spec', handleOpen)
+  }, [])
+
+  const copyLlmText = () => {
+    navigator.clipboard.writeText(llmsRawText)
+    setLlmCopied(true)
+    setTimeout(() => setLlmCopied(false), 2000)
+  }
 
   return (
     <div className="demo-app">
@@ -1516,6 +1532,26 @@ export function App() {
           <div className="demo-status-pill">
             <span className="demo-status-pill__dot" />
             <span className="demo-status-pill__text">SYSTEM NORMAL</span>
+          </div>
+
+          <div className="demo-topbar__group">
+            <button
+              type="button"
+              className="demo-tactical-btn is-spec"
+              onClick={() => setLlmModalOpen(true)}
+              title="View llms.txt AI Agent Specification"
+            >
+              <span className="demo-spec-dot">◆</span> LLMS.TXT
+            </button>
+            <a
+              href="/llms.txt"
+              target="_blank"
+              rel="noreferrer"
+              className="demo-tactical-btn"
+              title="Open raw llms.txt"
+            >
+              RAW ↗
+            </a>
           </div>
 
           <div className="demo-topbar__group">
@@ -1565,6 +1601,46 @@ export function App() {
       </header>
 
       <ReferenceView />
+
+      {llmModalOpen ? (
+        <div className="demo-llm-overlay" onClick={() => setLlmModalOpen(false)}>
+          <div className="demo-llm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="demo-llm-modal__head">
+              <div className="demo-llm-modal__title">
+                <span className="demo-spec-dot">◆</span>
+                <span>PRTS // llms.txt SPECIFICATION</span>
+              </div>
+              <div className="demo-llm-modal__actions">
+                <button
+                  type="button"
+                  className="demo-copy-btn"
+                  onClick={copyLlmText}
+                >
+                  {llmCopied ? '✓ COPIED ALL' : 'COPY ALL'}
+                </button>
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="demo-raw-link"
+                >
+                  RAW FILE ↗
+                </a>
+                <button
+                  type="button"
+                  className="demo-copy-btn"
+                  onClick={() => setLlmModalOpen(false)}
+                >
+                  CLOSE ⎋
+                </button>
+              </div>
+            </div>
+            <pre className="demo-llm-modal__body">
+              <code>{llmsRawText}</code>
+            </pre>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

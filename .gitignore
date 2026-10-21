@@ -11,7 +11,6 @@ test-results
 _vue-source
 .git-commit-msg.txt
 
-# 发布/打 tag 时写下的临时信息文件——和 .git-commit-msg.txt 是同一类事故来源，
-# 此前漏了这一条，导致 .tag-msg.tmp 被带进 1f52f22
+# Temporary release and commit metadata
 .tag-msg.tmp
 *.tmp

@@ -46,4 +46,7 @@ for (const file of ['effects.mjs', 'effects.d.mts', 'site.mjs', 'site.d.mts', 'd
 }
 cpSync(resolve(coreSrc, 'site'), resolve(coreDest, 'site'), { recursive: true })
 
+// Sync llms.txt to public/llms.txt for web access
+cpSync(resolve(root, 'llms.txt'), resolve(root, 'public/llms.txt'))
+
 console.log('\n✅ build complete → dist/')

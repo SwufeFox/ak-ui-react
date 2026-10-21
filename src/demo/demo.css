@@ -553,3 +553,143 @@ body {
     border-color: var(--ak-signal-info);
   }
 }
+
+/* ── llms.txt 视觉与模态弹窗 ────────────────────────────────────────────── */
+
+.demo-tactical-btn.is-spec {
+  color: var(--ak-signal-info, #4aabea);
+  border-right: 1px solid var(--demo-hairline);
+}
+
+.demo-tactical-btn.is-spec:hover {
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, transparent);
+}
+
+.demo-spec-dot {
+  font-size: 0.6rem;
+  color: var(--ak-signal-info, #4aabea);
+}
+
+.demo-rail__llm-banner {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.65rem 0.75rem;
+  margin: 0.5rem 0 0.75rem;
+  border: 1px solid var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 10%, transparent);
+  clip-path: polygon(0 0, calc(100% - 0.5rem) 0, 100% 0.5rem, 100% 100%, 0 100%);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--ak-motion-fast, 120ms) ease;
+}
+
+.demo-rail__llm-banner:hover {
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 20%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ak-signal-info, #4aabea) 30%, transparent);
+}
+
+.demo-rail__llm-tag {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--ak-signal-info, #4aabea);
+}
+
+.demo-rail__llm-title {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.demo-rail__llm-desc {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  color: var(--demo-text-muted);
+}
+
+.demo-llm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background: rgba(5, 7, 9, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: ak-dialog-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.demo-llm-modal {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(64rem, 100%);
+  height: min(52rem, 90vh);
+  border: 1px solid var(--ak-border, rgba(255, 255, 255, 0.18));
+  border-top: 3px solid var(--ak-signal-info, #4aabea);
+  background: #0f1215;
+  clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.85);
+}
+
+.demo-llm-modal__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  background: #15181c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-llm-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+
+.demo-llm-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.demo-raw-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--ak-motion-fast, 120ms) ease;
+}
+
+.demo-raw-link:hover {
+  border-color: var(--ak-signal-info, #4aabea);
+  color: var(--ak-signal-info, #4aabea);
+}
+
+.demo-llm-modal__body {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  overflow: auto;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #d6dde2;
+  background: #0b0d0f;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
