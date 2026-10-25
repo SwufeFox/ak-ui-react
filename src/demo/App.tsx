@@ -1,4 +1,5 @@
 import { createContext, cloneElement, isValidElement, Fragment, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { version as packageVersion } from '../../package.json'
 import {
   AkAssetLoader,
   AkAvatar,
@@ -1867,7 +1868,7 @@ export function App() {
           </div>
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
-          <span className="demo-topbar__version">v1.3.0</span>
+          <span className="demo-topbar__version">v{packageVersion}</span>
         </div>
 
         {/* 顶栏控件全部用库自己的组件 —— 以前这里是自造的 demo-tactical-btn /

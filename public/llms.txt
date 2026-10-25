@@ -3,7 +3,7 @@
 > React port of [ak-ui](https://github.com/YunYouJun/ak-ui) and [prts-design](https://github.com/MooncellWiki/prts-design) — an Arknights-inspired industrial / tactical terminal design system for React.
 > Framework-agnostic SCSS and DOM controllers are vendored from upstream; components are implemented in modern React (18 & 19).
 
-Package: `@swufefox/ak-ui-react` (v1.3.0)
+Package: `@swufefox/ak-ui-react` (v1.3.1)
 - Repository: https://github.com/SwufeFox/ak-ui-react
 - Showcase: https://ak-ui-react.pages.dev
 - Generated API Reference: `docs/api.md` (109 components, 115 interfaces)
