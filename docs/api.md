@@ -517,7 +517,7 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>`.
 
 ## AkInputNumber
 
-Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step'>`.
+Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
@@ -531,6 +531,8 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'typ
 | `step` | `number` | yes | 每次增减的步长。 |
 | `value` | `number` | yes | 当前值；越界会立刻写回夹紧值。 |
 | `onValueChange` | `(value: number) => void` | yes | 值变化时回调。 |
+| `size` | `AkControlSize` | yes | 尺寸档：高度、左右快捷按钮和步进图标一起缩放。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖；可用 `--ak-input-number-width` 调整整体宽度。 |
 
 ## AkInverse
 

@@ -684,6 +684,25 @@ function ReferenceView() {
             minLabel={t('common.minLabel')}
             onValueChange={setSlider}
           />
+          <div className="demo-stack">
+            <span className="demo-note">{t('ref.inputs.sizeTiers')}</span>
+            <div className="demo-row" style={{ alignItems: 'center' }}>
+              {(['sm', 'md', 'lg'] as const).map((s) => (
+                <AkInputNumber
+                  key={s}
+                  size={s}
+                  value={slider}
+                  max={100}
+                  label={`${t('common.numberField')} ${s}`}
+                  increaseLabel={t('common.increase')}
+                  decreaseLabel={t('common.decrease')}
+                  maxLabel={t('common.maxLabel')}
+                  minLabel={t('common.minLabel')}
+                  onValueChange={setSlider}
+                />
+              ))}
+            </div>
+          </div>
           <AkSegmented
             ariaLabel={t('console.roster.filter')}
             options={segmentOptions}

@@ -1,7 +1,9 @@
 import { useEffect, type InputHTMLAttributes } from 'react'
 import { clampRange, finite } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
-export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step'> {
+export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'> {
   /** 无障碍名，读屏会念。默认「数值」。 */
   label?: string
   /** 增加按钮的无障碍名。默认「增加」。 */
@@ -22,6 +24,10 @@ export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputEl
   value?: number
   /** 值变化时回调。 */
   onValueChange?: (value: number) => void
+  /** 尺寸档：高度、左右快捷按钮和步进图标一起缩放。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖；可用 `--ak-input-number-width` 调整整体宽度。 */
+  tokens?: AkTokens
 }
 
 export function AkInputNumber({
@@ -36,6 +42,8 @@ export function AkInputNumber({
   step = 1,
   value = 0,
   onValueChange,
+  size = 'md',
+  tokens,
   className,
   ...rest
 }: AkInputNumberProps) {
@@ -55,7 +63,13 @@ export function AkInputNumber({
   }
 
   return (
-    <div className={className ? `ak-input-number ${className}` : 'ak-input-number'} data-slot="ak-input-number" data-disabled={disabled || undefined}>
+    <div
+      className={className ? `ak-input-number ${className}` : 'ak-input-number'}
+      {...sizeAttrs(size)}
+      data-slot="ak-input-number"
+      data-disabled={disabled || undefined}
+      style={tokenStyle(tokens)}
+    >
       <button
         type="button"
         className="ak-input-number__increase"
