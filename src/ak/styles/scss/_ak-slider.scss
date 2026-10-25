@@ -1,23 +1,34 @@
 @use "sass:list";
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
+// ⚠️ mixin 里读令牌必须走 var()，不能在 mixin 内 @include tuning-steps ——
+// 伪元素（::-webkit-slider-thumb）不继承元素的自定义属性之外的东西，
+// 而且三档规则要落在 .ak-slider 上，不是落在伪元素上。
 @mixin slider-track {
-  height: 6px;
+  height: var(--ak-slider-track-h, 6px);
   border: 0;
   background:
-    linear-gradient(90deg, var(--ak-slider-accent) var(--ak-slider-fill), transparent var(--ak-slider-fill)) center / calc(100% - 14px) 100% no-repeat,
+    linear-gradient(90deg, var(--ak-slider-accent) var(--ak-slider-fill), transparent var(--ak-slider-fill)) center / calc(100% - var(--ak-slider-thumb-w, 14px)) 100% no-repeat,
     #202830;
-  box-shadow: inset 0 0 0 1px #59616a;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px #59616a;
 }
 
 @mixin slider-thumb {
   box-sizing: border-box;
-  width: 14px;
-  height: 22px;
+  width: var(--ak-slider-thumb-w, 14px);
+  height: var(--ak-slider-thumb-h, 22px);
   border: 2px solid var(--ak-slider-accent);
   border-radius: 0;
-  background: var(--ak-slider-thumb, #f3f4ef);
-  box-shadow: 0 0 0 3px var(--ak-slider-thumb-ring, #151b21);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ebece6 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 0 0 3px var(--ak-slider-thumb-ring, #151b21),
+    0 2px 6px rgba(0, 0, 0, 0.4);
   // 拇指自己也要有手感：悬停时信号色泛光
   transition:
     box-shadow var(--ak-motion-fast, 120ms) ease,
@@ -26,13 +37,22 @@
 }
 
 .ak-slider {
+  @include tuning.tuning-steps(
+    (
+      ak-slider-h: (26px, 36px, 46px),
+      ak-slider-track-h: (4px, 6px, 8px),
+      ak-slider-thumb-w: (11px, 14px, 18px),
+      ak-slider-thumb-h: (17px, 22px, 28px),
+    )
+  );
+
   --ak-slider-accent: var(--ak-color-primary, #4aabea);
   --ak-slider-fill: 0%;
   display: block;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  height: 36px;
+  height: calc(var(--ak-slider-h) * var(--ak-density-control, 1));
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -40,15 +60,26 @@
   // Native range thumbs travel from half a thumb width to width minus that
   // inset. Position all eleven tick centers on the same interval.
   background-color: transparent;
+  // 十一道刻度。位置原本按 14px 拇指半径手算（6.5px - i*1.3px）——
+  // 拇指换档后那个算式就偏了，所以改用 --ak-slider-thumb-w / -track-h 派生。
+  // ⚠️ 这里必须用 calc() 而不是 Sass 算术：令牌是运行时值。
   $ticks: ();
   $positions: ();
   @for $i from 0 through 10 {
     $ticks: list.append($ticks, linear-gradient(#75808b, #75808b), comma);
-    $positions: list.append($positions, calc(#{$i * 10%} + #{6.5px - $i * 1.3px}) bottom, comma);
+    $positions: list.append(
+      $positions,
+      calc(
+        #{$i * 10%} + (var(--ak-slider-thumb-w, 14px) / 2)
+          - (#{$i} * var(--ak-slider-thumb-w, 14px) / 10)
+      )
+        bottom,
+      comma
+    );
   }
   background-image: $ticks;
   background-position: $positions;
-  background-size: 1px 4px;
+  background-size: 1px calc(var(--ak-slider-track-h, 6px) * 0.66);
   background-repeat: no-repeat;
   cursor: pointer;
 
@@ -61,7 +92,9 @@
 
   &::-webkit-slider-thumb {
     @include slider-thumb;
-    margin-top: -8px;
+    // 拇指垂直居中于轨道：(轨道高 - 拇指高) / 2。
+    // 原来是写死的 -8px（按 6px 轨道 + 22px 拇指算的），换档即错位。
+    margin-top: calc((var(--ak-slider-track-h, 6px) - var(--ak-slider-thumb-h, 22px)) / 2);
     appearance: none;
   }
 

@@ -553,6 +553,8 @@ Extends `Omit<ButtonHTMLAttributes<HTMLElement>, 'name'>`.
 | `count` | `ReactNode` | yes | 右上角数量角标。 |
 | `price` | `ReactNode` | yes | 价格（商店场景）。 |
 | `sold` | `boolean` | yes | 是否处于已售罄或置灰状态。 |
+| `size` | `AkControlSize` | yes | 尺寸档：图标边长、内距与文字字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 |
 
 ## AkKv
 
@@ -696,6 +698,8 @@ Extends `Omit<HTMLAttributes<HTMLElement>, 'title'>`.
 | `role` | `'alert' \| 'status'` | yes | Overrides the semantic role derived from `variant`. |
 | `title` | `ReactNode` | yes | 通知标题。 |
 | `variant` | `AkNoticeVariant` | yes | 语义档位，决定左侧色条与路由码颜色。 |
+| `size` | `AkControlSize` | yes | 尺寸档：内距、色条宽度与字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-notice-bar': '0.5rem' }`。 |
 
 ## AkNoticeStack
 
@@ -985,7 +989,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 
 ## AkSlider
 
-Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'>`.
+Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
@@ -995,6 +999,8 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'typ
 | `step` | `number` | yes | 步长。 |
 | `value` | `number` | no | 当前值。 |
 | `onValueChange` | `(value: number) => void` | yes | 拖动时回调。 |
+| `size` | `AkControlSize` | yes | 尺寸档：控件高度、轨道粗细与拇指尺寸一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-slider-accent': '#ff5e19' }`。 |
 
 ## AkSlot
 

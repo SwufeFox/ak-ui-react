@@ -1,6 +1,11 @@
 @use "variables" as *;
 
 :root {
+  // 全局亚像素抗锯齿与排版优化，保证深色界面下拉丁展示字与数据标签的边缘极度锐利细腻
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
   @each $color, $value in $ak-colors {
     --ak-color-#{$color}: #{$value};
   }
@@ -105,9 +110,8 @@
   --ak-stripe-size: 8px;
   --ak-halftone-color: rgba(255, 255, 255, 0.16);
   --ak-halftone-size: 6px;
-  // 扫描线：上游写死 rgba(0,0,0,.05)（它的默认主题是亮色）——直接搬过来在 ak-ui 的
-  // 默认暗色主题上完全看不见，所以这里做成随主题翻转的令牌。
-  --ak-scanline-color: rgba(255, 255, 255, 0.035);
+  // 扫描线：暗色主题下呈现细腻微弱的高解析度电子束光栅
+  --ak-scanline-color: rgba(255, 255, 255, 0.04);
   --ak-glyph-filter: none;
 
   // 焦距与底图处理 (vignette / grain / mosaic)
@@ -115,6 +119,7 @@
   --ak-vignette-size: 55%;
   --ak-grain-color: rgba(255, 255, 255, 0.05);
   --ak-grain-size: 3px;
+  --ak-grain-opacity: 0.16;
   --ak-mosaic-size: 5px;
   --ak-trust-icon: none;
   --ak-trust-content: none;
@@ -144,7 +149,11 @@
   --ak-cut-md: 0.75rem;
   --ak-cut-lg: 1.5rem;
   --ak-radius-subtle: 2px;
-  --ak-shadow-panel: 0 1rem 2rem rgba(0, 0, 0, 0.32);
+  // 多层柔和自然阴影：接触阴影 + 中景扩散 + 远景深层遮蔽，细腻还原高科技设备的真实厚度
+  --ak-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.25), 0 16px 36px rgba(0, 0, 0, 0.38);
+  --ak-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.22);
+  --ak-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --ak-shadow-elevated: 0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.28), 0 20px 48px rgba(0, 0, 0, 0.42);
   // 信号色辉光：形状与强度归这枚令牌，颜色跟随 --ak-shadow-signal-color。
   // 组件（.ak-status）把颜色接到自己的信号色上，于是同一枚令牌能服务
   // 信息 / 警告 / 危险各档；宿主改这里就能整体重调所有信号辉光。
@@ -196,10 +205,17 @@
   --ak-grid-color: rgba(0, 0, 0, 0.06);
   --ak-stripe-color: rgba(0, 0, 0, 0.08);
   --ak-halftone-color: rgba(0, 0, 0, 0.14);
-  --ak-scanline-color: rgba(0, 0, 0, 0.05);
+  --ak-scanline-color: rgba(0, 0, 0, 0.035);
   --ak-glyph-filter: invert(1);
+
+  // 亮底阴影分层与材质参数
+  --ak-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1), 0 16px 32px rgba(0, 0, 0, 0.14);
+  --ak-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.08);
+  --ak-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --ak-shadow-elevated: 0 1px 3px rgba(0, 0, 0, 0.1), 0 6px 16px rgba(0, 0, 0, 0.12), 0 18px 40px rgba(0, 0, 0, 0.16);
 
   // 同上，亮底翻成黑系
   --ak-vignette-color: rgba(0, 0, 0, 0.32);
   --ak-grain-color: rgba(0, 0, 0, 0.05);
+  --ak-grain-opacity: 0.12;
 }

@@ -38,18 +38,24 @@
 
 // ── 毛玻璃 / 亚克力质感（AkBackdrop）─────────────────────────────────
 .ak-backdrop {
-  backdrop-filter: blur(var(--ak-backdrop-blur, 3px));
-  background: var(--ak-backdrop-surface, var(--ak-surface-raised));
-  box-shadow: inset 0 0 0 1px var(--ak-backdrop-edge, var(--ak-border-strong));
+  -webkit-backdrop-filter: blur(var(--ak-backdrop-blur, 8px));
+  backdrop-filter: blur(var(--ak-backdrop-blur, 8px));
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+    var(--ak-backdrop-surface, var(--ak-surface-raised));
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px var(--ak-backdrop-edge, var(--ak-border-strong)),
+    0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-// 强度档位。上游那处是最轻的一档，所以默认就是它。
+// 强度档位。上游那处是最轻的一档，现在升级为柔和通透的标准磨砂。
 .ak-backdrop--light {
-  --ak-backdrop-blur: 3px;
+  --ak-backdrop-blur: 8px;
 }
 
 .ak-backdrop--heavy {
-  --ak-backdrop-blur: 12px;
+  --ak-backdrop-blur: 18px;
   --ak-backdrop-surface: var(--ak-surface-inverse);
 }
 
@@ -65,6 +71,7 @@
 // 高对比度场景里模糊会让前景文字反而难读
 @media (forced-colors: active) {
   .ak-backdrop {
+    -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background: Canvas;
   }

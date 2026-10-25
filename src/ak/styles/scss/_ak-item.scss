@@ -1,27 +1,45 @@
 @use "variables" as *;
 
-// Material tile: the tier colour drives the glyph, glow and bottom edge.
+@use "ak-tuning" as tuning;
 // An empty icon draws a rotated tier diamond; an SVG child replaces it.
 .ak-item {
+  // 道具方块以前图标宽度锁在 clamp(1.8rem, 3.2cqw, 2.6rem)：
+  // 它在容器查询里，所以脱离容器（例如普通页面）就永远是 2.6rem 上限，
+  // 缩小不缩、放大不长。改成本地令牌 + 尺寸档。
+  @include tuning.tuning-steps(
+    (
+      ak-item-icon: (1.6rem, 2.6rem, 3.4rem),
+      ak-item-pad: (0.35rem 0.3rem 0.3rem, 0.55rem 0.45rem 0.45rem, 0.75rem 0.6rem 0.6rem),
+      ak-item-fs: (0.625rem, 0.72rem, 0.8rem),
+    )
+  );
+
   --ak-item-tier: var(--ak-rarity-1, #9c9c9c);
 
   position: relative;
   display: grid;
   box-sizing: border-box;
   min-width: 0;
-  padding: 0.55rem 0.45rem 0.45rem;
+  padding: var(--ak-item-pad);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-bottom: 0.2rem solid var(--ak-item-tier);
   border-radius: 0;
   justify-items: center;
   gap: 0.3rem;
   color: #f7f7f4;
-  background: rgba(10, 12, 14, 0.7);
+  // 细腻分层：顶边缘反光 + 内部暗部渐变 + 环境接触阴影，营造精工蚀刻道具徽章质感
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 40%, rgba(10, 12, 14, 0.75) 100%),
+    rgba(10, 12, 14, 0.7);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 16px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.25);
   font-family: $font-sans-serif;
 
   & &__icon {
     display: grid;
-    width: clamp(1.8rem, 3.2cqw, 2.6rem);
+    width: var(--ak-item-icon);
     aspect-ratio: 1;
     background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--ak-item-tier) 38%, transparent), transparent 70%);
     place-items: center;
@@ -48,7 +66,7 @@
     top: 0.25rem;
     right: 0.3rem;
     font-family: $font-monospace;
-    font-size: 0.65rem;
+    font-size: calc(var(--ak-item-fs) * 0.9);
     font-weight: 800;
     line-height: 1;
   }
@@ -57,7 +75,7 @@
     max-width: 100%;
     overflow: hidden;
     color: rgba(247, 247, 244, 0.72);
-    font-size: 0.68rem;
+    font-size: var(--ak-item-fs);
     line-height: 1.3;
     text-align: center;
     text-overflow: ellipsis;
@@ -66,7 +84,7 @@
 
   & &__price {
     font-family: $font-monospace;
-    font-size: 0.72rem;
+    font-size: var(--ak-item-fs);
     font-weight: 800;
   }
 
@@ -85,15 +103,27 @@
     cursor: pointer;
     transition:
       transform var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease),
+      box-shadow var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease),
+      border-color var(--ak-motion-fast, 120ms) ease,
       filter var(--ak-motion-base, 200ms) ease;
 
     &:hover:not(:disabled) {
-      filter: brightness(1.15);
+      filter: brightness(1.1);
       transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+        inset 0 0 14px rgba(0, 0, 0, 0.3),
+        0 6px 18px rgba(0, 0, 0, 0.38),
+        0 0 12px color-mix(in srgb, var(--ak-item-tier) 55%, transparent);
     }
 
     &:active:not(:disabled) {
       transform: scale(0.97);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 16px rgba(0, 0, 0, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
     &:disabled {
@@ -117,7 +147,12 @@
 [data-ak-theme="archive"] .ak-item {
   border-color: var(--ak-border, #d2d5d7);
   color: var(--ak-text-primary, #111315);
-  background: var(--ak-surface-panel, #ffffff);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    var(--ak-surface-panel, #ffffff);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
+    0 2px 6px rgba(0, 0, 0, 0.06);
 
   & .ak-item__name {
     color: var(--ak-text-secondary, #3b4146);

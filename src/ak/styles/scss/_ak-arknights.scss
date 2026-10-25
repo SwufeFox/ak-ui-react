@@ -366,9 +366,23 @@
     font-size: var(--ak-fs-xs);
     font-weight: 700;
     line-height: 1;
+    // ⚠️ `all: unset` 会清掉所有属性，包括 transition —— 所以必须写在它**之后**。
+    // 技能等级是最常点的档位选择器，之前只有 focus 环，指针移过去毫无变化。
+    transition:
+      color var(--ak-motion-fast, 120ms) ease,
+      background-color var(--ak-motion-fast, 120ms) ease;
 
     + button {
       border-left: 1px solid var(--ak-border);
+    }
+
+    &:hover:not(:disabled):not(.is-active) {
+      color: var(--ak-text-primary);
+      background: color-mix(in srgb, var(--ak-text-primary) 10%, transparent);
+    }
+
+    &:active:not(:disabled) {
+      background: color-mix(in srgb, var(--ak-signal-info) 22%, transparent);
     }
 
     // all: unset 把全局焦点环也清掉了，这里补回来（内缩 2px：按钮挨着，外扩会被邻格盖住）

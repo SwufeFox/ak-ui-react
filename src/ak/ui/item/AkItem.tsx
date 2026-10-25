@@ -1,5 +1,7 @@
 import type { ButtonHTMLAttributes, ElementType, ReactNode } from 'react'
 import { cx } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 export type AkItemTier = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -18,6 +20,10 @@ export interface AkItemProps extends Omit<ButtonHTMLAttributes<HTMLElement>, 'na
   price?: ReactNode
   /** 是否处于已售罄或置灰状态。 */
   sold?: boolean
+  /** 尺寸档：图标边长、内距与文字字号一起缩。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 */
+  tokens?: AkTokens
 }
 
 /**
@@ -33,7 +39,10 @@ export function AkItem({
   count,
   price,
   sold = false,
+  size = 'md',
+  tokens,
   className,
+  style,
   children,
   type,
   ...rest
@@ -45,12 +54,14 @@ export function AkItem({
     <Tag
       {...rest}
       type={buttonType}
+      {...sizeAttrs(size)}
       className={cx(
         'ak-item',
         `ak-item--tier-${tier}`,
         sold && 'ak-item--sold',
         className,
       )}
+      style={tokenStyle(tokens, style)}
       data-slot="ak-item"
       data-tier={tier}
     >

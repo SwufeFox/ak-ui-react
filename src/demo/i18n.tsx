@@ -418,6 +418,7 @@ const en = {
   'ref.inputs.air': 'Air',
   'ref.inputs.sliderValue': 'Slider value: {n}',
   'ref.inputs.selected': 'Selected: {value}',
+  'ref.inputs.sizeTiers': 'Size tiers sm / md / lg:',
 
   'ref.navigation.aria': 'Operator dossier',
   'ref.navigation.eyebrowText': 'DOSSIER / {n}',
@@ -895,6 +896,7 @@ const zhCN: Record<MessageKey, string> = {
   'ref.inputs.air': '空中',
   'ref.inputs.sliderValue': '滑块值：{n}',
   'ref.inputs.selected': '已选：{value}',
+  'ref.inputs.sizeTiers': '尺寸档 sm / md / lg：',
 
   'ref.navigation.aria': '干员档案',
   'ref.navigation.eyebrowText': '档案 / {n}',

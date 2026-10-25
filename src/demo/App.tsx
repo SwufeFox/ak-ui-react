@@ -693,6 +693,20 @@ function ReferenceView() {
           <span className="ak-text">
             {t('ref.inputs.selected', { value: segmentOptions.find((option) => option.value === segment)?.label ?? segment })}
           </span>
+
+          {/* 尺寸档对照：同一组件三档并排，肉眼可比 */}
+          <div className="demo-row" style={{ alignItems: 'center' }}>
+            <span className="demo-note">{t('ref.inputs.sizeTiers')}</span>
+            {(['sm', 'md', 'lg'] as const).map((s) => (
+              <AkSlider
+                key={s}
+                size={s}
+                label={`volume-${s}`}
+                value={slider}
+                onValueChange={(v) => setSlider(Number.isFinite(v) ? v : 0)}
+              />
+            ))}
+          </div>
         </div>
       </Block>
 

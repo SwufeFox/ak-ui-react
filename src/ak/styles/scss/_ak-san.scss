@@ -383,6 +383,27 @@
     box-shadow: 3cqh 1.8cqh 0 rgba(23, 25, 27, 0.3);
     cursor: pointer;
     transform: translate(-50%, -50%);
+    // 终端皮肤下的加号：这是整个 SAN 面板唯一的交互点，
+    // 之前悬停完全没有变化。尺寸走 cqh，所以反馈也得跟着容器尺度走。
+    transition:
+      background-color var(--ak-motion-fast, 120ms) ease,
+      color var(--ak-motion-fast, 120ms) ease;
+
+    &:hover:not(:disabled) {
+      color: #17191b;
+      background: var(--ak-signal-action, #{$yellow});
+    }
+
+    &:active:not(:disabled) {
+      // 位移必须一起写，否则 translate 会被覆盖、圆钮会跳位
+      transform: translate(-50%, -50%) scale(0.94);
+      box-shadow: 1.2cqh 0.7cqh 0 rgba(23, 25, 27, 0.35);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   }
 
   .ak-san__add .ak-icon {

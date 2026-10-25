@@ -44,8 +44,10 @@
   background-size: 250% 100%;
   box-shadow: var(
     --ak-button-shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 0 5px rgba(0, 0, 0, 0.2),
-    0 5px 10px rgba(0, 0, 0, 0.5)
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 6px 14px rgba(0, 0, 0, 0.28)
   );
   transition:
     filter var(--ak-motion-base, 200ms) var(--ak-ease-standard, ease),
@@ -240,6 +242,23 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3), inset 0 0 50px rgba(0, 0, 0, 0.3);
   display: inline-block;
   cursor: pointer;
+  // 这是启动键（斜置的发光方块），之前按下去只有一圈常驻的脉冲动画在转，
+  // 指针悬停/按下都没有反馈 —— 补上，并保留 45° 旋转不破形。
+  transition:
+    box-shadow var(--ak-motion-fast, 120ms) ease,
+    border-color var(--ak-motion-fast, 120ms) ease;
+
+  &:hover:not(:disabled) {
+    box-shadow:
+      0 0 30px rgba($yellow, 0.5),
+      0 0 20px rgba(0, 0, 0, 0.4),
+      inset 0 0 50px rgba($yellow, 0.18);
+  }
+
+  &:active:not(:disabled) {
+    // 旋转角度必须保留，否则按下瞬间方块会弹回正位
+    transform: rotate(-45deg) scale(0.94);
+  }
 
   .icon {
     color: $yellow;

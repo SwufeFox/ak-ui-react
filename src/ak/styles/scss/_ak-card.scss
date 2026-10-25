@@ -13,8 +13,16 @@
   );
 
   background-color: var(--ak-card-bg, transparent);
-  transition: 0.2s;
-  box-shadow: var(--ak-card-shadow, 0 0 10px rgba(0, 0, 0, 0.2));
+  transition:
+    transform var(--ak-motion-fast, 120ms) ease,
+    box-shadow var(--ak-motion-base, 200ms) ease,
+    border-color var(--ak-motion-fast, 120ms) ease;
+  box-shadow: var(
+    --ak-card-shadow,
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    0 4px 14px rgba(0, 0, 0, 0.22)
+  );
   outline: none;
   display: inline-block;
   padding: var(--ak-card-pad);
