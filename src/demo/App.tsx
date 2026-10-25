@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, cloneElement, isValidElement, Fragment, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import {
   AkAssetLoader,
   AkAvatar,
@@ -148,13 +148,157 @@ const StageContext = createContext<{ active: string; select: (id: string) => voi
 /** 菜单与指令共享动作集。 */
 const MENU_ACTIONS = new Set(['inspect', 'deploy', 'cancel', 'archive', 'file', 'edit', 'view'])
 
+/** Traverse React children without invoking component implementations. */
+type Tunable = { path: number[]; label: string; props: Record<string, unknown>; element: ReactElement }
+function componentName(type: ReactElement['type']): string {
+  if (typeof type === 'string') return type
+  const component = type as unknown as {
+    displayName?: string
+    name?: string
+    render?: { displayName?: string; name?: string }
+    type?: { displayName?: string; name?: string }
+  }
+  return component.displayName ?? component.name ?? component.render?.displayName ?? component.render?.name ?? component.type?.displayName ?? component.type?.name ?? 'Component'
+}
+function isAkComponent(type: ReactElement['type']): boolean {
+  return /^Ak[A-Z]/.test(componentName(type))
+}
+function walkTree(node: ReactNode, visit: (el: ReactElement, path: number[]) => ReactNode, path: number[] = []): ReactNode {
+  if (Array.isArray(node)) {
+    const next = node.map((child, i) => walkTree(child, visit, [...path, i]))
+    return next.every((child, i) => child === node[i]) ? node : next
+  }
+  if (!isValidElement(node)) return node
+  const el = node as ReactElement<{ children?: ReactNode }>
+  const children = el.props.children
+  const nextChildren = children === undefined ? undefined : walkTree(children, visit, [...path, 0])
+  return visit(nextChildren === children ? el : cloneElement(el, {}, nextChildren), path)
+}
+function getTunables(tree: ReactNode): Tunable[] {
+  const list: Tunable[] = []
+  const counts = new Map<string, number>()
+  // Read the original elements without mapping arrays or cloning ancestors.
+  const visit = (node: ReactNode, path: number[]) => {
+    if (Array.isArray(node)) {
+      node.forEach((child, i) => visit(child, [...path, i]))
+      return
+    }
+    if (!isValidElement(node)) return
+    const el = node as ReactElement<{ children?: ReactNode }>
+    if (el.props.children !== undefined) visit(el.props.children, [...path, 0])
+    const name = componentName(el.type)
+    if (isAkComponent(el.type)) {
+      const count = (counts.get(name) ?? 0) + 1
+      counts.set(name, count)
+      list.push({ path, label: `${name} · ${count}`, props: el.props as Record<string, unknown>, element: el })
+    }
+  }
+  visit(tree, [])
+  return list
+}
+function serializeValue(value: unknown, depth = 0): string {
+  if (value === null) return 'null'
+  if (typeof value === 'string') return JSON.stringify(value)
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (typeof value === 'function') return '/* callback supplied by caller */ () => {}'
+  if (isValidElement(value)) return serializeNode(value, depth)
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]'
+    const indent = '  '.repeat(depth)
+    const childIndent = '  '.repeat(depth + 1)
+    return `[\n${value.map((item) => `${childIndent}${serializeValue(item, depth + 1)}`).join(',\n')}\n${indent}]`
+  }
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value)
+    if (entries.length === 0) return '{}'
+    const indent = '  '.repeat(depth)
+    const childIndent = '  '.repeat(depth + 1)
+    return `{\n${entries.map(([key, item]) => {
+      const property = /^[A-Za-z_$][\w$]*$/.test(key) ? key : JSON.stringify(key)
+      return `${childIndent}${property}: ${serializeValue(item, depth + 1)}`
+    }).join(',\n')}\n${indent}}`
+  }
+  return 'undefined'
+}
+function serializeNode(node: ReactNode, depth = 0): string {
+  if (Array.isArray(node)) return node.map((child) => serializeNode(child, depth)).filter(Boolean).join('\n')
+  if (node == null || typeof node === 'boolean') return ''
+  const indent = '  '.repeat(depth)
+  if (typeof node === 'string' || typeof node === 'number') return `${indent}{${serializeValue(node)}}`
+  if (!isValidElement(node)) return ''
+  const el = node as ReactElement<{ children?: ReactNode }>
+  if (el.type === Fragment) {
+    const children = serializeNode(el.props.children, depth + 1)
+    return children ? `${indent}<>\n${children}\n${indent}</>` : `${indent}<></>`
+  }
+  const type = componentName(el.type)
+  const props = Object.entries(el.props as Record<string, unknown>).filter(([key, value]) => key !== 'children' && key !== 'key' && key !== 'ref' && value !== undefined)
+  const attrs = props.map(([key, value]) => ` ${key}={${serializeValue(value, depth + 1)}}`).join('')
+  const children = serializeNode(el.props.children, depth + 1)
+  return children ? `${indent}<${type}${attrs}>\n${children}\n${indent}</${type}>` : `${indent}<${type}${attrs} />`
+}
+function getAkImports(tree: ReactNode): string[] {
+  const names = new Set<string>()
+  const seen = new Set<object>()
+  const visit = (value: unknown) => {
+    if (typeof value === 'function' || value == null) return
+    if (isValidElement(value)) {
+      if (isAkComponent(value.type)) names.add(componentName(value.type))
+      visit(value.props)
+      return
+    }
+    if (typeof value !== 'object' || seen.has(value)) return
+    seen.add(value)
+    if (Array.isArray(value)) value.forEach(visit)
+    else Object.values(value).forEach(visit)
+  }
+  visit(tree)
+  return [...names]
+}
+
+function applyOverrides(tree: ReactNode, overrides: Record<string, unknown>): ReactNode {
+  const byPath = new Map<string, Record<string, unknown>>()
+  for (const [key, value] of Object.entries(overrides)) {
+    const [path, prop] = key.split('|')
+    if (!prop) continue
+    const props = byPath.get(path!) ?? {}
+    props[prop] = value
+    byPath.set(path!, props)
+  }
+  if (byPath.size === 0) return tree
+  return walkTree(tree, (el, path) => {
+    const props = byPath.get(path.join('.'))
+    if (!props) return el
+    const current = el.props as Record<string, unknown>
+    return Object.entries(props).some(([key, value]) => !Object.is(current[key], value))
+      ? cloneElement(el, props)
+      : el
+  })
+}
+
+/** Keep incomplete numeric input (such as `1.`) intact until blur. */
+function TuneNumberField({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  const [draft, setDraft] = useState<string | null>(null)
+  return <AkInput
+    size="sm"
+    inputMode="decimal"
+    value={draft ?? String(value)}
+    onFocus={() => setDraft(String(value))}
+    onChange={(event) => {
+      const text = event.target.value
+      setDraft(text)
+      if (text.trim() && Number.isFinite(Number(text))) onChange(Number(text))
+    }}
+    onBlur={() => setDraft(null)}
+  />
+}
+
 /** 组件分类面板容器。 */
 function Block({
   id,
   eyebrow,
   title,
   note,
-  code,
   api,
   children,
 }: {
@@ -162,26 +306,57 @@ function Block({
   eyebrow: string
   title: string
   note?: ReactNode
-  code?: string
   api?: BlockPropDoc[]
   children: ReactNode
 }) {
   const stage = useContext(StageContext)
   const { t } = useI18n()
-  const [tab, setTab] = useState<'preview' | 'code' | 'api'>('preview')
-  const [copied, setCopied] = useState(false)
+  const [tab, setTab] = useState<'preview' | 'code' | 'api' | 'tune'>('preview')
+  const [copyResult, setCopyResult] = useState<{ text: string; state: 'copied' | 'error' } | null>(null)
+  const copyTimer = useRef<number | null>(null)
+  const [selected, setSelected] = useState(0)
+  const [overrides, setOverrides] = useState<Record<string, unknown>>({})
+  const [previewExpanded, setPreviewExpanded] = useState(true)
+  const [resetVersion, setResetVersion] = useState(0)
+  const [codeText, setCodeText] = useState('')
+  const active = !stage || stage.active === id
+  // Keep the inspector's DOM and scroll range intact while other views are visible.
+  const tunables = useMemo(() => active ? getTunables(children) : [], [active, children])
+  const target = tunables[selected]
+  const actualTree = useMemo(() => active ? applyOverrides(children, overrides) : children, [active, children, overrides])
+  // Update before paint on entry; hidden views retain their text without serializing.
+  useLayoutEffect(() => {
+    if (active && tab === 'code') {
+      setCodeText(`import { ${getAkImports(actualTree).join(', ')} } from '@swufefox/ak-ui-react'\n\n${serializeNode(actualTree)}`)
+    }
+  }, [active, tab, actualTree])
+  const targetPrefix = target ? `${target.path.join('.')}|` : ''
+  const modifiedCount = target ? Object.keys(overrides).filter((key) => key.startsWith(targetPrefix)).length : 0
+  const hasControlledValue = Boolean(target && ['value', 'checked'].some((key) => key in target.props) && ['onValueChange', 'onChange', 'onInput'].some((key) => typeof target.props[key] === 'function'))
+  const editable = target ? [...Object.entries(target.props).filter(([key, value]) => !['key','ref','children','className','style'].includes(key) && !/^on[A-Z]/.test(key) && !(['value','checked'].includes(key) && hasControlledValue) && ['string','number','boolean'].includes(typeof value)), ...(typeof target.props.children === 'string' || typeof target.props.children === 'number' ? [['children', target.props.children] as [string, unknown]] : [])] : []
+  const hasCode = Boolean(children)
+  const copyState = copyResult?.text === codeText ? copyResult.state : 'idle'
+  useEffect(() => () => {
+    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current)
+  }, [])
 
-  if (stage && stage.active !== id) return null
+  if (!active) return null
 
   const index = CATEGORIES.findIndex((category) => category.id === id)
   const displayEyebrow =
     index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow.replace(/^\s*\d+\s*\/\s*/, '')}`
 
-  const copyCode = () => {
-    if (!code) return
-    navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const views = ['preview', 'tune', 'code', ...(api ? ['api' as const] : [])] as const
+  const copyCode = async () => {
+    const text = codeText
+    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current)
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyResult({ text, state: 'copied' })
+    } catch {
+      setCopyResult({ text, state: 'error' })
+    }
+    copyTimer.current = window.setTimeout(() => setCopyResult(null), 2000)
   }
 
   return (
@@ -192,53 +367,93 @@ function Block({
           <h2 id={`${id}-title`}>{title}</h2>
           {note ? <p className="demo-note">{note}</p> : null}
         </div>
-        {(code || api) ? (
-          <div className="demo-block__tabs" role="tablist">
-            <button
-              type="button"
-              className={`demo-doc-tab ${tab === 'preview' ? 'is-active' : ''}`}
-              onClick={() => setTab('preview')}
-            >
-              {t('common.preview')}
-            </button>
-            {code ? (
+        {(hasCode || api) ? (
+          <div className="demo-block__tabs" role="tablist" aria-label={t('common.demoViews')}>
+            {views.map((view) => (
               <button
+                key={view}
+                id={`${id}-tab-${view}`}
                 type="button"
-                className={`demo-doc-tab ${tab === 'code' ? 'is-active' : ''}`}
-                onClick={() => setTab('code')}
+                role="tab"
+                aria-selected={tab === view}
+                aria-controls={`${id}-${view === 'preview' || view === 'tune' ? 'workspace' : view}`}
+                tabIndex={tab === view ? 0 : -1}
+                className={`demo-doc-tab ${tab === view ? 'is-active' : ''}`}
+                onClick={() => setTab(view)}
+                onKeyDown={(event) => {
+                  let next = views.indexOf(view)
+                  if (event.key === 'ArrowRight') next = (next + 1) % views.length
+                  else if (event.key === 'ArrowLeft') next = (next - 1 + views.length) % views.length
+                  else if (event.key === 'Home') next = 0
+                  else if (event.key === 'End') next = views.length - 1
+                  else return
+                  event.preventDefault()
+                  setTab(views[next]!)
+                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus()
+                }}
               >
-                {t('common.code')}
+                {view === 'preview' ? t('common.preview') : view === 'tune' ? t('common.tune') : view === 'code' ? t('common.code') : t('common.apiDocs')}
               </button>
-            ) : null}
-            {api ? (
-              <button
-                type="button"
-                className={`demo-doc-tab ${tab === 'api' ? 'is-active' : ''}`}
-                onClick={() => setTab('api')}
-              >
-                {t('common.apiDocs')}
-              </button>
-            ) : null}
+            ))}
           </div>
         ) : null}
       </div>
 
-      {tab === 'preview' && children}
-
-      {tab === 'code' && code && (
-        <div className="demo-code-container">
-          <div className="demo-code-header">
-            <span>JSX / TSX</span>
-            <button type="button" className="demo-copy-btn" onClick={copyCode}>
-              {copied ? '✓ COPIED' : 'COPY'}
-            </button>
-          </div>
-          <pre className="demo-code-box"><code>{code}</code></pre>
+      <div id={`${id}-workspace`} className="demo-tune-workspace" role="tabpanel" aria-labelledby={`${id}-tab-${tab === 'tune' ? 'tune' : 'preview'}`} data-tuning={tab === 'tune'} hidden={tab !== 'preview' && tab !== 'tune'}>
+        <div className="demo-tune-preview-shell" data-expanded={previewExpanded}>
+          <AkButton type="button" variant="outline" size="sm" className="demo-tune-preview-toggle" hidden={tab !== 'tune'} aria-expanded={previewExpanded} aria-controls={`${id}-preview`} onClick={() => setPreviewExpanded((value) => !value)}>
+            {t(previewExpanded ? 'common.tuneHidePreview' : 'common.tuneShowPreview')}
+          </AkButton>
+          <div id={`${id}-preview`} className="demo-tune-preview">{actualTree}</div>
         </div>
-      )}
+        <div className="demo-tune-panel" hidden={tab !== 'tune'}>
+          {tunables.length === 0 ? <p>{t('common.tuneEmpty')}</p> : <>
+            <AkFieldLabel className="demo-tune-instance">{t('common.tuneInstance')}
+              <AkSelect size="sm" value={selected} onChange={(event) => setSelected(Number(event.target.value))}>
+                {tunables.map((item, i) => <option key={`${item.label}-${i}`} value={i}>{item.label}</option>)}
+              </AkSelect>
+            </AkFieldLabel>
+            <div className="demo-tune-fields" key={`${target?.path.join('.') ?? 'empty'}-${resetVersion}`}>
+              {hasControlledValue && <p className="demo-note">{t('common.tuneControlled')}</p>}
+              {editable.length === 0 ? <p>{t('common.tuneEmptyProps')}</p> : editable.map(([prop, value]) => {
+                const key = `${targetPrefix}${prop}`
+                const current = overrides[key] ?? value
+                const change = (next: unknown) => setOverrides((prev) => {
+                  const nextOverrides = { ...prev }
+                  if (Object.is(next, value)) delete nextOverrides[key]
+                  else nextOverrides[key] = next
+                  return nextOverrides
+                })
+                return typeof value === 'boolean'
+                  ? <AkChoice key={prop} checked={Boolean(current)} onChange={(event) => change(event.target.checked)}>{prop}</AkChoice>
+                  : <AkFieldLabel key={prop}>{prop}{prop === 'size' && ['sm', 'md', 'lg'].includes(String(value))
+                    ? <AkSelect size="sm" value={String(current)} onChange={(event) => change(event.target.value)}>{['sm', 'md', 'lg'].map((size) => <option key={size}>{size}</option>)}</AkSelect>
+                    : typeof value === 'number'
+                      ? <TuneNumberField value={Number(current)} onChange={change} />
+                      : <AkInput size="sm" value={String(current)} onChange={(event) => change(event.target.value)} />}
+                  </AkFieldLabel>
+              })}
+            </div>
+            <div className="demo-tune-actions">
+              <AkButton variant="outline" size="sm" disabled={modifiedCount === 0} onClick={() => {
+                setOverrides((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith(targetPrefix))))
+                setResetVersion((version) => version + 1)
+              }}>{t('common.tuneReset')}</AkButton>
+              <span className="demo-note" aria-live="polite">{t('common.tuneModified', { n: modifiedCount })}</span>
+            </div>
+          </>}
+        </div>
+      </div>
+      <div id={`${id}-code`} className="demo-code-container" role="tabpanel" aria-labelledby={`${id}-tab-code`} hidden={tab !== 'code'}>
+        <div className="demo-code-header">
+          <span>JSX / TSX</span>
+          <AkButton type="button" variant="outline" size="sm" onClick={copyCode} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
+        </div>
+        <pre className="demo-code-box" tabIndex={0}><code>{codeText}</code></pre>
+      </div>
 
       {tab === 'api' && api && (
-        <div className="demo-api-container">
+        <div id={`${id}-api`} className="demo-api-container" role="tabpanel" aria-labelledby={`${id}-tab-api`}>
           <table className="ak-table">
             <thead className="ak-table__head">
               <tr>
@@ -462,7 +677,7 @@ function ReferenceView() {
 
         <div className="demo-stage" ref={stageRef}>
           <StageContext.Provider value={stageValue}>
-      <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')} code={DOC_REGISTRY['components-1']?.code} api={DOC_REGISTRY['components-1']?.api}>
+      <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')} api={DOC_REGISTRY['components-1']?.api}>
         {/* 这一排是「外观展台」：真实用途是让人看五个 variant 的差别，
             本来就没有业务动作。但死按钮会让人以为坏了，所以点任何一个都会
             把它的档位名写进下面的回显行 —— 有反馈，又不假装它有功能。 */}
@@ -492,7 +707,7 @@ function ReferenceView() {
         </p>
       </Block>
 
-      <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')} code={DOC_REGISTRY['components-2']?.code} api={DOC_REGISTRY['components-2']?.api}>
+      <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')} api={DOC_REGISTRY['components-2']?.api}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkDropdownMenu label={t('ref.menu.open')} items={[
@@ -559,7 +774,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')} code={DOC_REGISTRY['components-3']?.code} api={DOC_REGISTRY['components-3']?.api}>
+      <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')} api={DOC_REGISTRY['components-3']?.api}>
         <div className="demo-grid">
           <AkCard as="article">
             <AkCardHeader>
@@ -612,7 +827,7 @@ function ReferenceView() {
         </AkDialog>
       </Block>
 
-      <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')} code={DOC_REGISTRY['components-4']?.code} api={DOC_REGISTRY['components-4']?.api}>
+      <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')} api={DOC_REGISTRY['components-4']?.api}>
         <div className="demo-stack">
           <AkNotice title={t('notice.info.title')} code={t('notice.code.info')}>
             {t('notice.info.body')}
@@ -670,7 +885,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')} code={DOC_REGISTRY['components-5']?.code} api={DOC_REGISTRY['components-5']?.api}>
+      <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')} api={DOC_REGISTRY['components-5']?.api}>
         <div className="demo-stack">
           <AkSlider label={t('ref.inputs.volume')} value={slider} onValueChange={(v) => setSlider(Number.isFinite(v) ? v : 0)} />
           <span className="ak-text">{t('ref.inputs.sliderValue', { n: slider })}</span>
@@ -729,7 +944,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} code={DOC_REGISTRY['components-6']?.code} api={DOC_REGISTRY['components-6']?.api}>
+      <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} api={DOC_REGISTRY['components-6']?.api}>
         <AkTabs
           ariaLabel={t('ref.navigation.aria')}
           items={tabSpec.map((item, index) => ({
@@ -745,7 +960,7 @@ function ReferenceView() {
         />
       </Block>
 
-      <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')} code={DOC_REGISTRY['components-7']?.code} api={DOC_REGISTRY['components-7']?.api}>
+      <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')} api={DOC_REGISTRY['components-7']?.api}>
         <div className="demo-stack">
           <div className="demo-row">
             <span style={{ fontSize: '2rem' }}>
@@ -804,7 +1019,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')} code={DOC_REGISTRY['components-8']?.code} api={DOC_REGISTRY['components-8']?.api}>
+      <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')} api={DOC_REGISTRY['components-8']?.api}>
         <AkMediaGallery
           items={items}
           value={galleryIndex}
@@ -851,7 +1066,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')} code={DOC_REGISTRY['components-9']?.code} api={DOC_REGISTRY['components-9']?.api}>
+      <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')} api={DOC_REGISTRY['components-9']?.api}>
         <div className="demo-stack">
           <AkAssetLoader
             label={t('common.resources')}
@@ -896,11 +1111,11 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-10" eyebrow={t('ref.shell.eyebrow')} title={t('ref.shell.title')} note={t('ref.shell.note')} code={DOC_REGISTRY['components-10']?.code} api={DOC_REGISTRY['components-10']?.api}>
+      <Block id="components-10" eyebrow={t('ref.shell.eyebrow')} title={t('ref.shell.title')} note={t('ref.shell.note')} api={DOC_REGISTRY['components-10']?.api}>
         <SiteShellDemo />
       </Block>
 
-      <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')} code={DOC_REGISTRY['components-11']?.code} api={DOC_REGISTRY['components-11']?.api}>
+      <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')} api={DOC_REGISTRY['components-11']?.api}>
         <div className="demo-stack">
           <div className="demo-row">
             <AkStripes bar variant="warning" style={{ width: '8rem' }} />
@@ -1064,7 +1279,7 @@ function ReferenceView() {
         </div>
       </Block>
 
-      <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')} code={DOC_REGISTRY['components-12']?.code} api={DOC_REGISTRY['components-12']?.api}>
+      <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')} api={DOC_REGISTRY['components-12']?.api}>
         <div className="demo-stack">
           <div className="demo-row" style={{ alignItems: 'center' }}>
             <AkRarity level={6} aria-label={t('common.rarityAria', { n: 6 })} />
@@ -1134,8 +1349,7 @@ function ReferenceView() {
           id="components-13"
           eyebrow={t('ref.controls.eyebrow')}
           title={t('ref.controls.title')}
-          note={t('ref.controls.note')}
-         code={DOC_REGISTRY['components-13']?.code} api={DOC_REGISTRY['components-13']?.api}>
+          note={t('ref.controls.note')} api={DOC_REGISTRY['components-13']?.api}>
           <div className="demo-stack">
             <AkDivider>{t('common.sectionLabel')}</AkDivider>
 
@@ -1188,7 +1402,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-        <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')} code={DOC_REGISTRY['components-14']?.code} api={DOC_REGISTRY['components-14']?.api}>
+        <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')} api={DOC_REGISTRY['components-14']?.api}>
         <AkFormStack>
           <AkField hint={t('common.fieldHint')}>
             <AkFieldLabel htmlFor="demo-field">{t('common.fieldName')}</AkFieldLabel>
@@ -1254,7 +1468,7 @@ function ReferenceView() {
       </AkFormStack>
       </Block>
 
-        <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} code={DOC_REGISTRY['components-15']?.code} api={DOC_REGISTRY['components-15']?.api}>
+        <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} api={DOC_REGISTRY['components-15']?.api}>
           <div className="demo-stack">
             <div className="demo-row" style={{ alignItems: 'center' }}>
               <AkCounter
@@ -1369,7 +1583,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-        <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} code={DOC_REGISTRY['components-16']?.code} api={DOC_REGISTRY['components-16']?.api}>
+        <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} api={DOC_REGISTRY['components-16']?.api}>
           <div className="demo-stack">
             <AkBreadcrumb
               items={[
@@ -1446,7 +1660,7 @@ function ReferenceView() {
           </div>
         </Block>
 
-      <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} code={DOC_REGISTRY['components-17']?.code} api={DOC_REGISTRY['components-17']?.api}>
+      <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} api={DOC_REGISTRY['components-17']?.api}>
         <div className="demo-stack">
           <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
             <AkCommand
