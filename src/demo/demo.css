@@ -1,26 +1,24 @@
 /* Demo-only layout helpers. Deliberately outside src/ak/styles so the library stylesheet
-   stays a faithful 1:1 port of the upstream SCSS. */
+   stays a faithful 1:1 port of the upstream SCSS.
+
+   ⚠️ 这些 `--demo-*` **全部派生自库令牌**，不再自带一套颜色。
+   曾经这里的十六进制是硬编码的独立调色板（`#0b0d0f` / `#fff` / `rgb(255 255 255 / 14%)`），
+   于是 `data-ak-theme="archive"` 切换后组件翻面、外壳不翻，示例站点看起来像两个产品拼的。
+   现在只写一次，两套主题自动跟随 —— 新增主题也不用再改这里。 */
 
 :root {
-  --demo-canvas: #0b0d0f;
-  --demo-canvas-glow: rgb(25 209 255 / 6%);
-  --demo-grid-line: rgb(255 255 255 / 3.5%);
-  --demo-hairline: rgb(255 255 255 / 14%);
-  --demo-topbar: rgb(12 14 16 / 88%);
-  --demo-text: #d2d2d2;
-  --demo-text-strong: #fff;
-  --demo-text-muted: rgb(210 210 210 / 68%);
-}
-
-:root[data-ak-theme='archive'] {
-  --demo-canvas: #edf0f2;
-  --demo-canvas-glow: rgb(0 152 220 / 8%);
-  --demo-grid-line: rgb(0 0 0 / 4%);
-  --demo-hairline: rgb(0 0 0 / 14%);
-  --demo-topbar: rgb(248 249 250 / 92%);
-  --demo-text: #2b2d2f;
-  --demo-text-strong: #141516;
-  --demo-text-muted: rgb(43 45 47 / 72%);
+  --demo-canvas: var(--ak-surface-canvas);
+  --demo-canvas-glow: color-mix(in srgb, var(--ak-signal-info) 7%, transparent);
+  --demo-grid-line: color-mix(in srgb, var(--ak-text-primary) 4%, transparent);
+  /* 发丝线：取文字色的 14%，暗底得白线、亮底得黑线，与手写 rgba 的观感一致 */
+  --demo-hairline: color-mix(in srgb, var(--ak-text-primary) 14%, transparent);
+  --demo-topbar: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
+  --demo-text: var(--ak-text-secondary);
+  --demo-text-strong: var(--ak-text-primary);
+  --demo-text-muted: color-mix(in srgb, var(--ak-text-secondary) 82%, transparent);
+  /* 代码块用下沉面 + 一点画布混色，两主题各自成立 */
+  --demo-code-bg: color-mix(in srgb, var(--ak-surface-canvas) 70%, var(--ak-surface-sunken-2));
+  --demo-code-head: var(--ak-surface-sunken-2);
 }
 
 body {
@@ -122,89 +120,12 @@ body {
   gap: 0.65rem;
 }
 
-.demo-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.3rem 0.65rem;
-  border: 1px solid rgba(70, 196, 124, 0.35);
-  background: rgba(70, 196, 124, 0.08);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #46c47c;
-}
-
-.demo-status-pill__dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: #46c47c;
-  box-shadow: 0 0 8px #46c47c;
-  animation: demo-status-pulse 2s ease-in-out infinite;
-}
-
-@keyframes demo-status-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
+/* 顶栏控件的自造样式已删除 —— 现在直接用 AkButton / AkSegmented / AkStatus。
+   保留 .demo-topbar__group 只作为两枚按钮的并排容器。 */
 .demo-topbar__group {
   display: inline-flex;
-  padding: 2px;
-  border: 1px solid var(--demo-hairline);
-  background: var(--ak-surface-sunken, rgba(0, 0, 0, 0.25));
-}
-
-.demo-tactical-btn {
-  padding: 0.32rem 0.65rem;
-  border: 0;
-  background: transparent;
-  color: var(--demo-text-muted);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: all var(--ak-motion-fast, 120ms) ease;
-}
-
-.demo-tactical-btn:hover {
-  color: var(--demo-text-strong);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.demo-tactical-btn.is-active {
-  color: #111315;
-  background: var(--ak-signal-action, #ffd800);
-  font-weight: 900;
-}
-
-.demo-github-btn {
-  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--demo-hairline);
-  background: var(--ak-surface-sunken, rgba(0, 0, 0, 0.2));
-  color: var(--demo-text-strong);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-  transition: all var(--ak-motion-fast, 120ms) ease;
-}
-
-.demo-github-btn:hover {
-  border-color: var(--ak-signal-info, #4aabea);
-  color: var(--ak-signal-info, #4aabea);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 10%, transparent);
-}
-
-.demo-github-btn .demo-arrow {
-  color: var(--ak-signal-info, #4aabea);
+  gap: 0.4rem;
 }
 
 /* ── 参考视图（主文档流）──────────────────────────────────────────────── */
@@ -455,8 +376,8 @@ body {
 }
 
 .demo-doc-tab.is-active {
-  color: #111315;
-  background: var(--ak-signal-action, #ffd800);
+  color: var(--ak-surface-canvas);
+  background: var(--ak-signal-action);
   border-color: var(--ak-signal-action, #ffd800);
   box-shadow: 0 0 12px rgba(255, 216, 0, 0.35);
 }
@@ -464,12 +385,8 @@ body {
 .demo-code-container {
   display: grid;
   border: 1px solid var(--demo-hairline);
-  background: #0d0f11;
+  background: var(--demo-code-bg);
   overflow: hidden;
-}
-
-[data-ak-theme="archive"] .demo-code-container {
-  background: #181b1e;
 }
 
 .demo-code-header {
@@ -477,9 +394,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  background: #14171a;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--ak-signal-info, #4aabea);
+  background: var(--demo-code-head);
+  border-bottom: 1px solid var(--demo-hairline);
+  color: var(--ak-signal-info);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.7rem;
   font-weight: 700;
@@ -488,9 +405,9 @@ body {
 
 .demo-copy-btn {
   padding: 0.25rem 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--demo-hairline);
   background: transparent;
-  color: #fff;
+  color: var(--ak-text-primary);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.65rem;
   font-weight: 700;
@@ -500,8 +417,8 @@ body {
 }
 
 .demo-copy-btn:hover {
-  border-color: var(--ak-signal-action, #ffd800);
-  color: var(--ak-signal-action, #ffd800);
+  border-color: var(--ak-signal-action);
+  color: var(--ak-signal-action);
 }
 
 .demo-code-box {
@@ -511,7 +428,7 @@ body {
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.82rem;
   line-height: 1.6;
-  color: #d8e0e6;
+  color: var(--ak-text-primary);
   background: transparent;
 }
 
@@ -600,7 +517,7 @@ body {
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.82rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--ak-text-primary);
 }
 
 .demo-rail__llm-desc {
@@ -616,7 +533,7 @@ body {
   display: grid;
   place-items: center;
   padding: clamp(1rem, 3vw, 2.5rem);
-  background: rgba(5, 7, 9, 0.85);
+  background: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   animation: ak-dialog-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -627,11 +544,11 @@ body {
   grid-template-rows: auto minmax(0, 1fr);
   width: min(64rem, 100%);
   height: min(52rem, 90vh);
-  border: 1px solid var(--ak-border, rgba(255, 255, 255, 0.18));
-  border-top: 3px solid var(--ak-signal-info, #4aabea);
-  background: #0f1215;
+  border: 1px solid var(--ak-border);
+  border-top: 3px solid var(--ak-signal-info);
+  background: var(--ak-surface-canvas);
   clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
-  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.85);
+  box-shadow: var(--ak-shadow-panel);
 }
 
 .demo-llm-modal__head {
@@ -641,8 +558,8 @@ body {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.85rem 1.25rem;
-  background: #15181c;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--ak-surface-sunken-2);
+  border-bottom: 1px solid var(--demo-hairline);
 }
 
 .demo-llm-modal__title {
@@ -653,7 +570,7 @@ body {
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: #fff;
+  color: var(--ak-text-primary);
 }
 
 .demo-llm-modal__actions {
@@ -666,7 +583,7 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--demo-hairline);
   background: transparent;
   color: var(--demo-text-muted);
   font-family: var(--ak-font-mono, monospace);
@@ -677,8 +594,8 @@ body {
 }
 
 .demo-raw-link:hover {
-  border-color: var(--ak-signal-info, #4aabea);
-  color: var(--ak-signal-info, #4aabea);
+  border-color: var(--ak-signal-info);
+  color: var(--ak-signal-info);
 }
 
 .demo-llm-modal__body {
@@ -688,8 +605,8 @@ body {
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.82rem;
   line-height: 1.6;
-  color: #d6dde2;
-  background: #0b0d0f;
+  color: var(--ak-text-primary);
+  background: var(--ak-surface-canvas);
   white-space: pre-wrap;
   word-break: break-word;
 }

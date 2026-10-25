@@ -1,5 +1,7 @@
-import { useId, type InputHTMLAttributes, type LabelHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { useId, type CSSProperties, type InputHTMLAttributes, type LabelHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cx, variantClass } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /**
  * 表单控件。
@@ -23,12 +25,23 @@ export interface AkFieldProps {
   /** 给出错误时把提示标成错误态，并把信号色接到字段上。 */
   invalid?: boolean
   className?: string
+  /** 尺寸档：字段内控件的统一高度档（同时下发到子控件）。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-field-signal': '#e33b3b' }`。 */
+  tokens?: AkTokens
+  style?: CSSProperties
 }
 
 /** 字段容器：把控件与其标签、提示绑成一组，并统一信号色。 */
-export function AkField({ children, hint, invalid = false, className }: AkFieldProps) {
+export function AkField({ children, hint, invalid = false, className, size = 'md', tokens, style }: AkFieldProps) {
   return (
-    <div className={cx('ak-field', className)} data-slot="ak-field" data-invalid={invalid || undefined}>
+    <div
+      {...sizeAttrs(size)}
+      className={cx('ak-field', className)}
+      style={tokenStyle(tokens, style)}
+      data-slot="ak-field"
+      data-invalid={invalid || undefined}
+    >
       {children}
       {hint ? (
         <span className="ak-field__hint" role={invalid ? 'alert' : undefined}>
@@ -54,17 +67,27 @@ export function AkFieldLabel({ className, children, ...rest }: AkFieldLabelProps
 
 // ── 输入 ────────────────────────────────────────────────────────────
 
-export interface AkInputProps extends InputHTMLAttributes<HTMLInputElement> {
+// ⚠️ 原生 <input>/<select> 也有 `size`，但那是**字符数**（number）。
+// 我们这枚 `size` 是外观档位（string），必须先把原生那枚 Omit 掉才能重声明，
+// 否则 TS2430：'number' is not assignable to 'AkControlSize'。
+// 代价：这几个组件不再能把原生 size 传进 DOM —— 视觉档位更重要。
+export interface AkInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** 无障碍名；未给 `id` 与外部标签时用它。 */
   label?: string
+  /** 尺寸档：高度、内距与字号。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖。 */
+  tokens?: AkTokens
 }
 
-export function AkInput({ className, label, ...rest }: AkInputProps) {
+export function AkInput({ className, label, size = 'md', tokens, style, ...rest }: AkInputProps) {
   return (
     <input
       {...rest}
+      {...sizeAttrs(size)}
       aria-label={rest['aria-label'] ?? label}
       className={cx('ak-input', className)}
+      style={tokenStyle(tokens, style)}
       data-slot="ak-input"
     />
   )
@@ -72,30 +95,42 @@ export function AkInput({ className, label, ...rest }: AkInputProps) {
 
 export interface AkTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
+  /** 尺寸档：内距与字号（高度由 `rows` 决定）。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖。 */
+  tokens?: AkTokens
 }
 
-export function AkTextarea({ className, label, ...rest }: AkTextareaProps) {
+export function AkTextarea({ className, label, size = 'md', tokens, style, ...rest }: AkTextareaProps) {
   return (
     <textarea
       {...rest}
+      {...sizeAttrs(size)}
       aria-label={rest['aria-label'] ?? label}
       className={cx('ak-textarea', className)}
+      style={tokenStyle(tokens, style)}
       data-slot="ak-textarea"
     />
   )
 }
 
-export interface AkSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+export interface AkSelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
   label?: string
   children?: ReactNode
+  /** 尺寸档：高度、内距与字号。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖。 */
+  tokens?: AkTokens
 }
 
-export function AkSelect({ className, label, children, ...rest }: AkSelectProps) {
+export function AkSelect({ className, label, children, size = 'md', tokens, style, ...rest }: AkSelectProps) {
   return (
     <select
       {...rest}
+      {...sizeAttrs(size)}
       aria-label={rest['aria-label'] ?? label}
       className={cx('ak-select', className)}
+      style={tokenStyle(tokens, style)}
       data-slot="ak-select"
     >
       {children}

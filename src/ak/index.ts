@@ -1,3 +1,7 @@
+// 可调层：尺寸档与逐实例令牌。所有组件共享这两枚类型。
+export type { AkControlSize } from './lib/size'
+export type { AkTokens } from './lib/tokens'
+
 export { AkButton, type AkButtonProps, type AkButtonVariant } from './ui/button/AkButton'
 export {
   AkCard,

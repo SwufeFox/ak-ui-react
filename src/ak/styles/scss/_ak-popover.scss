@@ -1,23 +1,34 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 .ak-popover,
 .ak-tooltip {
   margin: auto;
   box-sizing: border-box;
   border-radius: 0;
-  color: #f3f4ef;
-  background: #171a1d;
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.4);
+  color: var(--ak-popover-fg, #f3f4ef);
+  background: var(--ak-popover-bg, #171a1d);
+  box-shadow: var(--ak-popover-shadow, 0 1rem 3rem rgba(0, 0, 0, 0.4));
   font-family: $font-sans-serif;
 }
 
 .ak-popover {
+  @include tuning.tuning-steps(
+    (
+      ak-popover-w: (16rem, 22rem, 30rem),
+      ak-popover-pad: (0.75rem 0.85rem, 1rem 1.1rem, 1.35rem 1.5rem),
+      ak-popover-title-fs: (0.9rem, 1rem, 1.15rem),
+      ak-popover-body-fs: (0.75rem, 0.82rem, 0.9rem),
+      ak-popover-eyebrow-fs: (0.58rem, 0.64rem, 0.7rem),
+    )
+  );
+
   --ak-popover-info: var(--ak-signal-info, var(--ak-color-primary, #{$blue}));
   --ak-popover-signal: var(--ak-signal-action, var(--ak-color-advanced, #{$yellow}));
 
-  width: min(calc(100% - 2rem), calc(100vw - 32px), 22rem);
-  padding: 1rem 1.1rem;
-  border: 1px solid #626a70;
+  width: min(calc(100% - 2rem), calc(100vw - 32px), var(--ak-popover-w));
+  padding: var(--ak-popover-pad);
+  border: 1px solid var(--ak-popover-border, #626a70);
   border-top: 4px solid var(--ak-popover-signal);
   clip-path: polygon(0 0, calc(100% - var(--ak-cut, 0.9rem)) 0, 100% var(--ak-cut, 0.9rem), 100% 100%, 0 100%);
 
@@ -26,7 +37,7 @@
     margin-bottom: 0.55rem;
     color: var(--ak-popover-info);
     font-family: $font-monospace;
-    font-size: 0.64rem;
+    font-size: var(--ak-popover-eyebrow-fs);
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -35,15 +46,15 @@
   & &__title {
     display: block;
     margin-bottom: 0.35rem;
-    color: #fff;
-    font-size: 1rem;
+    color: var(--ak-popover-title-fg, #fff);
+    font-size: var(--ak-popover-title-fs);
     line-height: 1.35;
   }
 
   & &__content {
     margin: 0;
-    color: #bdc4c9;
-    font-size: 0.82rem;
+    color: var(--ak-popover-body-fg, #bdc4c9);
+    font-size: var(--ak-popover-body-fs);
     line-height: 1.6;
   }
 
@@ -53,14 +64,22 @@
 }
 
 .ak-tooltip {
+  @include tuning.tuning-steps(
+    (
+      ak-tooltip-max-w: (12rem, 18rem, 24rem),
+      ak-tooltip-pad: (0.4rem 0.55rem, 0.55rem 0.7rem, 0.75rem 0.95rem),
+      ak-tooltip-fs: (0.625rem, 0.7rem, 0.78rem),
+    )
+  );
+
   --ak-tooltip-signal: var(--ak-signal-info, var(--ak-color-primary, #{$blue}));
 
-  max-width: min(calc(100% - 2rem), calc(100vw - 32px), 18rem);
-  padding: 0.55rem 0.7rem;
+  max-width: min(calc(100% - 2rem), calc(100vw - 32px), var(--ak-tooltip-max-w));
+  padding: var(--ak-tooltip-pad);
   border: 1px solid var(--ak-tooltip-signal);
-  color: #f3f4ef;
+  color: var(--ak-popover-fg, #f3f4ef);
   font-family: $font-monospace;
-  font-size: 0.7rem;
+  font-size: var(--ak-tooltip-fs);
   letter-spacing: 0.02em;
   line-height: 1.45;
 

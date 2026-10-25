@@ -1,5 +1,7 @@
 import { useEffect, useRef, type HTMLAttributes, type ReactNode } from 'react'
 import { cx } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /**
  * 模态对话框。
@@ -27,6 +29,10 @@ export interface AkDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
   closeOnBackdrop?: boolean
   /** 是否禁用 Esc 关闭。默认 false。 */
   disableEscape?: boolean
+  /** 尺寸档：宽度上限、最大高度、内距与字号一起缩。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-dialog-w': '52rem' }`。 */
+  tokens?: AkTokens
   children?: ReactNode
 }
 
@@ -38,7 +44,10 @@ export function AkDialog({
   footer,
   closeOnBackdrop = true,
   disableEscape = false,
+  size = 'md',
+  tokens,
   className,
+  style,
   children,
   ...rest
 }: AkDialogProps) {
@@ -85,7 +94,9 @@ export function AkDialog({
     <dialog
       {...(rest as HTMLAttributes<HTMLDialogElement>)}
       ref={ref}
+      {...sizeAttrs(size)}
       className={cx('ak-dialog', className)}
+      style={tokenStyle(tokens, style)}
       data-slot="ak-dialog"
       onPointerDown={onPointerDown}
     >

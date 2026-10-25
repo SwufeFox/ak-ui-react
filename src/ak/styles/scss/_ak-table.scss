@@ -12,18 +12,35 @@
 // ══════════════════════════════════════════════════════════════════════════
 
 .ak-table {
-  width: 100%;
+  // 单元格内边距是这张表唯一"看起来挤/松"的旋钮。
+  // 以前三处各写一遍 0.55rem 0.75rem，改一处就不同步 —— 现在统一读两枚令牌。
+  --ak-table-pad-y: 0.55rem;
+  --ak-table-pad-x: 0.75rem;
+
+  width: var(--ak-table-width, 100%);
   border-collapse: collapse;
   border-top: 1px solid var(--ak-border);
   font-family: var(--ak-font-sans);
-  font-size: var(--ak-fs-sm);
+  font-size: var(--ak-table-fs, var(--ak-fs-sm));
   text-align: start;
+
+  &[data-ak-size="sm"] {
+    --ak-table-pad-y: 0.35rem;
+    --ak-table-pad-x: 0.55rem;
+    --ak-table-fs: var(--ak-fs-xs);
+  }
+
+  &[data-ak-size="lg"] {
+    --ak-table-pad-y: 0.8rem;
+    --ak-table-pad-x: 1.05rem;
+    --ak-table-fs: var(--ak-fs-body);
+  }
 }
 
 // 表头：大写拉丁标签，与 .ak-overline / .ak-attr__label 同一套排版
 .ak-table__head {
   th {
-    padding: 0.55rem 0.75rem;
+    padding: var(--ak-table-pad-y) var(--ak-table-pad-x);
     border-bottom: 1px solid var(--ak-border);
     color: var(--ak-text-secondary);
     font-family: var(--ak-font-label);
@@ -40,6 +57,10 @@
   th[aria-sort] {
     cursor: pointer;
     user-select: none;
+    // 排序是唯一会变化的交互点，以前点完箭头瞬变、没有任何中间态
+    transition:
+      color var(--ak-motion-fast, 120ms) ease,
+      background-color var(--ak-motion-fast, 120ms) ease;
 
     &::after {
       content: "↕";
@@ -62,13 +83,18 @@
 
     &:hover {
       color: var(--ak-text-primary);
+      background: color-mix(in srgb, var(--ak-text-primary) 5%, transparent);
+    }
+
+    &:active {
+      background: color-mix(in srgb, var(--ak-signal-info) 12%, transparent);
     }
   }
 }
 
 .ak-table__body {
   td {
-    padding: 0.55rem 0.75rem;
+    padding: var(--ak-table-pad-y) var(--ak-table-pad-x);
     border-bottom: 1px solid var(--ak-border-subtle);
     color: var(--ak-text-primary);
     vertical-align: middle;
@@ -110,7 +136,7 @@
 // 表尾（汇总行）
 .ak-table__foot {
   td {
-    padding: 0.55rem 0.75rem;
+    padding: var(--ak-table-pad-y) var(--ak-table-pad-x);
     border-top: 1px solid var(--ak-border);
     color: var(--ak-text-secondary);
     font-weight: 700;

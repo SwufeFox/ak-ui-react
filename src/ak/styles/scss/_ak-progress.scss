@@ -1,27 +1,37 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 .ak-progress-stack {
   display: grid;
-  width: min(32rem, 100%);
+  width: min(var(--ak-progress-stack-w, 32rem), 100%);
   gap: 1rem;
 }
 
 .ak-progress {
+  @include tuning.tuning-steps(
+    (
+      ak-progress-pad: (0.5rem 0.7rem 0.65rem, 0.75rem 0.9rem 0.9rem, 1rem 1.2rem 1.2rem),
+      ak-progress-track-h: (0.45rem, 0.75rem, 1rem),
+      ak-progress-fs: (0.5625rem, 0.625rem, 0.7rem),
+      ak-progress-gap: (0.4rem, 0.55rem, 0.7rem),
+    )
+  );
+
   --ak-progress-signal: var(--ak-signal-info, var(--ak-color-primary, #4aabea));
   --ak-progress-value: 0%;
   display: grid;
-  padding: 0.75rem 0.9rem 0.9rem;
+  padding: var(--ak-progress-pad);
   border: 1px solid rgba(243, 244, 239, 0.24);
   color: #f3f4ef;
-  background: rgba(17, 19, 21, 0.86);
-  gap: 0.55rem;
+  background: var(--ak-progress-bg, rgba(17, 19, 21, 0.86));
+  gap: var(--ak-progress-gap);
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-family: $font-monospace;
-    font-size: 0.625rem;
+    font-size: var(--ak-progress-fs);
     font-weight: 800;
     letter-spacing: 0.12em;
     line-height: 1;
@@ -30,12 +40,12 @@
 
   &__value {
     color: var(--ak-progress-signal);
-    font-size: 0.75rem;
+    font-size: calc(var(--ak-progress-fs) * 1.2);
   }
 
   &__track {
     position: relative;
-    height: 0.75rem;
+    height: var(--ak-progress-track-h);
     overflow: hidden;
     background: rgba(243, 244, 239, 0.13);
 
@@ -66,11 +76,19 @@
 }
 
 .ak-gauge {
+  @include tuning.tuning-steps(
+    (
+      ak-gauge-w: (6.5rem, 8.5rem, 11rem),
+      ak-gauge-value-fs: (1.75rem, 2.25rem, 2.9rem),
+      ak-gauge-inset: (0.5rem, 0.65rem, 0.85rem),
+    )
+  );
+
   --ak-gauge-signal: var(--ak-signal-info, var(--ak-color-primary, #4aabea));
   --ak-gauge-value: 0%;
   position: relative;
   display: inline-grid;
-  width: 8.5rem;
+  width: var(--ak-gauge-w);
   aspect-ratio: 1;
   place-items: center;
   color: #f3f4ef;
@@ -80,9 +98,9 @@
   &::before {
     position: absolute;
     content: "";
-    background: #171a1d;
+    background: var(--ak-gauge-hole, #171a1d);
     clip-path: inherit;
-    inset: 0.65rem;
+    inset: var(--ak-gauge-inset);
   }
 
   &__content {
@@ -102,7 +120,7 @@
   &__value {
     margin-top: 0.25rem;
     font-family: $font-monospace;
-    font-size: 2.25rem;
+    font-size: var(--ak-gauge-value-fs);
     font-weight: 800;
     line-height: 1;
   }

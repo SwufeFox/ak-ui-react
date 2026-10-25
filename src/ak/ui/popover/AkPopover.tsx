@@ -1,5 +1,7 @@
 import { cloneElement, isValidElement, useEffect, useId, useRef, useState, type HTMLAttributes, type ReactElement, type ReactNode } from 'react'
 import { cx } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /**
  * 浮层与提示。**上游用的是原生 Popover API**（样式表里通篇 `:popover-open`），
@@ -32,6 +34,10 @@ interface CommonProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'co
   onOpenChange?: (open: boolean) => void
   /** 触发器上的附加类名。 */
   triggerClassName?: string
+  /** 尺寸档：浮层宽度、内距与字号（tooltip 下是最大宽度与字号）。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖。浮层在顶层，外部选择器改不动它，走这里最省事。 */
+  tokens?: AkTokens
 }
 
 export interface AkPopoverProps extends CommonProps {
@@ -58,7 +64,10 @@ export function AkPopover({
   open,
   defaultOpen = false,
   onOpenChange,
+  size = 'md',
+  tokens,
   className,
+  style,
   triggerClassName,
   ...rest
 }: AkPopoverProps) {
@@ -142,7 +151,9 @@ export function AkPopover({
         ref={panelRef}
         // popover="auto" —— 让浏览器负责置顶层、Esc、点击外部关闭
         popover="auto"
+        {...sizeAttrs(size)}
         className={cx(panelClass, className)}
+        style={tokenStyle(tokens, style)}
         data-slot={kind === 'tooltip' ? 'ak-tooltip' : 'ak-popover'}
       >
         {eyebrow ? <span className="ak-popover__eyebrow">{eyebrow}</span> : null}

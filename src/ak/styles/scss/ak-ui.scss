@@ -2,6 +2,8 @@
 @use "tokens";
 @use "helpers";
 @use "mixins";
+// 可调层必须在组件之前：它只写自定义属性，组件样式在声明处消费这些属性。
+@use "ak-tuning";
 
 // components
 @use "ak-button";

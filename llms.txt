@@ -53,6 +53,28 @@ import '@swufefox/ak-ui-react/style.css'
    - Terminal Command Tone Palette: `--ak-terminal-paper`, `--ak-terminal-muted`, `--ak-terminal-dark`, `--ak-terminal-cyan`, `--ak-terminal-accent`
 5. **Components Never Ship Game Art**:
    Every icon-bearing component receives its icon from caller props (`icon`, `prefixIcon`, or `children`). No hidden bundled image dependencies.
+6. **Everything Is Tunable — Two Orthogonal Knobs**:
+   Geometry is never welded into a rule. Every interactive component reads its size from a CSS custom property, so you get three ways to adjust it without writing CSS:
+
+   **a. `size` prop — per-instance tier** (`'sm' | 'md' | 'lg'`, default `'md'` = the pre-tuning look):
+   ```tsx
+   <AkButton size="sm">Compact</AkButton>
+   <AkTable size="lg" columns={cols} rows={rows} />
+   ```
+   Supported on: `AkButton`, `AkCard`, `AkStatus`, `AkTag`, `AkInput`, `AkTextarea`, `AkSelect`, `AkField`, `AkProgress`, `AkGauge`, `AkTable`, `AkDialog`, `AkTabs`, `AkSegmented`, `AkPagination`, `AkDropdownMenu`, `AkContextMenu`, `AkPopover`.
+
+   **b. `tokens` prop — per-instance CSS-variable override** (any `--ak-*` the component actually reads):
+   ```tsx
+   <AkButton tokens={{ '--ak-button-bg': '#ff5e19', '--ak-button-height': '2rem' }} />
+   <AkDialog tokens={{ '--ak-dialog-w': '52rem' }} open={open} onOpenChange={setOpen} />
+   ```
+   Keys that are *functional state* (e.g. `--ak-progress-value`) are owned by the component and are not overridable.
+
+   **c. `data-ak-density` — subtree density scale** (`'compact' | 'cozy' | 'spacious'`, default 1.0):
+   ```tsx
+   <div data-ak-density="compact">{/* controls, tables and fields inside all shrink 12.5% */}</div>
+   ```
+   Density multiplies control heights and spacing via `--ak-density-scale` / `--ak-density-control`; it never changes colour or layout direction.
 
 ---
 
@@ -501,7 +523,34 @@ import {
 
 ---
 
-## 4. Subpath Exports & Controllers
+## 4. Tuning Reference — Which Token to Set
+
+Every tuning token below is a real CSS custom property read by the component's stylesheet. Set it via the `tokens` prop, or globally on `:root` / any scoped selector.
+
+| Component | Tunable tokens |
+| :--- | :--- |
+| `AkButton` | `--ak-button-height`, `--ak-button-min-width`, `--ak-button-pad-x`, `--ak-button-fs`, `--ak-button-icon`, `--ak-button-bg`, `--ak-button-fg`, `--ak-button-sheen`, `--ak-button-shadow`, `--ak-button-border` |
+| `AkCard` | `--ak-card-pad`, `--ak-card-gap`, `--ak-card-title-fs`, `--ak-card-bg`, `--ak-card-border`, `--ak-card-shadow`, `--ak-card-shadow-hover`, `--ak-card-w`, `--ak-card-h`, `--ak-card-place-color` |
+| `AkTag` | `--ak-tag-height`, `--ak-tag-pad`, `--ak-tag-fs`, `--ak-tag-signal`, `--ak-tag-text`, `--ak-tag-surface`, `--ak-cut` |
+| `AkStatus` | `--ak-status-sig`, `--ak-status-min-h`, `--ak-status-pad`, `--ak-status-label-fs`, `--ak-status-detail-fs`, `--ak-status-signal`, `--ak-shadow-signal` |
+| `AkInput` / `AkTextarea` / `AkSelect` | `--ak-field-min-h`, `--ak-field-pad`, `--ak-field-fs`, `--ak-field-signal`, `--ak-select-arrow-x` |
+| `AkProgress` | `--ak-progress-pad`, `--ak-progress-track-h`, `--ak-progress-fs`, `--ak-progress-gap`, `--ak-progress-bg`, `--ak-progress-signal` |
+| `AkGauge` | `--ak-gauge-w`, `--ak-gauge-value-fs`, `--ak-gauge-inset`, `--ak-gauge-hole`, `--ak-gauge-signal` |
+| `AkTable` | `--ak-table-pad-y`, `--ak-table-pad-x`, `--ak-table-fs`, `--ak-table-width` |
+| `AkDialog` | `--ak-dialog-w`, `--ak-dialog-max-h`, `--ak-dialog-pad`, `--ak-dialog-fs`, `--ak-dialog-bg`, `--ak-dialog-fg`, `--ak-dialog-body-fg`, `--ak-dialog-border`, `--ak-dialog-shadow`, `--ak-cut` |
+| `AkTabs` | `--ak-tabs-tab-h`, `--ak-tabs-tab-pad`, `--ak-tabs-tab-fs`, `--ak-tabs-panel-pad`, `--ak-tabs-width`, `--ak-tabs-signal` |
+| `AkSegmented` | `--ak-segmented-item-w`, `--ak-segmented-item-h`, `--ak-segmented-item-pad`, `--ak-segmented-fs`, `--ak-segmented-inset`, `--ak-segmented-bg`, `--ak-segmented-signal` |
+| `AkPagination` | `--ak-pagination-h`, `--ak-pagination-w`, `--ak-pagination-arrow-w`, `--ak-pagination-number-fs`, `--ak-pagination-title-fs`, `--ak-pagination-bg`, `--ak-pagination-fg`, `--ak-pagination-arrow-bg`, `--ak-pagination-arrow-bg-hover`, `--ak-pagination-arrow-bg-disabled`, `--ak-pagination-cur-border` |
+| `AkDropdownMenu` / `AkContextMenu` | `--ak-menu-trigger-h`, `--ak-menu-trigger-pad`, `--ak-menu-trigger-fs`, `--ak-menu-item-h`, `--ak-menu-item-pad`, `--ak-menu-item-fs`, `--ak-menu-min-w`, `--ak-menu-max-w` |
+| `AkPopover` / tooltip | `--ak-popover-w`, `--ak-popover-pad`, `--ak-popover-title-fs`, `--ak-popover-body-fs`, `--ak-popover-eyebrow-fs`, `--ak-popover-bg`, `--ak-popover-fg`, `--ak-popover-title-fg`, `--ak-popover-body-fg`, `--ak-popover-border`, `--ak-popover-shadow`, `--ak-tooltip-max-w`, `--ak-tooltip-pad`, `--ak-tooltip-fs` |
+| any form group | `--ak-form-w` (form stack max width) |
+| any progress group | `--ak-progress-stack-w` |
+
+Global: `--ak-density-scale` (spacing), `--ak-density-control` (control heights). Prefer `data-ak-density` over setting these by hand.
+
+---
+
+## 5. Subpath Exports & Controllers
 
 Framework-agnostic controllers are accessible via subpaths without React dependencies:
 
@@ -513,10 +562,11 @@ import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
 
 ---
 
-## 5. Summary of Common Mistakes to Avoid
+## 6. Summary of Common Mistakes to Avoid
 
 | Anti-pattern | Recommended Pattern | Reason |
 | :--- | :--- | :--- |
+| Inline `style={{ height: '2.25rem' }}` to shrink a control | `size="sm"`, or `tokens={{ '--ak-button-height': '2.25rem' }}` | Inline styles bypass the density/tier system and drift out of sync across the app |
 | Round avatars (`border-radius: 50%`) | Rectangular or chamfer cut avatars (`<AkAvatar cut />`) | Arknights design language strictly forbids bubbly round cards/avatars |
 | Hardcoded `#fff` or `#000` colors | `var(--ak-text-primary)`, `var(--ak-surface-canvas)` | Breaks theme inversion between Terminal (dark) and Archive (light) |
 | Fixed widths on buttons (`width: 150px`) | `min-width: 120px; width: auto;` (built into `AkButton`) | Avoids text clipping on longer phrases and CJK/English labels |

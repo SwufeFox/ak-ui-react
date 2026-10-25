@@ -1,12 +1,23 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 .ak-card {
-  background-color: transparent;
+  // 卡片以前只有 default/outline/stripe/place 四个写死的档位，没有尺寸概念。
+  // 这里把内边距、间距、标题字号抽成令牌，默认值 = 改造前字面量。
+  @include tuning.tuning-steps(
+    (
+      ak-card-pad: (0.35rem 0.7rem, 0.5rem 1rem, 0.85rem 1.5rem),
+      ak-card-gap: (0.75rem, 1rem, 1.35rem),
+      ak-card-title-fs: (1.0625rem, 1.25rem, 1.5rem),
+    )
+  );
+
+  background-color: var(--ak-card-bg, transparent);
   transition: 0.2s;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--ak-card-shadow, 0 0 10px rgba(0, 0, 0, 0.2));
   outline: none;
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: var(--ak-card-pad);
 
   & &__header {
     display: grid;
@@ -16,7 +27,7 @@
   & &__title {
     margin: 0;
     font-family: $font-serif;
-    font-size: 1.25rem;
+    font-size: var(--ak-card-title-fs);
     font-weight: 900;
     line-height: 1.3;
   }
@@ -35,7 +46,7 @@
 
   & &__footer {
     display: flex;
-    margin-top: 1rem;
+    margin-top: var(--ak-card-gap);
     align-items: center;
     gap: 0.75rem;
   }
@@ -43,26 +54,26 @@
   &--outline {
     display: block;
     min-height: 100px;
-    border: 0.5rem solid white;
-    background-color: transparent;
-    box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
+    border: 0.5rem solid var(--ak-card-border, white);
+    background-color: var(--ak-card-bg, transparent);
+    box-shadow: var(--ak-card-shadow, 2px 2px 15px rgba(0, 0, 0, 0.2));
 
     > .title,
     .ak-card__title {
       font-weight: 900;
       font-size: large;
       margin: 0.2rem 0;
-      border-bottom: 2px solid white;
+      border-bottom: 2px solid var(--ak-card-border, white);
     }
 
     &:hover {
-      box-shadow: 2px 2px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--ak-card-shadow-hover, 2px 2px 30px rgba(0, 0, 0, 0.2));
     }
   }
 
   &--stripe {
-    width: 200px;
-    height: 200px;
+    width: var(--ak-card-w, 200px);
+    height: var(--ak-card-h, 200px);
     padding: 0;
     // One 20px tile holds exactly one 45deg stripe period, so the hazard
     // pattern can scroll on hover without a visible seam.
@@ -83,8 +94,8 @@
 
   &--place {
     border: 1px solid transparent;
-    width: 100px;
-    height: 100px;
+    width: var(--ak-card-w, 100px);
+    height: var(--ak-card-h, 100px);
     box-shadow: inset 0 0 20px rgba($color: #fff, $alpha: 1);
     border-bottom: 4px solid var(--ak-card-place-color, white);
     padding: 0;

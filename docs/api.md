@@ -142,8 +142,11 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `icon` | `ReactNode` | yes | Renders a leading inline-start icon slot. |
+| `iconEnd` | `ReactNode` | yes | Renders a trailing inline-end icon slot. |
 | `block` | `boolean` | yes | Stretches the button to the full width of its container. |
 | `variant` | `AkButtonVariant` | yes | 外观档位：default / outline / action / advanced / light。 |
+| `size` | `AkControlSize` | yes | 尺寸档。默认 `md`（= 50px 高，改造前的值）。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-button-bg': '#ff5e19' }`。 |
 
 ## AkButtonGroup
 
@@ -162,6 +165,8 @@ Extends `HTMLAttributes<HTMLElement>`.
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | Element to render as, e.g. 'div' \| 'article' \| 'section' \| 'li'. |
 | `variant` | `AkCardVariant` | yes | 外观档位：default / outline / stripe / place。 |
+| `size` | `AkControlSize` | yes | 尺寸档：控制内边距、子块间距与标题字号。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-card-bg': '#171a1d' }`。 |
 
 ## AkCardContent
 
@@ -270,6 +275,8 @@ Props for a right-click or keyboard-invoked context menu.
 | `items` | `readonly AkMenuItem[]` | no | Menu entries, rendered in order. |
 | `label` | `string` | yes | Accessible name for the menu. Defaults to “Context menu”. |
 | `className` | `string` | yes | Extra class for the context-sensitive region. |
+| `size` | `AkControlSize` | yes | 尺寸档：一次同时缩菜单项与浮层宽度。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖（弹层在顶层，无法从外部选择器改，走 tokens 最省事）。 |
 
 ## AkCorner
 
@@ -344,6 +351,8 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
 | `footer` | `ReactNode` | yes | 底部操作区。 |
 | `closeOnBackdrop` | `boolean` | yes | 点遮罩是否关闭。默认 true。 |
 | `disableEscape` | `boolean` | yes | 是否禁用 Esc 关闭。默认 false。 |
+| `size` | `AkControlSize` | yes | 尺寸档：宽度上限、最大高度、内距与字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-dialog-w': '52rem' }`。 |
 | `children` | `ReactNode` | yes | — |
 
 ## AkDisplay
@@ -374,6 +383,8 @@ Props for the native-popover dropdown menu.
 | `label` | `ReactNode` | no | Trigger label. |
 | `items` | `readonly AkMenuItem[]` | no | Menu entries, rendered in order. |
 | `className` | `string` | yes | Extra class for the trigger-and-menu wrapper. |
+| `size` | `AkControlSize` | yes | 尺寸档：一次同时缩触发器与每条菜单项，两者不会失同步。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖（挂在 anchor 上，浮层继承）。 |
 
 ## AkElite
 
@@ -403,6 +414,9 @@ Extends `SlotProps<HTMLSpanElement>`.
 | `hint` | `ReactNode` | yes | 字段下方的提示或错误文字。 |
 | `invalid` | `boolean` | yes | 给出错误时把提示标成错误态，并把信号色接到字段上。 |
 | `className` | `string` | yes | — |
+| `size` | `AkControlSize` | yes | 尺寸档：字段内控件的统一高度档（同时下发到子控件）。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-field-signal': '#e33b3b' }`。 |
+| `style` | `CSSProperties` | yes | — |
 
 ## AkFieldLabel
 
@@ -431,6 +445,8 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
 | `unit` | `ReactNode` | yes | 数值单位后缀，默认 `percent`。 |
 | `value` | `number` | yes | 当前值，会夹到区间内。 |
 | `variant` | `AkGaugeVariant` | yes | 外观档位。 |
+| `size` | `AkControlSize` | yes | 尺寸档：直径、数值字号与内孔一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-gauge-hole': '#0b0d0f' }`。 |
 
 ## AkGlow
 
@@ -491,11 +507,13 @@ Extends `DivProps`.
 
 ## AkInput
 
-Extends `InputHTMLAttributes<HTMLInputElement>`.
+Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `label` | `string` | yes | 无障碍名；未给 `id` 与外部标签时用它。 |
+| `size` | `AkControlSize` | yes | 尺寸档：高度、内距与字号。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。 |
 
 ## AkInputNumber
 
@@ -725,6 +743,8 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'title'>`.
 | `previousIcon` | `ReactNode` | yes | 替换默认的箭头图标。 |
 | `nextIcon` | `ReactNode` | yes | — |
 | `loop` | `boolean` | yes | 循环：到首/末页时回卷。 |
+| `size` | `AkControlSize` | yes | 尺寸档：整体宽高、箭头区宽度、页码字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-pagination-w': '100%' }`。 |
 
 ## AkParticleField
 
@@ -805,6 +825,8 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
 | `value` | `number` | yes | 当前值，会夹到区间内。 |
 | `valueLabel` | `ReactNode` | yes | Custom text for the right-hand value readout. Defaults to the rounded percentage. |
 | `variant` | `AkProgressVariant` | yes | 外观档位。 |
+| `size` | `AkControlSize` | yes | 尺寸档：内距、轨道粗细与字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-progress-track-h': '1.25rem' }`。 |
 
 ## AkProgressStack
 
@@ -906,6 +928,8 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 
 ## AkSegmented
 
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'>`.
+
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `ariaLabel` | `string` | yes | 读屏标签，默认 `Options`。 |
@@ -913,15 +937,19 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 | `value` | `string` | yes | 当前选中值；不匹配时回退第一项。 |
 | `onValueChange` | `(value: string) => void` | yes | 选中变化时回调。 |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+| `size` | `AkControlSize` | yes | 尺寸档：每项的最小宽高、内边距与字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-segmented-inset': '0' }`。 |
 
 ## AkSelect
 
-Extends `SelectHTMLAttributes<HTMLSelectElement>`.
+Extends `Omit<SelectHTMLAttributes<HTMLSelectElement>, 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `label` | `string` | yes | — |
 | `children` | `ReactNode` | yes | — |
+| `size` | `AkControlSize` | yes | 尺寸档：高度、内距与字号。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。 |
 
 ## AkSkeleton
 
@@ -1014,6 +1042,8 @@ Extends `Omit<HTMLAttributes<HTMLSpanElement>, 'children'>`.
 | `detail` | `ReactNode` | yes | Secondary text shown after the signal label. |
 | `label` | `ReactNode` | yes | Primary label. Falls back to `Online`, matching the original registry component. |
 | `variant` | `AkStatusVariant` | yes | 语义档位。 |
+| `size` | `AkControlSize` | yes | 尺寸档：信号点直径与字号一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。 |
 
 ## AkStatusGroup
 
@@ -1052,8 +1082,12 @@ Extends `Omit<HTMLAttributes<HTMLTableElement>, 'children'>`.
 | `footer` | `Record<string, ReactNode>` | yes | 表尾汇总行（与 columns 对齐）。 |
 | `emptyLabel` | `ReactNode` | yes | 无数据时的占位文字。 |
 | `scrollable` | `boolean` | yes | 外层是否套一层横滑容器（列多时建议开）。 |
+| `size` | `AkControlSize` | yes | 尺寸档：控制单元格内边距与整表字号。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-table-pad-y': '0.25rem' }`。 |
 
 ## AkTabs
+
+Extends `Omit<HTMLAttributes<HTMLElement>, 'children' | 'onChange'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
@@ -1063,6 +1097,8 @@ Extends `Omit<HTMLAttributes<HTMLTableElement>, 'children'>`.
 | `onValueChange` | `(value: string) => void` | yes | 切换时回调。 |
 | `renderPanel` | `(item: AkTabsItem) => ReactNode` | yes | Per-panel content, keyed by tab value. |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+| `size` | `AkControlSize` | yes | 尺寸档：标签高度、内边距、字号与面板内距一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-tabs-width': '100%' }`。 |
 
 ## AkTag
 
@@ -1071,6 +1107,8 @@ Extends `HTMLAttributes<HTMLSpanElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `variant` | `AkTagVariant` | yes | 语义档位。 |
+| `size` | `AkControlSize` | yes | 尺寸档。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。 |
 
 ## AkTagGroup
 
@@ -1087,6 +1125,8 @@ Extends `TextareaHTMLAttributes<HTMLTextAreaElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `label` | `string` | yes | — |
+| `size` | `AkControlSize` | yes | 尺寸档：内距与字号（高度由 `rows` 决定）。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。 |
 
 ## AkThumbnail
 

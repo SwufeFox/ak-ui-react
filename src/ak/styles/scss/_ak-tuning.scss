@@ -1,0 +1,113 @@
+@use "sass:list";
+
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 可调层（tuning）
+//
+//  这一层回答一个问题：**为什么这个库以前"改不动"。**
+//  上游是展示站，几何全部写死在规则里；令牌建好了却没被组件消费。
+//  于是加两枚正交的旋钮：
+//
+//    1. `data-ak-size`    —— 单实例的档位（sm / md / lg）
+//    2. `data-ak-density` —— 整棵子树的密度（compact / cozy / spacious）
+//
+//  两者都只写**自定义属性**，不写几何规则。组件把几何读成
+//  `var(--ak-<组件>-height)`，于是旋钮一拧，所有接线的组件一起响应。
+//
+//  ⚠️ 默认值一律等于改造前的字面量 —— 这套旋钮不改变现有外观，
+//     只是把以前焊死的数字变成可拧的。
+//
+//  ⚠️ 本文件的注释一律用 `//`（静默注释）。`/* */` 是 loud comment，
+//     mixin 里的 loud comment 会被**复制进每一处 @include 的产物**，
+//     把 CSS 撑成注释墙 —— 踩过一次。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 尺寸档 ────────────────────────────────────────────────────────────────
+
+// 为一个几何令牌生成三档。
+//
+// 用 `&[data-ak-size=...]` 复合选择器（0,2,0）而不是裸属性选择器（0,1,0）：
+// 后者与组件根类同为 (0,1,0)，只能靠层叠顺序取胜 —— 一旦某个 partial
+// 被 @use 的顺序变了就静默失效。复合选择器不受顺序影响。
+//
+// `md` 是本组件自己的中性值，不引用全局 —— 这样同一个组件在不同尺度的
+// 页面上都保持自己的比例。
+//
+// $token 传**不带双横线前缀**的名字：混用插值会拼出四个横线，
+// 浏览器直接忽略该声明且不报错 —— 静默失效。
+@mixin size-steps($token, $sm, $md, $lg) {
+  --#{$token}: #{$md};
+
+  &[data-ak-size="sm"] {
+    --#{$token}: #{$sm};
+  }
+
+  &[data-ak-size="lg"] {
+    --#{$token}: #{$lg};
+  }
+}
+
+// 一次性声明多组三档，产出**一个**带嵌套的根规则。
+//
+// $steps 形如：
+//   (ak-button-height: (2.75rem, 3.125rem, 3.5rem),
+//    ak-button-fs:     (0.875rem, 1rem, 1.0625rem))
+// 三个值依次是 sm / md / lg。
+//
+// 比逐个 @include 好在：默认值块与档位块都收进同一个选择器里，
+// 不会在产物里散成十几条 `.ak-button { … }` 碎片。
+@mixin tuning-steps($steps) {
+  @each $token, $scale in $steps {
+    --#{$token}: #{list.nth($scale, 2)};
+  }
+
+  &[data-ak-size="sm"] {
+    @each $token, $scale in $steps {
+      --#{$token}: #{list.nth($scale, 1)};
+    }
+  }
+
+  &[data-ak-size="lg"] {
+    @each $token, $scale in $steps {
+      --#{$token}: #{list.nth($scale, 3)};
+    }
+  }
+}
+
+// 同时给高度与内边距生成三档（交互组件的常见组合）。
+// 六个值按 高-小/中/大、距-小/中/大 的顺序传。
+@mixin control-steps($height-token, $pad-token, $h-sm, $h-md, $h-lg, $p-sm, $p-md, $p-lg) {
+  @include size-steps($height-token, $h-sm, $h-md, $h-lg);
+  @include size-steps($pad-token, $p-sm, $p-md, $p-lg);
+}
+
+// ── 密度 ──────────────────────────────────────────────────────────────────
+
+// 密度只调**一个倍数**，其余几何由 calc() 派生。
+//
+// 好处：不用为每个组件写三套规则，也不会漏。倍数刻意只取温和值，
+// 避免 calc() 在极端倍数下出现亚像素抖动。
+//
+// ⚠️ 只在这里改 --ak-density-scale / --ak-density-control，
+//    派生值写在使用处的 calc() 里 —— 自定义属性在使用处求值，
+//    所以子树覆盖后自动跟随。不要在这里重复写派生值的字面量。
+:root {
+  --ak-density-scale: 1;
+
+  // 控件高度倍率：单独一枚，便于宿主只缩小控件、不缩小排版
+  --ak-density-control: 1;
+}
+
+[data-ak-density="compact"] {
+  --ak-density-scale: 0.875;
+  --ak-density-control: 0.875;
+}
+
+[data-ak-density="cozy"] {
+  --ak-density-scale: 1;
+  --ak-density-control: 1;
+}
+
+[data-ak-density="spacious"] {
+  --ak-density-scale: 1.15;
+  --ak-density-control: 1.15;
+}

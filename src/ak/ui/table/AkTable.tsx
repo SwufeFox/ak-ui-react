@@ -1,5 +1,7 @@
 import type { HTMLAttributes, ReactNode, ThHTMLAttributes } from 'react'
 import { cx } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /**
  * 数据表。
@@ -50,6 +52,10 @@ export interface AkTableProps extends Omit<HTMLAttributes<HTMLTableElement>, 'ch
   emptyLabel?: ReactNode
   /** 外层是否套一层横滑容器（列多时建议开）。 */
   scrollable?: boolean
+  /** 尺寸档：控制单元格内边距与整表字号。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-table-pad-y': '0.25rem' }`。 */
+  tokens?: AkTokens
 }
 
 export function AkTable({
@@ -58,11 +64,20 @@ export function AkTable({
   footer,
   emptyLabel = 'No records',
   scrollable = false,
+  size = 'md',
+  tokens,
   className,
+  style,
   ...rest
 }: AkTableProps) {
   const table = (
-    <table {...rest} className={cx('ak-table', className)} data-slot="ak-table">
+    <table
+      {...rest}
+      {...sizeAttrs(size)}
+      className={cx('ak-table', className)}
+      style={tokenStyle(tokens, style)}
+      data-slot="ak-table"
+    >
       <thead className="ak-table__head">
         <tr>
           {columns.map((col) => {

@@ -1,5 +1,7 @@
 import type { ElementType, HTMLAttributes, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place'
 
@@ -8,34 +10,53 @@ export interface AkCardProps extends HTMLAttributes<HTMLElement> {
   as?: ElementType
   /** 外观档位：default / outline / stripe / place。 */
   variant?: AkCardVariant
+  /** 尺寸档：控制内边距、子块间距与标题字号。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-card-bg': '#171a1d' }`。 */
+  tokens?: AkTokens
 }
 
-export function AkCard({ as: Tag = 'div', variant = 'default', className, children, ...rest }: AkCardProps) {
+export function AkCard({
+  as: Tag = 'div',
+  variant = 'default',
+  size = 'md',
+  tokens,
+  className,
+  style,
+  children,
+  ...rest
+}: AkCardProps) {
   return (
     <Tag
       {...rest}
+      {...sizeAttrs(size)}
       data-slot="ak-card"
       data-variant={variant}
       className={cx('ak-card', variantClass('ak-card', variant), className)}
+      style={tokenStyle(tokens, style)}
     >
       {children}
     </Tag>
   )
 }
 
-type SlotProps = HTMLAttributes<HTMLElement> & { children?: ReactNode }
+type SlotProps = HTMLAttributes<HTMLElement> & {
+  children?: ReactNode
+  /** 逐实例令牌覆盖（例如只调标题字号 `'--ak-card-title-fs'`）。 */
+  tokens?: AkTokens
+}
 
-export function AkCardHeader({ className, children, ...rest }: SlotProps) {
+export function AkCardHeader({ className, children, tokens, style, ...rest }: SlotProps) {
   return (
-    <header {...(rest as HTMLAttributes<HTMLElement>)} className={cx('ak-card__header', className)} data-slot="ak-card-header">
+    <header {...(rest as HTMLAttributes<HTMLElement>)} className={cx('ak-card__header', className)} style={tokenStyle(tokens, style)} data-slot="ak-card-header">
       {children}
     </header>
   )
 }
 
-export function AkCardTitle({ className, children, ...rest }: SlotProps) {
+export function AkCardTitle({ className, children, tokens, style, ...rest }: SlotProps) {
   return (
-    <h3 {...(rest as HTMLAttributes<HTMLHeadingElement>)} className={cx('ak-card__title', className)} data-slot="ak-card-title">
+    <h3 {...(rest as HTMLAttributes<HTMLHeadingElement>)} className={cx('ak-card__title', className)} style={tokenStyle(tokens, style)} data-slot="ak-card-title">
       {children}
     </h3>
   )

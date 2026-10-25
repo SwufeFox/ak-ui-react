@@ -1,4 +1,5 @@
 @use "sass:list";
+@use "variables" as *;
 
 @mixin slider-track {
   height: 6px;
@@ -15,8 +16,13 @@
   height: 22px;
   border: 2px solid var(--ak-slider-accent);
   border-radius: 0;
-  background: #f3f4ef;
-  box-shadow: 0 0 0 3px #151b21;
+  background: var(--ak-slider-thumb, #f3f4ef);
+  box-shadow: 0 0 0 3px var(--ak-slider-thumb-ring, #151b21);
+  // 拇指自己也要有手感：悬停时信号色泛光
+  transition:
+    box-shadow var(--ak-motion-fast, 120ms) ease,
+    border-color var(--ak-motion-fast, 120ms) ease,
+    transform var(--ak-motion-fast, 120ms) ease;
 }
 
 .ak-slider {
@@ -46,6 +52,10 @@
   background-repeat: no-repeat;
   cursor: pointer;
 
+  // 轨道与滑块以前是死的：拖动时除拇指位置外没有任何变化。
+  // 给轨道加过渡，让填充量在松手后有一点跟随感。
+  transition: opacity var(--ak-motion-fast, 120ms) ease;
+
   &::-webkit-slider-runnable-track { @include slider-track; }
   &::-moz-range-track { @include slider-track; }
 
@@ -56,6 +66,23 @@
   }
 
   &::-moz-range-thumb { @include slider-thumb; }
+
+  // 拇指的悬停/按下反馈（伪元素需要单独写，mixin 里挂不上选择器）
+  &:hover:not(:disabled)::-webkit-slider-thumb {
+    border-color: var(--ak-signal-info, #{$blue});
+    box-shadow: 0 0 0 3px var(--ak-slider-thumb-ring, #151b21),
+      0 0 0.7rem color-mix(in srgb, var(--ak-slider-accent) 55%, transparent);
+  }
+
+  &:hover:not(:disabled)::-moz-range-thumb {
+    border-color: var(--ak-signal-info, #{$blue});
+    box-shadow: 0 0 0 3px var(--ak-slider-thumb-ring, #151b21),
+      0 0 0.7rem color-mix(in srgb, var(--ak-slider-accent) 55%, transparent);
+  }
+
+  &:active:not(:disabled)::-webkit-slider-thumb {
+    transform: scaleY(1.08);
+  }
 
   &:focus-visible {
     outline: 2px solid var(--ak-slider-accent);

@@ -1,8 +1,21 @@
 @use "sass:map";
 @use "mixins" as *;
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 .ak-button {
+  // 几何全部走令牌：`data-ak-size` 改这几枚，`data-ak-density` 改倍率。
+  // 默认（md）等于改造前的字面量 50px / 120px / 1.25rem / 1rem，外观不变。
+  @include tuning.tuning-steps(
+    (
+      ak-button-height: (2.75rem, 3.125rem, 3.5rem),
+      ak-button-min-width: (6rem, 7.5rem, 9rem),
+      ak-button-pad-x: (0.9rem, 1.25rem, 1.6rem),
+      ak-button-fs: (0.875rem, 1rem, 1.0625rem),
+      ak-button-icon: (2.25rem, 3rem, 3.25rem),
+    )
+  );
+
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -10,26 +23,30 @@
   font-family: $font-sans-serif;
   outline: none;
   border: none;
-  font-size: 1rem;
+  font-size: var(--ak-button-fs);
   font-weight: bold;
-  height: 50px;
-  min-width: 120px;
+  height: calc(var(--ak-button-height) * var(--ak-density-control, 1));
+  min-width: var(--ak-button-min-width);
   width: auto;
   max-width: 100%;
-  padding: 0 1.25rem;
-  color: white;
-  background-color: rgba(gray, 0.95);
+  padding: 0 var(--ak-button-pad-x);
+  color: var(--ak-button-fg, white);
+  background-color: var(--ak-button-bg, rgba(gray, 0.95));
   // A narrow light band waits outside the face and crosses it on hover.
   background-image: linear-gradient(
     105deg,
     transparent 42%,
-    rgba(255, 255, 255, 0.24) 50%,
+    var(--ak-button-sheen, rgba(255, 255, 255, 0.24)) 50%,
     transparent 58%
   );
   background-position: 150% 0;
   background-repeat: no-repeat;
   background-size: 250% 100%;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2), 0 5px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: var(
+    --ak-button-shadow,
+    inset 0 0 5px rgba(0, 0, 0, 0.2),
+    0 5px 10px rgba(0, 0, 0, 0.5)
+  );
   transition:
     filter var(--ak-motion-base, 200ms) var(--ak-ease-standard, ease),
     transform var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease),
@@ -69,8 +86,9 @@
 
   &__icon {
     display: inline-flex;
-    width: 3rem;
-    height: 3rem;
+    // 图标跟着尺寸档走：sm 不把字挤爆，lg 不显小
+    width: var(--ak-button-icon, 3rem);
+    height: var(--ak-button-icon, 3rem);
     fill: currentColor;
   }
 
@@ -109,25 +127,36 @@
     }
   }
 
+  // 档位只声明这几枚变量，几何与配色规则本身共用一条 —— 于是
+  // `tokens={{ '--ak-button-bg': ... }}` 在**任何**档位下都生效。
   &--outline {
-    border: 2px solid #fff;
+    --ak-button-border: 2px solid #fff;
+    --ak-button-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+    border: var(--ak-button-border);
     font-family: $font-sans-serif;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--ak-button-shadow);
   }
 
   &--action {
+    --ak-button-bg: #{map.get($colors, "blue")};
+    --ak-button-shadow: 2px 5px 50px -10px rgba(0, 0, 0, 0.5);
+
     text-align: right;
-    background-color: map.get($colors, "blue");
-    box-shadow: 2px 5px 50px -10px rgba(0, 0, 0, 0.5);
+    background-color: var(--ak-button-bg);
+    box-shadow: var(--ak-button-shadow);
   }
 
   &--advanced {
-    background-color: rgba(map.get($colors, "yellow"), 0.85);
+    --ak-button-bg: #{rgba(map.get($colors, "yellow"), 0.85)};
   }
 
   &--light {
-    color: #1b1d1f;
-    background-color: rgba(#eee, 0.85);
+    --ak-button-fg: #1b1d1f;
+    --ak-button-bg: #{rgba(#eee, 0.85)};
+
+    color: var(--ak-button-fg);
+    background-color: var(--ak-button-bg);
   }
 
   // &--with-info {}

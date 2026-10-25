@@ -29,10 +29,19 @@
     box-shadow: 5px 3px 0 rgba(black, 0.4);
     cursor: pointer;
     z-index: 1;
+    transition:
+      background-color var(--ak-motion-fast, 120ms) ease,
+      box-shadow var(--ak-motion-fast, 120ms) ease;
+
     .ak-icon {
       color: white;
       width: 2rem;
       height: 2rem;
+    }
+
+    &:hover {
+      background-color: rgba(black, 0.85);
+      box-shadow: 5px 3px 0 rgba(black, 0.55);
     }
 
     @include active-darken;
@@ -168,10 +177,25 @@
     box-shadow: 0.25rem 0.2rem 0 rgba(17, 19, 21, 0.22);
     cursor: pointer;
     transform: translateY(-50%);
+    // 这个加号按钮是最常点的操作，以前只有 focus 环，悬停毫无变化
+    transition:
+      background-color var(--ak-motion-fast, 120ms) ease,
+      color var(--ak-motion-fast, 120ms) ease,
+      box-shadow var(--ak-motion-fast, 120ms) ease;
 
     .ak-icon {
       width: 1rem;
       height: 1rem;
+    }
+
+    &:hover:not(:disabled) {
+      color: #111315;
+      background: var(--ak-signal-action, #{$yellow});
+      box-shadow: 0.25rem 0.2rem 0 rgba(17, 19, 21, 0.35);
+    }
+
+    &:active:not(:disabled) {
+      box-shadow: 0.1rem 0.08rem 0 rgba(17, 19, 21, 0.35);
     }
 
     &:focus-visible {

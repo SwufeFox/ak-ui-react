@@ -1,6 +1,22 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
+// 菜单的尺寸档挂在 `.ak-menu-anchor` 上（触发器 + 浮层都在它里面），
+// 于是 `data-ak-size` 一次覆盖触发器和每一条菜单项 —— 不然两者会不同步：
+// 触发器缩了、浮层里的行还是原高，菜单就"头小身大"。
 .ak-menu-anchor {
+  @include tuning.tuning-steps(
+    (
+      ak-menu-trigger-h: (2rem, 2.5rem, 3rem),
+      ak-menu-trigger-pad: (0.35rem 0.6rem, 0.5rem 0.8rem, 0.7rem 1rem),
+      ak-menu-trigger-fs: (0.7rem, 0.78rem, 0.875rem),
+      ak-menu-item-h: (1.85rem, 2.35rem, 2.9rem),
+      ak-menu-item-pad: (0.4rem 0.55rem, 0.55rem 0.7rem, 0.75rem 0.9rem),
+      ak-menu-item-fs: (0.7rem, 0.76rem, 0.85rem),
+      ak-menu-min-w: (9rem, 12rem, 16rem),
+    )
+  );
+
   position: relative;
   display: inline-flex;
 }
@@ -9,15 +25,37 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  min-height: 2.5rem;
-  padding: 0.5rem 0.8rem;
+  min-height: calc(var(--ak-menu-trigger-h) * var(--ak-density-control, 1));
+  padding: var(--ak-menu-trigger-pad);
   border: 1px solid var(--ak-border-strong, #626a70);
   border-inline-start: 3px solid var(--ak-signal-action, #{$yellow});
   background: var(--ak-surface-raised, #171a1d);
   color: var(--ak-text-primary, #f3f4ef);
-  font: 700 0.78rem $font-monospace;
+  font: 700 var(--ak-menu-trigger-fs) $font-monospace;
   letter-spacing: 0.04em;
   cursor: pointer;
+  // 触发器以前完全静态：没有 hover、没有过渡，按下去和贴着墙一样。
+  transition:
+    background-color var(--ak-motion-fast, 120ms) ease,
+    border-color var(--ak-motion-fast, 120ms) ease,
+    color var(--ak-motion-fast, 120ms) ease;
+
+  &:hover {
+    // 左侧信号条才是这个组件的性格所在，悬停时让它点亮
+    color: var(--ak-signal-action, #{$yellow});
+    background: color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 10%, var(--ak-surface-raised, #171a1d));
+  }
+
+  &[aria-expanded="true"] {
+    color: var(--ak-signal-action, #{$yellow});
+    background: color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 16%, var(--ak-surface-raised, #171a1d));
+    // 展开时左侧信号条加粗一点，指示"面板挂在它下面"
+    border-inline-start-width: 5px;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
 }
 
 .ak-menu__trigger:focus-visible,
@@ -26,10 +64,22 @@
   outline-offset: 2px;
 }
 
+// ⚠️ 浮层用 `popover="auto"` 提到**顶层**，但它仍然是 anchor 的 DOM 子节点，
+// 所以自定义属性照常继承。这里再给 `.ak-menu` 自己挂一遍档位，
+// 是为了让「把 MenuSurface 单独挂到别处」的用法也不丢尺寸。
 .ak-menu {
+  @include tuning.tuning-steps(
+    (
+      ak-menu-item-h: (1.85rem, 2.35rem, 2.9rem),
+      ak-menu-item-pad: (0.4rem 0.55rem, 0.55rem 0.7rem, 0.75rem 0.9rem),
+      ak-menu-item-fs: (0.7rem, 0.76rem, 0.85rem),
+      ak-menu-min-w: (9rem, 12rem, 16rem),
+    )
+  );
+
   box-sizing: border-box;
-  min-width: 12rem;
-  max-width: min(20rem, calc(100vw - 2rem));
+  min-width: var(--ak-menu-min-w, 12rem);
+  max-width: min(var(--ak-menu-max-w, 20rem), calc(100vw - 2rem));
   max-height: min(24rem, calc(100vh - 2rem));
   overflow: auto;
   padding: 0.3rem;
@@ -68,21 +118,38 @@
   justify-content: space-between;
   gap: 1.5rem;
   width: 100%;
-  min-height: 2.35rem;
-  padding: 0.55rem 0.7rem;
+  min-height: calc(var(--ak-menu-item-h) * var(--ak-density-control, 1));
+  padding: var(--ak-menu-item-pad);
   border: 0;
   background: transparent;
   color: inherit;
   text-align: start;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--ak-menu-item-fs);
   cursor: pointer;
+  // 菜单项有 hover 但没有过渡 —— 指针扫过时是一格一格跳的
+  transition:
+    background-color var(--ak-motion-fast, 120ms) ease,
+    background-image var(--ak-motion-fast, 120ms) ease,
+    color var(--ak-motion-fast, 120ms) ease;
 }
 
 .ak-menu__item:hover:not(:disabled),
 .ak-menu__item:focus-visible {
   background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
   color: var(--ak-signal-action, #{$yellow});
+  // 悬停时文字右侧让出一点空间，形成"这一行被点亮"的方向感。
+  // ⚠️ 不能改 padding-inline-start：那会把整行文字往右推、相邻行错位。
+  //    只在内侧垫一块不占位的渐变，视觉上一致但不动布局。
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 22%, transparent),
+    transparent 60%
+  );
+}
+
+.ak-menu__item:active:not(:disabled) {
+  background: color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 16%, transparent);
 }
 
 .ak-menu__item[data-destructive] {

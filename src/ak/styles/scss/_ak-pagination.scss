@@ -1,17 +1,36 @@
 @use "mixins" as *;
+@use "ak-tuning" as tuning;
 
 .ak-pagination {
+  // 翻页控件是上游唯一一个**连颜色都写死**的组件（#999 底 / #333 按钮 / #222 禁用），
+  // 所以暗色主题下它一直是块灰砖，亮色主题下也不跟令牌走。
+  // 这里两件事一起做：几何进尺寸档，颜色进令牌。
+  @include tuning.tuning-steps(
+    (
+      ak-pagination-h: (4rem, 5rem, 6rem),
+      ak-pagination-w: (12rem, 16rem, 20rem),
+      ak-pagination-arrow-w: (3rem, 4rem, 5rem),
+      ak-pagination-number-fs: (1.5rem, 1.9rem, 2.35rem),
+      ak-pagination-title-fs: (0.875rem, 1rem, 1.125rem),
+    )
+  );
+
+  // 箭头区宽度 = 总宽 - 中段，所以中段宽度必须跟着档位一起算，
+  // 否则 sm 档下 8rem 的中段会把 12rem 的总宽撑破。
+  --ak-pagination-cur-w: calc(var(--ak-pagination-w) - var(--ak-pagination-arrow-w) * 2);
+
   display: inline-flex;
-  height: 5rem;
-  width: 16rem;
-  background-color: #999;
-  color: white;
+  height: calc(var(--ak-pagination-h) * var(--ak-density-control, 1));
+  width: var(--ak-pagination-w);
+  background-color: var(--ak-pagination-bg, #999);
+  color: var(--ak-pagination-fg, white);
+
   .prev,
   .next {
     position: relative;
-    background-color: #333;
+    background-color: var(--ak-pagination-arrow-bg, #333);
     height: 100%;
-    width: 4rem;
+    width: var(--ak-pagination-arrow-w);
     box-sizing: border-box;
     display: inline-flex;
     flex-direction: column;
@@ -26,12 +45,12 @@
     transition: background-color var(--ak-motion-fast, 120ms) ease, opacity var(--ak-motion-fast, 120ms) ease;
 
     .ak-icon {
-      width: 2rem;
-      height: 2rem;
+      width: calc(var(--ak-pagination-arrow-w) / 2);
+      height: calc(var(--ak-pagination-arrow-w) / 2);
     }
 
     &:hover:not(:disabled) {
-      background-color: #444;
+      background-color: var(--ak-pagination-arrow-bg-hover, #444);
     }
 
     &:focus-visible {
@@ -42,7 +61,7 @@
     &:disabled {
       cursor: not-allowed;
       opacity: 0.35;
-      background-color: #222;
+      background-color: var(--ak-pagination-arrow-bg-disabled, #222);
     }
 
     @include active-darken;
@@ -50,16 +69,16 @@
 
   .cur {
     display: inline-flex;
-    border: 2px solid gray;
+    border: 2px solid var(--ak-pagination-cur-border, gray);
     border-width: 2px 0;
-    width: 8rem;
+    width: var(--ak-pagination-cur-w);
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
     .title {
       font-weight: normal;
-      font-size: 1rem;
+      font-size: var(--ak-pagination-title-fs);
       line-height: 2rem;
       border: none;
       margin: 0;
@@ -74,7 +93,7 @@
   .number {
     font-family: var(--ak-font-mono, monospace);
     font-variant-numeric: tabular-nums;
-    font-size: 1.9rem;
+    font-size: var(--ak-pagination-number-fs);
     line-height: 1;
   }
 }

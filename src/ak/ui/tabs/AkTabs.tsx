@@ -1,5 +1,7 @@
-import type { ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
 import { useInstanceId } from '../../lib/useId'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 export interface AkTabsItem {
   description?: ReactNode
@@ -9,7 +11,10 @@ export interface AkTabsItem {
   value: string
 }
 
-export interface AkTabsProps {
+// Tabs 与 Segmented 的 props 以前是**封闭**的：不继承 HTML 属性，所以
+// className 之外连 `id`、`data-*`、`style` 都传不进去。这里补上继承，
+// 并把与组件语义冲突的键（`children` / `onChange`）显式摘掉。
+export interface AkTabsProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onChange'> {
   /** 读屏标签，默认 `Tabs`。 */
   ariaLabel?: string
   /** 标签列表；每项含 `value` / `label` / `title`。 */
@@ -22,9 +27,13 @@ export interface AkTabsProps {
   renderPanel?: (item: AkTabsItem) => ReactNode
   /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /** 尺寸档：标签高度、内边距、字号与面板内距一起缩。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-tabs-width': '100%' }`。 */
+  tokens?: AkTokens
 }
 
-export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, className }: AkTabsProps) {
+export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, className, size = 'md', tokens, style, ...rest }: AkTabsProps) {
   const instanceId = useInstanceId('ak-tabs')
   const activeValue = items.some((item) => item.value === value) ? (value as string) : (items[0]?.value ?? '')
 
@@ -44,7 +53,13 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
   }
 
   return (
-    <section className={className ? `ak-tabs ${className}` : 'ak-tabs'} data-slot="ak-tabs">
+    <section
+      {...rest}
+      {...sizeAttrs(size)}
+      className={className ? `ak-tabs ${className}` : 'ak-tabs'}
+      style={tokenStyle(tokens, style)}
+      data-slot="ak-tabs"
+    >
       <div className="ak-tabs__list" role="tablist" aria-label={ariaLabel || 'Tabs'}>
         {items.map((item, index) => (
           <button
@@ -88,7 +103,7 @@ export interface AkSegmentedOption {
   value: string
 }
 
-export interface AkSegmentedProps {
+export interface AkSegmentedProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'> {
   /** 读屏标签，默认 `Options`。 */
   ariaLabel?: string
   /** 选项列表，每项 `label` + `value`。 */
@@ -99,13 +114,25 @@ export interface AkSegmentedProps {
   onValueChange?: (value: string) => void
   /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /** 尺寸档：每项的最小宽高、内边距与字号一起缩。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-segmented-inset': '0' }`。 */
+  tokens?: AkTokens
 }
 
-export function AkSegmented({ ariaLabel, options, value, onValueChange, className }: AkSegmentedProps) {
+export function AkSegmented({ ariaLabel, options, value, onValueChange, className, size = 'md', tokens, style, ...rest }: AkSegmentedProps) {
   const activeValue = options.some((option) => option.value === value) ? value : options[0]?.value
 
   return (
-    <div className={className ? `ak-segmented ${className}` : 'ak-segmented'} data-slot="ak-segmented" role="group" aria-label={ariaLabel || 'Options'}>
+    <div
+      {...rest}
+      {...sizeAttrs(size)}
+      className={className ? `ak-segmented ${className}` : 'ak-segmented'}
+      style={tokenStyle(tokens, style)}
+      data-slot="ak-segmented"
+      role="group"
+      aria-label={ariaLabel || 'Options'}
+    >
       {options.map((option) => (
         <button
           key={option.value}

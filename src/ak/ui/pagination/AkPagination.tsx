@@ -1,5 +1,7 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /**
  * 翻页控件。
@@ -28,6 +30,10 @@ export interface AkPaginationProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   nextIcon?: ReactNode
   /** 循环：到首/末页时回卷。 */
   loop?: boolean
+  /** 尺寸档：整体宽高、箭头区宽度、页码字号一起缩。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-pagination-w': '100%' }`。 */
+  tokens?: AkTokens
 }
 
 export function AkPagination({
@@ -40,7 +46,10 @@ export function AkPagination({
   previousIcon,
   nextIcon,
   loop = false,
+  size = 'md',
+  tokens,
   className,
+  style,
   ...rest
 }: AkPaginationProps) {
   const last = Math.max(1, Math.floor(total))
@@ -60,7 +69,13 @@ export function AkPagination({
   const disabled = (which: 'prev' | 'next') => (!loop && (which === 'prev' ? atFirst : atLast))
 
   return (
-    <div {...rest} className={cx('ak-pagination', className)} data-slot="ak-pagination">
+    <div
+      {...rest}
+      {...sizeAttrs(size)}
+      className={cx('ak-pagination', className)}
+      style={tokenStyle(tokens, style)}
+      data-slot="ak-pagination"
+    >
       <button
         type="button"
         className="prev"

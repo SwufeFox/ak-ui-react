@@ -9,6 +9,8 @@ import {
   type Ref,
 } from 'react'
 import { cx } from '../../lib/utils'
+import { sizeAttrs, type AkControlSize } from '../../lib/size'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /** A selectable entry for `AkDropdownMenu` or `AkContextMenu`. */
 export interface AkMenuItem {
@@ -112,13 +114,17 @@ export interface AkDropdownMenuProps {
   items: readonly AkMenuItem[]
   /** Extra class for the trigger-and-menu wrapper. */
   className?: string
+  /** 尺寸档：一次同时缩触发器与每条菜单项，两者不会失同步。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖（挂在 anchor 上，浮层继承）。 */
+  tokens?: AkTokens
 }
 
 /**
  * A button-triggered menu backed by the browser Popover API.
  * Escape, outside dismissal, and top-layer placement remain native browser behavior.
  */
-export function AkDropdownMenu({ label, items, className }: AkDropdownMenuProps) {
+export function AkDropdownMenu({ label, items, className, size = 'md', tokens }: AkDropdownMenuProps) {
   const [open, setOpen] = useState(false)
   const menuId = useId().replace(/:/g, '')
   const panelRef = useRef<HTMLDivElement>(null)
@@ -149,7 +155,7 @@ export function AkDropdownMenu({ label, items, className }: AkDropdownMenuProps)
   }
 
   return (
-    <span className={cx('ak-menu-anchor', className)}>
+    <span {...sizeAttrs(size)} className={cx('ak-menu-anchor', className)} style={tokenStyle(tokens)}>
       <button
         id={`${menuId}-trigger`}
         ref={triggerRef}
@@ -167,7 +173,7 @@ export function AkDropdownMenu({ label, items, className }: AkDropdownMenuProps)
       >
         {label}<span aria-hidden="true">▾</span>
       </button>
-      <MenuSurface id={menuId} className="ak-menu--anchored" aria-labelledby={`${menuId}-trigger`} surfaceRef={panelRef} returnFocusRef={triggerRef} open={open} onOpenChange={onOpenChange} onKeyDown={moveFocus}>
+      <MenuSurface id={menuId} className="ak-menu--anchored" aria-labelledby={`${menuId}-trigger`} surfaceRef={panelRef} returnFocusRef={triggerRef} open={open} onOpenChange={onOpenChange} onKeyDown={moveFocus} {...sizeAttrs(size)}>
         <MenuEntries items={items} close={() => setOpen(false)} />
       </MenuSurface>
     </span>
@@ -184,13 +190,17 @@ export interface AkContextMenuProps {
   label?: string
   /** Extra class for the context-sensitive region. */
   className?: string
+  /** 尺寸档：一次同时缩菜单项与浮层宽度。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖（弹层在顶层，无法从外部选择器改，走 tokens 最省事）。 */
+  tokens?: AkTokens
 }
 
 /**
  * A context menu using a native auto popover. Opens on right-click or the
  * Context Menu / Shift+F10 keys and clamps its initial point to the viewport.
  */
-export function AkContextMenu({ children, items, label = 'Context menu', className }: AkContextMenuProps) {
+export function AkContextMenu({ children, items, label = 'Context menu', className, size = 'md', tokens }: AkContextMenuProps) {
   const [open, setOpen] = useState(false)
   const [point, setPoint] = useState({ x: 8, y: 8 })
   const menuId = useId().replace(/:/g, '')
@@ -224,6 +234,7 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
 
   return (
     <div
+      {...sizeAttrs(size)}
       ref={regionRef}
       tabIndex={0}
       role="group"
@@ -231,6 +242,7 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
       aria-controls={menuId}
       aria-expanded={open}
       className={cx('ak-context-menu', className)}
+      style={tokenStyle(tokens)}
       onContextMenu={(event) => {
         event.preventDefault()
         openAt(event.clientX, event.clientY)
@@ -252,7 +264,18 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
         open={open}
         onOpenChange={setOpen}
         aria-label={label}
-        style={{ position: 'fixed', left: point.x, top: point.y, right: 'auto', bottom: 'auto', margin: 0 }}
+        {...sizeAttrs(size)}
+        // tokens 在前、定位在后：右键菜单的坐标必须赢过调用方给的任意令牌，
+        // 否则 `--ak-menu-*` 里混进 left/top 之类会把弹层挪出视口。
+        style={{
+          ...tokenStyle(tokens),
+          position: 'fixed',
+          left: point.x,
+          top: point.y,
+          right: 'auto',
+          bottom: 'auto',
+          margin: 0,
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Escape') setOpen(false)
           if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {

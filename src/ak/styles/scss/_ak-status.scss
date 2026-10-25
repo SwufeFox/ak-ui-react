@@ -1,4 +1,5 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 .ak-tag-group,
 .ak-status-group {
@@ -9,21 +10,31 @@
 }
 
 .ak-tag {
+  @include tuning.tuning-steps(
+    (
+      ak-tag-height: (1.5rem, 1.875rem, 2.25rem),
+      ak-tag-pad: (0.25rem 0.65rem 0.25rem 0.8rem, 0.4rem 0.9rem 0.4rem 1.1rem, 0.5rem 1.15rem 0.5rem 1.35rem),
+      ak-tag-fs: (0.625rem, 0.6875rem, 0.75rem),
+    )
+  );
+
   --ak-tag-signal: var(--ak-signal-info, var(--ak-color-primary, #4aabea));
-  --ak-tag-text: #f3f4ef;
-  --ak-tag-surface: rgba(17, 19, 21, 0.88);
+  // 底色以前是写死的深色 rgba(17,19,21,.88)，亮色主题下标签会变成
+  // 浅底上的黑砖。改用「下沉面 + 一点底色」派生，两套主题各自成立。
+  --ak-tag-text: var(--ak-text-primary);
+  --ak-tag-surface: color-mix(in srgb, var(--ak-surface-sunken-2) 88%, transparent);
   position: relative;
   display: inline-flex;
   box-sizing: border-box;
-  min-height: 1.875rem;
-  padding: 0.4rem 0.9rem 0.4rem 1.1rem;
+  min-height: var(--ak-tag-height);
+  padding: var(--ak-tag-pad);
   border: 1px solid color-mix(in srgb, var(--ak-tag-signal) 55%, transparent);
   align-items: center;
   color: var(--ak-tag-text);
   background: var(--ak-tag-surface);
   clip-path: polygon(0 0, calc(100% - var(--ak-cut, 0.55rem)) 0, 100% var(--ak-cut, 0.55rem), 100% 100%, 0 100%);
   font-family: $font-monospace;
-  font-size: 0.6875rem;
+  font-size: var(--ak-tag-fs);
   font-weight: 800;
   letter-spacing: 0.08em;
   line-height: 1;
@@ -59,7 +70,8 @@
       background-color var(--ak-motion-fast, 120ms) ease;
 
     &:hover:not(:disabled) {
-      --ak-tag-surface: rgba(37, 40, 43, 0.92);
+      // 悬停只提亮一档，不换色系 —— 从同一个下沉面派生，主题自动跟随
+      --ak-tag-surface: color-mix(in srgb, var(--ak-surface-sunken-2) 70%, var(--ak-surface-raised));
     }
 
     &:disabled {
@@ -74,31 +86,44 @@
   }
 
   &[aria-pressed="true"] {
-    --ak-tag-text: #111315;
+    // 选中态是信号色实底，字色要用与信号色成对比的那一档
+    --ak-tag-text: var(--ak-surface-canvas);
     --ak-tag-surface: var(--ak-tag-signal);
   }
 }
 
 .ak-status {
+  @include tuning.tuning-steps(
+    (
+      ak-status-sig: (0.4rem, 0.55rem, 0.7rem),
+      ak-status-min-h: (2.25rem, 2.75rem, 3.25rem),
+      ak-status-pad: (0.4rem 0.65rem, 0.6rem 0.85rem, 0.75rem 1.05rem),
+      ak-status-label-fs: (0.5625rem, 0.625rem, 0.7rem),
+      ak-status-detail-fs: (0.6875rem, 0.75rem, 0.8125rem),
+    )
+  );
+
   --ak-status-signal: var(--ak-signal-info, var(--ak-color-primary, #4aabea));
   // 信号辉光的颜色跟着本组件的信号色走（信息 / 警告 / 危险各一档），
   // 形状与强度复用全局的 --ak-shadow-signal；强度保持原值 80%。
   --ak-shadow-signal-color: var(--ak-status-signal);
   --ak-shadow-signal: 0 0 0.75rem color-mix(in srgb, var(--ak-shadow-signal-color) 80%, transparent);
-  --ak-status-text: #f3f4ef;
+  // 同 .ak-tag：底色与字色都改为从主题令牌派生，
+  // 否则亮色主题下状态块是浅色页面上的黑砖（示例站点上实测到过）。
+  --ak-status-text: var(--ak-text-primary);
   display: inline-grid;
-  min-height: 2.75rem;
-  padding: 0.6rem 0.85rem;
+  min-height: var(--ak-status-min-h);
+  padding: var(--ak-status-pad);
   align-items: center;
   color: var(--ak-status-text);
-  background: rgba(17, 19, 21, 0.82);
+  background: color-mix(in srgb, var(--ak-surface-sunken-2) 82%, transparent);
   grid-template-columns: auto auto;
   grid-template-rows: auto auto;
   column-gap: 0.7rem;
 
   &__signal {
-    width: 0.55rem;
-    height: 0.55rem;
+    width: var(--ak-status-sig);
+    height: var(--ak-status-sig);
     background: var(--ak-status-signal);
     border-radius: 50%;
     box-shadow: var(--ak-shadow-signal);
@@ -109,7 +134,7 @@
   &__label {
     color: var(--ak-status-signal);
     font-family: $font-monospace;
-    font-size: 0.625rem;
+    font-size: var(--ak-status-label-fs);
     font-weight: 800;
     letter-spacing: 0.12em;
     line-height: 1.1;
@@ -120,7 +145,7 @@
     margin-top: 0.2rem;
     color: color-mix(in srgb, var(--ak-status-text) 72%, transparent);
     font-family: $font-sans-serif;
-    font-size: 0.75rem;
+    font-size: var(--ak-status-detail-fs);
     line-height: 1.2;
   }
 

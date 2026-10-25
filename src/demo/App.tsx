@@ -348,6 +348,22 @@ function ReferenceView() {
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
+  // 「外观展台」那排按钮的点击回显：让纯展示按钮也有反馈
+  const [buttonHit, setButtonHit] = useState('')
+  const [buttonHits, setButtonHits] = useState(0)
+  const [groupPick, setGroupPick] = useState<'A' | 'B' | 'C'>('A')
+  const [cardDialog, setCardDialog] = useState(false)
+  const [pageIndex, setPageIndex] = useState(3)
+  // 表单演示的受控状态：每个控件都真的受控，并在下方实时回显
+  const [fieldName, setFieldName] = useState('')
+  const [selectPick, setSelectPick] = useState('')
+  const [noteText, setNoteText] = useState('')
+  const [choiceA, setChoiceA] = useState(false)
+  const [choiceB, setChoiceB] = useState(false)
+  const hitButton = (name: string) => {
+    setButtonHit(name)
+    setButtonHits((n) => n + 1)
+  }
   // 理智计数演示状态
   const [loadingReady, setLoadingReady] = useState(false)
   const [screenOpen, setScreenOpen] = useState(false)
@@ -447,26 +463,33 @@ function ReferenceView() {
         <div className="demo-stage" ref={stageRef}>
           <StageContext.Provider value={stageValue}>
       <Block id="components-1" eyebrow={t('ref.actions.eyebrow')} title={t('ref.actions.title')} note={t('ref.actions.note')} code={DOC_REGISTRY['components-1']?.code} api={DOC_REGISTRY['components-1']?.api}>
+        {/* 这一排是「外观展台」：真实用途是让人看五个 variant 的差别，
+            本来就没有业务动作。但死按钮会让人以为坏了，所以点任何一个都会
+            把它的档位名写进下面的回显行 —— 有反馈，又不假装它有功能。 */}
         <div className="demo-row">
-          <AkButton>{t('common.default')}</AkButton>
-          <AkButton variant="outline">{t('common.outline')}</AkButton>
-          <AkButton variant="action">{t('common.action')}</AkButton>
-          <AkButton variant="advanced">{t('common.advanced')}</AkButton>
-          <AkButton variant="light">{t('common.light')}</AkButton>
+          <AkButton onClick={() => hitButton('default')}>{t('common.default')}</AkButton>
+          <AkButton variant="outline" onClick={() => hitButton('outline')}>{t('common.outline')}</AkButton>
+          <AkButton variant="action" onClick={() => hitButton('action')}>{t('common.action')}</AkButton>
+          <AkButton variant="advanced" onClick={() => hitButton('advanced')}>{t('common.advanced')}</AkButton>
+          <AkButton variant="light" onClick={() => hitButton('light')}>{t('common.light')}</AkButton>
           <AkTag>{t('common.tag')}</AkTag>
           <AkTag variant="advanced">{t('common.advanced')}</AkTag>
           <AkTag variant="danger">{t('common.danger')}</AkTag>
           <AkTag variant="neutral">{t('common.neutral')}</AkTag>
         </div>
         <div className="demo-row" style={{ marginTop: 'var(--ak-space-4)' }}>
-          <AkButton variant="action" icon={<span aria-hidden="true">◆</span>}>
+          <AkButton variant="action" icon={<span aria-hidden="true">◆</span>} onClick={() => hitButton('action+icon')}>
             {t('common.withIcon')}
           </AkButton>
-          <AkButton variant="outline" block style={{ maxWidth: '16rem' }}>
+          <AkButton variant="outline" block style={{ maxWidth: '16rem' }} onClick={() => hitButton('block')}>
             {t('common.block')}
           </AkButton>
           <AkButton disabled>{t('common.disabled')}</AkButton>
         </div>
+        {/* 回显：点了哪个档位 */}
+        <p className="demo-note" aria-live="polite">
+          {buttonHit ? `${t('ref.actions.hitLabel')}: ${buttonHit} · ${t('ref.actions.hitCount', { n: buttonHits })}` : t('ref.actions.hitHint')}
+        </p>
       </Block>
 
       <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')} code={DOC_REGISTRY['components-2']?.code} api={DOC_REGISTRY['components-2']?.api}>
@@ -545,7 +568,10 @@ function ReferenceView() {
             </AkCardHeader>
             <AkCardContent className="ak-text">{t('card.default.body')}</AkCardContent>
             <AkCardFooter>
-              <AkButton variant="outline">{t('common.inspect')}</AkButton>
+              {/* 卡片底部动作是真按钮，就该真开东西 —— 这里开库自带的详情对话框 */}
+              <AkButton variant="outline" onClick={() => setCardDialog(true)}>
+                {t('common.inspect')}
+              </AkButton>
             </AkCardFooter>
           </AkCard>
           <AkCard as="article" variant="outline">
@@ -564,6 +590,26 @@ function ReferenceView() {
             <AkCardContent className="ak-text">variant=&quot;stripe&quot;</AkCardContent>
           </AkCard>
         </div>
+
+        {/* 卡片里那个「查看」按钮真的会开这个对话框 —— 示例里每个动作都该有去处 */}
+        <AkDialog
+          open={cardDialog}
+          onOpenChange={setCardDialog}
+          eyebrow={t('card.default.title')}
+          title={t('card.default.title')}
+          footer={
+            <>
+              <AkButton variant="outline" size="sm" onClick={() => setCardDialog(false)}>
+                {t('common.cancel')}
+              </AkButton>
+              <AkButton variant="action" size="sm" onClick={() => setCardDialog(false)}>
+                {t('common.confirm')}
+              </AkButton>
+            </>
+          }
+        >
+          {t('card.default.body')}
+        </AkDialog>
       </Block>
 
       <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')} code={DOC_REGISTRY['components-4']?.code} api={DOC_REGISTRY['components-4']?.api}>
@@ -688,7 +734,8 @@ function ReferenceView() {
           <div className="demo-panel">
             <div className="demo-row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
               <AkCodeId>AkEntrance</AkCodeId>
-              <AkButton variant="outline" onClick={() => entranceRef.current?.replay()} style={{ minWidth: 'auto', height: '2.25rem', padding: '0 0.85rem' }}>
+              {/* 以前用内联 style 硬改尺寸 —— 现在走 size 档。 */}
+              <AkButton variant="outline" size="sm" onClick={() => entranceRef.current?.replay()}>
                 {t('ref.effects.replay')}
               </AkButton>
             </div>
@@ -1059,12 +1106,20 @@ function ReferenceView() {
           <div className="demo-stack">
             <AkDivider>{t('common.sectionLabel')}</AkDivider>
 
-            <div className="demo-row">
-              <AkButtonGroup>
-                <AkButton variant="action">A</AkButton>
-                <AkButton variant="outline">B</AkButton>
-                <AkButton variant="outline">C</AkButton>
-              </AkButtonGroup>
+          <div className="demo-row">
+            {/* 按钮组本来就该是单选：点哪个哪个变 action 档 */}
+            <AkButtonGroup>
+              {(['A', 'B', 'C'] as const).map((k) => (
+                <AkButton
+                  key={k}
+                  variant={groupPick === k ? 'action' : 'outline'}
+                  aria-pressed={groupPick === k}
+                  onClick={() => setGroupPick(k)}
+                >
+                  {k}
+                </AkButton>
+              ))}
+            </AkButtonGroup>
 
               <AkPopover
                 trigger={<AkButton variant="action">{t('common.openPanel')}</AkButton>}
@@ -1089,49 +1144,82 @@ function ReferenceView() {
               <AkStatus variant="offline" label="RELAY" detail="Down" />
             </AkStatusGroup>
 
-            <AkPagination
-              page={3}
-              total={12}
-              title={t('common.timeline')}
-              onPageChange={() => undefined}
-            />
+          {/* 以前 onPageChange 是 `() => undefined` —— 点了页码永远不动，
+              这正是「控件点了没效果」最典型的一处。 */}
+          <AkPagination
+            page={pageIndex}
+            total={12}
+            title={t('common.timeline')}
+            onPageChange={setPageIndex}
+          />
           </div>
         </Block>
 
         <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')} code={DOC_REGISTRY['components-14']?.code} api={DOC_REGISTRY['components-14']?.api}>
-          <AkFormStack>
-            <AkField hint={t('common.fieldHint')}>
-              <AkFieldLabel htmlFor="demo-field">{t('common.fieldName')}</AkFieldLabel>
-              <AkInput id="demo-field" placeholder="R001" />
-            </AkField>
+        <AkFormStack>
+          <AkField hint={t('common.fieldHint')}>
+            <AkFieldLabel htmlFor="demo-field">{t('common.fieldName')}</AkFieldLabel>
+          {/* 受控输入 + 回显：不接 value 的话，打字虽然能进去，但示例里
+              看不出"这个组件真的在受控状态工作" */}
+          <AkInput
+            id="demo-field"
+            placeholder="R001"
+            value={fieldName}
+            onChange={(e) => setFieldName(e.target.value)}
+          />
+        </AkField>
 
-            <AkField>
-              <AkSelect aria-label={t('common.selectPlaceholder')} defaultValue="">
-                <option value="" disabled>
-                  {t('common.selectPlaceholder')}
-                </option>
-                <option value="a">Alpha</option>
-                <option value="b">Bravo</option>
-              </AkSelect>
-            </AkField>
+        <AkField>
+          <AkSelect
+            aria-label={t('common.selectPlaceholder')}
+            value={selectPick}
+            onChange={(e) => setSelectPick(e.target.value)}
+          >
+            <option value="" disabled>
+              {t('common.selectPlaceholder')}
+            </option>
+            <option value="a">Alpha</option>
+            <option value="b">Bravo</option>
+          </AkSelect>
+        </AkField>
 
-            <AkField>
-              <AkTextarea rows={3} placeholder={t('common.textareaPlaceholder')} />
-            </AkField>
+        <AkField>
+          <AkTextarea
+            rows={3}
+            placeholder={t('common.textareaPlaceholder')}
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+          />
+        </AkField>
 
-            <AkField invalid hint={t('common.fieldHint')}>
-              <AkInput defaultValue="bad!" aria-invalid="true" />
-            </AkField>
+        <AkField invalid hint={t('common.fieldHint')}>
+          <AkInput defaultValue="bad!" aria-invalid="true" />
+        </AkField>
 
-            <div className="demo-row">
-              <AkChoice>{t('common.choiceCheck')}</AkChoice>
-              <AkChoice variant="radio" name="demo-deck">
-                {t('common.choiceRadio')}
-              </AkChoice>
-              <AkChoice variant="switch">{t('common.choiceSwitch')}</AkChoice>
-            </div>
-          </AkFormStack>
-        </Block>
+        <div className="demo-row">
+          <AkChoice checked={choiceA} onChange={(e) => setChoiceA(e.target.checked)}>
+            {t('common.choiceCheck')}
+          </AkChoice>
+          <AkChoice variant="radio" name="demo-deck" defaultChecked>
+            {t('common.choiceRadio')}
+          </AkChoice>
+          <AkChoice variant="switch" checked={choiceB} onChange={(e) => setChoiceB(e.target.checked)}>
+            {t('common.choiceSwitch')}
+          </AkChoice>
+        </div>
+
+        {/* 实时回显：证明每个控件都真的在受控 */}
+        <p className="demo-note" aria-live="polite">
+          {t('ref.form.liveEcho', {
+            name: fieldName || '—',
+            pick: selectPick || '—',
+            note: noteText || '—',
+            check: choiceA ? 'on' : 'off',
+            toggle: choiceB ? 'on' : 'off',
+          })}
+        </p>
+      </AkFormStack>
+      </Block>
 
         <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} code={DOC_REGISTRY['components-15']?.code} api={DOC_REGISTRY['components-15']?.api}>
           <div className="demo-stack">
@@ -1451,7 +1539,7 @@ function ReferenceView() {
                   <div style={{ display: 'grid', gap: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <AkOverline>CATEGORY // ELITE MATERIALS</AkOverline>
-                      <AkButton variant="outline" onClick={() => setScreenOpen(false)} style={{ height: '2rem', minWidth: 'auto' }}>
+                      <AkButton variant="outline" size="sm" onClick={() => setScreenOpen(false)}>
                         CLOSE ⎋
                       </AkButton>
                     </div>
@@ -1496,12 +1584,19 @@ function ReferenceView() {
 export function App() {
   const { locale, setLocale, t } = useI18n()
   const [theme, setTheme] = useState<Theme>('terminal')
+  const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
   const [llmCopied, setLlmCopied] = useState(false)
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
   }, [theme])
+
+  // 密度挂在 <html> 上，于是整个示例站点（包括每个演示块里的组件）
+  // 都跟着这份档位走 —— 这正是 data-ak-density 的设计用途：子树级联。
+  useEffect(() => {
+    document.documentElement.dataset.akDensity = density
+  }, [density])
 
   useEffect(() => {
     const handleOpen = () => setLlmModalOpen(true)
@@ -1528,75 +1623,74 @@ export function App() {
           <span className="demo-topbar__version">v1.3.0</span>
         </div>
 
+        {/* 顶栏控件全部用库自己的组件 —— 以前这里是自造的 demo-tactical-btn /
+            demo-status-pill，视觉与 AkButton / AkStatus 各调各的，主题切换时先露馅。 */}
         <div className="demo-topbar__controls">
-          <div className="demo-status-pill">
-            <span className="demo-status-pill__dot" />
-            <span className="demo-status-pill__text">SYSTEM NORMAL</span>
-          </div>
+          <AkStatus size="sm" label="SYSTEM NORMAL" />
 
           <div className="demo-topbar__group">
-            <button
-              type="button"
-              className="demo-tactical-btn is-spec"
+            <AkButton
+              size="sm"
+              variant="light"
               onClick={() => setLlmModalOpen(true)}
               title="View llms.txt AI Agent Specification"
+              icon={<span className="demo-spec-dot">◆</span>}
             >
-              <span className="demo-spec-dot">◆</span> LLMS.TXT
-            </button>
-            <a
-              href="/llms.txt"
-              target="_blank"
-              rel="noreferrer"
-              className="demo-tactical-btn"
-              title="Open raw llms.txt"
+              LLMS.TXT
+            </AkButton>
+            <AkButton
+              size="sm"
+              variant="light"
+              onClick={() => window.open('/llms.txt', '_blank', 'noreferrer')}
+              iconEnd={<span aria-hidden="true">↗</span>}
             >
-              RAW ↗
-            </a>
+              RAW
+            </AkButton>
           </div>
 
-          <div className="demo-topbar__group">
-            <button
-              type="button"
-              className={`demo-tactical-btn ${theme === 'terminal' ? 'is-active' : ''}`}
-              onClick={() => setTheme('terminal')}
-            >
-              TERMINAL
-            </button>
-            <button
-              type="button"
-              className={`demo-tactical-btn ${theme === 'archive' ? 'is-active' : ''}`}
-              onClick={() => setTheme('archive')}
-            >
-              ARCHIVE
-            </button>
-          </div>
+          <AkSegmented
+            size="sm"
+            ariaLabel="Theme"
+            options={[
+              { label: 'TERMINAL', value: 'terminal' },
+              { label: 'ARCHIVE', value: 'archive' },
+            ]}
+            value={theme}
+            onValueChange={(v) => setTheme(v as 'terminal' | 'archive')}
+          />
 
-          <div className="demo-topbar__group">
-            <button
-              type="button"
-              className={`demo-tactical-btn ${locale === 'zh-CN' ? 'is-active' : ''}`}
-              onClick={() => setLocale('zh-CN')}
-            >
-              中文
-            </button>
-            <button
-              type="button"
-              className={`demo-tactical-btn ${locale === 'en' ? 'is-active' : ''}`}
-              onClick={() => setLocale('en')}
-            >
-              EN
-            </button>
-          </div>
+          <AkSegmented
+            size="sm"
+            ariaLabel="Language"
+            options={[
+              { label: '中文', value: 'zh-CN' },
+              { label: 'EN', value: 'en' },
+            ]}
+            value={locale}
+            onValueChange={(v) => setLocale(v as 'zh-CN' | 'en')}
+          />
 
-          <a
-            href="https://github.com/swufefox/ak-ui-react"
-            target="_blank"
-            rel="noreferrer"
-            className="demo-github-btn"
+          {/* 密度：整站的活样板 —— 切一下，下面所有演示块里的组件一起变 */}
+          <AkSegmented
+            size="sm"
+            ariaLabel="Density"
+            options={[
+              { label: 'CMPT', value: 'compact' },
+              { label: 'COZY', value: 'cozy' },
+              { label: 'SPCS', value: 'spacious' },
+            ]}
+            value={density}
+            onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
+          />
+
+          <AkButton
+            size="sm"
+            variant="outline"
+            onClick={() => window.open('https://github.com/swufefox/ak-ui-react', '_blank', 'noreferrer')}
+            iconEnd={<span aria-hidden="true">↗</span>}
           >
-            <span>GITHUB</span>
-            <span className="demo-arrow">↗</span>
-          </a>
+            GITHUB
+          </AkButton>
         </div>
       </header>
 

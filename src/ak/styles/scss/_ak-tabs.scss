@@ -1,8 +1,19 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 .ak-tabs {
+  @include tuning.tuning-steps(
+    (
+      ak-tabs-tab-h: (2.25rem, 3rem, 3.5rem),
+      ak-tabs-tab-pad: (0.4rem 0.7rem, 0.65rem 1rem, 0.9rem 1.35rem),
+      ak-tabs-tab-fs: (0.625rem, 0.6875rem, 0.75rem),
+      ak-tabs-panel-pad: (1rem, 1.5rem, 2rem),
+      ak-tabs-width: (28rem, 42rem, 56rem),
+    )
+  );
+
   --ak-tabs-signal: var(--ak-signal-info, var(--ak-color-primary, #4aabea));
-  width: min(42rem, 100%);
+  width: min(var(--ak-tabs-width), 100%);
   border: 1px solid rgba(243, 244, 239, 0.25);
   color: #f3f4ef;
   background: rgba(17, 19, 21, 0.9);
@@ -16,20 +27,29 @@
 
   &__tab {
     position: relative;
-    min-height: 3rem;
-    padding: 0.65rem 1rem;
+    min-height: var(--ak-tabs-tab-h);
+    padding: var(--ak-tabs-tab-pad);
     border: 0;
     color: rgba(243, 244, 239, 0.62);
     background: transparent;
     cursor: pointer;
     font-family: $font-monospace;
-    font-size: 0.6875rem;
+    font-size: var(--ak-tabs-tab-fs);
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    // 同上：标签页以前没有过渡，切换是硬跳
+    transition:
+      color var(--ak-motion-fast, 120ms) ease,
+      background-color var(--ak-motion-base, 200ms) ease;
 
     & + & {
       border-left: 1px solid rgba(243, 244, 239, 0.18);
+    }
+
+    &:hover:not([aria-selected="true"]) {
+      color: var(--ak-text-primary);
+      background: color-mix(in srgb, var(--ak-text-primary) 6%, transparent);
     }
 
     &[aria-selected="true"] {
@@ -44,6 +64,8 @@
         height: 0.25rem;
         content: "";
         background: var(--ak-tabs-signal);
+        // 信号条从中间展开，比整条硬跳更像"切换"
+        animation: ak-tabs-signal-in var(--ak-motion-base, 200ms) var(--ak-ease-emphasized, ease-out);
       }
     }
 
@@ -56,7 +78,7 @@
 
   &__panel {
     min-height: 7rem;
-    padding: 1.5rem;
+    padding: var(--ak-tabs-panel-pad);
 
     &[hidden] {
       display: none;
@@ -68,7 +90,7 @@
     margin-bottom: 0.7rem;
     color: var(--ak-tabs-signal);
     font-family: $font-monospace;
-    font-size: 0.625rem;
+    font-size: var(--ak-segmented-fs);
     font-weight: 800;
     letter-spacing: 0.12em;
   }
@@ -91,17 +113,33 @@
 }
 
 .ak-segmented {
+  @include tuning.tuning-steps(
+    (
+      ak-segmented-item-w: (4rem, 5.5rem, 7rem),
+      ak-segmented-item-h: (1.85rem, 2.25rem, 2.75rem),
+      ak-segmented-item-pad: (0.3rem 0.6rem, 0.45rem 0.8rem, 0.6rem 1rem),
+      ak-segmented-fs: (0.5625rem, 0.625rem, 0.6875rem),
+    )
+  );
+
   --ak-segmented-signal: var(--ak-signal-action, var(--ak-color-advanced, #f1c644));
   display: inline-flex;
-  padding: 0.25rem;
-  background: var(--ak-surface-sunken, rgba(17, 19, 21, 0.9));
+  padding: var(--ak-segmented-inset, 0.25rem);
+  background: var(--ak-segmented-bg, var(--ak-surface-sunken, rgba(17, 19, 21, 0.9)));
   border: 1px solid var(--ak-border, rgba(255, 255, 255, 0.08));
 
   &__item {
-    min-width: 5.5rem;
-    min-height: 2.25rem;
-    padding: 0.45rem 0.8rem;
+    min-width: var(--ak-segmented-item-w);
+    min-height: var(--ak-segmented-item-h);
+    padding: var(--ak-segmented-item-pad);
     border: 0;
+    // 分段器的每一项都是可点目标，但以前既没有 hover 也没有 transition ——
+    // 顶栏切主题/密度时手指按下去毫无反馈，这是「平直」抱怨的主要来源之一。
+    transition:
+      color var(--ak-motion-fast, 120ms) ease,
+      background-color var(--ak-motion-fast, 120ms) ease,
+      box-shadow var(--ak-motion-fast, 120ms) ease,
+      transform var(--ak-motion-fast, 120ms) ease;
     color: rgba(243, 244, 239, 0.62);
     background: transparent;
     cursor: pointer;
@@ -110,9 +148,29 @@
     font-weight: 800;
     letter-spacing: 0.08em;
 
+    // 未选中项在悬停时先给一点提示，按下去再沉一档 ——
+    // 选中项不参与，避免"已选中的又在闪"。
+    &:hover:not([aria-pressed="true"]):not(:disabled) {
+      color: var(--ak-text-primary);
+      background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+      background: color-mix(in srgb, var(--ak-segmented-signal) 30%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ak-segmented-signal) 60%, transparent);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
     &[aria-pressed="true"] {
-      color: #111315;
+      color: var(--ak-surface-canvas);
       background: var(--ak-segmented-signal);
+      // 选中态给一圈极轻的辉光，让"当前档位"在密集的顶栏里跳出来
+      box-shadow: 0 0 0.75rem color-mix(in srgb, var(--ak-segmented-signal) 45%, transparent);
     }
 
     &:focus-visible {
@@ -157,8 +215,32 @@
     }
 
     &[aria-pressed="true"] {
-      color: #111315;
+      color: var(--ak-surface-canvas);
       background: var(--ak-segmented-signal);
     }
+  }
+}
+
+// 选中态的信号条从中间展开（Tabs）
+@keyframes ak-tabs-signal-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ak-tabs__tab,
+  .ak-segmented__item {
+    transition: none;
+  }
+
+  .ak-tabs__tab[aria-selected="true"]::after {
+    animation: none;
   }
 }
