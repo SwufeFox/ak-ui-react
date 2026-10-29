@@ -26,6 +26,10 @@
   }
 
   &__tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     position: relative;
     min-height: var(--ak-tabs-tab-h);
     padding: var(--ak-tabs-tab-pad);
@@ -41,15 +45,28 @@
     // 同上：标签页以前没有过渡，切换是硬跳
     transition:
       color var(--ak-motion-fast, 120ms) ease,
-      background-color var(--ak-motion-base, 200ms) ease;
+      background-color var(--ak-motion-base, 200ms) ease,
+      transform var(--ak-motion-fast, 120ms) ease;
 
     & + & {
       border-left: 1px solid rgba(243, 244, 239, 0.18);
     }
 
-    &:hover:not([aria-selected="true"]) {
+    &:hover:not([aria-selected="true"]):not(:disabled):not(.ak-tabs__tab--disabled) {
       color: var(--ak-text-primary);
       background: color-mix(in srgb, var(--ak-text-primary) 6%, transparent);
+    }
+
+    &:active:not(:disabled):not(.ak-tabs__tab--disabled) {
+      transform: translateY(1px);
+      background: color-mix(in srgb, var(--ak-tabs-signal) 18%, transparent);
+    }
+
+    &--disabled,
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.38;
+      pointer-events: none;
     }
 
     &[aria-selected="true"] {
@@ -74,6 +91,26 @@
       outline: 3px solid var(--ak-tabs-signal);
       outline-offset: -3px;
     }
+  }
+
+  &__tab-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.1em;
+    line-height: 1;
+  }
+
+  &__tab-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.08rem 0.32rem;
+    font-family: $font-monospace;
+    font-size: 0.72em;
+    font-weight: 900;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    letter-spacing: 0;
   }
 
   &__panel {
@@ -129,6 +166,10 @@
   border: 1px solid var(--ak-border, rgba(255, 255, 255, 0.08));
 
   &__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
     min-width: var(--ak-segmented-item-w);
     min-height: var(--ak-segmented-item-h);
     padding: var(--ak-segmented-item-pad);
@@ -150,20 +191,22 @@
 
     // 未选中项在悬停时先给一点提示，按下去再沉一档 ——
     // 选中项不参与，避免"已选中的又在闪"。
-    &:hover:not([aria-pressed="true"]):not(:disabled) {
+    &:hover:not([aria-pressed="true"]):not(:disabled):not(.ak-segmented__item--disabled) {
       color: var(--ak-text-primary);
       background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
     }
 
-    &:active:not(:disabled) {
+    &:active:not(:disabled):not(.ak-segmented__item--disabled) {
       transform: translateY(1px);
       background: color-mix(in srgb, var(--ak-segmented-signal) 30%, transparent);
       box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ak-segmented-signal) 60%, transparent);
     }
 
+    &--disabled,
     &:disabled {
       cursor: not-allowed;
-      opacity: 0.45;
+      opacity: 0.4;
+      pointer-events: none;
     }
 
     &[aria-pressed="true"] {
@@ -177,6 +220,26 @@
       outline: 2px solid var(--ak-segmented-signal);
       outline-offset: -2px;
     }
+  }
+
+  &__item-icon {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    font-size: 1.1em;
+  }
+
+  &__item-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.05rem 0.28rem;
+    font-family: $font-monospace;
+    font-size: 0.72em;
+    font-weight: 900;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.16);
+    color: inherit;
+    letter-spacing: 0;
   }
 }
 

@@ -1,14 +1,27 @@
 import type { HTMLAttributes, ReactNode } from 'react'
+import { cx } from '../../lib/utils'
 import { useInstanceId } from '../../lib/useId'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 export interface AkTabsItem {
+  /** 描述文字。 */
   description?: ReactNode
+  /** 小标文字。 */
   eyebrow?: ReactNode
+  /** 标签文本。 */
   label: string
+  /** 标题节点。 */
   title: ReactNode
+  /** 唯一值标识。 */
   value: string
+  /** 标签前置图标。 */
+  icon?: ReactNode
+  /** 标签后置角标。 */
+  badge?: ReactNode
+  /** 是否禁用。 */
+  disabled?: boolean
 }
 
 // Tabs 与 Segmented 的 props 以前是**封闭**的：不继承 HTML 属性，所以
@@ -35,19 +48,50 @@ export interface AkTabsProps extends Omit<HTMLAttributes<HTMLElement>, 'children
 
 export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, className, size = 'md', tokens, style, ...rest }: AkTabsProps) {
   const instanceId = useInstanceId('ak-tabs')
-  const activeValue = items.some((item) => item.value === value) ? (value as string) : (items[0]?.value ?? '')
+  const matchedItem = items.find((item) => item.value === value)
+  const activeValue = matchedItem
+    ? matchedItem.value
+    : (items.find((item) => !item.disabled)?.value ?? items[0]?.value ?? '')
 
   const tabId = (v: string) => `${instanceId}-tab-${v}`
   const panelId = (v: string) => `${instanceId}-panel-${v}`
 
+  const enabledItems = items.filter((item) => !item.disabled)
+  const isCurrentEnabled = items.some((item) => item.value === activeValue && !item.disabled)
+  const focusableValue = isCurrentEnabled ? activeValue : enabledItems[0]?.value
+
   function onKeydown(index: number, event: React.KeyboardEvent<HTMLButtonElement>) {
-    const offset = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0
+    const offset =
+      event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+        ? -1
+        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+          ? 1
+          : 0
     if (!offset && event.key !== 'Home' && event.key !== 'End') return
     event.preventDefault()
-    const nextIndex =
-      event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : (index + offset + items.length) % items.length
-    const nextItem = items[nextIndex]
+
+    const enabledIndices = items
+      .map((item, i) => (!item.disabled ? i : -1))
+      .filter((i) => i !== -1)
+    if (enabledIndices.length === 0) return
+
+    let targetIndex: number
+    if (event.key === 'Home') {
+      targetIndex = enabledIndices[0]
+    } else if (event.key === 'End') {
+      targetIndex = enabledIndices[enabledIndices.length - 1]
+    } else {
+      const currPos = enabledIndices.indexOf(index)
+      if (currPos === -1) {
+        targetIndex = enabledIndices[0]
+      } else {
+        const nextPos = (currPos + offset + enabledIndices.length) % enabledIndices.length
+        targetIndex = enabledIndices[nextPos]
+      }
+    }
+    const nextItem = items[targetIndex]
     if (!nextItem) return
+    playTactileSound('tap')
     onValueChange?.(nextItem.value)
     window.requestAnimationFrame(() => document.getElementById(tabId(nextItem.value))?.focus())
   }
@@ -56,7 +100,7 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
     <section
       {...rest}
       {...sizeAttrs(size)}
-      className={className ? `ak-tabs ${className}` : 'ak-tabs'}
+      className={cx('ak-tabs', className)}
       style={tokenStyle(tokens, style)}
       data-slot="ak-tabs"
     >
@@ -65,16 +109,25 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
           <button
             key={item.value}
             id={tabId(item.value)}
-            className="ak-tabs__tab"
+            className={cx('ak-tabs__tab', item.disabled && 'ak-tabs__tab--disabled')}
             role="tab"
             type="button"
+            disabled={item.disabled}
+            aria-disabled={item.disabled || undefined}
             aria-controls={panelId(item.value)}
             aria-selected={activeValue === item.value}
-            tabIndex={activeValue === item.value ? 0 : -1}
-            onClick={() => onValueChange?.(item.value)}
+            tabIndex={focusableValue === item.value ? 0 : -1}
+            onClick={() => {
+              if (!item.disabled) {
+                playTactileSound('tap')
+                onValueChange?.(item.value)
+              }
+            }}
             onKeyDown={(event) => onKeydown(index, event)}
           >
-            {item.label}
+            {item.icon ? <span className="ak-tabs__tab-icon">{item.icon}</span> : null}
+            <span className="ak-tabs__tab-label">{item.label}</span>
+            {item.badge ? <span className="ak-tabs__tab-badge">{item.badge}</span> : null}
           </button>
         ))}
       </div>
@@ -99,8 +152,16 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
 }
 
 export interface AkSegmentedOption {
+  /** 显示内容。 */
   label: ReactNode
+  /** 选项值。 */
   value: string
+  /** 前置图标。 */
+  icon?: ReactNode
+  /** 后置角标。 */
+  badge?: ReactNode
+  /** 是否禁用。 */
+  disabled?: boolean
 }
 
 export interface AkSegmentedProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'> {
@@ -121,27 +182,85 @@ export interface AkSegmentedProps extends Omit<HTMLAttributes<HTMLDivElement>, '
 }
 
 export function AkSegmented({ ariaLabel, options, value, onValueChange, className, size = 'md', tokens, style, ...rest }: AkSegmentedProps) {
-  const activeValue = options.some((option) => option.value === value) ? value : options[0]?.value
+  const instanceId = useInstanceId('ak-seg')
+  const matchedOption = options.find((option) => option.value === value)
+  const activeValue = matchedOption
+    ? matchedOption.value
+    : (options.find((option) => !option.disabled)?.value ?? options[0]?.value)
+
+  const itemId = (v: string) => `${instanceId}-item-${v}`
+
+  const enabledOptions = options.filter((opt) => !opt.disabled)
+  const isCurrentEnabled = options.some((opt) => opt.value === activeValue && !opt.disabled)
+  const focusableValue = isCurrentEnabled ? activeValue : enabledOptions[0]?.value
+
+  function onSegmentKeydown(index: number, event: React.KeyboardEvent<HTMLButtonElement>) {
+    const offset =
+      event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+        ? -1
+        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+          ? 1
+          : 0
+    if (!offset && event.key !== 'Home' && event.key !== 'End') return
+    event.preventDefault()
+
+    const enabledIndices = options
+      .map((option, i) => (!option.disabled ? i : -1))
+      .filter((i) => i !== -1)
+    if (enabledIndices.length === 0) return
+
+    let targetIndex: number
+    if (event.key === 'Home') {
+      targetIndex = enabledIndices[0]
+    } else if (event.key === 'End') {
+      targetIndex = enabledIndices[enabledIndices.length - 1]
+    } else {
+      const currPos = enabledIndices.indexOf(index)
+      if (currPos === -1) {
+        targetIndex = enabledIndices[0]
+      } else {
+        const nextPos = (currPos + offset + enabledIndices.length) % enabledIndices.length
+        targetIndex = enabledIndices[nextPos]
+      }
+    }
+    const nextOption = options[targetIndex]
+    if (!nextOption) return
+    playTactileSound('toggle')
+    onValueChange?.(nextOption.value)
+    window.requestAnimationFrame(() => document.getElementById(itemId(nextOption.value))?.focus())
+  }
 
   return (
     <div
       {...rest}
       {...sizeAttrs(size)}
-      className={className ? `ak-segmented ${className}` : 'ak-segmented'}
+      className={cx('ak-segmented', className)}
       style={tokenStyle(tokens, style)}
       data-slot="ak-segmented"
       role="group"
       aria-label={ariaLabel || 'Options'}
     >
-      {options.map((option) => (
+      {options.map((option, index) => (
         <button
           key={option.value}
-          className="ak-segmented__item"
+          id={itemId(option.value)}
+          className={cx('ak-segmented__item', option.disabled && 'ak-segmented__item--disabled')}
           type="button"
+          disabled={option.disabled}
+          aria-disabled={option.disabled || undefined}
           aria-pressed={activeValue === option.value}
-          onClick={() => onValueChange?.(option.value)}
+          tabIndex={focusableValue === option.value ? 0 : -1}
+          onClick={() => {
+            if (!option.disabled) {
+              playTactileSound('toggle')
+              onValueChange?.(option.value)
+            }
+          }}
+          onKeyDown={(event) => onSegmentKeydown(index, event)}
         >
-          {option.label}
+          {option.icon ? <span className="ak-segmented__item-icon">{option.icon}</span> : null}
+          <span className="ak-segmented__item-label">{option.label}</span>
+          {option.badge ? <span className="ak-segmented__item-badge">{option.badge}</span> : null}
         </button>
       ))}
     </div>

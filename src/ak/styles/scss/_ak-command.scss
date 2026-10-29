@@ -69,6 +69,16 @@
     transform: translate(-50%, -50%) rotate(-5deg);
   }
 
+  & &__icon {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.35cqw;
+    font-size: clamp(1.1rem, 2.2cqw, 2.4rem);
+    color: inherit;
+  }
+
   & &__label {
     position: relative;
     z-index: 1;
@@ -223,15 +233,23 @@
     text-align: center;
   }
 
-  &:hover {
+  &:hover:not(:disabled):not(.ak-command--disabled) {
     filter: brightness(1.08);
     transform: translateY(-0.18cqw);
   }
 
-  &:active {
+  &:active:not(:disabled):not(.ak-command--disabled) {
     filter: brightness(0.95);
     transform: translateY(0.08cqw);
     transition-duration: 90ms;
+  }
+
+  &--disabled,
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    filter: grayscale(0.6);
+    pointer-events: none;
   }
 
   &:focus-visible {

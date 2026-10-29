@@ -43,6 +43,20 @@
         box-shadow: inset 0 0 2px rgba(black, 0.6);
         height: 4rem;
         align-items: center;
+        transition:
+          background-color var(--ak-motion-fast, 120ms) ease,
+          transform var(--ak-motion-fast, 120ms) ease,
+          box-shadow var(--ak-motion-fast, 120ms) ease;
+
+        &:hover:not(:disabled) {
+          background-color: rgba(255, 255, 255, 0.12);
+          box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.2);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(1px) scale(0.98);
+          background-color: rgba(0, 0, 0, 0.25);
+        }
 
         &__label {
           font-family: $font-serif;

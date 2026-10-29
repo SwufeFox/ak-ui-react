@@ -2,6 +2,7 @@ import type { CSSProperties, InputHTMLAttributes } from 'react'
 import { clampRange, finite } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 // ⚠️ 原生 <input> 的 `size` 是字符数（number），我们这枚是外观档位（string）。
 // 不 Omit 会报 TS2430。
@@ -47,7 +48,10 @@ export function AkSlider({ label, min = 0, max = 100, step = 1, value, onValueCh
       // 填充比例是功能状态，必须排在 tokens/style 之后，不允许被覆盖
       style={{ ...tokenStyle(tokens, style), '--ak-slider-fill': `${fill}%` } as CSSProperties}
       onChange={(event) => {
-        if (!disabled) onValueChange?.(event.target.valueAsNumber)
+        if (!disabled) {
+          playTactileSound('step', 0.1)
+          onValueChange?.(event.target.valueAsNumber)
+        }
       }}
     />
   )

@@ -2,6 +2,7 @@ import { useId, type CSSProperties, type InputHTMLAttributes, type LabelHTMLAttr
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 /**
  * 表单控件。
@@ -142,13 +143,17 @@ export function AkSelect({ className, label, children, size = 'md', tokens, styl
 
 export type AkChoiceVariant = 'checkbox' | 'radio' | 'switch'
 
-export interface AkChoiceProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface AkChoiceProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** 外观：勾选框 / 单选圆点 / 开关滑块。样式表里对应 `.ak-choice--radio` / `--switch`。 */
   variant?: AkChoiceVariant
   /** 控件右侧的文字。 */
   children?: ReactNode
   /** 输入控件的 `name`（单选组需要）。 */
   name?: string
+  /** 尺寸档：图标尺寸、开关宽度、间距与字号。 */
+  size?: AkControlSize
+  /** 逐实例令牌覆盖，例如 `{ '--ak-choice-fill': '#ff5e19' }`。 */
+  tokens?: AkTokens
 }
 
 /**
@@ -157,15 +162,38 @@ export interface AkChoiceProps extends InputHTMLAttributes<HTMLInputElement> {
  * 上游样式表把三者做成同一个 `.ak-choice` 的变体（对勾是 `::after` 画的、
  * 开关滑块也是 `::after`），所以这里也是一个组件 + `variant`，不拆三个。
  */
-export function AkChoice({ variant = 'checkbox', className, children, ...rest }: AkChoiceProps) {
+export function AkChoice({
+  variant = 'checkbox',
+  className,
+  children,
+  size = 'md',
+  tokens,
+  style,
+  ...rest
+}: AkChoiceProps) {
   const isRadio = variant === 'radio'
   return (
-    <label className={cx('ak-choice', variantClass('ak-choice', variant, 'checkbox'), className)} data-slot="ak-choice">
+    <label
+      {...sizeAttrs(size)}
+      className={cx(
+        'ak-choice',
+        variantClass('ak-choice', variant, 'checkbox'),
+        rest.disabled && 'ak-choice--disabled',
+        className,
+      )}
+      style={tokenStyle(tokens, style)}
+      data-slot="ak-choice"
+      data-disabled={rest.disabled || undefined}
+    >
       <input
         {...rest}
         type={isRadio ? 'radio' : 'checkbox'}
         role={variant === 'switch' ? 'switch' : undefined}
         className="ak-choice__input"
+        onChange={(e) => {
+          playTactileSound('toggle')
+          rest.onChange?.(e)
+        }}
       />
       {children ? <span className="ak-choice__label">{children}</span> : null}
     </label>

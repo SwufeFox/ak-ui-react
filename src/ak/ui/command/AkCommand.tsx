@@ -1,5 +1,7 @@
-import type { CSSProperties, ElementType, HTMLAttributes, ReactNode } from 'react'
+import type { CSSProperties, ElementType, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 /**
  * 指令面板（command）。
@@ -37,6 +39,8 @@ export interface AkCommandProps extends Omit<HTMLAttributes<HTMLElement>, 'child
   label?: ReactNode
   /** 副信息（`.ak-command__meta`，小号加字距，溢出省略号）。 */
   meta?: ReactNode
+  /** 前置或装饰图标（`.ak-command__icon`）。 */
+  icon?: ReactNode
   /** 右上角角标（`.ak-command__badge`，橙底深字）。 */
   badge?: ReactNode
   /** 右上/中部当前值徽标（`.ak-command__current`）。 */
@@ -52,8 +56,12 @@ export interface AkCommandProps extends Omit<HTMLAttributes<HTMLElement>, 'child
    * （`.ak-command[aria-pressed="true"]::before`）→ 底部的信号色条由它驱动。
    */
   pressed?: boolean
+  /** 是否禁用。 */
+  disabled?: boolean
   /** 渲染成什么标签。默认 `button`（样式表自带 cursor:pointer 与 focus-visible 态）。 */
   as?: ElementType
+  /** 逐实例令牌覆盖，例如 `{ '--ak-command-signal': '#f5bd38' }`。 */
+  tokens?: AkTokens
   children?: ReactNode
 }
 
@@ -64,39 +72,74 @@ export interface AkCommandProps extends Omit<HTMLAttributes<HTMLElement>, 'child
 export function AkCommand({
   label,
   meta,
+  icon,
   badge,
   current,
   watermark,
   tone = 'default',
   layout = 'default',
   pressed = false,
+  disabled = false,
   as: Tag = 'button',
+  tokens,
   className,
+  style,
   children,
   ...rest
 }: AkCommandProps) {
   // button 元素不给 type 会在 form 里变成 submit，这里补上默认值
-  const tagProps = Tag === 'button' ? { type: 'button' as const } : {}
+  const isButton = Tag === 'button'
+  const tagProps = isButton
+    ? {
+        type: 'button' as const,
+        disabled: disabled || undefined,
+      }
+    : {}
 
   return (
     <Tag
       {...tagProps}
       {...rest}
+      aria-disabled={disabled || undefined}
       className={cx(
         'ak-command',
         variantClass('ak-command', tone),
         variantClass('ak-command', layout),
+        disabled && 'ak-command--disabled',
         className,
       )}
+      style={tokenStyle(tokens, style)}
       data-slot="ak-command"
       data-tone={tone}
       data-layout={layout}
       // 上游样式表用属性选择器驱动选中条，所以这里必须落到真属性上
       aria-pressed={pressed ? true : undefined}
+      tabIndex={isButton ? rest.tabIndex : (disabled ? -1 : (rest.tabIndex ?? (rest.onClick ? 0 : undefined)))}
+      onClick={(e: MouseEvent<HTMLElement>) => {
+        if (disabled) {
+          e.preventDefault()
+          return
+        }
+        playTactileSound('click', 0.16)
+        rest.onClick?.(e)
+      }}
+      onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
+        if (!isButton && rest.onClick && (e.key === 'Enter' || e.key === ' ')) {
+          if (disabled) {
+            e.preventDefault()
+            return
+          }
+          e.preventDefault()
+          playTactileSound('click', 0.16)
+          rest.onClick(e as unknown as MouseEvent<HTMLElement>)
+        }
+        rest.onKeyDown?.(e)
+      }}
     >
       {watermark ? <span className="ak-command__watermark">{watermark}</span> : null}
       {badge ? <span className="ak-command__badge">{badge}</span> : null}
       {current ? <span className="ak-command__current">{current}</span> : null}
+      {icon ? <span className="ak-command__icon">{icon}</span> : null}
       {label ? <span className="ak-command__label">{label}</span> : null}
       {meta ? <span className="ak-command__meta">{meta}</span> : null}
       {children}

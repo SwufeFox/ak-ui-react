@@ -2,6 +2,7 @@ import type { HTMLAttributes, ReactNode, ThHTMLAttributes } from 'react'
 import { cx } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 /**
  * 数据表。
@@ -44,12 +45,22 @@ export interface AkTableRow {
 }
 
 export interface AkTableProps extends Omit<HTMLAttributes<HTMLTableElement>, 'children'> {
+  /** 表格列配置列表。 */
   columns: AkTableColumn[]
+  /** 表格数据行列表。 */
   rows: AkTableRow[]
   /** 表尾汇总行（与 columns 对齐）。 */
   footer?: Record<string, ReactNode>
   /** 无数据时的占位文字。 */
   emptyLabel?: ReactNode
+  /** 点击行时的回调。开启后行具备悬停反馈与键盘 Enter/Space 点击。 */
+  onRowClick?: (row: AkTableRow, index: number) => void
+  /** 是否开启行悬停高亮，默认为 true。 */
+  hoverable?: boolean
+  /** 是否开启斑马纹交替底色，默认为 false。 */
+  striped?: boolean
+  /** 是否开启表头粘性吸顶，默认为 false。 */
+  stickyHeader?: boolean
   /** 外层是否套一层横滑容器（列多时建议开）。 */
   scrollable?: boolean
   /** 尺寸档：控制单元格内边距与整表字号。 */
@@ -58,11 +69,22 @@ export interface AkTableProps extends Omit<HTMLAttributes<HTMLTableElement>, 'ch
   tokens?: AkTokens
 }
 
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(
+    target.closest('button, input, select, textarea, a, [role="button"], [role="checkbox"], [role="switch"]'),
+  )
+}
+
 export function AkTable({
   columns,
   rows,
   footer,
   emptyLabel = 'No records',
+  onRowClick,
+  hoverable = true,
+  striped = false,
+  stickyHeader = false,
   scrollable = false,
   size = 'md',
   tokens,
@@ -74,7 +96,13 @@ export function AkTable({
     <table
       {...rest}
       {...sizeAttrs(size)}
-      className={cx('ak-table', className)}
+      className={cx(
+        'ak-table',
+        hoverable && 'ak-table--hoverable',
+        striped && 'ak-table--striped',
+        stickyHeader && 'ak-table--sticky-header',
+        className,
+      )}
       style={tokenStyle(tokens, style)}
       data-slot="ak-table"
     >
@@ -91,11 +119,15 @@ export function AkTable({
               thProps['aria-sort'] = col.sort
               // 只在真给了回调时才做成可点，避免「看起来能点其实没反应」的假 UI
               if (col.onSortChange) {
-                thProps.onClick = () => col.onSortChange?.(col.key)
+                thProps.onClick = () => {
+                  playTactileSound('toggle')
+                  col.onSortChange?.(col.key)
+                }
                 thProps.tabIndex = 0
                 thProps.onKeyDown = (e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
+                    playTactileSound('toggle')
                     col.onSortChange?.(col.key)
                   }
                 }
@@ -114,19 +146,48 @@ export function AkTable({
             </td>
           </tr>
         ) : (
-          rows.map((row) => (
-            <tr
-              key={row.id}
-              className={cx(row.selected && 'ak-table__row--selected', row.muted && 'ak-table__row--muted')}
-              aria-selected={row.selected || undefined}
-            >
-              {columns.map((col) => (
-                <td key={col.key} className={col.numeric ? 'ak-table__cell--num' : undefined}>
-                  {row.cells[col.key]}
-                </td>
-              ))}
-            </tr>
-          ))
+          rows.map((row, index) => {
+            const clickable = Boolean(onRowClick)
+            return (
+              <tr
+                key={row.id}
+                className={cx(
+                  row.selected && 'ak-table__row--selected',
+                  row.muted && 'ak-table__row--muted',
+                  clickable && 'ak-table__row--clickable',
+                )}
+                aria-selected={row.selected || undefined}
+                tabIndex={clickable ? 0 : undefined}
+                onClick={
+                  clickable
+                    ? (e) => {
+                        if (isInteractiveTarget(e.target)) return
+                        playTactileSound('click')
+                        onRowClick?.(row, index)
+                      }
+                    : undefined
+                }
+                onKeyDown={
+                  clickable
+                    ? (e) => {
+                        if (isInteractiveTarget(e.target)) return
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          playTactileSound('click')
+                          onRowClick?.(row, index)
+                        }
+                      }
+                    : undefined
+                }
+              >
+                {columns.map((col) => (
+                  <td key={col.key} className={col.numeric ? 'ak-table__cell--num' : undefined}>
+                    {row.cells[col.key]}
+                  </td>
+                ))}
+              </tr>
+            )
+          })
         )}
       </tbody>
 
@@ -145,5 +206,5 @@ export function AkTable({
   )
 
   if (!scrollable) return table
-  return <div className="ak-table-scroll">{table}</div>
+  return <div className={cx('ak-table-scroll', stickyHeader && 'ak-table-scroll--sticky')}>{table}</div>
 }

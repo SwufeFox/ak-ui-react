@@ -508,10 +508,17 @@ const en = {
   'ref.decor.terminalCn': '终端',
   'ref.decor.terminalEn': 'Terminal',
 
-  // 属性面板刻意保持「拉丁标签 + 中文名」双列，两语言下都同屏，所以这些 key 不随 locale 变。
   'common.potentialN': 'Potential {n}',
   'common.mastery3': 'Mastery 3',
   'common.medicLatin': 'Medic',
+
+  'app.sound.label': 'Tactile audio',
+  'app.sound.on': 'SOUND // ON',
+  'app.sound.off': 'SOUND // MUTE',
+  'ref.command.slotTitle': 'Operator slot tiles (elite / level / rarity aura)',
+  'ref.command.itemTitle': 'Depot materials (rarity glow / selected)',
+  'ref.command.screenTitle': 'Terminal screen modal (closeOnEsc / tokens / status)',
+  'ref.table.interactiveHint': 'Interactive row click enabled (Enter / Space)',
 } as const
 
 export type MessageKey = keyof typeof en
@@ -999,6 +1006,14 @@ const zhCN: Record<MessageKey, string> = {
   'common.potentialN': '潜能 {n}',
   'common.mastery3': '专精三',
   'common.medicLatin': 'Medic',
+
+  'app.sound.label': '触觉音效',
+  'app.sound.on': '触觉音效 // 开',
+  'app.sound.off': '触觉音效 // 静音',
+  'ref.command.slotTitle': '干员编队卡位（精英化 / 等级 / 高星光晕）',
+  'ref.command.itemTitle': '仓库材料方块（品质辉光 / 选中态）',
+  'ref.command.screenTitle': '全屏功能终端（Escape关闭 / 令牌覆盖 / 状态指示）',
+  'ref.table.interactiveHint': '行交互已启用：点击或使用 Enter / Space 选中行',
 }
 
 const dictionaries: Record<Locale, Record<MessageKey, string>> = { en, 'zh-CN': zhCN }

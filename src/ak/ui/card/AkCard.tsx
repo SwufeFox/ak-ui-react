@@ -1,7 +1,15 @@
-import type { ElementType, HTMLAttributes, ReactNode } from 'react'
+import type { ElementType, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
+
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return Boolean(
+    target.closest('button, input, select, textarea, a, [role="button"], [role="checkbox"], [role="switch"]'),
+  )
+}
 
 export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place'
 
@@ -12,6 +20,12 @@ export interface AkCardProps extends HTMLAttributes<HTMLElement> {
   variant?: AkCardVariant
   /** 尺寸档：控制内边距、子块间距与标题字号。 */
   size?: AkControlSize
+  /** 是否开启悬停提亮/浮起动效。 */
+  hoverable?: boolean
+  /** 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 */
+  interactive?: boolean
+  /** 是否处于选中状态。 */
+  selected?: boolean
   /** 逐实例令牌覆盖，例如 `{ '--ak-card-bg': '#171a1d' }`。 */
   tokens?: AkTokens
 }
@@ -20,19 +34,48 @@ export function AkCard({
   as: Tag = 'div',
   variant = 'default',
   size = 'md',
+  hoverable = false,
+  interactive = false,
+  selected = false,
   tokens,
   className,
   style,
   children,
   ...rest
 }: AkCardProps) {
+  const isButton = Tag === 'button'
   return (
     <Tag
       {...rest}
       {...sizeAttrs(size)}
       data-slot="ak-card"
       data-variant={variant}
-      className={cx('ak-card', variantClass('ak-card', variant), className)}
+      data-selected={selected || undefined}
+      aria-selected={selected || undefined}
+      role={!isButton && interactive && rest.onClick ? 'button' : rest.role}
+      tabIndex={interactive && rest.tabIndex === undefined ? 0 : rest.tabIndex}
+      onClick={(e: MouseEvent<HTMLElement>) => {
+        if (isInteractiveTarget(e.target)) return
+        if (interactive) playTactileSound('click', 0.15)
+        rest.onClick?.(e)
+      }}
+      onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
+        if (!isButton && interactive && rest.onClick && (e.key === 'Enter' || e.key === ' ')) {
+          if (isInteractiveTarget(e.target)) return
+          e.preventDefault()
+          playTactileSound('click', 0.15)
+          rest.onClick(e as unknown as MouseEvent<HTMLElement>)
+        }
+        rest.onKeyDown?.(e)
+      }}
+      className={cx(
+        'ak-card',
+        variantClass('ak-card', variant),
+        hoverable && 'ak-card--hoverable',
+        interactive && 'ak-card--interactive',
+        selected && 'ak-card--selected',
+        className,
+      )}
       style={tokenStyle(tokens, style)}
     >
       {children}

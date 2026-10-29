@@ -166,6 +166,9 @@ Extends `HTMLAttributes<HTMLElement>`.
 | `as` | `ElementType` | yes | Element to render as, e.g. 'div' \| 'article' \| 'section' \| 'li'. |
 | `variant` | `AkCardVariant` | yes | 外观档位：default / outline / stripe / place。 |
 | `size` | `AkControlSize` | yes | 尺寸档：控制内边距、子块间距与标题字号。 |
+| `hoverable` | `boolean` | yes | 是否开启悬停提亮/浮起动效。 |
+| `interactive` | `boolean` | yes | 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 |
+| `selected` | `boolean` | yes | 是否处于选中状态。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-card-bg': '#171a1d' }`。 |
 
 ## AkCardContent
@@ -199,13 +202,15 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 ## AkChoice
 
-Extends `InputHTMLAttributes<HTMLInputElement>`.
+Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `variant` | `AkChoiceVariant` | yes | 外观：勾选框 / 单选圆点 / 开关滑块。样式表里对应 `.ak-choice--radio` / `--switch`。 |
 | `children` | `ReactNode` | yes | 控件右侧的文字。 |
 | `name` | `string` | yes | 输入控件的 `name`（单选组需要）。 |
+| `size` | `AkControlSize` | yes | 尺寸档：图标尺寸、开关宽度、间距与字号。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-choice-fill': '#ff5e19' }`。 |
 
 ## AkCodeId
 
@@ -237,13 +242,16 @@ Extends `Omit<HTMLAttributes<HTMLElement>, 'children'>`.
 | --- | --- | --- | --- |
 | `label` | `ReactNode` | yes | 主标签（`.ak-command__label`，衬线大字）。 |
 | `meta` | `ReactNode` | yes | 副信息（`.ak-command__meta`，小号加字距，溢出省略号）。 |
+| `icon` | `ReactNode` | yes | 前置或装饰图标（`.ak-command__icon`）。 |
 | `badge` | `ReactNode` | yes | 右上角角标（`.ak-command__badge`，橙底深字）。 |
 | `current` | `ReactNode` | yes | 右上/中部当前值徽标（`.ak-command__current`）。 |
 | `watermark` | `ReactNode` | yes | 背景水印（`.ak-command__watermark`，旋转 -5°、透明度 .17）。 |
 | `tone` | `AkCommandTone` | yes | 色调。 |
 | `layout` | `AkCommandLayout` | yes | 布局。 |
 | `pressed` | `boolean` | yes | 选中态。**注意样式表认的是 `aria-pressed="true"` 而不是类** （`.ak-command[aria-pressed="true"]::before`）→ 底部的信号色条由它驱动。 |
+| `disabled` | `boolean` | yes | 是否禁用。 |
 | `as` | `ElementType` | yes | 渲染成什么标签。默认 `button`（样式表自带 cursor:pointer 与 focus-visible 态）。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-command-signal': '#f5bd38' }`。 |
 | `children` | `ReactNode` | yes | — |
 
 ## AkCommandGrid
@@ -555,6 +563,8 @@ Extends `Omit<ButtonHTMLAttributes<HTMLElement>, 'name'>`.
 | `count` | `ReactNode` | yes | 右上角数量角标。 |
 | `price` | `ReactNode` | yes | 价格（商店场景）。 |
 | `sold` | `boolean` | yes | 是否处于已售罄或置灰状态。 |
+| `selected` | `boolean` | yes | 是否处于选中状态。 |
+| `disabled` | `boolean` | yes | 是否禁用。 |
 | `size` | `AkControlSize` | yes | 尺寸档：图标边长、内距与文字字号一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 |
 
@@ -916,10 +926,13 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
 | `title` | `ReactNode` | no | 顶栏主标题。 |
 | `eyebrow` | `ReactNode` | yes | 标题上方的小标/分类代码。 |
 | `meta` | `ReactNode` | yes | 顶栏右侧的资源信息槽位（理智、龙门币、合成玉等读数）。 |
+| `status` | `ReactNode` | yes | 顶栏状态指示槽位（如信号状态、连接状态、运行指标）。 |
 | `backLabel` | `ReactNode` | yes | 返回按钮标签，默认为 'BACK'。 |
 | `onBack` | `() => void` | yes | 点击返回按钮的回调。若不传则不渲染返回按钮。 |
+| `closeOnEsc` | `boolean` | yes | 是否监听 Escape 键自动触发 onBack。默认为 false。 |
 | `watermark` | `ReactNode` | yes | 右下角装饰水印。 |
 | `leaving` | `boolean` | yes | 正在退场状态（播放离场动画）。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-screen-signal': '#ff5e19' }`。 |
 | `children` | `ReactNode` | yes | 屏幕内部主体内容。 |
 
 ## AkScrollArea
@@ -1015,12 +1028,17 @@ Extends `HTMLAttributes<HTMLElement>`.
 | `code` | `ReactNode` | yes | 职业代码大字水印（如 VNG / GRD / MED / CAS）。 |
 | `rarity` | `AkSlotRarity` | yes | 稀有度等级（1 到 6 档）。 |
 | `role` | `AkSlotRole` | yes | 职业类别，决定底部特征信号条颜色。 |
-| `meta` | `ReactNode` | yes | 副信息（如等级 LV.50、代号等）。 |
+| `meta` | `ReactNode` | yes | 副信息（如代号、阵营、职能等）。 |
 | `rarityLabel` | `ReactNode` | yes | 稀有度文字标识（左上角星级小字）。 |
+| `elite` | `0 \| 1 \| 2` | yes | 精英化阶段（0 / 1 / 2）。 |
+| `level` | `ReactNode` | yes | 等级读数（数字或 'LV.80'）。 |
 | `empty` | `boolean` | yes | 是否为空槽位（未编队/占位）。 |
+| `disabled` | `boolean` | yes | 是否禁用/不可派遣。 |
 | `reveal` | `boolean` | yes | 是否播放翻牌显现入场动画。 |
 | `index` | `number` | yes | 动画延迟阶梯索引（乘 80ms）。 |
 | `pressed` | `boolean` | yes | 是否为选中状态。 |
+| `size` | `AkControlSize` | yes | 尺寸档：槽位高度、字号与内边距一起缩。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-slot-signal': '#f5bd38' }`。 |
 
 ## AkSpec
 
@@ -1085,10 +1103,14 @@ Extends `Omit<HTMLAttributes<HTMLTableElement>, 'children'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `columns` | `AkTableColumn[]` | no | — |
-| `rows` | `AkTableRow[]` | no | — |
+| `columns` | `AkTableColumn[]` | no | 表格列配置列表。 |
+| `rows` | `AkTableRow[]` | no | 表格数据行列表。 |
 | `footer` | `Record<string, ReactNode>` | yes | 表尾汇总行（与 columns 对齐）。 |
 | `emptyLabel` | `ReactNode` | yes | 无数据时的占位文字。 |
+| `onRowClick` | `(row: AkTableRow, index: number) => void` | yes | 点击行时的回调。开启后行具备悬停反馈与键盘 Enter/Space 点击。 |
+| `hoverable` | `boolean` | yes | 是否开启行悬停高亮，默认为 true。 |
+| `striped` | `boolean` | yes | 是否开启斑马纹交替底色，默认为 false。 |
+| `stickyHeader` | `boolean` | yes | 是否开启表头粘性吸顶，默认为 false。 |
 | `scrollable` | `boolean` | yes | 外层是否套一层横滑容器（列多时建议开）。 |
 | `size` | `AkControlSize` | yes | 尺寸档：控制单元格内边距与整表字号。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-table-pad-y': '0.25rem' }`。 |

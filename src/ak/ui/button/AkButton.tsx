@@ -2,6 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 export type AkButtonVariant = 'default' | 'outline' | 'action' | 'advanced' | 'light'
 
@@ -42,6 +43,14 @@ export function AkButton({
       data-variant={variant}
       className={cx('ak-button', variantClass('ak-button', variant), block && 'ak-button--block', className)}
       style={tokenStyle(tokens, style)}
+      onClick={(e) => {
+        if (rest.disabled) {
+          e.preventDefault()
+          return
+        }
+        playTactileSound('click', 0.15)
+        rest.onClick?.(e)
+      }}
     >
       {icon ? (
         <span className="ak-button__icon" data-icon="inline-start">

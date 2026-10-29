@@ -104,10 +104,35 @@
     font-size: clamp(0.8rem, 1.1cqw, 1rem);
     font-weight: 900;
     clip-path: polygon(0 0, 100% 0, calc(100% - 0.9rem) 100%, 0 100%);
-    transition: background-color var(--ak-motion-fast, 120ms) ease;
+    transition:
+      background-color var(--ak-motion-fast, 120ms) ease,
+      transform var(--ak-motion-fast, 120ms) ease;
 
     &:hover {
       background: rgba(0, 0, 0, 0.34);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.52);
+      transform: translateY(1px);
+    }
+  }
+
+  & &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: $font-monospace;
+    font-size: clamp(0.7rem, 0.95cqw, 0.85rem);
+    font-weight: 700;
+
+    &:first-of-type:not(:last-child) {
+      margin-left: auto;
+    }
+
+    &:last-child {
+      margin-left: auto;
+      padding-right: var(--ak-screen-padding);
     }
   }
 
@@ -271,6 +296,11 @@
 
     &:hover {
       background: rgba(0, 0, 0, 0.14);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.22);
+      transform: translateY(1px);
     }
   }
 }

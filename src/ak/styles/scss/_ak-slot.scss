@@ -1,8 +1,18 @@
 @use "variables" as *;
+@use "ak-tuning" as tuning;
 
 // Operator slot: a role signal along the bottom, a rarity stripe on top and a
 // faint role code watermark. Works as static content or as a button.
 .ak-slot {
+  @include tuning.tuning-steps(
+    (
+      ak-slot-h: (clamp(4.25rem, 10cqh, 6rem), clamp(5.5rem, 13cqh, 8rem), clamp(6.75rem, 16cqh, 9.5rem)),
+      ak-slot-pad: (0.45rem 0.5rem 0.55rem, 0.6rem 0.65rem 0.7rem, 0.75rem 0.8rem 0.9rem),
+      ak-slot-name-fs: (clamp(0.75rem, 1.1cqw, 0.95rem), clamp(0.85rem, 1.3cqw, 1.1rem), clamp(1rem, 1.6cqw, 1.25rem)),
+      ak-slot-code-fs: (clamp(1.1rem, 2cqw, 1.6rem), clamp(1.25rem, 2.4cqw, 2rem), clamp(1.5rem, 2.8cqw, 2.4rem)),
+    )
+  );
+
   --ak-slot-signal: var(--ak-signal-info, #4aabea);
   --ak-slot-rarity: var(--ak-rarity-3, #4aabea);
 
@@ -10,8 +20,8 @@
   display: grid;
   box-sizing: border-box;
   min-width: 0;
-  min-height: clamp(5.5rem, 13cqh, 8rem);
-  padding: 0.6rem 0.65rem 0.7rem;
+  min-height: var(--ak-slot-h);
+  padding: var(--ak-slot-pad);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-bottom: 0.2rem solid var(--ak-slot-signal);
@@ -40,25 +50,71 @@
     top: 0.3rem;
     right: 0.45rem;
     color: rgba(255, 255, 255, 0.1);
-    font-size: clamp(1.25rem, 2.4cqw, 2rem);
+    font-size: var(--ak-slot-code-fs);
     font-weight: 900;
     letter-spacing: -0.06em;
     line-height: 1;
+    pointer-events: none;
+  }
+
+  & &__header {
+    position: absolute;
+    top: 0.45rem;
+    left: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
   & &__rarity {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.6rem;
     color: var(--ak-slot-rarity);
     font-size: 0.6rem;
     letter-spacing: 0.08em;
     line-height: 1;
   }
 
+  & &__elite {
+    display: inline-block;
+    padding: 0.05rem 0.25rem;
+    font-family: $font-monospace;
+    font-size: 0.58rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+
+    &[data-elite="1"] {
+      color: #92d8f8;
+      border-color: rgba(146, 216, 248, 0.55);
+      background: color-mix(in srgb, #92d8f8 15%, transparent);
+      box-shadow: 0 0 5px rgba(146, 216, 248, 0.25);
+    }
+
+    &[data-elite="2"] {
+      color: #ffe066;
+      border-color: rgba(255, 224, 102, 0.6);
+      background: color-mix(in srgb, #ffe066 18%, transparent);
+      box-shadow: 0 0 6px rgba(255, 224, 102, 0.35);
+    }
+  }
+
+  & &__level {
+    position: absolute;
+    top: 0.48rem;
+    right: 0.6rem;
+    z-index: 1;
+    font-family: $font-monospace;
+    font-size: 0.625rem;
+    font-weight: 800;
+    color: rgba(247, 247, 244, 0.75);
+    letter-spacing: 0.06em;
+  }
+
   & &__name {
     overflow: hidden;
-    font-size: clamp(0.85rem, 1.3cqw, 1.1rem);
+    font-size: var(--ak-slot-name-fs);
     font-weight: 900;
     line-height: 1.2;
     text-overflow: ellipsis;
@@ -88,20 +144,43 @@
     animation-delay: calc(var(--ak-slot-index, 0) * 80ms);
   }
 
-  // Interactive slots use the same face as buttons.
-  @at-root button#{&} {
+  // Interactive slots (button, role="button", or with .ak-slot--interactive)
+  @at-root :is(button#{&}, [role="button"]#{&}, #{&}--interactive) {
     cursor: pointer;
     transition:
       transform var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease),
-      box-shadow var(--ak-motion-base, 200ms) ease;
+      box-shadow var(--ak-motion-base, 200ms) ease,
+      border-color var(--ak-motion-fast, 120ms) ease;
 
-    &:hover {
+    &:hover:not(:disabled):not(.ak-slot--disabled) {
       transform: translateY(-2px);
+      box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.4),
+        0 0 12px color-mix(in srgb, var(--ak-slot-rarity) 35%, transparent);
     }
 
-    &:active {
+    // 高稀有度（5星/6星）干员槽位全息光晕
+    &[data-rarity="5"]:hover:not(:disabled):not(.ak-slot--disabled),
+    &[data-rarity="6"]:hover:not(:disabled):not(.ak-slot--disabled) {
+      box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.45),
+        0 0 18px color-mix(in srgb, var(--ak-slot-rarity) 60%, transparent),
+        inset 0 0 10px color-mix(in srgb, var(--ak-slot-rarity) 22%, transparent);
+      border-color: color-mix(in srgb, var(--ak-slot-rarity) 65%, rgba(255, 255, 255, 0.35));
+    }
+
+    &:active:not(:disabled):not(.ak-slot--disabled) {
       transform: translateY(0) scale(0.98);
     }
+  }
+
+  &--disabled,
+  &[aria-disabled="true"],
+  &:disabled {
+    opacity: 0.42;
+    filter: grayscale(0.5);
+    cursor: not-allowed !important;
+    pointer-events: none;
   }
 
   &[aria-pressed="true"] {

@@ -67,11 +67,17 @@
     cursor: pointer;
     transition:
       color var(--ak-motion-fast, 120ms) ease,
-      background-color var(--ak-motion-fast, 120ms) ease;
+      background-color var(--ak-motion-fast, 120ms) ease,
+      transform var(--ak-motion-fast, 120ms) ease;
 
     &:hover:not(:disabled) {
       // 悬停只提亮一档，不换色系 —— 从同一个下沉面派生，主题自动跟随
       --ak-tag-surface: color-mix(in srgb, var(--ak-surface-sunken-2) 70%, var(--ak-surface-raised));
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px) scale(0.96);
+      --ak-tag-surface: color-mix(in srgb, var(--ak-tag-signal) 30%, var(--ak-surface-sunken-2));
     }
 
     &:disabled {

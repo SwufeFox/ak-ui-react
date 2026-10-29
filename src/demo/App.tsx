@@ -108,6 +108,8 @@ import {
   AkTrust,
   AkVignette,
   AkWatermark,
+  useTactileSound,
+  playTactileSound,
 } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
@@ -277,7 +279,7 @@ function applyOverrides(tree: ReactNode, overrides: Record<string, unknown>): Re
   })
 }
 
-/** Keep incomplete numeric input (such as `1.`) intact until blur. */
+/** Keep incomplete numeric input (such as `1.`) intact until blur, with keyboard ArrowUp/ArrowDown stepping support. */
 function TuneNumberField({ value, onChange }: { value: number; onChange: (value: number) => void }) {
   const [draft, setDraft] = useState<string | null>(null)
   return <AkInput
@@ -289,6 +291,21 @@ function TuneNumberField({ value, onChange }: { value: number; onChange: (value:
       const text = event.target.value
       setDraft(text)
       if (text.trim() && Number.isFinite(Number(text))) onChange(Number(text))
+    }}
+    onKeyDown={(event) => {
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        const delta = event.shiftKey ? 10 : 1
+        const next = Number((value + delta).toFixed(4))
+        onChange(next)
+        setDraft(String(next))
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        const delta = event.shiftKey ? 10 : 1
+        const next = Number((value - delta).toFixed(4))
+        onChange(next)
+        setDraft(String(next))
+      }
     }}
     onBlur={() => setDraft(null)}
   />
@@ -426,7 +443,7 @@ function Block({
                   return nextOverrides
                 })
                 return typeof value === 'boolean'
-                  ? <AkChoice key={prop} checked={Boolean(current)} onChange={(event) => change(event.target.checked)}>{prop}</AkChoice>
+                  ? <AkChoice key={prop} size="sm" checked={Boolean(current)} onChange={(event) => change(event.target.checked)}>{prop}</AkChoice>
                   : <AkFieldLabel key={prop}>{prop}{prop === 'size' && ['sm', 'md', 'lg'].includes(String(value))
                     ? <AkSelect size="sm" value={String(current)} onChange={(event) => change(event.target.value)}>{['sm', 'md', 'lg'].map((size) => <option key={size}>{size}</option>)}</AkSelect>
                     : typeof value === 'number'
@@ -543,16 +560,40 @@ function SiteShellDemo() {
   )
 }
 
-const tabSpec = [
+interface TabSpecItem {
+  value: string
+  label: MessageKey
+  title: MessageKey
+  description: MessageKey
+  icon?: string
+  badge?: string
+}
+
+const tabSpec: readonly TabSpecItem[] = [
   {
     value: 'overview',
     label: 'ref.navigation.overview',
     title: 'ref.navigation.overview',
     description: 'ref.navigation.overviewDesc',
+    icon: '◈',
+    badge: 'NEW',
   },
-  { value: 'skills', label: 'ref.navigation.skills', title: 'ref.navigation.skills', description: 'ref.navigation.skillsDesc' },
-  { value: 'archive', label: 'ref.navigation.archive', title: 'ref.navigation.archive', description: 'ref.navigation.archiveDesc' },
-] as const satisfies readonly { value: string; label: MessageKey; title: MessageKey; description: MessageKey }[]
+  {
+    value: 'skills',
+    label: 'ref.navigation.skills',
+    title: 'ref.navigation.skills',
+    description: 'ref.navigation.skillsDesc',
+    icon: '⚡',
+    badge: 'M3',
+  },
+  {
+    value: 'archive',
+    label: 'ref.navigation.archive',
+    title: 'ref.navigation.archive',
+    description: 'ref.navigation.archiveDesc',
+    icon: '▤',
+  },
+]
 
 function ReferenceView() {
   const { t } = useI18n()
@@ -564,6 +605,11 @@ function ReferenceView() {
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
+  const [selectedTableRow, setSelectedTableRow] = useState('r1')
+  const [tableStriped, setTableStriped] = useState(true)
+  const [tableSticky, setTableSticky] = useState(false)
+  const [selectedItem, setSelectedItem] = useState('D32')
+  const [selectedSlot, setSelectedSlot] = useState('silverash')
   // 「外观展台」那排按钮的点击回显：让纯展示按钮也有反馈
   const [buttonHit, setButtonHit] = useState('')
   const [buttonHits, setButtonHits] = useState(0)
@@ -631,9 +677,10 @@ function ReferenceView() {
   }, [])
 
   const segmentOptions = [
-    { label: t('common.all'), value: 'all' },
-    { label: t('ref.inputs.ground'), value: 'ground' },
-    { label: t('ref.inputs.air'), value: 'air' },
+    { label: t('common.all'), value: 'all', icon: <span>◈</span>, badge: '12' },
+    { label: t('ref.inputs.ground'), value: 'ground', icon: <span>▼</span>, badge: '8' },
+    { label: t('ref.inputs.air'), value: 'air', icon: <span>▲</span>, badge: '4' },
+    { label: 'CLASSIFIED', value: 'classified', icon: <span>⚿</span>, disabled: true },
   ]
   const items: GalleryItem[] = galleryItems(t)
   // 画廊素材展示项
@@ -777,7 +824,7 @@ function ReferenceView() {
 
       <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')} api={DOC_REGISTRY['components-3']?.api}>
         <div className="demo-grid">
-          <AkCard as="article">
+          <AkCard as="article" hoverable>
             <AkCardHeader>
               <AkCardTitle>{t('card.default.title')}</AkCardTitle>
               <AkCardDescription>{t('card.default.desc')}</AkCardDescription>
@@ -790,13 +837,25 @@ function ReferenceView() {
               </AkButton>
             </AkCardFooter>
           </AkCard>
-          <AkCard as="article" variant="outline">
+          <AkCard
+            as="article"
+            variant="outline"
+            hoverable
+            interactive
+            selected={groupPick === 'A'}
+            onClick={() => {
+              playTactileSound('click')
+              setGroupPick('A')
+            }}
+          >
             <AkCardHeader>
               <AkCardTitle>{t('card.outline.title')}</AkCardTitle>
-              <AkCardDescription>{t('card.outline.desc')}</AkCardDescription>
+              <AkCardDescription>interactive + selected</AkCardDescription>
             </AkCardHeader>
             {/* 这是给开发者看的 API 字面量，不是界面文案，所以不进字典。 */}
-            <AkCardContent className="ak-text">variant=&quot;outline&quot;</AkCardContent>
+            <AkCardContent className="ak-text">
+              {groupPick === 'A' ? 'SELECTED // 选中' : 'CLICK TO SELECT // 点击选中'}
+            </AkCardContent>
           </AkCard>
           <AkCard as="article" variant="stripe">
             <AkCardHeader>
@@ -948,13 +1007,26 @@ function ReferenceView() {
       <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} api={DOC_REGISTRY['components-6']?.api}>
         <AkTabs
           ariaLabel={t('ref.navigation.aria')}
-          items={tabSpec.map((item, index) => ({
-            value: item.value,
-            label: t(item.label),
-            eyebrow: t('ref.navigation.eyebrowText', { n: String(index + 1).padStart(3, '0') }),
-            title: t(item.title),
-            description: t(item.description),
-          }))}
+          items={[
+            ...tabSpec.map((item, index) => ({
+              value: item.value,
+              label: t(item.label),
+              icon: item.icon ? <span>{item.icon}</span> : undefined,
+              badge: item.badge,
+              eyebrow: t('ref.navigation.eyebrowText', { n: String(index + 1).padStart(3, '0') }),
+              title: t(item.title),
+              description: t(item.description),
+            })),
+            {
+              value: 'restricted',
+              label: 'RESTRICTED',
+              icon: <span>⚿</span>,
+              disabled: true,
+              title: 'RESTRICTED SECTOR',
+              eyebrow: '004 // CLASSIFIED',
+              description: 'Access denied: Level 4 credentials required.',
+            },
+          ]}
           value={tab}
           onValueChange={(v) => setTab(v ?? 'overview')}
           renderPanel={(item) => <p className="ak-text">{t('ref.navigation.panelBody', { value: String(item.title) })}</p>}
@@ -1456,6 +1528,15 @@ function ReferenceView() {
           </AkChoice>
         </div>
 
+        <div className="demo-row" style={{ alignItems: 'center' }}>
+          <span className="demo-note">{t('ref.inputs.sizeTiers')}</span>
+          {(['sm', 'md', 'lg'] as const).map((s) => (
+            <AkChoice key={s} size={s} variant="switch" defaultChecked>
+              {s}
+            </AkChoice>
+          ))}
+        </div>
+
         {/* 实时回显：证明每个控件都真的在受控 */}
         <p className="demo-note" aria-live="polite">
           {t('ref.form.liveEcho', {
@@ -1594,19 +1675,45 @@ function ReferenceView() {
               ]}
             />
 
+            <div className="demo-row" style={{ alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <AkChoice
+                variant="switch"
+                checked={tableStriped}
+                onChange={(e) => setTableStriped(e.target.checked)}
+              >
+                STRIPED // 斑马纹
+              </AkChoice>
+              <AkChoice
+                variant="switch"
+                checked={tableSticky}
+                onChange={(e) => setTableSticky(e.target.checked)}
+              >
+                STICKY HEADER // 吸顶表头
+              </AkChoice>
+              <span className="demo-note">
+                {t('ref.table.interactiveHint')} [SELECTED: {selectedTableRow}]
+              </span>
+            </div>
+
             <AkTable
               scrollable
+              striped={tableStriped}
+              stickyHeader={tableSticky}
+              hoverable
+              onRowClick={(row) => setSelectedTableRow(row.id)}
               columns={[
-                { key: 'name', header: t('common.colName') },
-                { key: 'atk', header: t('common.colAtk'), numeric: true, sort: 'descending' },
-                { key: 'def', header: t('common.colDef'), numeric: true },
+                { key: 'name', header: t('common.colName'), sort: 'none', onSortChange: () => {} },
+                { key: 'atk', header: t('common.colAtk'), numeric: true, sort: 'descending', onSortChange: () => {} },
+                { key: 'def', header: t('common.colDef'), numeric: true, sort: 'none', onSortChange: () => {} },
+                { key: 'role', header: 'ROLE' },
               ]}
               rows={[
-                { id: 'r1', cells: { name: 'Amiya', atk: '512', def: '128' }, selected: true },
-                { id: 'r2', cells: { name: 'Kaltsit', atk: '480', def: '210' } },
-                { id: 'r3', cells: { name: 'Ifrit', atk: '620', def: '90' } },
+                { id: 'r1', cells: { name: 'Amiya', atk: '512', def: '128', role: 'CASTER' }, selected: selectedTableRow === 'r1' },
+                { id: 'r2', cells: { name: 'Kaltsit', atk: '480', def: '210', role: 'MEDIC' }, selected: selectedTableRow === 'r2' },
+                { id: 'r3', cells: { name: 'Ifrit', atk: '620', def: '90', role: 'CASTER' }, selected: selectedTableRow === 'r3' },
+                { id: 'r4', cells: { name: 'Saria', atk: '485', def: '590', role: 'DEFENDER' }, selected: selectedTableRow === 'r4' },
               ]}
-              footer={{ name: t('common.total'), atk: '1612', def: '428' }}
+              footer={{ name: t('common.total'), atk: '2097', def: '1018', role: '4 UNITS' }}
             />
 
             <div className="demo-row" style={{ alignItems: 'center' }}>
@@ -1725,6 +1832,7 @@ function ReferenceView() {
               meta="STORY / CHAPTER 01"
               tone="paper"
               layout="wide"
+              icon={<span>✦</span>}
               pressed={selectedCommand === 'operation'}
               onClick={() => setSelectedCommand('operation')}
               style={{ minHeight: '7.5rem' }}
@@ -1737,39 +1845,152 @@ function ReferenceView() {
               onClick={() => setSelectedCommand('archive')}
               style={{ minHeight: '7.5rem' }}
             />
+            <AkCommand
+              label="STANDBY"
+              meta="OFFLINE // 待机"
+              disabled
+              tone="dark"
+              style={{ minHeight: '7.5rem' }}
+            />
           </AkCommandGrid>
 
           {/* 干员槽位卡 (AkSlot) */}
           <div>
-            <AkOverline>OPERATOR SLOTS // 干员卡位</AkOverline>
+            <AkOverline>{t('ref.command.slotTitle')}</AkOverline>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(8.5rem, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <AkSlot name="SILVERASH" role="guard" rarity={6} code="GRD" meta="LV.90 // S3" reveal index={0} />
-              <AkSlot name="AMIYA" role="caster" rarity={5} code="CAS" meta="LV.80 // S2" reveal index={1} />
-              <AkSlot name="SARIA" role="defender" rarity={6} code="DEF" meta="LV.90 // S1" reveal index={2} pressed />
-              <AkSlot name="EYJA" role="caster" rarity={6} code="CAS" meta="LV.90 // S3" reveal index={3} />
-              <AkSlot empty><span>+ ASSIGN</span></AkSlot>
+              <AkSlot
+                name="SILVERASH"
+                role="guard"
+                rarity={6}
+                rarityLabel="★★★★★★"
+                code="GRD"
+                meta="TSS // 真银斩"
+                elite={2}
+                level={90}
+                reveal
+                index={0}
+                pressed={selectedSlot === 'silverash'}
+                onClick={() => setSelectedSlot('silverash')}
+              />
+              <AkSlot
+                name="AMIYA"
+                role="caster"
+                rarity={5}
+                rarityLabel="★★★★★"
+                code="CAS"
+                meta="CHIMERA // 奇美拉"
+                elite={1}
+                level={80}
+                reveal
+                index={1}
+                pressed={selectedSlot === 'amiya'}
+                onClick={() => setSelectedSlot('amiya')}
+              />
+              <AkSlot
+                name="SARIA"
+                role="defender"
+                rarity={6}
+                rarityLabel="★★★★★★"
+                code="DEF"
+                meta="CALC // 钙质化"
+                elite={2}
+                level="LV.90"
+                reveal
+                index={2}
+                pressed={selectedSlot === 'saria'}
+                onClick={() => setSelectedSlot('saria')}
+              />
+              <AkSlot
+                name="EYJA"
+                role="caster"
+                rarity={6}
+                rarityLabel="★★★★★★"
+                code="CAS"
+                meta="VOLCANO // 点燃"
+                elite={2}
+                level={90}
+                reveal
+                index={3}
+                pressed={selectedSlot === 'eyja'}
+                onClick={() => setSelectedSlot('eyja')}
+              />
+              <AkSlot
+                name="PURNIX"
+                role="specialist"
+                rarity={4}
+                rarityLabel="★★★★"
+                code="SPC"
+                meta="REST // 休息中"
+                elite={0}
+                level={45}
+                disabled
+              />
+              <AkSlot empty onClick={() => setSelectedSlot('empty')}>
+                <span>+ ASSIGN</span>
+              </AkSlot>
             </div>
           </div>
 
           {/* 材料与道具方块 (AkItem) */}
           <div>
-            <AkOverline>DEPOT MATERIAL TILES // 材料与道具方块</AkOverline>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(6rem, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <AkItem tier={5} name="D32钢" count="x4" />
-              <AkItem tier={5} name="双极纳米片" count="x6" />
-              <AkItem tier={4} name="改量装置" count="x12" />
-              <AkItem tier={3} name="锰矿" count="x28" />
-              <AkItem tier={2} name="糖" count="x84" />
-              <AkItem tier={4} name="龙门币" price="5,000" sold />
+            <AkOverline>{t('ref.command.itemTitle')}</AkOverline>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(6.5rem, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <AkItem
+                tier={5}
+                name="D32钢"
+                count="x4"
+                selected={selectedItem === 'D32'}
+                onClick={() => setSelectedItem('D32')}
+              />
+              <AkItem
+                tier={5}
+                name="双极纳米片"
+                count="x6"
+                selected={selectedItem === 'nano'}
+                onClick={() => setSelectedItem('nano')}
+              />
+              <AkItem
+                tier={5}
+                name="聚合剂"
+                count="x3"
+                selected={selectedItem === 'poly'}
+                onClick={() => setSelectedItem('poly')}
+              />
+              <AkItem
+                tier={4}
+                name="改量装置"
+                count="x12"
+                selected={selectedItem === 'device'}
+                onClick={() => setSelectedItem('device')}
+              />
+              <AkItem
+                tier={3}
+                name="锰矿"
+                count="x28"
+                selected={selectedItem === 'ore'}
+                onClick={() => setSelectedItem('ore')}
+              />
+              <AkItem
+                tier={2}
+                name="糖"
+                count="x84"
+                disabled
+              />
+              <AkItem
+                tier={4}
+                name="龙门币"
+                price="5,000"
+                sold
+              />
             </div>
           </div>
 
           {/* 终端大屏交互 (AkScreen) */}
           <div>
-            <AkOverline>FUNCTION SCREEN // 终端大屏模态</AkOverline>
+            <AkOverline>{t('ref.command.screenTitle')}</AkOverline>
             <div style={{ marginTop: '0.5rem' }}>
               <AkButton variant="action" icon={<span>⤢</span>} onClick={() => setScreenOpen(true)}>
-                OPEN TERMINAL SCREEN // 打开终端功能大屏
+                OPEN TERMINAL SCREEN (Esc to close) // 打开终端功能大屏
               </AkButton>
             </div>
 
@@ -1780,18 +2001,22 @@ function ReferenceView() {
                   title="DEPOT // 仓库物资"
                   eyebrow="MANAGEMENT // 01"
                   watermark="DEPOT"
+                  closeOnEsc
+                  status={<AkStatus size="sm" variant="default" label="ONLINE" detail="SYNC // 100%" />}
+                  tokens={{ '--ak-screen-signal': '#ff5e19' }}
                   meta={<AkCounter value="42,850" prefixIcon={<span>◆</span>} />}
                   onBack={() => setScreenOpen(false)}
                   backLabel="RETURN"
                 >
                   <div style={{ display: 'grid', gap: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <AkOverline>CATEGORY // ELITE MATERIALS</AkOverline>
+                      <AkOverline>CATEGORY // ELITE MATERIALS (PRESS ESC OR RETURN)</AkOverline>
                       <AkButton variant="outline" size="sm" onClick={() => setScreenOpen(false)}>
                         CLOSE ⎋
                       </AkButton>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(7rem, 1fr))', gap: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(7.5rem, 1fr))', gap: '0.75rem' }}>
+                      <AkItem tier={6} name="源石原石" count="x18" selected />
                       <AkItem tier={5} name="D32钢" count="x4" />
                       <AkItem tier={5} name="双极纳米片" count="x6" />
                       <AkItem tier={5} name="聚合剂" count="x3" />
@@ -1831,6 +2056,7 @@ function ReferenceView() {
 
 export function App() {
   const { locale, setLocale, t } = useI18n()
+  const { enabled: soundEnabled, toggle: toggleSound } = useTactileSound()
   const [theme, setTheme] = useState<Theme>('terminal')
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
@@ -1930,6 +2156,16 @@ export function App() {
             value={density}
             onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
           />
+
+          <AkButton
+            size="sm"
+            variant={soundEnabled ? 'action' : 'outline'}
+            onClick={toggleSound}
+            icon={<span>{soundEnabled ? '🔊' : '🔇'}</span>}
+            aria-label={t('app.sound.label')}
+          >
+            {soundEnabled ? t('app.sound.on') : t('app.sound.off')}
+          </AkButton>
 
           <AkButton
             size="sm"

@@ -31,7 +31,8 @@
     z-index: 1;
     transition:
       background-color var(--ak-motion-fast, 120ms) ease,
-      box-shadow var(--ak-motion-fast, 120ms) ease;
+      box-shadow var(--ak-motion-fast, 120ms) ease,
+      transform var(--ak-motion-fast, 120ms) ease;
 
     .ak-icon {
       color: white;
@@ -42,6 +43,11 @@
     &:hover {
       background-color: rgba(black, 0.85);
       box-shadow: 5px 3px 0 rgba(black, 0.55);
+    }
+
+    &:active {
+      transform: translateY(1px) scale(0.95);
+      box-shadow: 2px 1px 0 rgba(black, 0.6);
     }
 
     @include active-darken;

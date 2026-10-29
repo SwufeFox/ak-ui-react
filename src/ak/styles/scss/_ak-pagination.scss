@@ -42,15 +42,25 @@
     outline: none;
     color: inherit;
     font: inherit;
-    transition: background-color var(--ak-motion-fast, 120ms) ease, opacity var(--ak-motion-fast, 120ms) ease;
+    transition:
+      background-color var(--ak-motion-fast, 120ms) ease,
+      transform var(--ak-motion-fast, 120ms) ease,
+      box-shadow var(--ak-motion-fast, 120ms) ease,
+      opacity var(--ak-motion-fast, 120ms) ease;
 
     .ak-icon {
       width: calc(var(--ak-pagination-arrow-w) / 2);
       height: calc(var(--ak-pagination-arrow-w) / 2);
+      pointer-events: none;
     }
 
     &:hover:not(:disabled) {
       background-color: var(--ak-pagination-arrow-bg-hover, #444);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px) scale(0.95);
+      box-shadow: inset 0 2px 5px rgba(black, 0.5), 0 2px 4px rgba(black, 0.3);
     }
 
     &:focus-visible {

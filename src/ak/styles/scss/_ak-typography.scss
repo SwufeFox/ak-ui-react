@@ -16,3 +16,10 @@
     letter-spacing: var(--ak-type-tight, -0.04em);
   }
 }
+
+// 正文里的 pre 默认折行并断词（同步自 prts-design 最新更新），避免在窄屏或移动端横向溢出撑宽视口；
+// 专属代码块（带 .ak-code, .ak-code-box, .demo-code-box 或内部含有 code 节点）依然保留横向滚动。
+pre:where(:not(.ak-code, .ak-code-box, .demo-code-box, :has(code))) {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}

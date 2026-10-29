@@ -71,7 +71,8 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: #596167;
+    border-color: #697177;
+    background-color: color-mix(in srgb, var(--ak-surface-sunken) 88%, var(--ak-surface-raised, #2c3238));
   }
 
   &:focus-visible {
@@ -98,6 +99,7 @@
 }
 
 .ak-select {
+  cursor: pointer;
   padding-right: var(--ak-select-arrow-x, 3.25rem);
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, var(--ak-text-primary, #f3f4ef) 50%),
@@ -114,20 +116,53 @@
   --ak-choice-fill: #{$blue};
   --ak-choice-signal: var(--ak-field-signal, #{$text-color});
 
+  @include tuning.tuning-steps(
+    (
+      ak-choice-size: (1.25rem, 1.5rem, 1.75rem),
+      ak-choice-switch-w: (2.3rem, 2.8rem, 3.4rem),
+      ak-choice-gap: (0.5rem, 0.7rem, 0.9rem),
+      ak-choice-fs: (0.82rem, 0.92rem, 1.05rem),
+    )
+  );
+
   display: inline-grid;
   align-items: center;
   color: var(--ak-text-primary, #f8f8f5);
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
   font-family: $font-sans-serif;
-  grid-template-columns: 1.5rem minmax(0, 1fr);
-  gap: 0.7rem;
+  grid-template-columns: var(--ak-choice-size) minmax(0, 1fr);
+  gap: var(--ak-choice-gap);
+
+  &:hover:not(:has(:disabled)):not(.ak-choice--disabled):not([data-disabled="true"]) {
+    .ak-choice__input {
+      border-color: var(--ak-choice-signal);
+    }
+
+    .ak-choice__label {
+      color: var(--ak-text-primary);
+    }
+  }
+
+  &:active:not(:has(:disabled)):not(.ak-choice--disabled):not([data-disabled="true"]) .ak-choice__input {
+    transform: scale(0.92);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  &:has(:disabled),
+  &--disabled,
+  &[data-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 
   &__input {
     position: relative;
     display: inline-grid;
     box-sizing: border-box;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: var(--ak-choice-size);
+    height: var(--ak-choice-size);
     margin: 0;
     border: 2px solid var(--ak-border-strong, #697177);
     border-radius: 0;
@@ -135,11 +170,15 @@
     place-items: center;
     background: var(--ak-surface-sunken-2, #1a1b1d);
     cursor: inherit;
-    transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+    transition:
+      border-color 140ms ease,
+      background-color 140ms ease,
+      box-shadow 140ms ease,
+      transform 100ms ease;
 
     &::after {
-      width: 0.65rem;
-      height: 0.36rem;
+      width: calc(var(--ak-choice-size) * 0.43);
+      height: calc(var(--ak-choice-size) * 0.24);
       border-bottom: 3px solid #111315;
       border-left: 3px solid #111315;
       content: "";
@@ -175,16 +214,21 @@
   }
 
   &__label {
-    font-size: 0.92rem;
+    font-size: var(--ak-choice-fs);
     line-height: 1.45;
+    transition: color 140ms ease;
+  }
+
+  &--radio {
+    grid-template-columns: var(--ak-choice-size) minmax(0, 1fr);
   }
 
   &--radio &__input {
     border-radius: 50%;
 
     &::after {
-      width: 0.62rem;
-      height: 0.62rem;
+      width: calc(var(--ak-choice-size) * 0.41);
+      height: calc(var(--ak-choice-size) * 0.41);
       border: 0;
       border-radius: 50%;
       background: #111315;
@@ -197,25 +241,33 @@
   }
 
   &--switch {
-    grid-template-columns: 2.8rem minmax(0, 1fr);
+    grid-template-columns: var(--ak-choice-switch-w) minmax(0, 1fr);
+  }
+
+  &--switch:active:not(:has(:disabled)) .ak-choice__input {
+    transform: scale(0.96);
+
+    &::after {
+      width: calc(var(--ak-choice-size) * 0.72);
+    }
   }
 
   &--switch &__input {
-    width: 2.8rem;
+    width: var(--ak-choice-switch-w);
     border-radius: 2rem;
     background: #b9bfbc;
 
     &::after {
       position: absolute;
       left: 0.22rem;
-      width: 0.9rem;
-      height: 0.9rem;
+      width: calc(var(--ak-choice-size) * 0.6);
+      height: calc(var(--ak-choice-size) * 0.6);
       border: 0;
       border-radius: 50%;
       background: #fff;
       opacity: 1;
       transform: none;
-      transition: left 140ms ease, background-color 140ms ease;
+      transition: left 140ms ease, width 100ms ease, background-color 140ms ease;
     }
 
     &:checked {
@@ -223,7 +275,7 @@
     }
 
     &:checked::after {
-      left: 1.42rem;
+      left: calc(var(--ak-choice-switch-w) - var(--ak-choice-size) * 0.6 - 0.22rem);
       background: #fff;
       transform: none;
     }
@@ -286,6 +338,9 @@
 
   & &__max,
   & &__min {
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
     background-color: var(--ak-surface-sunken, #23272b);
     border: 1px solid var(--ak-border, #4a4c4f);
     color: var(--ak-text-secondary, #9da5aa);
@@ -299,20 +354,26 @@
     transition:
       background-color var(--ak-motion-fast) ease,
       color var(--ak-motion-fast) ease,
+      box-shadow var(--ak-motion-fast) ease,
       transform var(--ak-motion-fast) ease;
 
     &:hover:not(:disabled) {
       background-color: var(--ak-border-strong, #4a4c4f);
       color: var(--ak-text-primary, #fff);
+      box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.1);
     }
 
     &:active:not(:disabled) {
-      transform: scale(0.96);
+      transform: scale(0.94);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
     }
   }
 
   & &__increase,
   & &__decrease {
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
     background-color: var(--ak-surface-raised, #2c3238);
     border: 1px solid var(--ak-border, #4a4c4f);
     color: var(--ak-text-primary, #f8f8f5);
@@ -320,21 +381,26 @@
     transition:
       background-color var(--ak-motion-fast) ease,
       color var(--ak-motion-fast) ease,
+      box-shadow var(--ak-motion-fast) ease,
       transform var(--ak-motion-fast) ease;
 
     .ak-icon {
       width: calc(var(--ak-input-number-icon) * var(--ak-density-control, 1));
       height: calc(var(--ak-input-number-icon) * var(--ak-density-control, 1));
       fill: currentcolor;
+      pointer-events: none;
     }
 
     &:hover:not(:disabled) {
       background-color: var(--ak-signal-info, #2bf);
       color: #000;
+      box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.2);
     }
 
     &:active:not(:disabled) {
-      transform: scale(0.96);
+      transform: scale(0.94);
+      background-color: color-mix(in srgb, var(--ak-signal-info, #2bf) 85%, #000);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
     }
   }
 

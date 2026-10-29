@@ -240,3 +240,12 @@ export {
 export { AkItem, type AkItemProps, type AkItemTier } from './ui/item/AkItem'
 export { AkSlot, type AkSlotProps, type AkSlotRarity, type AkSlotRole } from './ui/slot/AkSlot'
 export { AkScreen, type AkScreenProps, type AkScreenTone } from './ui/screen/AkScreen'
+
+// 战术触觉微音效合成引擎（纯前端零依赖 Web Audio）
+export {
+  playTactileSound,
+  setTactileSoundEnabled,
+  isTactileSoundEnabled,
+  useTactileSound,
+  type TactileSoundType,
+} from './lib/audio'

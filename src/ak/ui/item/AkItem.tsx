@@ -1,7 +1,8 @@
-import type { ButtonHTMLAttributes, ElementType, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ElementType, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { cx } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
+import { playTactileSound } from '../../lib/audio'
 
 export type AkItemTier = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -20,6 +21,10 @@ export interface AkItemProps extends Omit<ButtonHTMLAttributes<HTMLElement>, 'na
   price?: ReactNode
   /** 是否处于已售罄或置灰状态。 */
   sold?: boolean
+  /** 是否处于选中状态。 */
+  selected?: boolean
+  /** 是否禁用。 */
+  disabled?: boolean
   /** 尺寸档：图标边长、内距与文字字号一起缩。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 */
@@ -39,6 +44,8 @@ export function AkItem({
   count,
   price,
   sold = false,
+  selected = false,
+  disabled = false,
   size = 'md',
   tokens,
   className,
@@ -54,16 +61,42 @@ export function AkItem({
     <Tag
       {...rest}
       type={buttonType}
+      disabled={isButton ? disabled : undefined}
+      aria-disabled={disabled || undefined}
+      aria-selected={selected || undefined}
       {...sizeAttrs(size)}
       className={cx(
         'ak-item',
         `ak-item--tier-${tier}`,
         sold && 'ak-item--sold',
+        selected && 'ak-item--selected',
+        disabled && 'ak-item--disabled',
         className,
       )}
       style={tokenStyle(tokens, style)}
       data-slot="ak-item"
       data-tier={tier}
+      tabIndex={isButton ? rest.tabIndex : (disabled ? -1 : (rest.tabIndex ?? (rest.onClick ? 0 : undefined)))}
+      onClick={(e: MouseEvent<HTMLElement>) => {
+        if (disabled) {
+          e.preventDefault()
+          return
+        }
+        playTactileSound(tier >= 5 ? 'pip' : 'tap', 0.15)
+        rest.onClick?.(e)
+      }}
+      onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
+        if (!isButton && rest.onClick && (e.key === 'Enter' || e.key === ' ')) {
+          if (disabled) {
+            e.preventDefault()
+            return
+          }
+          e.preventDefault()
+          playTactileSound(tier >= 5 ? 'pip' : 'tap', 0.15)
+          rest.onClick(e as unknown as MouseEvent<HTMLElement>)
+        }
+        rest.onKeyDown?.(e)
+      }}
     >
       <div className="ak-item__icon">
         {icon ?? children}

@@ -169,10 +169,15 @@
   border: 2px solid transparent;
   background-clip: padding-box;
   background-color: var(--ak-border-strong);
+  transition: background-color var(--ak-motion-fast, 120ms) ease;
 }
 
 .ak-scroll-area::-webkit-scrollbar-thumb:hover {
   background-color: var(--ak-text-secondary);
+}
+
+.ak-scroll-area::-webkit-scrollbar-thumb:active {
+  background-color: var(--ak-signal-info, #4aabea);
 }
 
 // 只在需要时给一个最大高，避免内容把容器撑爆
