@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ElementType, KeyboardEvent, MouseEvent, Reac
 import { cx } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
-import { playTactileSound } from '../../lib/audio'
+import { playTactileSound, type TactileSoundType } from '../../lib/audio'
 
 export type AkItemTier = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -29,6 +29,8 @@ export interface AkItemProps extends Omit<ButtonHTMLAttributes<HTMLElement>, 'na
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 */
   tokens?: AkTokens
+  /** 触发点击时播放的触觉音效。传 false 禁用音效，缺省时 5/6 阶播 'pip'，其余播 'select'。 */
+  sound?: TactileSoundType | false
 }
 
 /**
@@ -52,10 +54,12 @@ export function AkItem({
   style,
   children,
   type,
+  sound,
   ...rest
 }: AkItemProps) {
   const isButton = Tag === 'button'
   const buttonType = isButton ? type ?? 'button' : undefined
+  const itemSound = sound !== undefined ? sound : (tier >= 5 ? 'pip' : 'select')
 
   return (
     <Tag
@@ -82,7 +86,9 @@ export function AkItem({
           e.preventDefault()
           return
         }
-        playTactileSound(tier >= 5 ? 'pip' : 'tap', 0.15)
+        if (itemSound) {
+          playTactileSound(itemSound, 0.16)
+        }
         rest.onClick?.(e)
       }}
       onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
@@ -92,7 +98,9 @@ export function AkItem({
             return
           }
           e.preventDefault()
-          playTactileSound(tier >= 5 ? 'pip' : 'tap', 0.15)
+          if (itemSound) {
+            playTactileSound(itemSound, 0.16)
+          }
           rest.onClick(e as unknown as MouseEvent<HTMLElement>)
         }
         rest.onKeyDown?.(e)

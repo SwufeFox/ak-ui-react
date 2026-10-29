@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
-import { playTactileSound } from '../../lib/audio'
+import { playTactileSound, type TactileSoundType } from '../../lib/audio'
 
 export type AkButtonVariant = 'default' | 'outline' | 'action' | 'advanced' | 'light'
 
@@ -19,6 +19,8 @@ export interface AkButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-button-bg': '#ff5e19' }`。 */
   tokens?: AkTokens
+  /** 触发点击时播放的触觉音效。传 false 禁用音效，缺省时 action 变体播 'confirm'，其余播 'click'。 */
+  sound?: TactileSoundType | false
 }
 
 export function AkButton({
@@ -32,6 +34,7 @@ export function AkButton({
   children,
   type = 'button',
   style,
+  sound,
   ...rest
 }: AkButtonProps) {
   return (
@@ -48,7 +51,10 @@ export function AkButton({
           e.preventDefault()
           return
         }
-        playTactileSound('click', 0.15)
+        const soundToPlay = sound !== undefined ? sound : (variant === 'action' ? 'confirm' : 'click')
+        if (soundToPlay) {
+          playTactileSound(soundToPlay, 0.16)
+        }
         rest.onClick?.(e)
       }}
     >

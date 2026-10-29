@@ -91,7 +91,7 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
     }
     const nextItem = items[targetIndex]
     if (!nextItem) return
-    playTactileSound('tap')
+    playTactileSound('tab', 0.16)
     onValueChange?.(nextItem.value)
     window.requestAnimationFrame(() => document.getElementById(tabId(nextItem.value))?.focus())
   }
@@ -119,7 +119,7 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
             tabIndex={focusableValue === item.value ? 0 : -1}
             onClick={() => {
               if (!item.disabled) {
-                playTactileSound('tap')
+                playTactileSound('tab', 0.16)
                 onValueChange?.(item.value)
               }
             }}

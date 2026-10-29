@@ -1,4 +1,4 @@
-import { useEffect, type HTMLAttributes, type ReactNode } from 'react'
+import { useEffect, useRef, type HTMLAttributes, type ReactNode } from 'react'
 import { cx } from '../../lib/utils'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 import { playTactileSound } from '../../lib/audio'
@@ -26,6 +26,8 @@ export interface AkScreenProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
   watermark?: ReactNode
   /** 正在退场状态（播放离场动画）。 */
   leaving?: boolean
+  /** 是否启用入场与返回触觉音效（默认 true）。 */
+  sound?: boolean
   /** 逐实例令牌覆盖，例如 `{ '--ak-screen-signal': '#ff5e19' }`。 */
   tokens?: AkTokens
   /** 屏幕内部主体内容。 */
@@ -61,24 +63,40 @@ export function AkScreen({
   closeOnEsc = false,
   watermark,
   leaving = false,
+  sound = true,
   tokens,
   className,
   style,
   children,
   ...rest
 }: AkScreenProps) {
+  const hasPlayedOpenRef = useRef(false)
+
+  useEffect(() => {
+    if (sound && !leaving && !hasPlayedOpenRef.current) {
+      hasPlayedOpenRef.current = true
+      playTactileSound('open', 0.2)
+    }
+  }, [sound, leaving])
+
+  const handleBack = () => {
+    if (sound) {
+      playTactileSound('close', 0.2)
+    }
+    onBack?.()
+  }
+
   useEffect(() => {
     if (!closeOnEsc || !onBack || leaving) return
     const handler = () => {
-      playTactileSound('click', 0.16)
-      onBack()
+      handleBack()
     }
     escStack.push(handler)
     return () => {
       const idx = escStack.lastIndexOf(handler)
       if (idx !== -1) escStack.splice(idx, 1)
     }
-  }, [closeOnEsc, onBack, leaving])
+  }, [closeOnEsc, onBack, leaving, sound])
 
   return (
     <div
@@ -98,10 +116,7 @@ export function AkScreen({
           <button
             type="button"
             className="ak-screen__back"
-            onClick={() => {
-              playTactileSound('click', 0.16)
-              onBack()
-            }}
+            onClick={handleBack}
             aria-label={typeof backLabel === 'string' ? backLabel : 'Back'}
           >
             <span aria-hidden="true">‹</span>

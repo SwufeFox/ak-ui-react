@@ -8,7 +8,7 @@ The component layer is re-implemented in React while the design layer stays inta
 framework-agnostic SCSS and the DOM controllers are reused as-is, so the React components drive
 the *same* controller instances the Vue components did.
 
-- **Package:** `@swufefox/ak-ui-react` (v1.3.1)
+- **Package:** `@swufefox/ak-ui-react` (v1.3.2)
 - **Repo:** https://github.com/SwufeFox/ak-ui-react
 - **Showcase:** https://ak-ui-react.pages.dev
 - **Upstream:** [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (Vue)

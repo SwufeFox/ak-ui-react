@@ -2,7 +2,7 @@ import type { CSSProperties, ElementType, HTMLAttributes, KeyboardEvent, MouseEv
 import { cx } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
-import { playTactileSound } from '../../lib/audio'
+import { playTactileSound, type TactileSoundType } from '../../lib/audio'
 
 export type AkSlotRole =
   | 'vanguard'
@@ -49,6 +49,8 @@ export interface AkSlotProps extends HTMLAttributes<HTMLElement> {
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-slot-signal': '#f5bd38' }`。 */
   tokens?: AkTokens
+  /** 触发点击时播放的触觉音效。传 false 禁用音效，缺省时 5/6 星播 'elite'，其余播 'select'，空槽位播 'tap'。 */
+  sound?: TactileSoundType | false
 }
 
 /**
@@ -76,6 +78,7 @@ export function AkSlot({
   className,
   style,
   children,
+  sound,
   ...rest
 }: AkSlotProps) {
   const isButton = Tag === 'button'
@@ -86,6 +89,7 @@ export function AkSlot({
   }
 
   if (empty) {
+    const emptySound = sound !== undefined ? sound : 'tap'
     return (
       <Tag
         {...rest}
@@ -110,7 +114,9 @@ export function AkSlot({
             e.preventDefault()
             return
           }
-          playTactileSound('tap', 0.15)
+          if (emptySound) {
+            playTactileSound(emptySound, 0.15)
+          }
           rest.onClick?.(e)
         }}
         onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
@@ -120,7 +126,9 @@ export function AkSlot({
               return
             }
             e.preventDefault()
-            playTactileSound('tap', 0.15)
+            if (emptySound) {
+              playTactileSound(emptySound, 0.15)
+            }
             rest.onClick?.(e as unknown as MouseEvent<HTMLElement>)
           }
           rest.onKeyDown?.(e)
@@ -130,6 +138,8 @@ export function AkSlot({
       </Tag>
     )
   }
+
+  const slotSound = sound !== undefined ? sound : (rarity >= 5 ? 'elite' : 'select')
 
   return (
     <Tag
@@ -146,7 +156,9 @@ export function AkSlot({
           e.preventDefault()
           return
         }
-        playTactileSound(rarity >= 5 ? 'pip' : 'click', 0.16)
+        if (slotSound) {
+          playTactileSound(slotSound, 0.18)
+        }
         rest.onClick?.(e)
       }}
       onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
@@ -156,7 +168,9 @@ export function AkSlot({
             return
           }
           e.preventDefault()
-          playTactileSound(rarity >= 5 ? 'pip' : 'click', 0.16)
+          if (slotSound) {
+            playTactileSound(slotSound, 0.18)
+          }
           rest.onClick?.(e as unknown as MouseEvent<HTMLElement>)
         }
         rest.onKeyDown?.(e)

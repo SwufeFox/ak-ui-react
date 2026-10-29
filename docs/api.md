@@ -147,6 +147,7 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`.
 | `variant` | `AkButtonVariant` | yes | 外观档位：default / outline / action / advanced / light。 |
 | `size` | `AkControlSize` | yes | 尺寸档。默认 `md`（= 50px 高，改造前的值）。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-button-bg': '#ff5e19' }`。 |
+| `sound` | `TactileSoundType \| false` | yes | 触发点击时播放的触觉音效。传 false 禁用音效，缺省时 action 变体播 'confirm'，其余播 'click'。 |
 
 ## AkButtonGroup
 
@@ -567,6 +568,7 @@ Extends `Omit<ButtonHTMLAttributes<HTMLElement>, 'name'>`.
 | `disabled` | `boolean` | yes | 是否禁用。 |
 | `size` | `AkControlSize` | yes | 尺寸档：图标边长、内距与文字字号一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 |
+| `sound` | `TactileSoundType \| false` | yes | 触发点击时播放的触觉音效。传 false 禁用音效，缺省时 5/6 阶播 'pip'，其余播 'select'。 |
 
 ## AkKv
 
@@ -932,6 +934,7 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
 | `closeOnEsc` | `boolean` | yes | 是否监听 Escape 键自动触发 onBack。默认为 false。 |
 | `watermark` | `ReactNode` | yes | 右下角装饰水印。 |
 | `leaving` | `boolean` | yes | 正在退场状态（播放离场动画）。 |
+| `sound` | `boolean` | yes | 是否启用入场与返回触觉音效（默认 true）。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-screen-signal': '#ff5e19' }`。 |
 | `children` | `ReactNode` | yes | 屏幕内部主体内容。 |
 
@@ -1039,6 +1042,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 | `pressed` | `boolean` | yes | 是否为选中状态。 |
 | `size` | `AkControlSize` | yes | 尺寸档：槽位高度、字号与内边距一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-slot-signal': '#f5bd38' }`。 |
+| `sound` | `TactileSoundType \| false` | yes | 触发点击时播放的触觉音效。传 false 禁用音效，缺省时 5/6 星播 'elite'，其余播 'select'，空槽位播 'tap'。 |
 
 ## AkSpec
 
