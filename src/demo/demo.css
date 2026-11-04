@@ -535,6 +535,113 @@ body {
   }
 }
 
+.demo-dossier__avatar-mock--chimera {
+  border-color: var(--ak-signal-action, #ffd800);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--ak-signal-action, #ffd800) 45%, transparent);
+  animation: demo-avatar-overdrive 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes demo-avatar-overdrive {
+  0% { filter: drop-shadow(0 0 4px var(--ak-signal-action, #ffd800)); }
+  100% { filter: drop-shadow(0 0 14px var(--ak-signal-danger, #e33b3b)); }
+}
+
+.demo-dossier__avatar-mock--disengaged {
+  opacity: 0.45;
+  filter: grayscale(0.85);
+}
+
+.demo-dossier__ticker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  padding: 0.25rem 0.55rem;
+  background: var(--ak-surface-sunken-2);
+  border: 1px solid var(--demo-hairline);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.62rem;
+}
+
+.demo-dossier__ticker-tag {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  background: var(--ak-signal-info, #4aabea);
+  color: #111;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.demo-dossier__ticker-msg {
+  color: var(--demo-text-strong);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demo-intro__quickjumps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--demo-hairline);
+}
+
+.demo-quickjumps__label {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--demo-text-muted);
+  text-transform: uppercase;
+}
+
+.demo-quickjumps__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.demo-quickjump__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.55rem;
+  background: color-mix(in srgb, var(--ak-surface-sunken-2) 90%, transparent);
+  border: 1px solid var(--demo-hairline);
+  color: var(--demo-text);
+  cursor: pointer;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  transition:
+    border-color var(--demo-motion-fast) ease,
+    background-color var(--demo-motion-fast) ease,
+    transform var(--demo-motion-fast) ease,
+    color var(--demo-motion-fast) ease,
+    box-shadow var(--demo-motion-fast) ease;
+}
+
+.demo-quickjump__chip:hover {
+  border-color: var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, var(--ak-surface-sunken-2));
+  color: var(--ak-signal-info, #4aabea);
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--ak-signal-info, #4aabea) 25%, transparent);
+}
+
+.demo-quickjump__code {
+  font-weight: 800;
+}
+
+.demo-quickjump__name {
+  opacity: 0.55;
+  font-size: 0.58rem;
+}
+
 .demo-catalogue {
   display: grid;
   grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
@@ -581,6 +688,102 @@ body {
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.65rem;
   letter-spacing: 0.06em;
+}
+
+.demo-rail__search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.15rem 0.35rem;
+  background: var(--ak-surface-sunken-2);
+  border: 1px solid var(--demo-hairline);
+  transition: border-color var(--demo-motion-fast) ease, box-shadow var(--demo-motion-fast) ease;
+}
+
+.demo-rail__search-box:focus-within {
+  border-color: var(--ak-signal-info, #4aabea);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--ak-signal-info, #4aabea) 30%, transparent);
+}
+
+.demo-rail__search-icon {
+  padding-left: 0.35rem;
+  color: var(--ak-signal-info, #4aabea);
+  font-size: 0.85rem;
+  pointer-events: none;
+  font-weight: 900;
+}
+
+.demo-rail__search-input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  outline: none;
+}
+
+.demo-rail__search-input::placeholder {
+  color: var(--demo-text-muted);
+  opacity: 0.7;
+}
+
+.demo-rail__search-clear {
+  padding: 0.2rem 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--demo-text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: color var(--demo-motion-fast) ease;
+}
+
+.demo-rail__search-clear:hover {
+  color: var(--ak-signal-danger, #e33b3b);
+}
+
+.demo-rail__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.5rem 0.75rem;
+  text-align: center;
+  border: 1px dashed var(--demo-hairline);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.demo-rail__empty-title {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--demo-text-muted);
+  letter-spacing: 0.1em;
+}
+
+.demo-rail__empty-hint {
+  font-size: 0.62rem;
+  color: var(--demo-text-muted);
+  opacity: 0.65;
+}
+
+.demo-rail__empty-reset {
+  align-self: center;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.65rem;
+  background: transparent;
+  border: 1px solid var(--ak-signal-info);
+  color: var(--ak-signal-info);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.62rem;
+  cursor: pointer;
+  transition: background-color var(--demo-motion-fast) ease, color var(--demo-motion-fast) ease;
+}
+
+.demo-rail__empty-reset:hover {
+  background: var(--ak-signal-info);
+  color: #111;
 }
 
 .demo-rail__item {
@@ -926,6 +1129,25 @@ body {
   padding: 0.15rem 0.35rem;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--demo-hairline);
+}
+
+.demo-api-prop {
+  font-weight: 800;
+  color: var(--demo-text-strong) !important;
+}
+
+.demo-api-type {
+  color: var(--ak-signal-info, #4aabea) !important;
+}
+
+.demo-api-default {
+  color: var(--demo-text-muted) !important;
+}
+
+.demo-api-desc {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--demo-text);
 }
 
 /* ── 终端大屏（AkScreen）内部 PRTS 战术物资调度控制台 ──────────────── */

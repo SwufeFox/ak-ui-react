@@ -148,6 +148,41 @@ const CATEGORIES = [
   { id: 'components-17', title: 'ref.command.title' },
 ] as const satisfies readonly { id: string; title: MessageKey }[]
 
+const CATEGORY_KEYWORDS: Record<string, readonly string[]> = {
+  'components-1': ['button', 'actions', 'chamfer', 'subtitle', 'danger', 'ghost', 'group', '按钮', '动作'],
+  'components-2': ['menu', 'menubar', 'dropdown', 'toolbar', 'contextmenu', 'collapsible', '菜单', '工具栏', '折叠'],
+  'components-3': ['card', 'glass', 'chassis', 'tactical', 'outline', 'stripe', 'place', 'surface', '卡片', '毛玻璃', '机匣', '面板'],
+  'components-4': ['notice', 'alert', 'progress', 'gauge', 'laser', '通知', '公告', '进度条', '仪表盘'],
+  'components-5': ['slider', 'inputnumber', 'segmented', 'step', '滑动条', '步进器', '分段器'],
+  'components-6': ['tabs', 'navigation', 'breadcrumb', 'segmented', '标签页', '导航', '面包屑'],
+  'components-7': ['effects', 'countup', 'depth', 'entrance', 'glow', 'skew', 'outline', '特效', '数字滚动', '景深', '入场'],
+  'components-8': ['gallery', 'album', 'polaroid', 'media', '画廊', '相册', '拍立得'],
+  'components-9': ['loader', 'assetloader', 'loading', '资源加载', '预加载'],
+  'components-10': ['site', 'shell', 'sectionnavigator', 'mobilemenu', 'particlefield', '粒子', '整页导航', '移动端菜单'],
+  'components-11': ['decor', 'laser', 'reticle', 'stripes', 'halftone', 'corner', 'cut', 'barcode', 'watermark', 'bilingual', '装饰', '准星', '斜纹', '网点', '切角', '条形码'],
+  'components-12': ['arknights', 'rarity', 'profession', 'elite', 'potential', 'skilllevels', 'attrs', 'trust', '游戏数据', '稀有度', '职业', '精二', '潜能', '专精'],
+  'components-13': ['popover', 'tooltip', 'dialog', 'modal', '浮层', '气泡', '提示', '对话框', '弹窗'],
+  'components-14': ['form', 'input', 'field', 'textarea', 'select', 'choice', 'checkbox', 'switch', '表单', '输入框', '选择器', '开关'],
+  'components-15': ['data', 'san', 'sanity', 'counter', 'level', 'skeleton', 'spinner', '理智', '计数器', '关卡', '骨架屏', '加载中'],
+  'components-16': ['collection', 'table', 'avatar', 'thumbnail', 'scrollarea', 'newslist', '表格', '头像', '缩略图', '滚动区', '快讯'],
+  'components-17': ['command', 'screen', 'item', 'slot', '大屏', '指令牌', '材料方块', '槽位'],
+}
+
+const QUICK_JUMPS = [
+  { label: 'AkButton', categoryId: 'components-1', tag: '按钮' },
+  { label: 'AkCard', categoryId: 'components-3', tag: '卡片' },
+  { label: 'AkLaser', categoryId: 'components-11', tag: '激光' },
+  { label: 'AkStatus', categoryId: 'components-4', tag: '芯片' },
+  { label: 'AkProgress', categoryId: 'components-4', tag: '进度条' },
+  { label: 'AkTable', categoryId: 'components-16', tag: '表格' },
+  { label: 'AkDialog', categoryId: 'components-13', tag: '弹窗' },
+  { label: 'AkPopover', categoryId: 'components-13', tag: '气泡' },
+  { label: 'AkTabs', categoryId: 'components-6', tag: '标签页' },
+  { label: 'AkSlider', categoryId: 'components-5', tag: '滑条' },
+  { label: 'AkSan', categoryId: 'components-15', tag: '理智' },
+  { label: 'AkScreen', categoryId: 'components-17', tag: '终端屏' },
+] as const
+
 /** 舞台上下文：当前激活的分类 id + 切换函数。 */
 const StageContext = createContext<{ active: string; select: (id: string) => void } | null>(null)
 
@@ -484,7 +519,7 @@ function Block({
 
       {tab === 'api' && api && (
         <div id={`${id}-api`} className="demo-api-container" role="tabpanel" aria-labelledby={`${id}-tab-api`}>
-          <table className="ak-table">
+          <table className="ak-table ak-table--tactical ak-table--hoverable">
             <thead className="ak-table__head">
               <tr>
                 <th>{t('common.propName')}</th>
@@ -496,10 +531,10 @@ function Block({
             <tbody className="ak-table__body">
               {api.map((item) => (
                 <tr key={item.name}>
-                  <td><code>{item.name}</code></td>
-                  <td><code style={{ color: 'var(--ak-signal-info)' }}>{item.type}</code></td>
-                  <td><code>{item.default ?? '—'}</code></td>
-                  <td>{item.desc}</td>
+                  <td><code className="demo-api-prop">{item.name}</code></td>
+                  <td><code className="demo-api-type">{item.type}</code></td>
+                  <td><code className="demo-api-default">{item.default ?? '—'}</code></td>
+                  <td className="demo-api-desc">{item.desc}</td>
                 </tr>
               ))}
             </tbody>
@@ -959,7 +994,7 @@ const DEPOT_ITEMS: DepotItem[] = [
 ]
 
 function ReferenceView() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [tab, setTab] = useState('overview')
   const [segment, setSegment] = useState('all')
   const [galleryIndex, setGalleryIndex] = useState(0)
@@ -990,6 +1025,16 @@ function ReferenceView() {
     setButtonHit(name)
     setButtonHits((n) => n + 1)
   }
+
+  // 战术干员档案动态交互状态
+  const [dossierMode, setDossierMode] = useState<'nominal' | 'chimera' | 'disengaged'>('nominal')
+  const [dossierHeat, setDossierHeat] = useState('42.0°C')
+  const [dossierSync, setDossierSync] = useState(88)
+  const [tacticalLog, setTacticalLog] = useState<string>('TACTICAL LINK ESTABLISHED // PRTS READY')
+
+  // 模块搜索与过滤
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
   // 理智计数演示状态
   const [loadingReady, setLoadingReady] = useState(false)
   const [screenOpen, setScreenOpen] = useState(false)
@@ -1075,6 +1120,48 @@ function ReferenceView() {
     },
     [activeIndex, selectCategory],
   )
+
+  const randomCategory = useCallback(() => {
+    const otherCategories = CATEGORIES.filter((c) => c.id !== active)
+    const pick = otherCategories[Math.floor(Math.random() * otherCategories.length)]
+    if (pick) {
+      playTactileSound('confirm', 0.2)
+      selectCategory(pick.id)
+    }
+  }, [active, selectCategory])
+
+  const filteredCategories = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return CATEGORIES
+    return CATEGORIES.filter((category, index) => {
+      const num = String(index + 1).padStart(2, '0')
+      const title = t(category.title).toLowerCase()
+      const keywords = CATEGORY_KEYWORDS[category.id] ?? []
+      return (
+        num.includes(query) ||
+        category.id.includes(query) ||
+        title.includes(query) ||
+        keywords.some((kw) => kw.toLowerCase().includes(query))
+      )
+    })
+  }, [searchQuery, t])
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+        searchInputRef.current?.select()
+      }
+    }
+    const handleRandom = () => randomCategory()
+    window.addEventListener('keydown', handleKey)
+    window.addEventListener('ak:random-module', handleRandom)
+    return () => {
+      window.removeEventListener('keydown', handleKey)
+      window.removeEventListener('ak:random-module', handleRandom)
+    }
+  }, [randomCategory])
 
   /** 浏览器前进/后退或者直接改 hash 时跟随。（只处理落在已知分类上的 hash。） */
   useEffect(() => {
@@ -1164,15 +1251,15 @@ function ReferenceView() {
           <AkCard as="article" variant="chassis">
             <div className="demo-dossier__grid">
               <div className="demo-dossier__op">
-                <AkReticle corners="four" tone="info" style={{ padding: '0.4rem', background: 'var(--ak-surface-sunken)' }}>
-                  <div className="demo-dossier__avatar-mock">
+                <AkReticle corners="four" tone={dossierMode === 'chimera' ? 'action' : 'info'} style={{ padding: '0.4rem', background: 'var(--ak-surface-sunken)' }}>
+                  <div className={`demo-dossier__avatar-mock demo-dossier__avatar-mock--${dossierMode}`}>
                     <span className="demo-dossier__avatar-code">OP-01</span>
                     <strong className="demo-dossier__avatar-name">AMIYA</strong>
-                    <span className="demo-dossier__avatar-class">CASTER / GUARD</span>
+                    <span className="demo-dossier__avatar-class">{dossierMode === 'chimera' ? 'OVERDRIVE // 爆发' : 'CASTER / GUARD'}</span>
                   </div>
                 </AkReticle>
                 <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <AkRarity level={5} />
+                  <AkRarity level={dossierMode === 'chimera' ? 6 : 5} />
                   <span style={{ fontSize: '0.62rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-text-muted)' }}>
                     SEC-ID: RI-8492 // LEVEL 90
                   </span>
@@ -1184,27 +1271,105 @@ function ReferenceView() {
                   <AkBilingual cn="战术部署状态" en="TACTICAL DEPLOYMENT OVERVIEW" />
                   <AkBarcode />
                 </div>
-                <AkLaser tone="info" animated style={{ margin: '0.35rem 0' }} />
+                <AkLaser tone={dossierMode === 'chimera' ? 'action' : dossierMode === 'disengaged' ? 'danger' : 'info'} animated style={{ margin: '0.35rem 0' }} />
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  <AkStatus size="sm" label="COMBAT READY" detail="TACTICAL LINK ESTABLISHED" />
-                  <AkStatus size="sm" variant="warning" label="REACTOR HEAT" detail="NOMINAL // 42°C" />
+                  <AkStatus
+                    size="sm"
+                    variant={dossierMode === 'chimera' ? 'warning' : dossierMode === 'disengaged' ? 'critical' : 'default'}
+                    label={dossierMode === 'chimera' ? 'OVERDRIVE ENGAGED' : dossierMode === 'disengaged' ? 'EVACUATED' : 'COMBAT READY'}
+                    detail={dossierMode === 'chimera' ? 'CHIMERA SKILL 3 ONLINE' : dossierMode === 'disengaged' ? 'LINK SEVERED' : 'TACTICAL LINK ESTABLISHED'}
+                  />
+                  <AkStatus
+                    size="sm"
+                    variant={dossierMode === 'chimera' ? 'critical' : 'warning'}
+                    label="REACTOR HEAT"
+                    detail={dossierHeat}
+                  />
                 </div>
-                <AkProgress label="NEURAL SYNCHRONY // 神经同步率" value={88} style={{ marginTop: '0.45rem' }} />
+                <AkProgress
+                  variant={dossierMode === 'chimera' ? 'danger' : 'default'}
+                  label={dossierMode === 'chimera' ? 'NEURAL OVERDRIVE // 神经超频' : 'NEURAL SYNCHRONY // 神经同步率'}
+                  value={dossierSync}
+                  style={{ marginTop: '0.45rem' }}
+                />
+                <div className="demo-dossier__ticker">
+                  <span className="demo-dossier__ticker-tag">LOG</span>
+                  <span className="demo-dossier__ticker-msg">{tacticalLog}</span>
+                </div>
               </div>
 
               <div className="demo-dossier__actions">
-                <AkButton variant="action" chamfer subtitle="INITIATE // 爆发" icon={<span aria-hidden="true">⚡</span>} onClick={() => hitButton('dossier:chimera')}>
+                <AkButton
+                  variant="action"
+                  chamfer
+                  subtitle="INITIATE // 爆发"
+                  icon={<span aria-hidden="true">⚡</span>}
+                  onClick={() => {
+                    playTactileSound('action', 0.25)
+                    setDossierMode('chimera')
+                    setDossierSync(100)
+                    setDossierHeat('98.4°C // CRITICAL')
+                    setTacticalLog('CHIMERA ACTIVATED: ATK +230%, TRUE DAMAGE ONLINE // NEURAL OVERDRIVE')
+                    hitButton('dossier:chimera')
+                  }}
+                >
                   CHIMERA
                 </AkButton>
-                <AkButton variant="danger" chamfer subtitle="ABORT // 撤离" icon={<span aria-hidden="true">⚠</span>} onClick={() => hitButton('dossier:disengage')}>
+                <AkButton
+                  variant="danger"
+                  chamfer
+                  subtitle="ABORT // 撤离"
+                  icon={<span aria-hidden="true">⚠</span>}
+                  onClick={() => {
+                    playTactileSound('warn', 0.22)
+                    setDossierMode('disengaged')
+                    setDossierSync(22)
+                    setDossierHeat('28.5°C // COOLING')
+                    setTacticalLog('OPERATOR EVACUATED // TACTICAL RETREAT IN PROGRESS')
+                    hitButton('dossier:disengage')
+                  }}
+                >
                   DISENGAGE
                 </AkButton>
-                <AkButton variant="ghost" subtitle="DATA // 遥测" onClick={() => hitButton('dossier:telemetry')}>
+                <AkButton
+                  variant="ghost"
+                  subtitle="DATA // 遥测"
+                  onClick={() => {
+                    playTactileSound('dial', 0.2)
+                    setDossierMode('nominal')
+                    const newHeat = (40 + Math.random() * 4).toFixed(1)
+                    setDossierHeat(`${newHeat}°C // NOMINAL`)
+                    setDossierSync(Math.floor(84 + Math.random() * 12))
+                    setTacticalLog('SENSOR TELEMETRY RE-CALIBRATED // ALL PRTS CHANNELS NORMAL')
+                    hitButton('dossier:telemetry')
+                  }}
+                >
                   TELEMETRY
                 </AkButton>
               </div>
             </div>
           </AkCard>
+        </div>
+
+        {/* 快速直达锚点条 */}
+        <div className="demo-intro__quickjumps">
+          <span className="demo-quickjumps__label">QUICK JUMP // 快速直达:</span>
+          <div className="demo-quickjumps__list">
+            {QUICK_JUMPS.map((qj) => (
+              <button
+                key={qj.label}
+                type="button"
+                className="demo-quickjump__chip"
+                onClick={() => {
+                  playTactileSound('click', 0.15)
+                  selectCategory(qj.categoryId)
+                }}
+              >
+                <span className="demo-quickjump__code">{qj.label}</span>
+                <span className="demo-quickjump__name">{qj.tag}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -1214,6 +1379,32 @@ function ReferenceView() {
             <span className="demo-rail__eyebrow">CATALOGUE // 索引</span>
             <span className="demo-rail__count">{CATEGORIES.length} MODULES</span>
           </div>
+
+          <div className="demo-rail__search-box">
+            <span className="demo-rail__search-icon" aria-hidden="true">⌕</span>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="demo-rail__search-input"
+              placeholder={locale === 'zh-CN' ? '搜索 112 个组件... (/)' : 'Filter 112 components... (/)'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="demo-rail__search-clear"
+                onClick={() => {
+                  setSearchQuery('')
+                  searchInputRef.current?.focus()
+                }}
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
           <button
             type="button"
             className="demo-rail__llm-banner"
@@ -1223,21 +1414,39 @@ function ReferenceView() {
             <span className="demo-rail__llm-title">llms.txt</span>
             <span className="demo-rail__llm-desc">SPECIFICATION ↗</span>
           </button>
-          {CATEGORIES.map((category, index) => (
-            <button
-              key={category.id}
-              type="button"
-              className="demo-rail__item"
-              aria-current={active === category.id ? 'true' : undefined}
-              onClick={() => {
-                playTactileSound('tab', 0.16)
-                selectCategory(category.id)
-              }}
-            >
-              <span className="demo-rail__index">{String(index + 1).padStart(2, '0')}</span>
-              <span className="demo-rail__label">{t(category.title)}</span>
-            </button>
-          ))}
+
+          {filteredCategories.length === 0 ? (
+            <div className="demo-rail__empty">
+              <span className="demo-rail__empty-title">NO MATCH // 无匹配</span>
+              <span className="demo-rail__empty-hint">{locale === 'zh-CN' ? '未找到包含此关键字的组件' : 'No components found'}</span>
+              <button
+                type="button"
+                className="demo-rail__empty-reset"
+                onClick={() => setSearchQuery('')}
+              >
+                RESET // 重置
+              </button>
+            </div>
+          ) : (
+            filteredCategories.map((category) => {
+              const originalIndex = CATEGORIES.findIndex((c) => c.id === category.id)
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className="demo-rail__item"
+                  aria-current={active === category.id ? 'true' : undefined}
+                  onClick={() => {
+                    playTactileSound('tab', 0.16)
+                    selectCategory(category.id)
+                  }}
+                >
+                  <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
+                  <span className="demo-rail__label">{t(category.title)}</span>
+                </button>
+              )
+            })
+          )}
         </nav>
 
         <div className="demo-stage" ref={stageRef}>
@@ -2944,6 +3153,14 @@ function ReferenceView() {
                 {t('ref.catalogue.previous')}
               </AkButton>
               <AkButton
+                variant="ghost"
+                onClick={randomCategory}
+                title="Random Module // 随机巡检"
+                icon={<span aria-hidden="true">🎲</span>}
+              >
+                RANDOM
+              </AkButton>
+              <AkButton
                 variant="outline"
                 disabled={activeIndex === CATEGORIES.length - 1}
                 onClick={() => {
@@ -3067,6 +3284,16 @@ export function App() {
             value={density}
             onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
           />
+
+          <AkButton
+            size="sm"
+            variant="ghost"
+            onClick={() => window.dispatchEvent(new CustomEvent('ak:random-module'))}
+            title="Random Module // 随机巡检"
+            icon={<span aria-hidden="true">🎲</span>}
+          >
+            RANDOM
+          </AkButton>
 
           <AkButton
             size="sm"
