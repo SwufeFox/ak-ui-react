@@ -25,6 +25,8 @@ export interface AkDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
   title?: ReactNode
   /** 底部操作区。 */
   footer?: ReactNode
+  /** 是否显示右上角关闭按钮，默认 true。 */
+  closable?: boolean
   /** 点遮罩是否关闭。默认 true。 */
   closeOnBackdrop?: boolean
   /** 是否禁用 Esc 关闭。默认 false。 */
@@ -42,6 +44,7 @@ export function AkDialog({
   eyebrow,
   title,
   footer,
+  closable = true,
   closeOnBackdrop = true,
   disableEscape = false,
   size = 'md',
@@ -100,10 +103,22 @@ export function AkDialog({
       data-slot="ak-dialog"
       onPointerDown={onPointerDown}
     >
-      {(eyebrow || title) ? (
+      {(eyebrow || title || closable) ? (
         <header className="ak-dialog__header">
-          {eyebrow ? <span className="ak-dialog__eyebrow">{eyebrow}</span> : null}
-          {title ? <strong className="ak-dialog__title">{title}</strong> : null}
+          <div className="ak-dialog__header-content">
+            {eyebrow ? <span className="ak-dialog__eyebrow">{eyebrow}</span> : null}
+            {title ? <strong className="ak-dialog__title">{title}</strong> : null}
+          </div>
+          {closable ? (
+            <button
+              type="button"
+              className="ak-dialog__close"
+              aria-label="Close dialog"
+              onClick={() => onOpenChange?.(false)}
+            >
+              ✕
+            </button>
+          ) : null}
         </header>
       ) : null}
       <div className="ak-dialog__body">{children}</div>

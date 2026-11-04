@@ -79,6 +79,20 @@
   --ak-surface-sunken: #1a1b1c;
   --ak-surface-sunken-2: #232425;
 
+  // 卡片与通知部件的语义底色与边框（暗色主题下呈现高科技深色战术板）
+  --ak-card-bg: color-mix(in srgb, var(--ak-surface-canvas) 85%, var(--ak-surface-sunken-2));
+  --ak-card-border: color-mix(in srgb, var(--ak-text-primary) 12%, transparent);
+  --ak-notice-bg: color-mix(in srgb, var(--ak-surface-canvas) 85%, var(--ak-surface-sunken-2));
+  --ak-notice-fg: var(--ak-text-primary);
+  --ak-notice-border: color-mix(in srgb, var(--ak-text-primary) 15%, transparent);
+  --ak-notice-msg-fg: var(--ak-text-secondary);
+  --ak-popover-bg: color-mix(in srgb, var(--ak-surface-canvas) 88%, var(--ak-surface-sunken-2));
+  --ak-popover-fg: var(--ak-text-primary);
+  --ak-popover-border: color-mix(in srgb, var(--ak-text-primary) 18%, transparent);
+  --ak-popover-title-fg: var(--ak-text-primary);
+  --ak-popover-body-fg: var(--ak-text-secondary);
+  --ak-laser-color: var(--ak-signal-info);
+
   // Rarity palette（游戏内稀有度六档：底轨色 / 文字色）
   --ak-rarity-1: #bababa;
   --ak-rarity-1-text: #bababa;
@@ -149,15 +163,16 @@
   --ak-cut-md: 0.75rem;
   --ak-cut-lg: 1.5rem;
   --ak-radius-subtle: 2px;
-  // 多层柔和自然阴影：接触阴影 + 中景扩散 + 远景深层遮蔽，细腻还原高科技设备的真实厚度
-  --ak-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.25), 0 16px 36px rgba(0, 0, 0, 0.38);
-  --ak-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.22);
-  --ak-shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.2);
-  --ak-shadow-elevated: 0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.28), 0 20px 48px rgba(0, 0, 0, 0.42);
+  // 多层柔和自然阴影：顶部发丝微高光 + 接触阴影 + 中景扩散 + 远景深层遮蔽，细腻还原高科技设备的复合材质厚度
+  --ak-shadow-panel: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.25), 0 6px 16px rgba(0, 0, 0, 0.32), 0 20px 44px rgba(0, 0, 0, 0.48);
+  --ak-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.09), inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3);
+  --ak-shadow-subtle: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.24);
+  --ak-shadow-elevated: inset 0 1px 0 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.25), 0 10px 24px rgba(0, 0, 0, 0.38), 0 28px 64px rgba(0, 0, 0, 0.52);
   // 信号色辉光：形状与强度归这枚令牌，颜色跟随 --ak-shadow-signal-color。
   // 组件（.ak-status）把颜色接到自己的信号色上，于是同一枚令牌能服务
   // 信息 / 警告 / 危险各档；宿主改这里就能整体重调所有信号辉光。
   --ak-shadow-signal: 0 0 1rem color-mix(in srgb, var(--ak-shadow-signal-color, var(--ak-signal-info)) 62%, transparent);
+  --ak-shadow-neon: 0 0 16px color-mix(in srgb, var(--ak-signal-info) 38%, transparent), 0 0 2px var(--ak-signal-info);
   --ak-depth-perspective: 30em;
 
   // Motion and focus
@@ -166,6 +181,8 @@
   --ak-motion-slow: 420ms;
   --ak-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ak-ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ak-ease-tactical: cubic-bezier(0.16, 1, 0.3, 1);
+  --ak-ease-snap: cubic-bezier(0, 0, 0.2, 1);
   --ak-focus-color: var(--ak-signal-action);
   --ak-focus-width: 3px;
   --ak-focus-offset: 3px;
@@ -193,6 +210,20 @@
 
   --ak-surface-sunken: #fdfdfb;
   --ak-surface-sunken-2: #f2f3f4;
+
+  // 档案主题（浅色）卡片与通知部件底色与边框
+  --ak-card-bg: var(--ak-surface-raised);
+  --ak-card-border: var(--ak-border);
+  --ak-notice-bg: var(--ak-surface-raised);
+  --ak-notice-fg: var(--ak-text-primary);
+  --ak-notice-border: var(--ak-border);
+  --ak-notice-msg-fg: var(--ak-text-secondary);
+  --ak-popover-bg: var(--ak-surface-raised);
+  --ak-popover-fg: var(--ak-text-primary);
+  --ak-popover-border: var(--ak-border);
+  --ak-popover-title-fg: var(--ak-text-primary);
+  --ak-popover-body-fg: var(--ak-text-secondary);
+  --ak-laser-color: var(--ak-signal-info);
 
   // 亮底上彩色轨对比不足，文字色改用上游的深色变体
   --ak-rarity-1-text: #6f6f6f;

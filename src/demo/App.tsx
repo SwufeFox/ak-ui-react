@@ -11,6 +11,7 @@ import {
   AkAttr,
   AkAttrs,
   AkBackdrop,
+  AkBarcode,
   AkBilingual,
   AkBlueBand,
   AkBrackets,
@@ -54,7 +55,9 @@ import {
   AkNoticeStack,
   AkProgressStack,
   AkDialog,
+  AkLaser,
   AkLevel,
+  AkReticle,
   AkSkeleton,
   AkSpinner,
   AkEntrance,
@@ -967,6 +970,7 @@ function ReferenceView() {
   const [selectedCommand, setSelectedCommand] = useState('deploy')
   const [selectedTableRow, setSelectedTableRow] = useState('r1')
   const [tableStriped, setTableStriped] = useState(true)
+  const [tableTactical, setTableTactical] = useState(true)
   const [tableSticky, setTableSticky] = useState(false)
   const [selectedItem, setSelectedItem] = useState('D32')
   const [selectedSlot, setSelectedSlot] = useState('silverash')
@@ -1046,6 +1050,14 @@ function ReferenceView() {
   const stageRef = useRef<HTMLDivElement>(null)
   const entranceRef = useRef<AkEntranceHandle>(null)
   const stageValue = useMemo(() => ({ active, select: setActive }), [active])
+
+  const [liveTime, setLiveTime] = useState(() => new Date().toISOString().slice(11, 23))
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLiveTime(new Date().toISOString().slice(11, 23))
+    }, 47)
+    return () => clearInterval(timer)
+  }, [])
 
   /** 切换分类：写 hash（可分享）并把舞台滚回顶部（原位替换而不是继承上一块的滚动位置）。 */
   const selectCategory = useCallback((id: string) => {
@@ -1130,18 +1142,69 @@ function ReferenceView() {
               </span>
             </div>
             <div className="demo-intro__chip">
+              <span className="demo-intro__chip-label">SYSTEM TIME</span>
+              <span className="demo-intro__chip-value demo-intro__chip-value--live">
+                <span className="demo-intro__live-dot" />
+                {liveTime}
+              </span>
+            </div>
+            <div className="demo-intro__chip">
               <span className="demo-intro__chip-label">SECTIONS</span>
               <span className="demo-intro__chip-value">{CATEGORIES.length} MODULES</span>
             </div>
             <div className="demo-intro__chip">
               <span className="demo-intro__chip-label">COMPONENTS</span>
-              <span className="demo-intro__chip-value">109 INTERFACES</span>
-            </div>
-            <div className="demo-intro__chip">
-              <span className="demo-intro__chip-label">TELEMETRY</span>
-              <span className="demo-intro__chip-value">SYNC // 0.12ms</span>
+              <span className="demo-intro__chip-value">112 INTERFACES</span>
             </div>
           </div>
+        </div>
+
+        {/* 罗德岛最高机密战术指挥台 · 实战化高级组件集成展示 */}
+        <div className="demo-intro__dossier">
+          <AkCard as="article" variant="chassis">
+            <div className="demo-dossier__grid">
+              <div className="demo-dossier__op">
+                <AkReticle corners="four" tone="info" style={{ padding: '0.4rem', background: 'var(--ak-surface-sunken)' }}>
+                  <div className="demo-dossier__avatar-mock">
+                    <span className="demo-dossier__avatar-code">OP-01</span>
+                    <strong className="demo-dossier__avatar-name">AMIYA</strong>
+                    <span className="demo-dossier__avatar-class">CASTER / GUARD</span>
+                  </div>
+                </AkReticle>
+                <div style={{ display: 'grid', gap: '0.25rem' }}>
+                  <AkRarity level={5} />
+                  <span style={{ fontSize: '0.62rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-text-muted)' }}>
+                    SEC-ID: RI-8492 // LEVEL 90
+                  </span>
+                </div>
+              </div>
+
+              <div className="demo-dossier__info">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <AkBilingual cn="战术部署状态" en="TACTICAL DEPLOYMENT OVERVIEW" />
+                  <AkBarcode />
+                </div>
+                <AkLaser tone="info" animated style={{ margin: '0.35rem 0' }} />
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <AkStatus size="sm" label="COMBAT READY" detail="TACTICAL LINK ESTABLISHED" />
+                  <AkStatus size="sm" variant="warning" label="REACTOR HEAT" detail="NOMINAL // 42°C" />
+                </div>
+                <AkProgress label="NEURAL SYNCHRONY // 神经同步率" value={88} style={{ marginTop: '0.45rem' }} />
+              </div>
+
+              <div className="demo-dossier__actions">
+                <AkButton variant="action" chamfer subtitle="INITIATE // 爆发" icon={<span aria-hidden="true">⚡</span>} onClick={() => hitButton('dossier:chimera')}>
+                  CHIMERA
+                </AkButton>
+                <AkButton variant="danger" chamfer subtitle="ABORT // 撤离" icon={<span aria-hidden="true">⚠</span>} onClick={() => hitButton('dossier:disengage')}>
+                  DISENGAGE
+                </AkButton>
+                <AkButton variant="ghost" subtitle="DATA // 遥测" onClick={() => hitButton('dossier:telemetry')}>
+                  TELEMETRY
+                </AkButton>
+              </div>
+            </div>
+          </AkCard>
         </div>
       </header>
 
@@ -1187,6 +1250,9 @@ function ReferenceView() {
           <AkButton onClick={() => hitButton('default')}>{t('common.default')}</AkButton>
           <AkButton variant="outline" onClick={() => hitButton('outline')}>{t('common.outline')}</AkButton>
           <AkButton variant="action" onClick={() => hitButton('action')}>{t('common.action')}</AkButton>
+          <AkButton variant="action" chamfer subtitle="DEPLOY" onClick={() => hitButton('action+chamfer')}>CHAMFER</AkButton>
+          <AkButton variant="danger" subtitle="ABORT" onClick={() => hitButton('danger')}>RETREAT</AkButton>
+          <AkButton variant="ghost" subtitle="PASSIVE" onClick={() => hitButton('ghost')}>GHOST</AkButton>
           <AkButton variant="advanced" onClick={() => hitButton('advanced')}>{t('common.advanced')}</AkButton>
           <AkButton variant="light" onClick={() => hitButton('light')}>{t('common.light')}</AkButton>
           <AkTag>{t('common.tag')}</AkTag>
@@ -1194,9 +1260,13 @@ function ReferenceView() {
           <AkTag variant="danger">{t('common.danger')}</AkTag>
           <AkTag variant="neutral">{t('common.neutral')}</AkTag>
         </div>
-        <div className="demo-row" style={{ marginTop: 'var(--ak-space-4)' }}>
-          <AkButton variant="action" icon={<span aria-hidden="true">◆</span>} onClick={() => hitButton('action+icon')}>
+        <AkLaser tone="info" style={{ margin: 'var(--ak-space-4) 0' }} />
+        <div className="demo-row">
+          <AkButton variant="action" chamfer subtitle="TACTICAL" icon={<span aria-hidden="true">◆</span>} onClick={() => hitButton('action+icon')}>
             {t('common.withIcon')}
+          </AkButton>
+          <AkButton variant="danger" chamfer subtitle="EMERGENCY" icon={<span aria-hidden="true">⚠</span>} onClick={() => hitButton('danger+icon')}>
+            EMERGENCY
           </AkButton>
           <AkButton variant="outline" block style={{ maxWidth: '16rem' }} onClick={() => hitButton('block')}>
             {t('common.block')}
@@ -1318,6 +1388,57 @@ function ReferenceView() {
             </AkCardHeader>
             <AkCardContent className="ak-text">variant=&quot;stripe&quot;</AkCardContent>
           </AkCard>
+          <AkCard as="article" variant="glass" chamfer hoverable>
+            <AkCardHeader>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <AkCardTitle>HUD GLASS // 亚克力面板</AkCardTitle>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-signal-info)' }}>PRTS.HUD</span>
+              </div>
+              <AkCardDescription>variant=&quot;glass&quot; · 战术斜切 + 磨砂毛玻璃</AkCardDescription>
+            </AkCardHeader>
+            <AkCardContent className="ak-text">
+              半透明战术亚克力材质，融合 backdrop-filter 模糊与辉光边界。
+            </AkCardContent>
+            <AkCardFooter>
+              <AkButton chamfer variant="ghost" size="sm" onClick={() => setCardDialog(true)}>
+                INSPECT
+              </AkButton>
+            </AkCardFooter>
+          </AkCard>
+          <AkCard as="article" variant="tactical" chamfer hoverable>
+            <AkCardHeader>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <AkCardTitle>TACTICAL // 战术终端</AkCardTitle>
+                <AkBarcode />
+              </div>
+              <AkCardDescription>variant=&quot;tactical&quot; + chamfer · 4角发丝准星 + 战术光轨</AkCardDescription>
+            </AkCardHeader>
+            <AkCardContent className="ak-text">
+              搭载四角发丝级 L-Reticles、右上角切角、顶部全息信号条与深邃复合材质阴影。
+            </AkCardContent>
+            <AkCardFooter>
+              <AkButton chamfer variant="action" size="sm" onClick={() => setCardDialog(true)}>
+                TACTICAL VIEW
+              </AkButton>
+            </AkCardFooter>
+          </AkCard>
+          <AkCard as="article" variant="chassis" hoverable>
+            <AkCardHeader>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <AkCardTitle>CHASSIS // 军工装甲板</AkCardTitle>
+                <AkBarcode />
+              </div>
+              <AkCardDescription>variant=&quot;chassis&quot; · 边缘警戒斜纹 + 双轨金属轮廓</AkCardDescription>
+            </AkCardHeader>
+            <AkCardContent className="ak-text">
+              军工重装机甲外壳，左侧警戒斜纹与凹刻双重金属框，专为重度工业与防暴系统设计。
+            </AkCardContent>
+            <AkCardFooter>
+              <AkButton chamfer variant="action" size="sm" onClick={() => setCardDialog(true)}>
+                ARMOR ENGAGE
+              </AkButton>
+            </AkCardFooter>
+          </AkCard>
         </div>
 
         {/* 卡片里那个「查看」按钮真的会开这个对话框 —— 示例里每个动作都该有去处 */}
@@ -1356,7 +1477,8 @@ function ReferenceView() {
             {t('notice.ok.body')}
           </AkNotice>
         </div>
-        <div className="demo-row" style={{ marginTop: 'var(--ak-space-4)' }}>
+        <AkLaser tone="info" style={{ margin: 'var(--ak-space-4) 0' }} />
+        <div className="demo-row">
           <AkStatus label={t('ref.feedback.status.network')} detail={t('ref.feedback.status.networkValue')} />
           <AkStatus label={t('ref.feedback.status.reactor')} detail={t('ref.feedback.status.reactorValue')} variant="warning" />
           <AkStatus label={t('ref.feedback.status.hull')} detail={t('ref.feedback.status.hullValue')} variant="critical" />
@@ -1371,7 +1493,8 @@ function ReferenceView() {
             valueLabel={t('ref.feedback.progress.critical')}
           />
         </div>
-        <div className="demo-row" style={{ marginTop: 'var(--ak-space-4)' }}>
+        <AkLaser tone="info" style={{ margin: 'var(--ak-space-4) 0' }} />
+        <div className="demo-row">
           <AkGauge label={t('common.deploy')} value={64} unit={t('common.percent')} />
           <AkGauge label={t('common.heat')} value={88} unit={t('common.percent')} variant="warning" />
         </div>
@@ -1681,6 +1804,15 @@ function ReferenceView() {
               style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)' }}
             />
             <AkBrackets style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)' }} />
+            <AkReticle style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AkBarcode />
+            </AkReticle>
+            <AkReticle corners="four" tone="info" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-signal-info)' }}>LOCK // 4-RETICLE</span>
+            </AkReticle>
+            <AkReticle tone="action" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '0.68rem', fontFamily: 'var(--ak-font-mono)' }}>RETICLE</span>
+            </AkReticle>
             <AkHalftone variant="full" style={{ padding: 'var(--ak-space-3)' }}>
               <AkGlyphBox style={{ padding: '0.25rem' }}>G</AkGlyphBox>
             </AkHalftone>
@@ -1697,6 +1829,21 @@ function ReferenceView() {
               <AkMotion effect="fade" pace="slow">
                 <AkInverse style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>FADE</AkInverse>
               </AkMotion>
+            </div>
+          </div>
+          {/* 战术全息激光线 Laser */}
+          <div className="demo-stack" style={{ marginTop: 'var(--ak-space-4)', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--ak-font-mono)', minWidth: '5rem', color: 'var(--ak-signal-info)' }}>LASER // INFO</span>
+              <AkLaser tone="info" />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--ak-font-mono)', minWidth: '5rem', color: 'var(--ak-signal-action)' }}>LASER // ACTION</span>
+              <AkLaser tone="action" />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--ak-font-mono)', minWidth: '5rem', color: 'var(--ak-signal-danger)' }}>LASER // DANGER</span>
+              <AkLaser tone="danger" />
             </div>
           </div>
           {/* 左缘警戒斜纹：8px 斜纹条用 --ak-signal-action，所以是动作语义 */}
@@ -2132,6 +2279,13 @@ function ReferenceView() {
             <div className="demo-row" style={{ alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <AkChoice
                 variant="switch"
+                checked={tableTactical}
+                onChange={(e) => setTableTactical(e.target.checked)}
+              >
+                TACTICAL // 战术终端风格
+              </AkChoice>
+              <AkChoice
+                variant="switch"
                 checked={tableStriped}
                 onChange={(e) => setTableStriped(e.target.checked)}
               >
@@ -2151,6 +2305,7 @@ function ReferenceView() {
 
             <AkTable
               scrollable
+              tactical={tableTactical}
               striped={tableStriped}
               stickyHeader={tableSticky}
               hoverable
@@ -2849,6 +3004,8 @@ export function App() {
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
           <span className="demo-topbar__version">v{packageVersion}</span>
+          <AkBarcode className="demo-topbar__barcode" />
+          <span className="demo-topbar__coord">LOC: 31.23°N // 121.47°E // SHIP-01</span>
         </div>
 
         {/* 顶栏控件全部用库自己的组件 —— 以前这里是自造的 demo-tactical-btn /

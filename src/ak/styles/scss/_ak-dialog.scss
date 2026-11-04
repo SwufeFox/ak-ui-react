@@ -37,25 +37,90 @@
   border-radius: 0;
   color: var(--ak-dialog-fg, #f3f4ef);
   background: var(--ak-dialog-bg, #171a1d);
-  box-shadow: var(--ak-dialog-shadow, inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 1.5rem 5rem rgba(0, 0, 0, 0.55));
+  box-shadow: var(
+    --ak-dialog-shadow,
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 2rem 5rem -1rem rgba(0, 0, 0, 0.75),
+    0 0 30px color-mix(in srgb, var(--ak-dialog-signal) 14%, transparent)
+  );
   clip-path: polygon(0 0, calc(100% - var(--ak-cut, 1.25rem)) 0, 100% var(--ak-cut, 1.25rem), 100% 100%, 0 100%);
   font-family: $font-sans-serif;
 
   &::backdrop {
-    background: rgba(5, 7, 8, 0.76);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    background: rgba(5, 7, 8, 0.82);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   &[open] {
     animation: ak-dialog-enter 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  // 顶部全息信号条
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--ak-dialog-signal) 0%, var(--ak-dialog-info) 100%);
+    pointer-events: none;
+    z-index: 10;
+  }
+
   & &__header {
-    display: grid;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     padding: 1.15rem var(--ak-dialog-pad) 1rem;
-    border-bottom: 1px solid #3b4146;
+    border-bottom: 1px solid color-mix(in srgb, var(--ak-text-primary) 15%, transparent);
+    gap: 1rem;
+  }
+
+  & &__header-content {
+    display: grid;
     gap: 0.45rem;
+    min-width: 0;
+  }
+
+  & &__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--ak-text-primary) 20%, transparent);
+    background: transparent;
+    color: var(--ak-text-secondary);
+    font-family: $font-monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    transition:
+      color var(--ak-motion-fast, 120ms) ease,
+      background-color var(--ak-motion-fast, 120ms) ease,
+      border-color var(--ak-motion-fast, 120ms) ease,
+      box-shadow var(--ak-motion-fast, 120ms) ease;
+
+    &:hover {
+      color: var(--ak-signal-info);
+      border-color: var(--ak-signal-info);
+      background: color-mix(in srgb, var(--ak-signal-info) 12%, transparent);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--ak-signal-info) 35%, transparent);
+    }
+
+    &:active {
+      transform: scale(0.94);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ak-signal-info);
+      outline-offset: 2px;
+    }
   }
 
   & &__eyebrow {

@@ -11,15 +11,17 @@ function isInteractiveTarget(target: EventTarget | null): boolean {
   )
 }
 
-export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place'
+export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place' | 'tactical' | 'glass' | 'chassis'
 
 export interface AkCardProps extends HTMLAttributes<HTMLElement> {
   /** Element to render as, e.g. 'div' | 'article' | 'section' | 'li'. */
   as?: ElementType
-  /** 外观档位：default / outline / stripe / place。 */
+  /** 外观档位：default / outline / stripe / place / tactical / glass / chassis。 */
   variant?: AkCardVariant
   /** 尺寸档：控制内边距、子块间距与标题字号。 */
   size?: AkControlSize
+  /** 是否开启右上角 45° 战术切角。 */
+  chamfer?: boolean
   /** 是否开启悬停提亮/浮起动效。 */
   hoverable?: boolean
   /** 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 */
@@ -34,6 +36,7 @@ export function AkCard({
   as: Tag = 'div',
   variant = 'default',
   size = 'md',
+  chamfer = false,
   hoverable = false,
   interactive = false,
   selected = false,
@@ -71,6 +74,7 @@ export function AkCard({
       className={cx(
         'ak-card',
         variantClass('ak-card', variant),
+        chamfer && 'ak-card--chamfer',
         hoverable && 'ak-card--hoverable',
         interactive && 'ak-card--interactive',
         selected && 'ak-card--selected',

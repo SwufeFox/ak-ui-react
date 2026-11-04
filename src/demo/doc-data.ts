@@ -12,7 +12,9 @@ export interface BlockDoc {
 export const DOC_REGISTRY: Record<string, BlockDoc> = {
   'components-1': {
     api: [
-      { name: 'variant', type: "'default' | 'outline' | 'action' | 'advanced' | 'light'", default: "'default'", desc: '外观样式档位，决定底色与强调信号' },
+      { name: 'variant', type: "'default' | 'outline' | 'action' | 'advanced' | 'light' | 'danger' | 'ghost'", default: "'default'", desc: '外观样式档位，决定底色与强调信号（danger 为紧急撤退红，ghost 为高透 HUD 按钮）' },
+      { name: 'chamfer', type: 'boolean', default: 'false', desc: '是否开启右上角 10px 战术斜切角' },
+      { name: 'subtitle', type: 'ReactNode', desc: '副标题 / 战术代号（大写等宽小字，常用于双语排版如「部署 // DEPLOY」）' },
       { name: 'icon', type: 'ReactNode', desc: '前置图标节点插槽' },
       { name: 'block', type: 'boolean', default: 'false', desc: '是否撑满父容器 100% 宽度' },
       { name: 'disabled', type: 'boolean', default: 'false', desc: '原生禁用状态，带置灰与禁止光标' },
@@ -31,7 +33,10 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
   'components-3': {
     api: [
       { name: 'as', type: 'ElementType', default: "'div'", desc: '底层渲染的 HTML 标签（如 article, section）' },
-      { name: 'variant', type: "'default' | 'outline' | 'stripe' | 'place'", default: "'default'", desc: '卡片外观风格：默认、线框、斑马纹或放置槽' },
+      { name: 'variant', type: "'default' | 'outline' | 'stripe' | 'place' | 'tactical' | 'glass' | 'chassis'", default: "'default'", desc: '卡片外观风格：默认复合面板、线框、斑马纹、放置槽、4角准星终端、亚克力毛玻璃或重型装甲机匣' },
+      { name: 'chamfer', type: 'boolean', default: 'false', desc: '是否开启右上角 45° 战术斜切角' },
+      { name: 'hoverable', type: 'boolean', default: 'false', desc: '是否开启悬停微浮与辉光动效' },
+      { name: 'interactive', type: 'boolean', default: 'false', desc: '是否为可交互卡片（带点击反馈与焦点管理）' },
       { name: 'children', type: 'ReactNode', desc: '卡片主体或槽位组件' },
     ],
   },
@@ -149,6 +154,7 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
     api: [
       { name: 'columns', type: 'readonly AkTableColumn[]', desc: '表格列定义（key, header, numeric, sort 等）' },
       { name: 'rows', type: 'readonly AkTableRow[]', desc: '表格行数据' },
+      { name: 'tactical', type: 'boolean', default: 'false', desc: '是否开启战术沉浸式深色指挥台外观' },
       { name: 'fallback', type: 'ReactNode', desc: '头像无图时的缩写首字母' },
       { name: 'cut', type: 'boolean', default: 'false', desc: '头像右上切角机能风' },
       { name: 'items', type: 'readonly AkNewsListItem[]', desc: '公告条目列表' },

@@ -59,6 +59,8 @@ export interface AkTableProps extends Omit<HTMLAttributes<HTMLTableElement>, 'ch
   hoverable?: boolean
   /** 是否开启斑马纹交替底色，默认为 false。 */
   striped?: boolean
+  /** 是否开启战术深色沉浸式指挥台风格。 */
+  tactical?: boolean
   /** 是否开启表头粘性吸顶，默认为 false。 */
   stickyHeader?: boolean
   /** 外层是否套一层横滑容器（列多时建议开）。 */
@@ -84,6 +86,7 @@ export function AkTable({
   onRowClick,
   hoverable = true,
   striped = false,
+  tactical = false,
   stickyHeader = false,
   scrollable = false,
   size = 'md',
@@ -100,6 +103,7 @@ export function AkTable({
         'ak-table',
         hoverable && 'ak-table--hoverable',
         striped && 'ak-table--striped',
+        tactical && 'ak-table--tactical',
         stickyHeader && 'ak-table--sticky-header',
         className,
       )}

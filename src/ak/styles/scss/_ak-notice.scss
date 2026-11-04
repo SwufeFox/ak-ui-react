@@ -29,17 +29,17 @@
   box-sizing: border-box;
   min-height: calc(var(--ak-notice-min-h) * var(--ak-density-control, 1));
   padding: var(--ak-notice-pad);
-  border: 1px solid var(--ak-notice-border, rgba(17, 19, 21, 0.24));
-  color: var(--ak-notice-fg, #171a1d);
+  border: 1px solid var(--ak-notice-border, color-mix(in srgb, var(--ak-text-primary) 15%, transparent));
+  color: var(--ak-notice-fg, var(--ak-text-primary));
   // 细腻光影与半透磨砂：顶边缘高光 + 弱反光渐变 + 多层阴影
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%),
-    var(--ak-notice-bg, rgba(243, 244, 239, 0.94));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%),
+    var(--ak-notice-bg, color-mix(in srgb, var(--ak-surface-canvas) 85%, var(--ak-surface-sunken-2)));
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
-    var(--ak-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.15));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    0 4px 18px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   clip-path: polygon(0 0, calc(100% - var(--ak-cut, 1rem)) 0, 100% var(--ak-cut, 1rem), 100% 100%, 0 100%);
   grid-template-columns: var(--ak-notice-gutter) 1fr;
 
@@ -51,6 +51,7 @@
     width: var(--ak-notice-bar);
     content: "";
     background: var(--ak-notice-signal);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--ak-notice-signal) 45%, transparent);
   }
 
   &__code {
@@ -69,7 +70,7 @@
 
   &__body {
     padding-left: 1.2rem;
-    border-left: 1px solid rgba(17, 19, 21, 0.2);
+    border-left: 1px solid color-mix(in srgb, var(--ak-text-primary) 14%, transparent);
   }
 
   &__title {
@@ -82,7 +83,7 @@
 
   &__message {
     margin: 0.45rem 0 0;
-    color: var(--ak-notice-msg-fg, rgba(17, 19, 21, 0.68));
+    color: var(--ak-notice-msg-fg, var(--ak-text-secondary));
     font-family: $font-sans-serif;
     font-size: var(--ak-notice-msg-fs);
     line-height: 1.55;

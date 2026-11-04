@@ -218,6 +218,89 @@ export function AkBrackets({ className, children, ...rest }: AkBracketsProps) {
   )
 }
 
+export interface AkReticleProps extends DivProps {
+  /** 准星色调：info（默认青色）/ action（黄色）/ danger（红色） */
+  tone?: 'info' | 'action' | 'danger'
+  /** 准星角位：two（对角两角标，默认）/ four（四角锁定框）。 */
+  corners?: 'two' | 'four'
+}
+
+/** 战术 HUD 准星边框（两角或四角发丝直角标，可包裹任意面板或头像）。 */
+export function AkReticle({ tone = 'info', corners = 'two', className, children, ...rest }: AkReticleProps) {
+  return (
+    <div
+      {...rest}
+      className={cx(
+        'ak-reticle',
+        tone !== 'info' && `ak-reticle--${tone}`,
+        corners === 'four' && 'ak-reticle--four',
+        className,
+      )}
+      data-slot="ak-reticle"
+      data-tone={tone}
+      data-corners={corners}
+    >
+      {children}
+    </div>
+  )
+}
+
+export interface AkLaserProps extends SlotProps<HTMLDivElement> {
+  /** 激光色调：info（默认青色）/ action（黄色）/ danger（红色）。 */
+  tone?: 'info' | 'action' | 'danger'
+  /** 是否开启全息发光辉光投影。默认 true。 */
+  glow?: boolean
+  /** 是否开启激光呼吸明暗动效。默认 false。 */
+  animated?: boolean
+  /** 激光方向：horizontal（水平光带，默认）/ vertical（垂直光带）。 */
+  direction?: 'horizontal' | 'vertical'
+}
+
+/** 战术全息激光线（高科技发丝光轨，用于关键数据分割或面板边缘装饰）。 */
+export function AkLaser({
+  tone = 'info',
+  glow = true,
+  animated = false,
+  direction = 'horizontal',
+  className,
+  children,
+  ...rest
+}: AkLaserProps) {
+  return (
+    <div
+      {...rest}
+      className={cx(
+        'ak-laser',
+        tone !== 'info' && `ak-laser--${tone}`,
+        direction === 'vertical' && 'ak-laser--vertical',
+        glow && 'ak-laser--glow',
+        animated && 'ak-laser--animated',
+        className,
+      )}
+      data-slot="ak-laser"
+      data-tone={tone}
+      data-direction={direction}
+      role="separator"
+      aria-hidden="true"
+    >
+      {children}
+    </div>
+  )
+}
+
+export interface AkBarcodeProps extends SlotProps<HTMLSpanElement> {
+  as?: ElementType
+}
+
+/** 军工条形码装饰（PRTS 资产管理 / 战术箱序列号）。 */
+export function AkBarcode({ as: Tag = 'span', className, children, ...rest }: AkBarcodeProps) {
+  return (
+    <Tag {...rest} className={cx('ak-barcode', className)} data-slot="ak-barcode" aria-hidden="true">
+      {children}
+    </Tag>
+  )
+}
+
 export type AkBackdropVariant = 'grid' | 'dots' | 'diag' | 'scanlines'
 
 export interface AkGridBackdropProps extends DivProps {

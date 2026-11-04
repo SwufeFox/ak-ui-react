@@ -12,7 +12,8 @@
     )
   );
 
-  background-color: var(--ak-card-bg, transparent);
+  background-color: var(--ak-card-bg, color-mix(in srgb, var(--ak-surface-canvas) 85%, var(--ak-surface-sunken-2)));
+  border: 1px solid var(--ak-card-border, color-mix(in srgb, var(--ak-text-primary) 12%, transparent));
   transition:
     transform var(--ak-motion-fast, 120ms) ease,
     box-shadow var(--ak-motion-base, 200ms) ease,
@@ -26,6 +27,29 @@
   outline: none;
   display: inline-block;
   padding: var(--ak-card-pad);
+
+  &--chamfer {
+    clip-path: polygon(0 0, calc(100% - 1.25rem) 0, 100% 1.25rem, 100% 100%, 0 100%);
+  }
+
+  &--glass {
+    background-color: color-mix(in srgb, var(--ak-surface-canvas) 60%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--ak-signal-info) 32%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      0 8px 32px 0 rgba(0, 0, 0, 0.38),
+      0 0 16px color-mix(in srgb, var(--ak-signal-info) 14%, transparent);
+
+    &:hover {
+      border-color: var(--ak-signal-info);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+        0 12px 36px 0 rgba(0, 0, 0, 0.45),
+        0 0 24px color-mix(in srgb, var(--ak-signal-info) 28%, transparent);
+    }
+  }
 
   & &__header {
     display: grid;
@@ -61,10 +85,12 @@
 
   &--hoverable {
     &:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
-        0 4px 16px rgba(0, 0, 0, 0.32);
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 8px 24px -4px rgba(0, 0, 0, 0.45),
+        0 0 16px color-mix(in srgb, var(--ak-signal-info, #18d1ff) 18%, transparent);
     }
   }
 
@@ -73,7 +99,7 @@
     user-select: none;
 
     &:active {
-      transform: translateY(1px);
+      transform: translateY(1px) scale(0.99);
       box-shadow:
         inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
         0 2px 6px rgba(0, 0, 0, 0.2);
@@ -89,7 +115,114 @@
     border-color: var(--ak-signal-info, #4aabea) !important;
     box-shadow:
       inset 0 0 0 1px var(--ak-signal-info, #4aabea),
-      0 0 14px color-mix(in srgb, var(--ak-signal-info, #4aabea) 30%, transparent) !important;
+      0 0 16px color-mix(in srgb, var(--ak-signal-info, #4aabea) 36%, transparent) !important;
+  }
+
+  &--tactical {
+    position: relative;
+    border: 1px solid color-mix(in srgb, var(--ak-text-primary) 15%, transparent);
+    background-color: var(--ak-card-bg, color-mix(in srgb, var(--ak-surface-canvas) 85%, var(--ak-surface-sunken-2)));
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+      0 4px 20px rgba(0, 0, 0, 0.38);
+
+    // 顶部战术细线
+    &::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 0.75rem;
+      right: 0.75rem;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ak-signal-info) 15%,
+        var(--ak-signal-info) 85%,
+        transparent
+      );
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    // 4角 L 标：精准在 4 个顶点绘制 8px 长、1.5px 粗的发丝准星
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+        linear-gradient(var(--ak-signal-info), var(--ak-signal-info));
+      background-size:
+        8px 1.5px, 1.5px 8px,
+        8px 1.5px, 1.5px 8px,
+        8px 1.5px, 1.5px 8px,
+        8px 1.5px, 1.5px 8px;
+      background-position:
+        0 0, 0 0,
+        100% 0, 100% 0,
+        0 100%, 0 100%,
+        100% 100%, 100% 100%;
+      background-repeat: no-repeat;
+      opacity: 0.75;
+      transition: opacity var(--ak-motion-base, 200ms) ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+      filter: drop-shadow(0 0 3px var(--ak-signal-info));
+    }
+  }
+
+  &--chassis {
+    position: relative;
+    border: 1px solid color-mix(in srgb, var(--ak-text-primary) 18%, transparent);
+    background-color: var(--ak-card-bg, color-mix(in srgb, var(--ak-surface-canvas) 88%, var(--ak-surface-sunken-2)));
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 6px 24px rgba(0, 0, 0, 0.42);
+
+    // 左边缘战术斑马条（Hazard Edge）
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 7px;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--ak-signal-action) 0 4px,
+        #15181a 4px 8px
+      );
+      pointer-events: none;
+    }
+
+    // 内部双重凹刻线
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 1px solid color-mix(in srgb, var(--ak-text-primary) 6%, transparent);
+      pointer-events: none;
+    }
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--ak-signal-action) 50%, transparent);
+      box-shadow:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 8px 32px rgba(0, 0, 0, 0.48),
+        0 0 18px color-mix(in srgb, var(--ak-signal-action) 20%, transparent);
+    }
   }
 
   &--outline {

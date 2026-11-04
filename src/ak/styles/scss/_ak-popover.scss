@@ -8,7 +8,8 @@
   border-radius: 0;
   color: var(--ak-popover-fg, #f3f4ef);
   background: var(--ak-popover-bg, #171a1d);
-  box-shadow: var(--ak-popover-shadow, inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 1rem 3rem rgba(0, 0, 0, 0.4));
+  backdrop-filter: blur(14px);
+  box-shadow: var(--ak-popover-shadow, inset 0 1px 0 0 rgba(255, 255, 255, 0.16), 0 1rem 3rem rgba(0, 0, 0, 0.45));
   font-family: $font-sans-serif;
 }
 
@@ -67,7 +68,7 @@
   @include tuning.tuning-steps(
     (
       ak-tooltip-max-w: (12rem, 18rem, 24rem),
-      ak-tooltip-pad: (0.4rem 0.55rem, 0.55rem 0.7rem, 0.75rem 0.95rem),
+      ak-tooltip-pad: (0.4rem 0.65rem, 0.55rem 0.8rem, 0.75rem 1rem),
       ak-tooltip-fs: (0.625rem, 0.7rem, 0.78rem),
     )
   );
@@ -80,8 +81,13 @@
   color: var(--ak-popover-fg, #f3f4ef);
   font-family: $font-monospace;
   font-size: var(--ak-tooltip-fs);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   line-height: 1.45;
+  clip-path: polygon(0 0, calc(100% - 0.45rem) 0, 100% 0.45rem, 100% 100%, 0 100%);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+    0 4px 16px rgba(0, 0, 0, 0.45),
+    0 0 12px color-mix(in srgb, var(--ak-tooltip-signal) 30%, transparent);
 
   &:popover-open {
     animation: ak-popover-enter 100ms ease-out;
