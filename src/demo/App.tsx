@@ -1026,11 +1026,16 @@ function ReferenceView() {
     setButtonHits((n) => n + 1)
   }
 
-  // 战术干员档案动态交互状态
-  const [dossierMode, setDossierMode] = useState<'nominal' | 'chimera' | 'disengaged'>('nominal')
-  const [dossierHeat, setDossierHeat] = useState('42.0°C')
-  const [dossierSync, setDossierSync] = useState(88)
-  const [tacticalLog, setTacticalLog] = useState<string>('TACTICAL LINK ESTABLISHED // PRTS READY')
+  // 一键安装命令复制状态
+  const [installCopied, setInstallCopied] = useState(false)
+  const installCmd = 'npm install @swufefox/ak-ui-react'
+
+  const copyInstall = useCallback(() => {
+    navigator.clipboard.writeText(installCmd)
+    playTactileSound('confirm', 0.2)
+    setInstallCopied(true)
+    setTimeout(() => setInstallCopied(false), 2000)
+  }, [])
 
   // 模块搜索与过滤
   const [searchQuery, setSearchQuery] = useState('')
@@ -1095,14 +1100,6 @@ function ReferenceView() {
   const stageRef = useRef<HTMLDivElement>(null)
   const entranceRef = useRef<AkEntranceHandle>(null)
   const stageValue = useMemo(() => ({ active, select: setActive }), [active])
-
-  const [liveTime, setLiveTime] = useState(() => new Date().toISOString().slice(11, 23))
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setLiveTime(new Date().toISOString().slice(11, 23))
-    }, 47)
-    return () => clearInterval(timer)
-  }, [])
 
   /** 切换分类：写 hash（可分享）并把舞台滚回顶部（原位替换而不是继承上一块的滚动位置）。 */
   const selectCategory = useCallback((id: string) => {
@@ -1185,175 +1182,105 @@ function ReferenceView() {
 
   return (
     <main className="demo-main">
-      <header className="demo-reference__intro">
-        <div className="demo-intro__blueprint" aria-hidden="true">
-          <span className="demo-intro__crosshair demo-intro__crosshair--tl">+</span>
-          <span className="demo-intro__crosshair demo-intro__crosshair--tr">+</span>
-          <span className="demo-intro__coord">SEC-09 // LAT: 42°18'N LON: 98°44'E</span>
-          <span className="demo-intro__hazard" />
-        </div>
-
-        <div className="demo-intro__top">
-          <div className="demo-intro__brand">
-            <span className="demo-intro__brand-emblem">RHODES ISLAND</span>
-            <span className="demo-intro__brand-sep">//</span>
-            <span className="demo-intro__brand-sys">PRTS-OS TACTICAL SPECIFICATION</span>
-          </div>
-          <div className="demo-intro__badge-row">
-            <span className="demo-intro__clearance">
-              <span className="demo-intro__clearance-dot" />
-              CLEARANCE: LV.4 // CLASSIFIED ACCESS ONLY
+      <header className="demo-hero">
+        <div className="demo-hero__container">
+          <div className="demo-hero__meta">
+            <span className="demo-hero__badge">
+              <span className="demo-hero__badge-dot" />
+              RHODES ISLAND / PRTS DESIGN SYSTEM
             </span>
-            <span className="demo-intro__serial">
-              PRTS-UI-SYS-DOC // REV {packageVersion}
-            </span>
-          </div>
-        </div>
-
-        <div className="demo-intro__main">
-          <div className="demo-intro__heading">
-            <span className="demo-eyebrow">{t('ref.catalogue.eyebrow')} // PRTS-DESIGN-SYSTEM</span>
-            <h1 className="demo-intro__title">
-              <span className="demo-intro__title-en">TACTICAL INTERFACE SPECIFICATION</span>
-              <span className="demo-intro__title-cn">{t('ref.catalogue.title')}</span>
-            </h1>
-            <p className="demo-note">{t('ref.catalogue.note')}</p>
+            <span className="demo-hero__version">REV {packageVersion}</span>
+            <span className="demo-hero__tag">REACT 19 READY</span>
           </div>
 
-          <div className="demo-intro__metrics" aria-label="System Metrics">
-            <div className="demo-intro__chip">
-              <span className="demo-intro__chip-label">SYS STATUS</span>
-              <span className="demo-intro__chip-value demo-intro__chip-value--live">
-                <span className="demo-intro__live-dot" />
-                ONLINE // PRTS-ACTIVE
-              </span>
-            </div>
-            <div className="demo-intro__chip">
-              <span className="demo-intro__chip-label">SYSTEM TIME</span>
-              <span className="demo-intro__chip-value demo-intro__chip-value--live">
-                <span className="demo-intro__live-dot" />
-                {liveTime}
-              </span>
-            </div>
-            <div className="demo-intro__chip">
-              <span className="demo-intro__chip-label">SECTIONS</span>
-              <span className="demo-intro__chip-value">{CATEGORIES.length} MODULES</span>
-            </div>
-            <div className="demo-intro__chip">
-              <span className="demo-intro__chip-label">COMPONENTS</span>
-              <span className="demo-intro__chip-value">112 INTERFACES</span>
-            </div>
-          </div>
-        </div>
+          <div className="demo-hero__grid">
+            <div className="demo-hero__content">
+              <h1 className="demo-hero__title">
+                <span className="demo-hero__pkg">@swufefox/ak-ui-react</span>
+                <span className="demo-hero__heading-cn">{t('ref.catalogue.title')}</span>
+              </h1>
 
-        {/* 罗德岛最高机密战术指挥台 · 实战化高级组件集成展示 */}
-        <div className="demo-intro__dossier">
-          <AkCard as="article" variant="chassis">
-            <div className="demo-dossier__grid">
-              <div className="demo-dossier__op">
-                <AkReticle corners="four" tone={dossierMode === 'chimera' ? 'action' : 'info'} style={{ padding: '0.4rem', background: 'var(--ak-surface-sunken)' }}>
-                  <div className={`demo-dossier__avatar-mock demo-dossier__avatar-mock--${dossierMode}`}>
-                    <span className="demo-dossier__avatar-code">OP-01</span>
-                    <strong className="demo-dossier__avatar-name">AMIYA</strong>
-                    <span className="demo-dossier__avatar-class">{dossierMode === 'chimera' ? 'OVERDRIVE // 爆发' : 'CASTER / GUARD'}</span>
-                  </div>
-                </AkReticle>
-                <div style={{ display: 'grid', gap: '0.25rem' }}>
-                  <AkRarity level={dossierMode === 'chimera' ? 6 : 5} />
-                  <span style={{ fontSize: '0.62rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-text-muted)' }}>
-                    SEC-ID: RI-8492 // LEVEL 90
+              <p className="demo-hero__desc">
+                战术级高精度 React 19 UI 组件库，专为严谨的科幻工业界面、任务监控台、密集数据大屏与控制台应用打造。
+                零运行时 CSS 开销，纯原生样式变量驱动，提供 112+ 个战术级控件与 17 个系统模块。
+              </p>
+
+              <div className="demo-hero__actions">
+                <div
+                  className="demo-hero__install-box"
+                  onClick={copyInstall}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      copyInstall()
+                    }
+                  }}
+                  title="Click to copy install command"
+                >
+                  <span className="demo-hero__install-prefix">$</span>
+                  <code className="demo-hero__install-code">{installCmd}</code>
+                  <span className={`demo-hero__install-btn ${installCopied ? 'demo-hero__install-btn--copied' : ''}`}>
+                    {installCopied ? 'COPIED ✓' : 'COPY'}
                   </span>
                 </div>
-              </div>
 
-              <div className="demo-dossier__info">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <AkBilingual cn="战术部署状态" en="TACTICAL DEPLOYMENT OVERVIEW" />
-                  <AkBarcode />
+                <div className="demo-hero__btn-group">
+                  <AkButton
+                    variant="action"
+                    chamfer
+                    subtitle="EXPLORE // 快速开始"
+                    onClick={() => {
+                      playTactileSound('click', 0.15)
+                      selectCategory('components-1')
+                    }}
+                    iconEnd={<span aria-hidden="true">↓</span>}
+                  >
+                    BROWSE CATALOGUE
+                  </AkButton>
+                  <AkButton
+                    variant="outline"
+                    onClick={() => {
+                      playTactileSound('click', 0.15)
+                      window.open('https://github.com/swufefox/ak-ui-react', '_blank', 'noreferrer')
+                    }}
+                    iconEnd={<span aria-hidden="true">↗</span>}
+                  >
+                    GITHUB
+                  </AkButton>
                 </div>
-                <AkLaser tone={dossierMode === 'chimera' ? 'action' : dossierMode === 'disengaged' ? 'danger' : 'info'} animated style={{ margin: '0.35rem 0' }} />
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  <AkStatus
-                    size="sm"
-                    variant={dossierMode === 'chimera' ? 'warning' : dossierMode === 'disengaged' ? 'critical' : 'default'}
-                    label={dossierMode === 'chimera' ? 'OVERDRIVE ENGAGED' : dossierMode === 'disengaged' ? 'EVACUATED' : 'COMBAT READY'}
-                    detail={dossierMode === 'chimera' ? 'CHIMERA SKILL 3 ONLINE' : dossierMode === 'disengaged' ? 'LINK SEVERED' : 'TACTICAL LINK ESTABLISHED'}
-                  />
-                  <AkStatus
-                    size="sm"
-                    variant={dossierMode === 'chimera' ? 'critical' : 'warning'}
-                    label="REACTOR HEAT"
-                    detail={dossierHeat}
-                  />
-                </div>
-                <AkProgress
-                  variant={dossierMode === 'chimera' ? 'danger' : 'default'}
-                  label={dossierMode === 'chimera' ? 'NEURAL OVERDRIVE // 神经超频' : 'NEURAL SYNCHRONY // 神经同步率'}
-                  value={dossierSync}
-                  style={{ marginTop: '0.45rem' }}
-                />
-                <div className="demo-dossier__ticker">
-                  <span className="demo-dossier__ticker-tag">LOG</span>
-                  <span className="demo-dossier__ticker-msg">{tacticalLog}</span>
-                </div>
-              </div>
-
-              <div className="demo-dossier__actions">
-                <AkButton
-                  variant="action"
-                  chamfer
-                  subtitle="INITIATE // 爆发"
-                  icon={<span aria-hidden="true">⚡</span>}
-                  onClick={() => {
-                    playTactileSound('action', 0.25)
-                    setDossierMode('chimera')
-                    setDossierSync(100)
-                    setDossierHeat('98.4°C // CRITICAL')
-                    setTacticalLog('CHIMERA ACTIVATED: ATK +230%, TRUE DAMAGE ONLINE // NEURAL OVERDRIVE')
-                    hitButton('dossier:chimera')
-                  }}
-                >
-                  CHIMERA
-                </AkButton>
-                <AkButton
-                  variant="danger"
-                  chamfer
-                  subtitle="ABORT // 撤离"
-                  icon={<span aria-hidden="true">⚠</span>}
-                  onClick={() => {
-                    playTactileSound('warn', 0.22)
-                    setDossierMode('disengaged')
-                    setDossierSync(22)
-                    setDossierHeat('28.5°C // COOLING')
-                    setTacticalLog('OPERATOR EVACUATED // TACTICAL RETREAT IN PROGRESS')
-                    hitButton('dossier:disengage')
-                  }}
-                >
-                  DISENGAGE
-                </AkButton>
-                <AkButton
-                  variant="ghost"
-                  subtitle="DATA // 遥测"
-                  onClick={() => {
-                    playTactileSound('dial', 0.2)
-                    setDossierMode('nominal')
-                    const newHeat = (40 + Math.random() * 4).toFixed(1)
-                    setDossierHeat(`${newHeat}°C // NOMINAL`)
-                    setDossierSync(Math.floor(84 + Math.random() * 12))
-                    setTacticalLog('SENSOR TELEMETRY RE-CALIBRATED // ALL PRTS CHANNELS NORMAL')
-                    hitButton('dossier:telemetry')
-                  }}
-                >
-                  TELEMETRY
-                </AkButton>
               </div>
             </div>
-          </AkCard>
+
+            <div className="demo-hero__specs">
+              <div className="demo-hero__spec-card">
+                <span className="demo-hero__spec-num">112+</span>
+                <span className="demo-hero__spec-label">COMPONENTS // 组件</span>
+                <span className="demo-hero__spec-desc">涵盖按钮、卡片、数据表、大屏等战术控件</span>
+              </div>
+              <div className="demo-hero__spec-card">
+                <span className="demo-hero__spec-num">17</span>
+                <span className="demo-hero__spec-label">MODULES // 业务分类</span>
+                <span className="demo-hero__spec-desc">严格分类管理，原位无刷新切换与独立深链</span>
+              </div>
+              <div className="demo-hero__spec-card">
+                <span className="demo-hero__spec-num">0 KB</span>
+                <span className="demo-hero__spec-label">RUNTIME CSS // 性能</span>
+                <span className="demo-hero__spec-desc">无 CSS-in-JS 运行时损耗，纯原生 CSS 变量设计</span>
+              </div>
+              <div className="demo-hero__spec-card">
+                <span className="demo-hero__spec-num">TS STRICT</span>
+                <span className="demo-hero__spec-label">SAFETY // 类型安全</span>
+                <span className="demo-hero__spec-desc">100% 严苛 TypeScript 声明与完整 JSDoc 注释</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 快速直达锚点条 */}
         <div className="demo-intro__quickjumps">
-          <span className="demo-quickjumps__label">QUICK JUMP // 快速直达:</span>
+          <span className="demo-quickjumps__label">QUICK JUMP // 常用组件直达:</span>
           <div className="demo-quickjumps__list">
             {QUICK_JUMPS.map((qj) => (
               <button
@@ -1469,7 +1396,6 @@ function ReferenceView() {
           <AkTag variant="danger">{t('common.danger')}</AkTag>
           <AkTag variant="neutral">{t('common.neutral')}</AkTag>
         </div>
-        <AkLaser tone="info" style={{ margin: 'var(--ak-space-4) 0' }} />
         <div className="demo-row">
           <AkButton variant="action" chamfer subtitle="TACTICAL" icon={<span aria-hidden="true">◆</span>} onClick={() => hitButton('action+icon')}>
             {t('common.withIcon')}
@@ -1686,8 +1612,7 @@ function ReferenceView() {
             {t('notice.ok.body')}
           </AkNotice>
         </div>
-        <AkLaser tone="info" style={{ margin: 'var(--ak-space-4) 0' }} />
-        <div className="demo-row">
+        <div className="demo-row" style={{ marginTop: 'var(--ak-space-4)' }}>
           <AkStatus label={t('ref.feedback.status.network')} detail={t('ref.feedback.status.networkValue')} />
           <AkStatus label={t('ref.feedback.status.reactor')} detail={t('ref.feedback.status.reactorValue')} variant="warning" />
           <AkStatus label={t('ref.feedback.status.hull')} detail={t('ref.feedback.status.hullValue')} variant="critical" />
@@ -1702,8 +1627,7 @@ function ReferenceView() {
             valueLabel={t('ref.feedback.progress.critical')}
           />
         </div>
-        <AkLaser tone="info" style={{ margin: 'var(--ak-space-4) 0' }} />
-        <div className="demo-row">
+        <div className="demo-row" style={{ marginTop: 'var(--ak-space-4)' }}>
           <AkGauge label={t('common.deploy')} value={64} unit={t('common.percent')} />
           <AkGauge label={t('common.heat')} value={88} unit={t('common.percent')} variant="warning" />
         </div>
@@ -3221,15 +3145,10 @@ export function App() {
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
           <span className="demo-topbar__version">v{packageVersion}</span>
-          <AkBarcode className="demo-topbar__barcode" />
-          <span className="demo-topbar__coord">LOC: 31.23°N // 121.47°E // SHIP-01</span>
         </div>
 
-        {/* 顶栏控件全部用库自己的组件 —— 以前这里是自造的 demo-tactical-btn /
-            demo-status-pill，视觉与 AkButton / AkStatus 各调各的，主题切换时先露馅。 */}
+        {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
-          <AkStatus size="sm" label="SYSTEM NORMAL" />
-
           <div className="demo-topbar__group">
             <AkButton
               size="sm"
@@ -3284,16 +3203,6 @@ export function App() {
             value={density}
             onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
           />
-
-          <AkButton
-            size="sm"
-            variant="ghost"
-            onClick={() => window.dispatchEvent(new CustomEvent('ak:random-module'))}
-            title="Random Module // 随机巡检"
-            icon={<span aria-hidden="true">🎲</span>}
-          >
-            RANDOM
-          </AkButton>
 
           <AkButton
             size="sm"
