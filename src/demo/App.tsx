@@ -516,7 +516,7 @@ function Block({
         <div className="demo-code-header">
           <span className="demo-code-title">
             <span className="demo-code-dot" />
-            JSX / TSX SPECIFICATION
+            JSX / TSX
           </span>
           <AkButton type="button" variant="outline" size="sm" sound={false} onClick={copyCode} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
         </div>
@@ -555,6 +555,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
   const { t } = useI18n()
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const categoryListRef = useRef<HTMLDivElement>(null)
   const filteredCategories = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return CATEGORIES
@@ -583,6 +584,26 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [])
+
+  useLayoutEffect(() => {
+    const list = categoryListRef.current
+    if (!list) return
+    const revealActive = () => {
+      if (list.scrollWidth <= list.clientWidth) return
+      const item = list.querySelector<HTMLElement>('[aria-current="true"]')
+      if (!item) return
+      const rail = list.getBoundingClientRect()
+      const selected = item.getBoundingClientRect()
+      if (selected.left < rail.left || selected.width > list.clientWidth) {
+        list.scrollLeft += selected.left - rail.left
+      } else if (selected.right > rail.right) {
+        list.scrollLeft += selected.right - rail.right
+      }
+    }
+    revealActive()
+    window.addEventListener('resize', revealActive)
+    return () => window.removeEventListener('resize', revealActive)
+  }, [active, filteredCategories])
 
   return (
     <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
@@ -618,7 +639,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
           </button>
         )}
       </div>
-      <div className="demo-rail__list">
+      <div ref={categoryListRef} className="demo-rail__list">
         {filteredCategories.length === 0 ? (
           <div className="demo-rail__empty">
             <span className="demo-rail__empty-title">{t('ref.catalogue.empty')}</span>
@@ -1288,8 +1309,10 @@ function ReferenceView() {
   return (
     <main className="demo-main">
       <header className="demo-hero">
-        <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
-        <p className="demo-hero__desc">{t('ref.catalogue.description')}</p>
+        <div className="demo-hero__intro">
+          <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
+          <p className="demo-hero__desc">{t('ref.catalogue.description')}</p>
+        </div>
         <button type="button" className="demo-hero__install-box" onClick={copyInstall} aria-label={t('ref.catalogue.copyInstall')}>
           <span className="demo-hero__install-prefix" aria-hidden="true">$</span>
           <code className="demo-hero__install-code">{installCmd}</code>
@@ -2326,24 +2349,24 @@ function ReferenceView() {
                 checked={tableTactical}
                 onChange={(e) => setTableTactical(e.target.checked)}
               >
-                TACTICAL // 战术终端风格
+                {t('ref.table.tactical')}
               </AkChoice>
               <AkChoice
                 variant="switch"
                 checked={tableStriped}
                 onChange={(e) => setTableStriped(e.target.checked)}
               >
-                STRIPED // 斑马纹
+                {t('ref.table.striped')}
               </AkChoice>
               <AkChoice
                 variant="switch"
                 checked={tableSticky}
                 onChange={(e) => setTableSticky(e.target.checked)}
               >
-                STICKY HEADER // 吸顶表头
+                {t('ref.table.sticky')}
               </AkChoice>
               <span className="demo-note">
-                {t('ref.table.interactiveHint')} [SELECTED: {selectedTableRow}]
+                {t('ref.table.interactiveHint')} · {t('common.commandSelected')}: {selectedTableRow}
               </span>
             </div>
 
@@ -2976,8 +2999,9 @@ function ReferenceView() {
               {t('ref.catalogue.position', { n: activeIndex + 1, m: CATEGORIES.length })}
             </span>
             <div className="demo-row">
-              <AkButton
-                variant="outline"
+              <button
+                type="button"
+                className="demo-stage__page"
                 disabled={activeIndex === 0}
                 onClick={() => {
                   playTactileSound('tab', 0.16)
@@ -2985,9 +3009,10 @@ function ReferenceView() {
                 }}
               >
                 {t('ref.catalogue.previous')}
-              </AkButton>
-              <AkButton
-                variant="outline"
+              </button>
+              <button
+                type="button"
+                className="demo-stage__page"
                 disabled={activeIndex === CATEGORIES.length - 1}
                 onClick={() => {
                   playTactileSound('tab', 0.16)
@@ -2995,7 +3020,7 @@ function ReferenceView() {
                 }}
               >
                 {t('ref.catalogue.next')}
-              </AkButton>
+              </button>
             </div>
           </div>
         </div>
@@ -3041,18 +3066,16 @@ export function App() {
 
         {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
-          <AkButton
-            size="sm"
-            variant="light"
-            onClick={() => setLlmModalOpen(true)}
-            title="View llms.txt AI Agent Specification"
-            icon={<span className="demo-spec-dot">◆</span>}
-          >
-            LLMS.TXT
-          </AkButton>
+          <button type="button" className="demo-topbar__link" onClick={() => {
+            playTactileSound('click', 0.16)
+            setLlmModalOpen(true)
+          }}>
+            llms.txt
+          </button>
 
           <AkSegmented
             size="sm"
+            className="demo-topbar__language"
             ariaLabel={t('app.lang.label')}
             options={[
               { label: '中文', value: 'zh-CN' },
@@ -3092,26 +3115,15 @@ export function App() {
                   onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
                 />
               </div>
-              <AkButton
-                size="sm"
-                variant="outline"
-                onClick={toggleSound}
-                aria-label={t('app.sound.label')}
-                aria-pressed={soundEnabled}
-              >
+              <button type="button" className="demo-settings__sound" onClick={toggleSound} aria-label={t('app.sound.label')} aria-pressed={soundEnabled}>
                 {soundEnabled ? t('app.sound.on') : t('app.sound.off')}
-              </AkButton>
+              </button>
             </div>
           </details>
 
-          <AkButton
-            size="sm"
-            variant="outline"
-            onClick={() => window.open('https://github.com/swufefox/ak-ui-react', '_blank', 'noreferrer')}
-            iconEnd={<span aria-hidden="true">↗</span>}
-          >
-            GITHUB
-          </AkButton>
+          <a className="demo-topbar__link" href="https://github.com/swufefox/ak-ui-react" target="_blank" rel="noreferrer" onClick={() => playTactileSound('click', 0.16)}>
+            GitHub <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </header>
 

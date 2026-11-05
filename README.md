@@ -324,7 +324,8 @@ npm ≥ 11.5.1 and Node ≥ 22.14.0).
 The component showcase is the same Vite app used for development (`src/demo/`). Search by
 component name or category; `/` focuses search, and Enter opens a single matching category. The
 categories provide live previews and generated code, with prop tuning and API notes where
-available. Theme, density, and sound controls are grouped under Settings. The showcase deploys to
+available. Theme, density, and sound controls are grouped under Settings. On narrow screens, the
+category list scrolls horizontally and reveals the current selection. The showcase deploys to
 **Cloudflare Pages** on every push to `master`, independently of the npm release.
 
 ```bash
