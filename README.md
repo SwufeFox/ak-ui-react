@@ -321,10 +321,11 @@ npm ≥ 11.5.1 and Node ≥ 22.14.0).
 
 ## Showcase
 
-The component showcase is the same Vite app used for development (`src/demo/`, 11 sections from
-Actions through Arknights game data). It deploys to **Cloudflare Pages** on every push to
-`master` — independent of the npm release, so a docs change does not cut a version and a release
-does not wait on the site.
+The component showcase is the same Vite app used for development (`src/demo/`). Search by
+component name or category; `/` focuses search, and Enter opens a single matching category. The
+categories provide live previews and generated code, with prop tuning and API notes where
+available. Theme, density, and sound controls are grouped under Settings. The showcase deploys to
+**Cloudflare Pages** on every push to `master`, independently of the npm release.
 
 ```bash
 npm run dev          # local, http://localhost:5273

@@ -120,7 +120,6 @@ import { useI18n, type MessageKey } from './i18n'
 import { DOC_REGISTRY, type BlockPropDoc } from './doc-data'
 import llmsRawText from '../../llms.txt?raw'
 import type { AkMobileMenuHandle } from '../ak/ui/site/AkMobileMenu'
-import { TacticalScenariosView } from './TacticalScenarios'
 import './demo.css'
 
 type Theme = 'terminal' | 'archive'
@@ -169,20 +168,26 @@ const CATEGORY_KEYWORDS: Record<string, readonly string[]> = {
   'components-17': ['command', 'screen', 'item', 'slot', '大屏', '指令牌', '材料方块', '槽位'],
 }
 
-const QUICK_JUMPS = [
-  { label: 'AkButton', categoryId: 'components-1', tag: '按钮' },
-  { label: 'AkCard', categoryId: 'components-3', tag: '卡片' },
-  { label: 'AkLaser', categoryId: 'components-11', tag: '激光' },
-  { label: 'AkStatus', categoryId: 'components-4', tag: '芯片' },
-  { label: 'AkProgress', categoryId: 'components-4', tag: '进度条' },
-  { label: 'AkTable', categoryId: 'components-16', tag: '表格' },
-  { label: 'AkDialog', categoryId: 'components-13', tag: '弹窗' },
-  { label: 'AkPopover', categoryId: 'components-13', tag: '气泡' },
-  { label: 'AkTabs', categoryId: 'components-6', tag: '标签页' },
-  { label: 'AkSlider', categoryId: 'components-5', tag: '滑条' },
-  { label: 'AkSan', categoryId: 'components-15', tag: '理智' },
-  { label: 'AkScreen', categoryId: 'components-17', tag: '终端屏' },
-] as const
+// Component names are indexed by their primary example, so searches lead to useful results.
+const CATEGORY_COMPONENTS: Record<(typeof CATEGORIES)[number]['id'], readonly string[]> = {
+  'components-1': ['AkButton'],
+  'components-2': ['AkDropdownMenu', 'AkContextMenu', 'AkMenubar', 'AkToolbar', 'AkCollapsible', 'AkMenuGroup', 'AkMenuSeparator'],
+  'components-3': ['AkCard', 'AkCardHeader', 'AkCardTitle', 'AkCardDescription', 'AkCardContent', 'AkCardFooter'],
+  'components-4': ['AkNotice', 'AkNoticeStack', 'AkStatus', 'AkProgress', 'AkProgressStack', 'AkGauge'],
+  'components-5': ['AkSlider', 'AkInputNumber', 'AkSegmented'],
+  'components-6': ['AkTabs'],
+  'components-7': ['AkCountUp', 'AkEntrance', 'AkDepth', 'AkDepthLayer', 'AkParticleField'],
+  'components-8': ['AkMediaGallery', 'AkMediaAlbum'],
+  'components-9': ['AkAssetLoader', 'AkMobileMenu'],
+  'components-10': ['AkSectionNavigator'],
+  'components-11': ['AkStripes', 'AkGridBackdrop', 'AkCorner', 'AkBrackets', 'AkReticle', 'AkBarcode', 'AkHalftone', 'AkGlyphBox', 'AkGlyph', 'AkMotion', 'AkInverse', 'AkLaser', 'AkStripeEdge', 'AkCut', 'AkCodeId', 'AkBlueBand', 'AkChevrons', 'AkDisplay', 'AkWatermark', 'AkGlow', 'AkOutline', 'AkSkew', 'AkVignette', 'AkGrain', 'AkMosaic', 'AkBackdrop', 'AkOverline', 'AkNum', 'AkEn', 'AkBilingual'],
+  'components-12': ['AkRarity', 'AkRarityChip', 'AkRarityBar', 'AkRarityScope', 'AkProfession', 'AkProfessionLabel', 'AkElite', 'AkPotential', 'AkSpec', 'AkTrust', 'AkSkillLevels', 'AkPotList', 'AkPot', 'AkAttrs', 'AkAttr', 'AkKv', 'AkKvItem'],
+  'components-13': ['AkDivider', 'AkButtonGroup', 'AkPopover', 'AkTag', 'AkTagGroup', 'AkStatusGroup', 'AkPagination'],
+  'components-14': ['AkFormStack', 'AkField', 'AkFieldLabel', 'AkInput', 'AkSelect', 'AkTextarea', 'AkChoice'],
+  'components-15': ['AkCounter', 'AkLevel', 'AkSpinner', 'AkSan', 'AkSanContainer', 'AkSkeleton', 'AkLoadingScreen', 'AkDialog'],
+  'components-16': ['AkBreadcrumb', 'AkTable', 'AkAvatar', 'AkAvatarGroup', 'AkThumbnail', 'AkScrollArea', 'AkNewsList'],
+  'components-17': ['AkCommandGrid', 'AkCommand', 'AkCommandGroup', 'AkSlot', 'AkItem', 'AkScreen'],
+}
 
 /** 舞台上下文：当前激活的分类 id + 切换函数。 */
 const StageContext = createContext<{ active: string; select: (id: string) => void } | null>(null)
@@ -543,6 +548,107 @@ function Block({
         </div>
       )}
     </section>
+  )
+}
+
+function CatalogueRail({ active, selectCategory }: { active: string; selectCategory: (id: string) => void }) {
+  const { t } = useI18n()
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const filteredCategories = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return CATEGORIES
+    return CATEGORIES.filter((category, index) => {
+      const num = String(index + 1).padStart(2, '0')
+      const title = t(category.title).toLowerCase()
+      const keywords = CATEGORY_KEYWORDS[category.id] ?? []
+      return (
+        num.includes(query) ||
+        category.id.includes(query) ||
+        title.includes(query) ||
+        CATEGORY_COMPONENTS[category.id].some((name) => name.toLowerCase().includes(query)) ||
+        keywords.some((kw) => kw.toLowerCase().includes(query))
+      )
+    })
+  }, [searchQuery, t])
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement)?.tagName)) {
+        event.preventDefault()
+        searchInputRef.current?.focus()
+        searchInputRef.current?.select()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [])
+
+  return (
+    <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
+      <div className="demo-rail__head">
+        <span className="demo-rail__eyebrow">{t('ref.catalogue.rail')}</span>
+        <span className="demo-rail__count">{t('ref.catalogue.count', { n: CATEGORIES.length })}</span>
+      </div>
+      <div className="demo-rail__search-box">
+        <span className="demo-rail__search-icon" aria-hidden="true">⌕</span>
+        <input
+          ref={searchInputRef}
+          type="text"
+          className="demo-rail__search-input"
+          aria-label={t('ref.catalogue.search')}
+          placeholder={t('ref.catalogue.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return
+            if (event.key === 'Escape') setSearchQuery('')
+            if (event.key === 'Enter' && filteredCategories.length === 1) {
+              event.preventDefault()
+              selectCategory(filteredCategories[0]!.id)
+            }
+          }}
+        />
+        {searchQuery && (
+          <button type="button" className="demo-rail__search-clear" aria-label={t('ref.catalogue.clearSearch')} onClick={() => {
+            setSearchQuery('')
+            searchInputRef.current?.focus()
+          }}>
+            ✕
+          </button>
+        )}
+      </div>
+      <div className="demo-rail__list">
+        {filteredCategories.length === 0 ? (
+          <div className="demo-rail__empty">
+            <span className="demo-rail__empty-title">{t('ref.catalogue.empty')}</span>
+            <button type="button" className="demo-rail__empty-reset" onClick={() => {
+              setSearchQuery('')
+              searchInputRef.current?.focus()
+            }}>
+              {t('ref.catalogue.reset')}
+            </button>
+          </div>
+        ) : filteredCategories.map((category) => {
+          const originalIndex = CATEGORIES.findIndex((item) => item.id === category.id)
+          return (
+            <button
+              key={category.id}
+              type="button"
+              className="demo-rail__item"
+              aria-current={active === category.id ? 'true' : undefined}
+              onClick={() => {
+                playTactileSound('tab', 0.16)
+                selectCategory(category.id)
+              }}
+            >
+              <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
+              <span className="demo-rail__label">{t(category.title)}</span>
+            </button>
+          )
+        })}
+      </div>
+    </nav>
   )
 }
 
@@ -995,7 +1101,7 @@ const DEPOT_ITEMS: DepotItem[] = [
 ]
 
 function ReferenceView() {
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
   const [tab, setTab] = useState('overview')
   const [segment, setSegment] = useState('all')
   const [galleryIndex, setGalleryIndex] = useState(0)
@@ -1061,20 +1167,26 @@ function ReferenceView() {
     setButtonHits((n) => n + 1)
   }
 
-  // 一键安装命令复制状态
-  const [installCopied, setInstallCopied] = useState(false)
+  const [installCopyState, setInstallCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const installCopyTimer = useRef<number | null>(null)
   const installCmd = 'npm install @swufefox/ak-ui-react'
 
-  const copyInstall = useCallback(() => {
-    navigator.clipboard.writeText(installCmd)
-    playTactileSound('confirm', 0.2)
-    setInstallCopied(true)
-    setTimeout(() => setInstallCopied(false), 2000)
+  useEffect(() => () => {
+    if (installCopyTimer.current !== null) window.clearTimeout(installCopyTimer.current)
   }, [])
 
-  // 模块搜索与过滤
-  const [searchQuery, setSearchQuery] = useState('')
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const copyInstall = useCallback(async () => {
+    if (installCopyTimer.current !== null) window.clearTimeout(installCopyTimer.current)
+    try {
+      await navigator.clipboard.writeText(installCmd)
+      playTactileSound('confirm', 0.2)
+      setInstallCopyState('copied')
+    } catch {
+      setInstallCopyState('error')
+    }
+    installCopyTimer.current = window.setTimeout(() => setInstallCopyState('idle'), 2000)
+  }, [])
+
   // 理智计数演示状态
   const [loadingReady, setLoadingReady] = useState(false)
   const [screenOpen, setScreenOpen] = useState(false)
@@ -1153,33 +1265,6 @@ function ReferenceView() {
     [activeIndex, selectCategory],
   )
 
-  const filteredCategories = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return CATEGORIES
-    return CATEGORIES.filter((category, index) => {
-      const num = String(index + 1).padStart(2, '0')
-      const title = t(category.title).toLowerCase()
-      const keywords = CATEGORY_KEYWORDS[category.id] ?? []
-      return (
-        num.includes(query) ||
-        category.id.includes(query) ||
-        title.includes(query) ||
-        keywords.some((kw) => kw.toLowerCase().includes(query))
-      )
-    })
-  }, [searchQuery, t])
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
-        e.preventDefault()
-        searchInputRef.current?.focus()
-        searchInputRef.current?.select()
-      }
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [])
 
   /** 浏览器前进/后退或者直接改 hash 时跟随。（只处理落在已知分类上的 hash。） */
   useEffect(() => {
@@ -1203,163 +1288,19 @@ function ReferenceView() {
   return (
     <main className="demo-main">
       <header className="demo-hero">
-        <div className="demo-hero__container">
-          <div className="demo-hero__meta">
-            <span className="demo-hero__badge">
-              <span className="demo-hero__badge-dot" />
-              RHODES ISLAND / PRTS DESIGN SYSTEM
-            </span>
-            <span className="demo-hero__version">REV {packageVersion}</span>
-            <span className="demo-hero__tag">REACT 19 READY</span>
-          </div>
-
-          <div className="demo-hero__grid">
-            <div className="demo-hero__content">
-              <h1 className="demo-hero__title">
-                <span className="demo-hero__pkg">@swufefox/ak-ui-react</span>
-                <span className="demo-hero__heading-cn">{t('ref.catalogue.title')}</span>
-              </h1>
-
-              <p className="demo-hero__desc">
-                战术级高精度 React 19 UI 组件库，专为严谨的科幻工业界面、任务监控台、密集数据大屏与控制台应用打造。
-                零运行时 CSS 开销，纯原生样式变量驱动，提供 112+ 个战术级控件与 17 个系统模块。
-              </p>
-
-              <div className="demo-hero__actions">
-                <div
-                  className="demo-hero__install-box"
-                  onClick={copyInstall}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      copyInstall()
-                    }
-                  }}
-                  title="Click to copy install command"
-                >
-                  <span className="demo-hero__install-prefix">$</span>
-                  <code className="demo-hero__install-code">{installCmd}</code>
-                  <span className={`demo-hero__install-btn ${installCopied ? 'demo-hero__install-btn--copied' : ''}`}>
-                    {installCopied ? 'COPIED ✓' : 'COPY'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="demo-hero__specs">
-              <div className="demo-hero__spec-card">
-                <span className="demo-hero__spec-num">112+</span>
-                <span className="demo-hero__spec-label">COMPONENTS // 组件</span>
-                <span className="demo-hero__spec-desc">涵盖按钮、卡片、数据表、大屏等战术控件</span>
-              </div>
-              <div className="demo-hero__spec-card">
-                <span className="demo-hero__spec-num">17</span>
-                <span className="demo-hero__spec-label">MODULES // 业务分类</span>
-                <span className="demo-hero__spec-desc">严格分类管理，原位无刷新切换与独立深链</span>
-              </div>
-              <div className="demo-hero__spec-card">
-                <span className="demo-hero__spec-num">0 KB</span>
-                <span className="demo-hero__spec-label">RUNTIME CSS // 性能</span>
-                <span className="demo-hero__spec-desc">无 CSS-in-JS 运行时损耗，纯原生 CSS 变量设计</span>
-              </div>
-              <div className="demo-hero__spec-card">
-                <span className="demo-hero__spec-num">TS STRICT</span>
-                <span className="demo-hero__spec-label">SAFETY // 类型安全</span>
-                <span className="demo-hero__spec-desc">100% 严苛 TypeScript 声明与完整 JSDoc 注释</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 快速直达锚点条 */}
-        <div className="demo-intro__quickjumps">
-          <span className="demo-quickjumps__label">QUICK JUMP // 常用组件直达:</span>
-          <div className="demo-quickjumps__list">
-            {QUICK_JUMPS.map((qj) => (
-              <button
-                key={qj.label}
-                type="button"
-                className="demo-quickjump__chip"
-                onClick={() => {
-                  playTactileSound('click', 0.15)
-                  selectCategory(qj.categoryId)
-                }}
-              >
-                <span className="demo-quickjump__code">{qj.label}</span>
-                <span className="demo-quickjump__name">{qj.tag}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
+        <p className="demo-hero__desc">{t('ref.catalogue.description')}</p>
+        <button type="button" className="demo-hero__install-box" onClick={copyInstall} aria-label={t('ref.catalogue.copyInstall')}>
+          <span className="demo-hero__install-prefix" aria-hidden="true">$</span>
+          <code className="demo-hero__install-code">{installCmd}</code>
+          <span className="demo-hero__install-btn" aria-live="polite">
+            {t(installCopyState === 'copied' ? 'ref.catalogue.copied' : installCopyState === 'error' ? 'ref.catalogue.copyError' : 'ref.catalogue.copy')}
+          </span>
+        </button>
       </header>
 
       <div className="demo-catalogue">
-        <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
-          <div className="demo-rail__head">
-            <span className="demo-rail__eyebrow">CATALOGUE // 索引</span>
-            <span className="demo-rail__count">{CATEGORIES.length} MODULES</span>
-          </div>
-
-          <div className="demo-rail__search-box">
-            <span className="demo-rail__search-icon" aria-hidden="true">⌕</span>
-            <input
-              ref={searchInputRef}
-              type="text"
-              className="demo-rail__search-input"
-              placeholder={locale === 'zh-CN' ? '搜索 112 个组件... (/)' : 'Filter 112 components... (/)'}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                className="demo-rail__search-clear"
-                onClick={() => {
-                  setSearchQuery('')
-                  searchInputRef.current?.focus()
-                }}
-                aria-label="Clear search"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          {filteredCategories.length === 0 ? (
-            <div className="demo-rail__empty">
-              <span className="demo-rail__empty-title">NO MATCH // 无匹配</span>
-              <span className="demo-rail__empty-hint">{locale === 'zh-CN' ? '未找到包含此关键字的组件' : 'No components found'}</span>
-              <button
-                type="button"
-                className="demo-rail__empty-reset"
-                onClick={() => setSearchQuery('')}
-              >
-                RESET // 重置
-              </button>
-            </div>
-          ) : (
-            filteredCategories.map((category) => {
-              const originalIndex = CATEGORIES.findIndex((c) => c.id === category.id)
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  className="demo-rail__item"
-                  aria-current={active === category.id ? 'true' : undefined}
-                  onClick={() => {
-                    playTactileSound('tab', 0.16)
-                    selectCategory(category.id)
-                  }}
-                >
-                  <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
-                  <span className="demo-rail__label">{t(category.title)}</span>
-                </button>
-              )
-            })
-          )}
-        </nav>
+        <CatalogueRail active={active} selectCategory={selectCategory} />
 
         <div className="demo-stage" ref={stageRef}>
           <StageContext.Provider value={stageValue}>
@@ -3072,22 +3013,6 @@ export function App() {
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
   const [llmCopied, setLlmCopied] = useState(false)
-  const [viewMode, setViewMode] = useState<'scenarios' | 'catalogue'>(() => {
-    if (typeof window !== 'undefined' && window.location.hash.startsWith('#components-')) {
-      return 'catalogue'
-    }
-    return 'scenarios'
-  })
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash.startsWith('#components-')) {
-        setViewMode('catalogue')
-      }
-    }
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
@@ -3109,34 +3034,9 @@ export function App() {
     <div className="demo-app">
       <header className="demo-topbar">
         <div className="demo-topbar__brand">
-          <div className="demo-brand-badge">
-            <span className="demo-brand-badge__emblem">◆</span>
-            <span className="demo-brand-badge__label">PRTS // OS</span>
-          </div>
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
           <span className="demo-topbar__version">v{packageVersion}</span>
-        </div>
-
-        {/* 核心双模视图切换器 */}
-        <div className="demo-topbar__view-toggle">
-          <AkSegmented
-            size="sm"
-            ariaLabel="View Mode"
-            options={[
-              { label: '◈ SCENARIOS // 复合场景', value: 'scenarios' },
-              { label: '⌕ CATALOGUE // 组件索引', value: 'catalogue' },
-            ]}
-            value={viewMode}
-            onValueChange={(v) => {
-              playTactileSound('tab', 0.16)
-              const next = v as 'scenarios' | 'catalogue'
-              setViewMode(next)
-              if (next === 'scenarios' && window.location.hash.startsWith('#components-')) {
-                history.replaceState(null, '', window.location.pathname)
-              }
-            }}
-          />
         </div>
 
         {/* 顶栏操作控件 */}
@@ -3153,18 +3053,7 @@ export function App() {
 
           <AkSegmented
             size="sm"
-            ariaLabel="Theme"
-            options={[
-              { label: 'TERMINAL', value: 'terminal' },
-              { label: 'ARCHIVE', value: 'archive' },
-            ]}
-            value={theme}
-            onValueChange={(v) => setTheme(v as 'terminal' | 'archive')}
-          />
-
-          <AkSegmented
-            size="sm"
-            ariaLabel="Language"
+            ariaLabel={t('app.lang.label')}
             options={[
               { label: '中文', value: 'zh-CN' },
               { label: 'EN', value: 'en' },
@@ -3173,28 +3062,47 @@ export function App() {
             onValueChange={(v) => setLocale(v as 'zh-CN' | 'en')}
           />
 
-          {/* 密度：整站的活样板 —— 切一下，下面所有演示块里的组件一起变 */}
-          <AkSegmented
-            size="sm"
-            ariaLabel="Density"
-            options={[
-              { label: 'CMPT', value: 'compact' },
-              { label: 'COZY', value: 'cozy' },
-              { label: 'SPCS', value: 'spacious' },
-            ]}
-            value={density}
-            onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
-          />
-
-          <AkButton
-            size="sm"
-            variant={soundEnabled ? 'action' : 'outline'}
-            onClick={toggleSound}
-            icon={<span>{soundEnabled ? '🔊' : '🔇'}</span>}
-            aria-label={t('app.sound.label')}
-          >
-            {soundEnabled ? t('app.sound.on') : t('app.sound.off')}
-          </AkButton>
+          <details className="demo-settings">
+            <summary>{t('app.settings.label')}</summary>
+            <div className="demo-settings__panel">
+              <div className="demo-settings__group">
+                <span>{t('app.theme.label')}</span>
+                <AkSegmented
+                  size="sm"
+                  ariaLabel={t('app.theme.label')}
+                  options={[
+                    { label: t('app.theme.terminal'), value: 'terminal' },
+                    { label: t('app.theme.archive'), value: 'archive' },
+                  ]}
+                  value={theme}
+                  onValueChange={(v) => setTheme(v as Theme)}
+                />
+              </div>
+              <div className="demo-settings__group">
+                <span>{t('app.density.label')}</span>
+                <AkSegmented
+                  size="sm"
+                  ariaLabel={t('app.density.label')}
+                  options={[
+                    { label: t('app.density.compact'), value: 'compact' },
+                    { label: t('app.density.cozy'), value: 'cozy' },
+                    { label: t('app.density.spacious'), value: 'spacious' },
+                  ]}
+                  value={density}
+                  onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
+                />
+              </div>
+              <AkButton
+                size="sm"
+                variant="outline"
+                onClick={toggleSound}
+                aria-label={t('app.sound.label')}
+                aria-pressed={soundEnabled}
+              >
+                {soundEnabled ? t('app.sound.on') : t('app.sound.off')}
+              </AkButton>
+            </div>
+          </details>
 
           <AkButton
             size="sm"
@@ -3207,16 +3115,7 @@ export function App() {
         </div>
       </header>
 
-      {viewMode === 'scenarios' ? (
-        <TacticalScenariosView
-          onBrowseCatalogue={() => {
-            setViewMode('catalogue')
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-          }}
-        />
-      ) : (
-        <ReferenceView />
-      )}
+      <ReferenceView />
 
       {llmModalOpen ? (
         <div className="demo-llm-overlay" onClick={() => setLlmModalOpen(false)}>

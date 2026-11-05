@@ -58,12 +58,7 @@ body {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   min-height: 100vh;
-  background-color: var(--demo-canvas);
-  background-image:
-    radial-gradient(circle at 50% 0%, var(--demo-canvas-glow), transparent 60%),
-    linear-gradient(to right, var(--demo-grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--demo-grid-line) 1px, transparent 1px);
-  background-size: 100% 100%, 36px 36px, 36px 36px;
+  background: var(--demo-canvas);
 }
 
 .demo-topbar {
@@ -80,19 +75,6 @@ body {
   border-bottom: 1px solid var(--demo-hairline);
   background: var(--demo-topbar);
   backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, var(--ak-signal-info) 25%, var(--ak-signal-info) 75%, transparent 100%);
-    opacity: 0.55;
-    pointer-events: none;
-  }
 }
 
 .demo-topbar__brand {
@@ -102,25 +84,6 @@ body {
   gap: 0.65rem 0.85rem;
 }
 
-.demo-brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.2rem 0.5rem;
-  border: 1px solid var(--ak-signal-info, #4aabea);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 12%, transparent);
-  color: var(--ak-signal-info, #4aabea);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  line-height: 1;
-}
-
-.demo-brand-badge__emblem {
-  font-size: 0.6rem;
-  animation: demo-status-pulse 2.2s ease-in-out infinite;
-}
 
 .demo-topbar__brand .ak-display {
   color: var(--demo-text-strong);
@@ -147,12 +110,6 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.demo-topbar__view-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .demo-topbar__controls {
   display: flex;
   flex-wrap: wrap;
@@ -161,12 +118,48 @@ body {
   gap: 0.65rem;
 }
 
-/* 顶栏控件的自造样式已删除 —— 现在直接用 AkButton / AkSegmented / AkStatus。
-   保留 .demo-topbar__group 只作为两枚按钮的并排容器。 */
-.demo-topbar__group {
-  display: inline-flex;
+.demo-settings {
+  position: relative;
+}
+
+.demo-settings summary {
+  display: flex;
   align-items: center;
+  min-height: 2.25rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--demo-hairline);
+  color: var(--demo-text-strong);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  list-style: none;
+}
+
+.demo-settings summary::-webkit-details-marker { display: none; }
+.demo-settings summary:hover,
+.demo-settings[open] summary { border-color: var(--ak-signal-info); }
+.demo-settings summary:focus-visible { outline: 2px solid var(--ak-signal-info); outline-offset: 2px; }
+
+.demo-settings__panel {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: grid;
+  gap: 1rem;
+  box-sizing: border-box;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-canvas);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 25%);
+}
+
+.demo-settings__group {
+  display: grid;
   gap: 0.4rem;
+  color: var(--demo-text-muted);
+  font-size: 0.75rem;
 }
 
 /* ── 参考视图（主文档流）──────────────────────────────────────────────── */
@@ -180,161 +173,28 @@ body {
 }
 
 .demo-hero {
-  position: relative;
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
-  padding: clamp(1.5rem, 3vw, 2.4rem);
-  border: 1px solid var(--demo-hairline);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--ak-signal-info, #4aabea) 4%, transparent) 0%, transparent 60%),
-    repeating-linear-gradient(90deg, color-mix(in srgb, var(--ak-text-primary) 2.5%, transparent) 0 1px, transparent 1px 3rem),
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--ak-text-primary) 2.5%, transparent) 0 1px, transparent 1px 3rem),
-    color-mix(in srgb, var(--ak-surface-canvas) 92%, transparent);
-  backdrop-filter: blur(12px);
-  box-shadow:
-    inset 0 0 60px rgba(0, 0, 0, 0.4),
-    0 12px 36px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-}
-
-.demo-hero::before {
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  width: 1.5rem;
-  height: 1.5rem;
-  content: "";
-  border-top: 3px solid var(--ak-signal-info, #4aabea);
-  border-left: 3px solid var(--ak-signal-info, #4aabea);
-  filter: drop-shadow(0 0 6px var(--ak-signal-info, #4aabea));
-  pointer-events: none;
-}
-
-.demo-hero::after {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 1.5rem;
-  height: 1.5rem;
-  content: "";
-  border-bottom: 3px solid var(--ak-signal-info, #4aabea);
-  border-right: 3px solid var(--ak-signal-info, #4aabea);
-  filter: drop-shadow(0 0 6px var(--ak-signal-info, #4aabea));
-  pointer-events: none;
-}
-
-.demo-hero__container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.demo-hero__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem 1rem;
-}
-
-.demo-hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.2rem 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--ak-signal-info, #4aabea) 40%, transparent);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 10%, transparent);
-  color: var(--ak-signal-info, #4aabea);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-}
-
-.demo-hero__badge-dot {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 6px currentColor;
-  animation: demo-status-pulse 2s ease-in-out infinite;
-}
-
-.demo-hero__version,
-.demo-hero__tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.6rem;
-  border: 1px solid var(--demo-hairline);
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 60%, transparent);
-  color: var(--demo-text-muted);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.demo-hero__tag {
-  color: var(--ak-signal-action, #ffd800);
-  border-color: color-mix(in srgb, var(--ak-signal-action, #ffd800) 35%, transparent);
-  background: color-mix(in srgb, var(--ak-signal-action, #ffd800) 8%, transparent);
-}
-
-.demo-hero__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 1.75rem 2.5rem;
-  align-items: start;
-}
-
-@media (max-width: 960px) {
-  .demo-hero__grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-hero__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+  justify-items: start;
+  gap: 0.75rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border-left: 2px solid var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-surface-sunken) 76%, transparent);
 }
 
 .demo-hero__title {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.demo-hero__pkg {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: clamp(1.4rem, 2.8vw, 2.2rem);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: var(--ak-text-primary);
-  text-shadow: 0 0 20px color-mix(in srgb, var(--ak-signal-info, #4aabea) 25%, transparent);
-}
-
-.demo-hero__heading-cn {
-  font-family: var(--ak-font-serif, "Source Han Serif CN", Georgia, serif);
-  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--demo-text-strong);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1.2;
 }
 
 .demo-hero__desc {
+  max-width: 65ch;
   margin: 0;
-  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
-  line-height: 1.65;
   color: var(--demo-text);
-  max-width: 52ch;
-}
-
-.demo-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.85rem 1.25rem;
-  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .demo-hero__install-box {
@@ -342,9 +202,11 @@ body {
   align-items: center;
   gap: 0.65rem;
   padding: 0.45rem 0.85rem;
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 95%, black);
+  max-width: 100%;
+  min-width: 0;
+  background: var(--ak-surface-sunken-2);
   border: 1px solid var(--demo-hairline);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  text-align: left;
   cursor: pointer;
   transition:
     border-color var(--demo-motion-fast) ease,
@@ -356,7 +218,7 @@ body {
 .demo-hero__install-box:hover {
   border-color: var(--ak-signal-info, #4aabea);
   background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 8%, var(--ak-surface-sunken-2));
-  box-shadow: 0 0 12px color-mix(in srgb, var(--ak-signal-info, #4aabea) 25%, transparent);
+  color: var(--demo-text-strong);
 }
 
 .demo-hero__install-box:focus-visible {
@@ -377,158 +239,18 @@ body {
   font-weight: 700;
   color: var(--demo-text-strong);
   letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
 }
 
 .demo-hero__install-btn {
-  display: inline-block;
-  padding: 0.15rem 0.45rem;
-  background: var(--ak-surface-panel);
-  border: 1px solid var(--demo-hairline);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--demo-text-muted);
-  transition: all var(--demo-motion-fast) ease;
+  flex: none;
+  margin-left: auto;
+  color: var(--ak-signal-info);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.demo-hero__install-box:hover .demo-hero__install-btn {
-  color: var(--ak-signal-info, #4aabea);
-  border-color: var(--ak-signal-info, #4aabea);
-}
-
-.demo-hero__install-btn--copied {
-  color: #111 !important;
-  background: var(--ak-signal-info, #4aabea) !important;
-  border-color: var(--ak-signal-info, #4aabea) !important;
-  font-weight: 900 !important;
-}
-
-.demo-hero__specs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.85rem;
-  align-content: stretch;
-}
-
-@media (max-width: 600px) {
-  .demo-hero__specs {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-hero__spec-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.75rem 0.95rem;
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 75%, transparent);
-  border: 1px solid var(--demo-hairline);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(8px);
-  transition: border-color var(--demo-motion-fast) ease, transform var(--demo-motion-fast) ease;
-}
-
-.demo-hero__spec-card:hover {
-  border-color: color-mix(in srgb, var(--ak-signal-info, #4aabea) 50%, var(--demo-hairline));
-  transform: translateY(-1px);
-}
-
-.demo-hero__spec-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 100%;
-  background: var(--ak-signal-info, #4aabea);
-  opacity: 0.6;
-}
-
-.demo-hero__spec-num {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
-  font-weight: 900;
-  color: var(--ak-text-primary);
-  letter-spacing: -0.01em;
-}
-
-.demo-hero__spec-label {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: var(--ak-signal-info, #4aabea);
-  text-transform: uppercase;
-}
-
-.demo-hero__spec-desc {
-  font-size: 0.72rem;
-  line-height: 1.45;
-  color: var(--demo-text-muted);
-}
-
-.demo-intro__quickjumps {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem 1rem;
-  margin-top: 1rem;
-  padding-top: 0.85rem;
-  border-top: 1px dashed var(--demo-hairline);
-}
-
-.demo-quickjumps__label {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: var(--demo-text-muted);
-  text-transform: uppercase;
-}
-
-.demo-quickjumps__list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.demo-quickjump__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.22rem 0.55rem;
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 90%, transparent);
-  border: 1px solid var(--demo-hairline);
-  color: var(--demo-text);
-  cursor: pointer;
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  transition:
-    border-color var(--demo-motion-fast) ease,
-    background-color var(--demo-motion-fast) ease,
-    transform var(--demo-motion-fast) ease,
-    color var(--demo-motion-fast) ease,
-    box-shadow var(--demo-motion-fast) ease;
-}
-
-.demo-quickjump__chip:hover {
-  border-color: var(--ak-signal-info, #4aabea);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, var(--ak-surface-sunken-2));
-  color: var(--ak-signal-info, #4aabea);
-  transform: translateY(-1px);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--ak-signal-info, #4aabea) 25%, transparent);
-}
-
-.demo-quickjump__code {
-  font-weight: 800;
-}
-
-.demo-quickjump__name {
-  opacity: 0.55;
-  font-size: 0.58rem;
-}
 
 .demo-catalogue {
   display: grid;
@@ -547,6 +269,12 @@ body {
   padding-right: 0.4rem;
   scrollbar-width: thin;
   scrollbar-color: var(--demo-hairline) transparent;
+}
+
+.demo-rail__list {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 .demo-rail::-webkit-scrollbar { width: 0.35rem; }
@@ -604,6 +332,7 @@ body {
 
 .demo-rail__search-input {
   width: 100%;
+  min-width: 0;
   padding: 0.4rem 0.5rem;
   background: transparent;
   border: none;
@@ -650,11 +379,6 @@ body {
   letter-spacing: 0.1em;
 }
 
-.demo-rail__empty-hint {
-  font-size: 0.62rem;
-  color: var(--demo-text-muted);
-  opacity: 0.65;
-}
 
 .demo-rail__empty-reset {
   align-self: center;
@@ -1363,14 +1087,16 @@ body {
 
   .demo-rail {
     position: static;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 0.5rem;
     max-height: none;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: visible;
     padding-right: 0;
-    padding-bottom: 0.35rem;
+  }
+
+  .demo-rail__list {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--demo-hairline);
   }
 
@@ -1596,7 +1322,8 @@ body {
 .demo-code-container[hidden] { display: none; }
 
 .demo-tune-preview-shell { min-width: 0; }
-.demo-tune-preview-toggle { display: none; }
+.demo-tune-workspace .demo-tune-preview-toggle { display: none; }
+.demo-tune-preview-toggle[hidden] { display: none !important; }
 
 .demo-tune-preview {
   min-width: 0;
@@ -1669,28 +1396,20 @@ body {
     align-items: flex-start;
   }
 
-  .demo-topbar__view-toggle {
-    width: 100%;
-    justify-content: stretch;
-  }
-
-  .demo-topbar__view-toggle > .ak-segmented {
-    width: 100%;
-  }
-
+  .demo-topbar__tagline { display: none; }
   .demo-topbar__controls {
+    position: relative;
     flex: 1 0 100%;
     justify-content: flex-start;
     gap: 0.45rem;
-    min-width: 0;
   }
-
-  .demo-topbar__controls > .ak-segmented {
-    box-sizing: border-box;
-    flex: 1 1 calc(50% - 0.45rem);
-    width: auto;
-    min-width: 0;
-  }
+  .demo-topbar__controls > .ak-segmented { flex: 0 0 auto; width: auto; }
+  .demo-topbar__controls > .ak-segmented button { white-space: nowrap; }
+  .demo-settings { position: static; }
+  .demo-stage { scroll-margin-top: 1rem; }
+  .demo-rail__search-input { font-size: 1rem; }
+  .demo-block__tabs { max-width: 100%; box-sizing: border-box; overflow-x: auto; }
+  .demo-doc-tab { flex: none; padding-inline: 0.5rem; white-space: nowrap; }
 
   .demo-tune-preview { padding: 0.85rem; }
   .demo-tune-workspace[data-tuning="true"] { --demo-workspace-height: min(36dvh, 22rem); }
@@ -1712,331 +1431,5 @@ body {
   .demo-raw-link,
   .demo-tune-panel select,
   .demo-tune-panel input { transition-duration: 0.01ms; }
-}
-
-/* ── 真实复合战术场景 (Tactical Scenarios) ────────────────────────────── */
-
-.demo-scenarios-view {
-  width: 100%;
-  max-width: 96rem;
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.5rem) 4rem;
-}
-
-.demo-scenarios__hero {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem 2rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px dashed var(--demo-hairline);
-}
-
-.demo-scenarios__hero-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  max-width: 58rem;
-}
-
-.demo-scenarios__title {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.demo-scenarios__title-en {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  color: var(--ak-signal-info, #4aabea);
-  text-transform: uppercase;
-}
-
-.demo-scenarios__title-cn {
-  font-family: var(--ak-font-serif, "Source Han Serif CN", Georgia, serif);
-  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
-  font-weight: 900;
-  color: var(--demo-text-strong);
-  letter-spacing: 0.02em;
-}
-
-.demo-scenarios__desc {
-  margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: var(--demo-text-muted);
-}
-
-.demo-scenarios__switcher {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1rem;
-}
-
-.demo-scenarios__code-box {
-  margin-bottom: 1.75rem;
-  background: var(--demo-code-bg);
-  border: 1px solid var(--ak-signal-info, #4aabea);
-  box-shadow: 0 0 24px color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, transparent);
-  animation: ak-fade-in 240ms ease both;
-}
-
-.demo-scenarios__code-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem 1rem;
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 12%, var(--ak-surface-sunken-2));
-  border-bottom: 1px solid var(--demo-hairline);
-}
-
-.demo-scenarios__code-pre {
-  margin: 0;
-  padding: 1rem 1.25rem;
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: var(--ak-text-primary);
-  overflow-x: auto;
-}
-
-.demo-telemetry__metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (max-width: 1024px) {
-  .demo-telemetry__metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .demo-telemetry__metrics-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-telemetry__body-grid {
-  display: grid;
-  grid-template-columns: minmax(18rem, 24rem) 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 960px) {
-  .demo-telemetry__body-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-pipeline__stages-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.85rem;
-  margin-top: 0.5rem;
-}
-
-@media (max-width: 900px) {
-  .demo-pipeline__stages-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 540px) {
-  .demo-pipeline__stages-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-pipeline__stage-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--demo-hairline);
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 70%, transparent);
-  cursor: pointer;
-  position: relative;
-  transition: all var(--demo-motion-fast) ease;
-}
-
-.demo-pipeline__stage-card:hover {
-  border-color: var(--ak-signal-info, #4aabea);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 8%, var(--ak-surface-sunken-2));
-}
-
-.demo-pipeline__stage-card.is-active {
-  border-color: var(--ak-signal-info, #4aabea);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, var(--ak-surface-sunken-2));
-  box-shadow: 0 0 16px color-mix(in srgb, var(--ak-signal-info, #4aabea) 25%, transparent);
-}
-
-.demo-pipeline__stage-card.is-active::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--ak-signal-info, #4aabea);
-}
-
-.demo-pipeline__stage-card.is-done {
-  border-color: color-mix(in srgb, var(--ak-signal-action, #ffd800) 40%, var(--demo-hairline));
-}
-
-.demo-pipeline__stage-badge {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--ak-signal-info, #4aabea);
-}
-
-.demo-pipeline__stage-card.is-done .demo-pipeline__stage-badge {
-  color: var(--ak-signal-action, #ffd800);
-}
-
-.demo-pipeline__stage-name {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.85rem;
-  font-weight: 900;
-  color: var(--demo-text-strong);
-}
-
-.demo-pipeline__stage-sub {
-  font-size: 0.68rem;
-  color: var(--demo-text-muted);
-  font-family: var(--ak-font-mono, monospace);
-}
-
-.demo-audit__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-/* ── 场景 04：故障应急作战室 (War Room) ───────────────────────────── */
-
-.demo-warroom__banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--ak-signal-danger, #ff4d4f);
-  background: color-mix(in srgb, var(--ak-signal-danger, #ff4d4f) 10%, var(--ak-surface-sunken-2));
-  box-shadow: 0 0 20px color-mix(in srgb, var(--ak-signal-danger, #ff4d4f) 15%, transparent);
-}
-
-.demo-warroom__banner.is-resolved {
-  border-color: var(--ak-signal-action, #ffd800);
-  background: color-mix(in srgb, var(--ak-signal-action, #ffd800) 8%, var(--ak-surface-sunken-2));
-  box-shadow: none;
-}
-
-.demo-warroom__banner-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.demo-warroom__banner-title {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 1rem;
-  font-weight: 900;
-  color: var(--demo-text-strong);
-}
-
-.demo-warroom__banner-meta {
-  font-size: 0.78rem;
-  font-family: var(--ak-font-mono, monospace);
-  color: var(--demo-text-muted);
-}
-
-.demo-warroom__banner-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.demo-warroom__grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (max-width: 1080px) {
-  .demo-warroom__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .demo-warroom__grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-warroom__service-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.demo-ticker {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.45rem 0.85rem;
-  background: var(--ak-surface-sunken-2);
-  border: 1px solid var(--demo-hairline);
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.72rem;
-  color: var(--demo-text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.demo-ticker__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ak-signal-info, #4aabea);
-  animation: demo-status-pulse 1.8s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-.demo-pipeline__runner-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  background: var(--ak-surface-sunken-2);
-  border: 1px solid var(--demo-hairline);
 }
 
