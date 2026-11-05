@@ -147,6 +147,12 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.demo-topbar__view-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .demo-topbar__controls {
   display: flex;
   flex-wrap: wrap;
@@ -1663,6 +1669,15 @@ body {
     align-items: flex-start;
   }
 
+  .demo-topbar__view-toggle {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .demo-topbar__view-toggle > .ak-segmented {
+    width: 100%;
+  }
+
   .demo-topbar__controls {
     flex: 1 0 100%;
     justify-content: flex-start;
@@ -1697,4 +1712,219 @@ body {
   .demo-raw-link,
   .demo-tune-panel select,
   .demo-tune-panel input { transition-duration: 0.01ms; }
+}
+
+/* ── 真实复合战术场景 (Tactical Scenarios) ────────────────────────────── */
+
+.demo-scenarios-view {
+  width: 100%;
+  max-width: 96rem;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.5rem) 4rem;
+}
+
+.demo-scenarios__hero {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px dashed var(--demo-hairline);
+}
+
+.demo-scenarios__hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 58rem;
+}
+
+.demo-scenarios__title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.demo-scenarios__title-en {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--ak-signal-info, #4aabea);
+  text-transform: uppercase;
+}
+
+.demo-scenarios__title-cn {
+  font-family: var(--ak-font-serif, "Source Han Serif CN", Georgia, serif);
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  font-weight: 900;
+  color: var(--demo-text-strong);
+  letter-spacing: 0.02em;
+}
+
+.demo-scenarios__desc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--demo-text-muted);
+}
+
+.demo-scenarios__switcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.demo-scenarios__code-box {
+  margin-bottom: 1.75rem;
+  background: color-mix(in srgb, var(--ak-surface-sunken-2) 95%, black);
+  border: 1px solid var(--ak-signal-info, #4aabea);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, transparent);
+  animation: ak-fade-in 240ms ease both;
+}
+
+.demo-scenarios__code-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 12%, var(--ak-surface-sunken-2));
+  border-bottom: 1px solid var(--demo-hairline);
+}
+
+.demo-scenarios__code-pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ak-text-primary);
+  overflow-x: auto;
+}
+
+.demo-telemetry__metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .demo-telemetry__metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .demo-telemetry__metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-telemetry__body-grid {
+  display: grid;
+  grid-template-columns: minmax(18rem, 24rem) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .demo-telemetry__body-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-pipeline__stages-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .demo-pipeline__stages-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .demo-pipeline__stages-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-pipeline__stage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--demo-hairline);
+  background: color-mix(in srgb, var(--ak-surface-sunken-2) 70%, transparent);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--demo-motion-fast) ease;
+}
+
+.demo-pipeline__stage-card:hover {
+  border-color: var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 8%, var(--ak-surface-sunken-2));
+}
+
+.demo-pipeline__stage-card.is-active {
+  border-color: var(--ak-signal-info, #4aabea);
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, var(--ak-surface-sunken-2));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--ak-signal-info, #4aabea) 25%, transparent);
+}
+
+.demo-pipeline__stage-card.is-active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ak-signal-info, #4aabea);
+}
+
+.demo-pipeline__stage-card.is-done {
+  border-color: color-mix(in srgb, var(--ak-signal-action, #ffd800) 40%, var(--demo-hairline));
+}
+
+.demo-pipeline__stage-badge {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--ak-signal-info, #4aabea);
+}
+
+.demo-pipeline__stage-card.is-done .demo-pipeline__stage-badge {
+  color: var(--ak-signal-action, #ffd800);
+}
+
+.demo-pipeline__stage-name {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--demo-text-strong);
+}
+
+.demo-pipeline__stage-sub {
+  font-size: 0.68rem;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+}
+
+.demo-audit__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }

@@ -120,6 +120,7 @@ import { useI18n, type MessageKey } from './i18n'
 import { DOC_REGISTRY, type BlockPropDoc } from './doc-data'
 import llmsRawText from '../../llms.txt?raw'
 import type { AkMobileMenuHandle } from '../ak/ui/site/AkMobileMenu'
+import { TacticalScenariosView } from './TacticalScenarios'
 import './demo.css'
 
 type Theme = 'terminal' | 'archive'
@@ -3071,6 +3072,22 @@ export function App() {
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
   const [llmCopied, setLlmCopied] = useState(false)
+  const [viewMode, setViewMode] = useState<'scenarios' | 'catalogue'>(() => {
+    if (typeof window !== 'undefined' && window.location.hash.startsWith('#components-')) {
+      return 'catalogue'
+    }
+    return 'scenarios'
+  })
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash.startsWith('#components-')) {
+        setViewMode('catalogue')
+      }
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
@@ -3099,6 +3116,27 @@ export function App() {
           <AkDisplay>{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
           <span className="demo-topbar__version">v{packageVersion}</span>
+        </div>
+
+        {/* 核心双模视图切换器 */}
+        <div className="demo-topbar__view-toggle">
+          <AkSegmented
+            size="sm"
+            ariaLabel="View Mode"
+            options={[
+              { label: '◈ SCENARIOS // 复合场景', value: 'scenarios' },
+              { label: '⌕ CATALOGUE // 组件索引', value: 'catalogue' },
+            ]}
+            value={viewMode}
+            onValueChange={(v) => {
+              playTactileSound('tab', 0.16)
+              const next = v as 'scenarios' | 'catalogue'
+              setViewMode(next)
+              if (next === 'scenarios' && window.location.hash.startsWith('#components-')) {
+                history.replaceState(null, '', window.location.pathname)
+              }
+            }}
+          />
         </div>
 
         {/* 顶栏操作控件 */}
@@ -3169,7 +3207,16 @@ export function App() {
         </div>
       </header>
 
-      <ReferenceView />
+      {viewMode === 'scenarios' ? (
+        <TacticalScenariosView
+          onBrowseCatalogue={() => {
+            setViewMode('catalogue')
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        />
+      ) : (
+        <ReferenceView />
+      )}
 
       {llmModalOpen ? (
         <div className="demo-llm-overlay" onClick={() => setLlmModalOpen(false)}>
