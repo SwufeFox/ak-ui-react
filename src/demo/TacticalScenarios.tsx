@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactElement } from 'react'
+import { useState, useMemo, useEffect, useRef, type ReactElement } from 'react'
 import {
   AkButton,
   AkCard,
@@ -25,11 +25,14 @@ import {
   AkCountUp,
   AkOverline,
   AkTag,
+  AkSlider,
   playTactileSound,
 } from '../ak'
 import { useI18n } from './i18n'
 
-export type ScenarioId = 'cluster' | 'pipeline' | 'audit'
+export type ScenarioId = 'cluster' | 'pipeline' | 'audit' | 'warroom'
+
+// ── 场景 01 数据结构：分布式集群与节点遥测 ─────────────────────────────
 
 interface ClusterNode {
   id: string
@@ -98,7 +101,7 @@ interface ProcessRow {
   status: string
 }
 
-const PROCESS_LIST: Record<string, ProcessRow[]> = {
+const INITIAL_PROCESSES: Record<string, ProcessRow[]> = {
   'node-alpha-01': [
     { pid: '1042', process: 'kube-apiserver --etcd-servers', cpu: 14.8, mem: '2.1 GB', status: 'RUNNING' },
     { pid: '1098', process: 'etcd --wal-dir=/data/etcd', cpu: 11.2, mem: '1.4 GB', status: 'RUNNING' },
@@ -123,6 +126,8 @@ const PROCESS_LIST: Record<string, ProcessRow[]> = {
   ],
 }
 
+// ── 场景 03 数据结构：安全审计 ─────────────────────────────────────────
+
 interface AuditEvent {
   id: string
   time: string
@@ -132,13 +137,74 @@ interface AuditEvent {
   severity: 'info' | 'warning' | 'danger'
 }
 
-const AUDIT_EVENTS: AuditEvent[] = [
+const INITIAL_AUDIT_EVENTS: AuditEvent[] = [
   { id: 'aud-901', time: '13:14:22', operator: 'OPS-LEAD // KALTSIT', ip: '10.240.0.4', action: 'APPLY CLUSTER SECURITY POLICY // TLS-1.3 ENFORCED', severity: 'info' },
   { id: 'aud-902', time: '13:12:08', operator: 'AUTOMATION // PRTS-DAEMON', ip: '10.240.0.1', action: 'AUTOSCALE TRIGGERED // +4 PODS IN WORKER-BETA', severity: 'info' },
   { id: 'aud-903', time: '13:08:44', operator: 'EXT-PROXY // 198.51.100.24', ip: '198.51.100.24', action: 'ANOMALOUS TCP BURST BLOCKED // WAF SHIELDED', severity: 'danger' },
   { id: 'aud-904', time: '12:59:15', operator: 'SYS-ADMIN // DOC-01', ip: '10.240.0.8', action: 'CONTAINER IMAGE DEPLOYED // SHA: 8F4E2B19', severity: 'info' },
   { id: 'aud-905', time: '12:45:30', operator: 'SECURITY-AGENT', ip: '10.240.1.15', action: 'CERTIFICATE ROTATION SCHEDULED // EXPIRING 7D', severity: 'warning' },
   { id: 'aud-906', time: '12:30:11', operator: 'AUDIT-CHECKER', ip: '10.240.0.1', action: 'ZERO TRUST MTLS VERIFICATION SUCCESS', severity: 'info' },
+]
+
+// ── 场景 04 数据结构：故障应急作战室与服务网格 ─────────────────────────
+
+interface MeshService {
+  id: string
+  name: string
+  role: string
+  status: 'healthy' | 'degraded' | 'critical'
+  latency: number
+  p99: number
+  errorRate: number
+  trafficRate: number
+  circuitBreaker: 'closed' | 'open' | 'half-open'
+}
+
+const INITIAL_MESH_SERVICES: MeshService[] = [
+  {
+    id: 'api-gateway',
+    name: 'EDGE // ENVOY-GATEWAY',
+    role: 'L7 INGRESS & RATE LIMIT',
+    status: 'healthy',
+    latency: 12,
+    p99: 28,
+    errorRate: 0.02,
+    trafficRate: 46.2,
+    circuitBreaker: 'closed',
+  },
+  {
+    id: 'auth-service',
+    name: 'AUTH // OAUTH2-TOKEN-SVC',
+    role: 'JWT VERIFY & MTLS IDENTITY',
+    status: 'healthy',
+    latency: 8,
+    p99: 19,
+    errorRate: 0.0,
+    trafficRate: 21.8,
+    circuitBreaker: 'closed',
+  },
+  {
+    id: 'checkout-api',
+    name: 'CORE // CHECKOUT-TRANSACTION',
+    role: 'ORDER & PAYMENT ORCHESTRATION',
+    status: 'degraded',
+    latency: 540,
+    p99: 1820,
+    errorRate: 14.8,
+    trafficRate: 14.5,
+    circuitBreaker: 'half-open',
+  },
+  {
+    id: 'payment-gw',
+    name: 'RELAY // STRIPE-PAYMENT-ADAPTER',
+    role: 'EXTERNAL GATEWAY CONNECTOR',
+    status: 'healthy',
+    latency: 94,
+    p99: 210,
+    errorRate: 0.15,
+    trafficRate: 9.2,
+    circuitBreaker: 'closed',
+  },
 ]
 
 export interface TacticalScenariosViewProps {
@@ -150,34 +216,179 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
   const [activeScenario, setActiveScenario] = useState<ScenarioId>('cluster')
   const [showCode, setShowCode] = useState(false)
 
-  // 场景 01 状态：集群遥测
+  // ── 场景 01 状态：集群遥测 ──────────────────────────────────────────
   const [selectedNodeId, setSelectedNodeId] = useState<string>('node-alpha-01')
   const [drainDialogOpen, setDrainDialogOpen] = useState(false)
   const [drainedNodeIds, setDrainedNodeIds] = useState<string[]>([])
   const [clusterNotice, setClusterNotice] = useState<string | null>(null)
   const [sortKey, setSortKey] = useState<'pid' | 'process' | 'cpu'>('cpu')
   const [sortDir, setSortDir] = useState<'ascending' | 'descending' | 'none'>('descending')
+  const [procSearch, setProcSearch] = useState('')
+  const [processMap, setProcessMap] = useState<Record<string, ProcessRow[]>>(INITIAL_PROCESSES)
+  const [livePulse, setLivePulse] = useState(true)
+  const [cpuJitter, setCpuJitter] = useState(0)
+  const [liveTicker, setLiveTicker] = useState('HEARTBEAT 13:50:00 · node-alpha-01 sync: 0 errors · WAN ingress nominal')
 
-  // 场景 02 状态：流水线
+  // 场景 01 周期心跳仿真
+  useEffect(() => {
+    if (!livePulse) return
+    const timer = setInterval(() => {
+      const delta = (Math.random() - 0.5) * 3
+      setCpuJitter(Number(delta.toFixed(1)))
+      const now = new Date().toLocaleTimeString()
+      const bw = (4.6 + Math.random() * 0.4).toFixed(2)
+      setLiveTicker(`[HEARTBEAT ${now}] node-alpha-01: kubelet sync 0 errors · net_rx: ${bw} GB/s · WAN nominal`)
+    }, 3200)
+    return () => clearInterval(timer)
+  }, [livePulse])
+
+  // ── 场景 02 状态：流水线编排 ─────────────────────────────────────────
   const [pipelineStep, setPipelineStep] = useState<number>(2) // 0: Quality, 1: Build, 2: Scan, 3: Deploy
   const [pipelineConcurrency, setPipelineConcurrency] = useState<number>(8)
   const [autoRollback, setAutoRollback] = useState<boolean>(true)
   const [twoFactorEnforce, setTwoFactorEnforce] = useState<boolean>(true)
   const [rollbackDialogOpen, setRollbackDialogOpen] = useState<boolean>(false)
   const [pipelineNotice, setPipelineNotice] = useState<string | null>(null)
+  const [isAutoRunning, setIsAutoRunning] = useState(false)
+  const [autoRunProgress, setAutoRunProgress] = useState(65)
+  const autoRunTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // 场景 03 状态：安全审计
+  // 自动流水线演练调度器
+  const handleStartAutoRun = () => {
+    if (isAutoRunning) return
+    playTactileSound('confirm', 0.2)
+    setIsAutoRunning(true)
+    setPipelineStep(0)
+    setAutoRunProgress(15)
+    setPipelineNotice('[PIPELINE STARTED] Executing Stage 01: Static AST Analysis & Unit Tests...')
+
+    autoRunTimerRef.current = setTimeout(() => {
+      setPipelineStep(1)
+      setAutoRunProgress(45)
+      setPipelineNotice('[STAGE 01 PASSED] Executing Stage 02: Multi-arch OCI Container Compilation...')
+
+      autoRunTimerRef.current = setTimeout(() => {
+        setPipelineStep(2)
+        setAutoRunProgress(75)
+        setPipelineNotice('[STAGE 02 PASSED] Executing Stage 03: Trivy SBOM & Zero-Day CVE Vulnerability Scan...')
+
+        autoRunTimerRef.current = setTimeout(() => {
+          setPipelineStep(3)
+          setAutoRunProgress(100)
+          setIsAutoRunning(false)
+          playTactileSound('confirm', 0.25)
+          setPipelineNotice('[PIPELINE COMPLETED] Stage 04 Canary deployment reached 100% quorum!')
+        }, 1600)
+      }, 1600)
+    }, 1600)
+  }
+
+  const handleAbortPipeline = () => {
+    if (autoRunTimerRef.current) clearTimeout(autoRunTimerRef.current)
+    setIsAutoRunning(false)
+    playTactileSound('warn', 0.25)
+    setPipelineNotice('[PIPELINE ABORTED] Emergency circuit break engaged. Reverted to previous stable SHA.')
+    setRollbackDialogOpen(false)
+  }
+
+  // ── 场景 03 状态：安全审计 ───────────────────────────────────────────
+  const [auditList, setAuditList] = useState<AuditEvent[]>(INITIAL_AUDIT_EVENTS)
   const [auditFilter, setAuditFilter] = useState<'all' | 'info' | 'warning' | 'danger'>('all')
   const [auditSearch, setAuditSearch] = useState<string>('')
   const [mfaSwitch, setMfaSwitch] = useState<boolean>(true)
   const [ipWhitelistSwitch, setIpWhitelistSwitch] = useState<boolean>(true)
   const [inspectAudit, setInspectAudit] = useState<AuditEvent | null>(null)
+  const [blockedIps, setBlockedIps] = useState<string[]>([])
+  const [auditNotice, setAuditNotice] = useState<string | null>(null)
 
+  // 模拟注入威胁事件
+  const handleSimulateThreat = () => {
+    playTactileSound('warn', 0.25)
+    const threat: AuditEvent = {
+      id: `threat-${Math.random().toString(36).slice(2, 6)}`,
+      time: new Date().toLocaleTimeString(),
+      operator: 'SUSPECT-BOT // PROBE-09',
+      ip: '203.0.113.88',
+      action: 'UNAUTHORIZED PRIVILEGE ESCALATION ATTEMPT ON /v2/iam/tokens',
+      severity: 'danger',
+    }
+    setAuditList((prev) => [threat, ...prev])
+    setInspectAudit(threat)
+    setAuditNotice('[INTRUSION ALERT] High-risk privilege anomaly detected from IP 203.0.113.88!')
+  }
+
+  const handleExportAudits = () => {
+    playTactileSound('confirm', 0.2)
+    const json = JSON.stringify(filteredAudits, null, 2)
+    navigator.clipboard.writeText(json)
+    setAuditNotice(`[EXPORT SUCCESS] ${filteredAudits.length} audit records copied to clipboard as JSON!`)
+    setTimeout(() => setAuditNotice(null), 3500)
+  }
+
+  // ── 场景 04 状态：故障应急作战室 ─────────────────────────────────────
+  const [meshServices, setMeshServices] = useState<MeshService[]>(INITIAL_MESH_SERVICES)
+  const [incidentStatus, setIncidentStatus] = useState<'active' | 'mitigated' | 'resolved'>('active')
+  const [pageDialogOpen, setPageDialogOpen] = useState(false)
+  const [trafficRatio, setTrafficRatio] = useState(20) // US-East standby ratio (0 - 100%)
+  const [warroomNotice, setWarroomNotice] = useState<string | null>(null)
+  const [selectedServiceId, setSelectedServiceId] = useState('checkout-api')
+
+  const selectedMeshService = meshServices.find((s) => s.id === selectedServiceId) ?? meshServices[2]
+  const isCheckoutTripped = meshServices.find((s) => s.id === 'checkout-api')?.circuitBreaker === 'open'
+
+  const toggleCircuitBreaker = () => {
+    playTactileSound('dial', 0.2)
+    setMeshServices((prev) =>
+      prev.map((s) => {
+        if (s.id !== 'checkout-api') return s
+        const nextBreaker = s.circuitBreaker === 'open' ? 'half-open' : 'open'
+        return {
+          ...s,
+          circuitBreaker: nextBreaker,
+          errorRate: nextBreaker === 'open' ? 0.08 : 14.8,
+          latency: nextBreaker === 'open' ? 42 : 540,
+          status: nextBreaker === 'open' ? 'healthy' : 'degraded',
+        }
+      }),
+    )
+    if (!isCheckoutTripped) {
+      setWarroomNotice('[CIRCUIT BREAKER OPEN] checkout-api isolated! Mock fallback engaged; customer error rate fell to 0.08%.')
+    } else {
+      setWarroomNotice('[CIRCUIT BREAKER RESET] checkout-api returned to half-open canary inspection.')
+    }
+    setTimeout(() => setWarroomNotice(null), 4000)
+  }
+
+  const handleResolveIncident = () => {
+    playTactileSound('confirm', 0.25)
+    if (incidentStatus === 'resolved') {
+      setIncidentStatus('active')
+      setWarroomNotice('[INCIDENT REOPENED] Alert re-escalated to SRE Tier-1 rotation.')
+    } else {
+      setIncidentStatus('resolved')
+      setMeshServices((prev) =>
+        prev.map((s) => ({
+          ...s,
+          status: 'healthy',
+          errorRate: 0.01,
+          latency: 24,
+          circuitBreaker: 'closed',
+        })),
+      )
+      setWarroomNotice('[INCIDENT RESOLVED] All services verified healthy. Post-mortem draft dispatched to Commander.')
+    }
+  }
+
+  // ── 场景 01 计算派生数据 ─────────────────────────────────────────────
   const selectedNode = CLUSTER_NODES.find((n) => n.id === selectedNodeId) ?? CLUSTER_NODES[0]
-  const currentProcesses = PROCESS_LIST[selectedNode.id] ?? []
+  const currentProcesses = processMap[selectedNode.id] ?? []
 
   const sortedProcesses = useMemo(() => {
-    const list = [...currentProcesses]
+    let list = [...currentProcesses]
+    if (procSearch.trim()) {
+      const q = procSearch.toLowerCase()
+      list = list.filter((p) => p.process.toLowerCase().includes(q) || p.pid.includes(q))
+    }
     if (sortDir === 'none') return list
     return list.sort((a, b) => {
       const valA = a[sortKey]
@@ -187,10 +398,11 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
         : String(valA).localeCompare(String(valB))
       return sortDir === 'ascending' ? diff : -diff
     })
-  }, [currentProcesses, sortKey, sortDir])
+  }, [currentProcesses, sortKey, sortDir, procSearch])
 
+  // ── 场景 03 计算派生数据 ─────────────────────────────────────────────
   const filteredAudits = useMemo(() => {
-    return AUDIT_EVENTS.filter((ev) => {
+    return auditList.filter((ev) => {
       if (auditFilter !== 'all' && ev.severity !== auditFilter) return false
       if (auditSearch.trim()) {
         const q = auditSearch.toLowerCase()
@@ -198,7 +410,7 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
       }
       return true
     })
-  }, [auditFilter, auditSearch])
+  }, [auditList, auditFilter, auditSearch])
 
   const handleSortChange = (key: 'pid' | 'process' | 'cpu') => {
     playTactileSound('dial', 0.15)
@@ -244,6 +456,7 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
               { label: '01 // CLUSTER TELEMETRY (集群遥测)', value: 'cluster' },
               { label: '02 // PIPELINE DISPATCH (任务编排)', value: 'pipeline' },
               { label: '03 // SECURITY AUDIT (安全审计)', value: 'audit' },
+              { label: '04 // INCIDENT WAR ROOM (应急作战室)', value: 'warroom' },
             ]}
             value={activeScenario}
             onValueChange={(val) => {
@@ -301,6 +514,26 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
       {/* 场景 01：分布式集群与节点遥测终端 */}
       {activeScenario === 'cluster' && (
         <div className="demo-scenario-content">
+          {/* 实时动态状态条 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div className="demo-ticker">
+              <span className="demo-ticker__dot" />
+              <span>{liveTicker}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <AkChoice
+                variant="switch"
+                checked={livePulse}
+                onChange={(e) => {
+                  playTactileSound('toggle', 0.15)
+                  setLivePulse(e.target.checked)
+                }}
+              >
+                LIVE PULSE // 实时心跳抖动
+              </AkChoice>
+            </div>
+          </div>
+
           {/* 实时全局指标矩阵 */}
           <div className="demo-telemetry__metrics-grid">
             <AkCard as="article" variant="glass" chamfer>
@@ -310,11 +543,11 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                   <AkTag variant="advanced">ACTIVE</AkTag>
                 </div>
                 <AkCardTitle style={{ fontSize: '1.6rem', fontFamily: 'var(--ak-font-mono)', fontWeight: 900 }}>
-                  <AkCountUp value={68} duration={800} />.4%
+                  <AkCountUp value={Math.round(68 + cpuJitter)} duration={800} />.4%
                 </AkCardTitle>
               </AkCardHeader>
               <AkCardContent>
-                <AkProgress value={68} label="CORE USAGE (128 vCPUs)" />
+                <AkProgress value={Math.min(100, Math.round(68 + cpuJitter))} label="CORE USAGE (128 vCPUs)" />
               </AkCardContent>
             </AkCard>
 
@@ -322,14 +555,14 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
               <AkCardHeader>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <AkOverline>HEALTH STATUS</AkOverline>
-                  <AkStatus size="sm" variant="default" label="HEALTHY" />
+                  <AkStatus size="sm" variant={drainedNodeIds.length > 0 ? 'warning' : 'default'} label={drainedNodeIds.length > 0 ? 'PARTIAL' : 'HEALTHY'} />
                 </div>
                 <AkCardTitle style={{ fontSize: '1.6rem', fontFamily: 'var(--ak-font-mono)', fontWeight: 900 }}>
-                  16 / 16 <span style={{ fontSize: '0.9rem', color: 'var(--ak-text-muted)' }}>ONLINE</span>
+                  {4 - drainedNodeIds.length} / 4 <span style={{ fontSize: '0.9rem', color: 'var(--ak-text-muted)' }}>ONLINE</span>
                 </AkCardTitle>
               </AkCardHeader>
               <AkCardContent>
-                <AkProgress value={100} label="CONSENSUS QUORUM" />
+                <AkProgress value={drainedNodeIds.length > 0 ? 75 : 100} label="CONSENSUS QUORUM" />
               </AkCardContent>
             </AkCard>
 
@@ -340,7 +573,7 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                   <AkTag variant="neutral">WAN-01</AkTag>
                 </div>
                 <AkCardTitle style={{ fontSize: '1.6rem', fontFamily: 'var(--ak-font-mono)', fontWeight: 900 }}>
-                  4.82 <span style={{ fontSize: '0.9rem', color: 'var(--ak-text-muted)' }}>GB/s</span>
+                  {(4.82 + cpuJitter * 0.05).toFixed(2)} <span style={{ fontSize: '0.9rem', color: 'var(--ak-text-muted)' }}>GB/s</span>
                 </AkCardTitle>
               </AkCardHeader>
               <AkCardContent>
@@ -368,11 +601,16 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
           <div className="demo-telemetry__body-grid">
             {/* 左侧：物理节点卡片列表 */}
             <div className="demo-telemetry__node-list">
-              <AkOverline>CLUSTER TOPOLOGY // 拓扑节点</AkOverline>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <AkOverline>CLUSTER TOPOLOGY NODES ({CLUSTER_NODES.length})</AkOverline>
+                <span className="demo-note">Click node to inspect</span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {CLUSTER_NODES.map((node) => {
                   const isSelected = selectedNodeId === node.id
                   const isCordoned = drainedNodeIds.includes(node.id)
+                  const displayCpu = isCordoned ? 0 : Math.min(100, Math.max(5, Math.round(node.cpu + cpuJitter)))
                   return (
                     <div
                       key={node.id}
@@ -400,7 +638,7 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                           {node.role} · {node.ip}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
-                          <AkProgress label="CPU" value={isCordoned ? 0 : node.cpu} variant={node.cpu > 80 ? 'danger' : 'default'} />
+                          <AkProgress label="CPU" value={displayCpu} variant={displayCpu > 80 ? 'danger' : 'default'} />
                           <AkProgress label="MEM" value={isCordoned ? 8 : node.mem} variant={node.mem > 80 ? 'warning' : 'default'} />
                         </div>
                       </AkCard>
@@ -472,29 +710,71 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                     </AkNotice>
                   )}
 
-                  <div style={{ marginBottom: '0.5rem' }}>
-                    <AkOverline>ACTIVE WORKLOAD PROCESSES // 当前调度进程 (Click header to sort)</AkOverline>
+                  {/* 进程快速过滤工具条 */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <AkInput
+                      size="sm"
+                      placeholder="Filter active processes by name or PID..."
+                      value={procSearch}
+                      onChange={(e) => setProcSearch(e.target.value)}
+                      style={{ maxWidth: '20rem' }}
+                    />
+                    <span className="demo-note">{sortedProcesses.length} processes registered</span>
                   </div>
 
+                  {/* 真实进程表格 */}
                   <AkTable
-                    scrollable
                     tactical
                     striped
                     columns={[
-                      { key: 'pid', header: 'PID', sort: sortKey === 'pid' ? sortDir : 'none', onSortChange: () => handleSortChange('pid') },
-                      { key: 'process', header: 'PROCESS COMMAND', sort: sortKey === 'process' ? sortDir : 'none', onSortChange: () => handleSortChange('process') },
-                      { key: 'cpu', header: 'CPU %', numeric: true, sort: sortKey === 'cpu' ? sortDir : 'none', onSortChange: () => handleSortChange('cpu') },
-                      { key: 'mem', header: 'MEMORY RSS', numeric: true },
-                      { key: 'status', header: 'STATE' },
+                      {
+                        key: 'pid',
+                        header: 'PID',
+                        sort: sortKey === 'pid' ? sortDir : 'none',
+                        onSortChange: () => handleSortChange('pid'),
+                      },
+                      {
+                        key: 'process',
+                        header: 'PROCESS BINARY',
+                        sort: sortKey === 'process' ? sortDir : 'none',
+                        onSortChange: () => handleSortChange('process'),
+                      },
+                      {
+                        key: 'cpu',
+                        header: 'CPU %',
+                        numeric: true,
+                        sort: sortKey === 'cpu' ? sortDir : 'none',
+                        onSortChange: () => handleSortChange('cpu'),
+                      },
+                      { key: 'mem', header: 'MEMORY ALLOC', numeric: true },
+                      { key: 'status', header: 'THREAD STATE' },
+                      { key: 'actions', header: 'ACTION' },
                     ]}
                     rows={sortedProcesses.map((proc) => ({
                       id: proc.pid,
                       cells: {
-                        pid: proc.pid,
-                        process: proc.process,
-                        cpu: `${proc.cpu}%`,
+                        pid: <code style={{ fontFamily: 'var(--ak-font-mono)' }}>{proc.pid}</code>,
+                        process: <strong>{proc.process}</strong>,
+                        cpu: `${proc.cpu.toFixed(1)}%`,
                         mem: proc.mem,
                         status: proc.status,
+                        actions: (
+                          <AkButton
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              playTactileSound('warn', 0.2)
+                              setProcessMap((prev) => ({
+                                ...prev,
+                                [selectedNode.id]: (prev[selectedNode.id] ?? []).filter((p) => p.pid !== proc.pid),
+                              }))
+                              setClusterNotice(`[SIGTERM] Process PID ${proc.pid} terminated on ${selectedNode.name}.`)
+                              setTimeout(() => setClusterNotice(null), 3000)
+                            }}
+                          >
+                            KILL
+                          </AkButton>
+                        ),
                       },
                     }))}
                   />
@@ -552,18 +832,13 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                 </div>
                 <div style={{ display: 'flex', gap: '0.65rem' }}>
                   <AkButton
-                    variant="action"
+                    variant={isAutoRunning ? 'default' : 'action'}
                     chamfer
                     size="sm"
-                    disabled={pipelineStep >= 3}
-                    onClick={() => {
-                      playTactileSound('confirm', 0.2)
-                      setPipelineStep((s) => Math.min(3, s + 1))
-                      setPipelineNotice('Stage advanced successfully. Metrics nominal.')
-                      setTimeout(() => setPipelineNotice(null), 3000)
-                    }}
+                    disabled={isAutoRunning}
+                    onClick={handleStartAutoRun}
                   >
-                    ADVANCE STAGE // 推进阶段
+                    {isAutoRunning ? 'RUNNING... // 正在演练' : '▶ RUN FULL PIPELINE // 启动完整流水线演练'}
                   </AkButton>
                   <AkButton
                     variant="danger"
@@ -610,33 +885,38 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                 })}
               </div>
 
-              {pipelineNotice && (
-                <AkNotice title="PIPELINE STATUS" code="SUCCESS" style={{ marginTop: '1rem' }}>
-                  {pipelineNotice}
-                </AkNotice>
-              )}
+              {/* 实时演练执行进度条 */}
+              <div style={{ marginTop: '1.25rem' }}>
+                <AkProgress
+                  label={`CURRENT STAGE EXECUTION PROGRESS: ${pipelineStep === 0 ? 'STATIC AUDIT' : pipelineStep === 1 ? 'OCI BUILD' : pipelineStep === 2 ? 'TRIVY SCAN' : 'CANARY TRAFFIC'}`}
+                  value={autoRunProgress}
+                  variant={autoRunProgress >= 100 ? 'default' : 'default'}
+                />
+              </div>
             </AkCardContent>
           </AkCard>
 
-          {/* 流水线参数调优与日志 */}
-          <div className="demo-telemetry__body-grid">
-            {/* 左侧：流水线策略配置面板 */}
-            <AkCard as="div" variant="outline">
+          {/* 实时反馈与参数控制双栏 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(22rem, 1fr))', gap: '1.25rem' }}>
+            {/* 左机匣：实时控制参数 */}
+            <AkCard as="section" variant="chassis">
               <AkCardHeader>
-                <AkCardTitle>DEPLOYMENT POLICY // 部署策略参数</AkCardTitle>
-                <AkCardDescription>Real-time controllable parameters for the active runner</AkCardDescription>
+                <AkBilingual cn="调度与熔断控制" en="DISPATCH & CIRCUIT BREAKER TUNING" />
+                <AkCardDescription>Real-time orchestration hyperparameters</AkCardDescription>
               </AkCardHeader>
               <AkCardContent>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <AkField hint="Maximum parallel runner instances allowed">
-                    <AkFieldLabel htmlFor="concurrency">MAX CONCURRENCY THREADS</AkFieldLabel>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <AkField>
+                    <AkFieldLabel>WORKER CONCURRENCY (线程并发上限)</AkFieldLabel>
                     <AkInputNumber
-                      id="concurrency"
                       value={pipelineConcurrency}
                       min={1}
                       max={32}
-                      label="Threads"
-                      onValueChange={setPipelineConcurrency}
+                      step={2}
+                      onValueChange={(val) => {
+                        playTactileSound('dial', 0.15)
+                        setPipelineConcurrency(val)
+                      }}
                     />
                   </AkField>
 
@@ -644,68 +924,92 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                     <AkChoice
                       variant="switch"
                       checked={autoRollback}
-                      onChange={(e) => setAutoRollback(e.target.checked)}
+                      onChange={(e) => {
+                        playTactileSound('toggle', 0.15)
+                        setAutoRollback(e.target.checked)
+                      }}
                     >
-                      AUTOMATIC ROLLBACK ON P99 SPIKE
+                      AUTO-ROLLBACK ON SMOKE-TEST ANOMALY
                     </AkChoice>
 
                     <AkChoice
                       variant="switch"
                       checked={twoFactorEnforce}
-                      onChange={(e) => setTwoFactorEnforce(e.target.checked)}
+                      onChange={(e) => {
+                        playTactileSound('toggle', 0.15)
+                        setTwoFactorEnforce(e.target.checked)
+                      }}
                     >
-                      ENFORCE 2FA OPERATOR SIGN-OFF
+                      REQUIRE 2FA APPROVAL FOR CANARY PROMOTION
                     </AkChoice>
                   </div>
                 </div>
               </AkCardContent>
             </AkCard>
 
-            {/* 右侧：实时日志堆栈 */}
-            <AkCard as="div" variant="chassis">
+            {/* 右机匣：实时通知信标堆叠 */}
+            <AkCard as="section" variant="chassis">
               <AkCardHeader>
-                <AkCardTitle>ACTIVE LOG STACK // 阶段日志堆栈</AkCardTitle>
-                <AkCardDescription>Live telemetry stream from worker sandboxes</AkCardDescription>
+                <AkBilingual cn="调度实时事件堆叠" en="LIVE DISPATCH NOTICE STACK" />
+                <AkCardDescription>Streaming build logs & consensus notices</AkCardDescription>
               </AkCardHeader>
               <AkCardContent>
+                {pipelineNotice && (
+                  <AkNotice
+                    title="ACTIVE RUN UPDATE"
+                    variant="info"
+                    code="PRTS_CI"
+                    style={{ marginBottom: '0.75rem' }}
+                  >
+                    {pipelineNotice}
+                  </AkNotice>
+                )}
+
                 <AkNoticeStack>
-                  <AkNotice title="ARTIFACT COMPILATION COMPLETE" code="STAMP_OK">
-                    Built image `registry.rhodes.internal/ak-ui-prod:2.4.0` in 41.2s. Output size: 28.4 MB.
+                  <AkNotice
+                    variant="success"
+                    title="CONTAINER SIGNATURE VERIFIED"
+                    code="COSIGN_OK"
+                  >
+                    Digest sha256:8f4e2b19 cryptographically signed by Rhodes KMS key.
                   </AkNotice>
-                  <AkNotice variant="warning" title="HIGH DISK IO DETECTED ON LAYER CACHE" code="IO_WARN">
-                    Build agent disk IOPS reached 4,200. Consider provisioning additional SSD scratch volumes.
+                  <AkNotice
+                    variant="info"
+                    title="TRIVY SCAN COMPLETED"
+                    code="CVE_CLEAN"
+                  >
+                    0 Critical, 0 High vulnerabilities found in rootfs layers.
                   </AkNotice>
-                  <AkNotice variant="success" title="0 CRITICAL CVEs DETECTED" code="SECURITY_PASSED">
-                    Cross-referenced against NVD & GitHub Advisory Database (3,841 dependencies analyzed).
+                  <AkNotice
+                    variant="warning"
+                    title="CANARY ANOMALY THRESHOLD"
+                    code="WATCH_DOG"
+                  >
+                    P99 latency monitored at 14ms (alert trigger threshold: 50ms).
                   </AkNotice>
                 </AkNoticeStack>
               </AkCardContent>
             </AkCard>
           </div>
 
-          {/* 熔断确认弹窗 */}
+          {/* 紧急回滚确认弹窗 */}
           <AkDialog
             open={rollbackDialogOpen}
             onOpenChange={setRollbackDialogOpen}
-            eyebrow="SAFETY INTERLOCK // CIRCUIT BREAKER"
-            title="IMMEDIATELY ABORT & ROLLBACK PROD PIPELINE?"
+            eyebrow="CIRCUIT BREAKER // SAFETY INTERLOCK"
+            title="EMERGENCY ROLLBACK TO PREVIOUS SHA?"
             footer={
               <>
                 <AkButton variant="outline" size="sm" onClick={() => setRollbackDialogOpen(false)}>
-                  RESUME // 继续流水线
+                  CANCEL // 取消
                 </AkButton>
                 <AkButton
                   variant="danger"
                   chamfer
                   size="sm"
-                  onClick={() => {
-                    playTactileSound('confirm', 0.25)
-                    setRollbackDialogOpen(false)
-                    setPipelineStep(0)
-                    setPipelineNotice('CIRCUIT BREAKER TRIGGERED: Rollback initiated. Cluster restored to v2.3.9.')
-                  }}
+                  onClick={handleAbortPipeline}
                 >
-                  CONFIRM CIRCUIT BREAK // 确认紧急熔断
+                  CONFIRM HALT // 确认熔断
                 </AkButton>
               </>
             }
@@ -740,30 +1044,61 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
             </AkCardHeader>
 
             <AkCardContent>
+              {auditNotice && (
+                <AkNotice
+                  title="SECURITY EVENT DISPATCH"
+                  variant="warning"
+                  code="AUDIT_GUARD"
+                  style={{ marginBottom: '1rem' }}
+                >
+                  {auditNotice}
+                </AkNotice>
+              )}
+
               {/* 过滤与检索工具栏 */}
               <div className="demo-audit__toolbar">
-                <AkInput
-                  placeholder="Filter by operator, IP, or action keyword..."
-                  value={auditSearch}
-                  onChange={(e) => setAuditSearch(e.target.value)}
-                  style={{ maxWidth: '24rem' }}
-                />
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <AkInput
+                    placeholder="Filter by operator, IP, or action keyword..."
+                    value={auditSearch}
+                    onChange={(e) => setAuditSearch(e.target.value)}
+                    style={{ maxWidth: '20rem' }}
+                  />
 
-                <AkSegmented
-                  size="sm"
-                  ariaLabel="Severity Filter"
-                  options={[
-                    { label: 'ALL EVENTS', value: 'all' },
-                    { label: 'INFO', value: 'info' },
-                    { label: 'WARNING', value: 'warning' },
-                    { label: 'CRITICAL', value: 'danger' },
-                  ]}
-                  value={auditFilter}
-                  onValueChange={(val) => {
-                    playTactileSound('click', 0.15)
-                    setAuditFilter(val as any)
-                  }}
-                />
+                  <AkSegmented
+                    size="sm"
+                    ariaLabel="Severity Filter"
+                    options={[
+                      { label: 'ALL EVENTS', value: 'all' },
+                      { label: 'INFO', value: 'info' },
+                      { label: 'WARNING', value: 'warning' },
+                      { label: 'CRITICAL', value: 'danger' },
+                    ]}
+                    value={auditFilter}
+                    onValueChange={(val) => {
+                      playTactileSound('click', 0.15)
+                      setAuditFilter(val as any)
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <AkButton
+                    size="sm"
+                    variant="danger"
+                    chamfer
+                    onClick={handleSimulateThreat}
+                  >
+                    INJECT THREAT TEST // 注入威胁测试
+                  </AkButton>
+                  <AkButton
+                    size="sm"
+                    variant="outline"
+                    onClick={handleExportAudits}
+                  >
+                    EXPORT JSON // 导出快照
+                  </AkButton>
+                </div>
               </div>
 
               {/* 审计日志数据表 */}
@@ -789,13 +1124,17 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                         </AkTag>
                       ),
                       operator: ev.operator,
-                      ip: ev.ip,
+                      ip: (
+                        <span style={{ fontFamily: 'var(--ak-font-mono)', color: blockedIps.includes(ev.ip) ? 'var(--ak-signal-danger)' : 'inherit' }}>
+                          {ev.ip} {blockedIps.includes(ev.ip) ? '(BLOCKED)' : ''}
+                        </span>
+                      ),
                       action: ev.action,
                     },
                     selected: inspectAudit?.id === ev.id,
                   }))}
                   onRowClick={(row) => {
-                    const found = AUDIT_EVENTS.find((e) => e.id === row.id)
+                    const found = auditList.find((e) => e.id === row.id)
                     if (found) {
                       playTactileSound('click', 0.15)
                       setInspectAudit(found)
@@ -821,9 +1160,30 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
               eyebrow="AUDIT RECORD INSPECTOR"
               title={`EVENT #${inspectAudit.id}: ${inspectAudit.action}`}
               footer={
-                <AkButton variant="action" size="sm" onClick={() => setInspectAudit(null)}>
-                  CLOSE // 关闭
-                </AkButton>
+                <div style={{ display: 'flex', gap: '0.65rem' }}>
+                  {blockedIps.includes(inspectAudit.ip) ? (
+                    <AkButton variant="outline" size="sm" disabled>
+                      IP ALREADY BLOCKED // 已加入防火墙黑名单
+                    </AkButton>
+                  ) : (
+                    <AkButton
+                      variant="danger"
+                      chamfer
+                      size="sm"
+                      onClick={() => {
+                        playTactileSound('confirm', 0.2)
+                        setBlockedIps((prev) => [...prev, inspectAudit.ip])
+                        setAuditNotice(`[FIREWALL RECONFIGURED] Client IP ${inspectAudit.ip} blocked across ingress border.`)
+                        setInspectAudit(null)
+                      }}
+                    >
+                      BLOCK CLIENT IP // 封锁源 IP
+                    </AkButton>
+                  )}
+                  <AkButton variant="action" size="sm" onClick={() => setInspectAudit(null)}>
+                    CLOSE // 关闭
+                  </AkButton>
+                </div>
               }
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -841,12 +1201,229 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
                 </div>
                 <div style={{ padding: '0.75rem', background: 'var(--ak-surface-sunken)', border: '1px solid var(--demo-hairline)', fontSize: '0.75rem', fontFamily: 'var(--ak-font-mono)' }}>
                   <code>
-                    {`{\n  "event_id": "${inspectAudit.id}",\n  "trace_id": "tr-7f9a8820c4",\n  "auth_method": "mTLS + RBAC v2",\n  "enforced_policy": "ZeroTrust_Level_4",\n  "result": "PERMITTED"\n}`}
+                    {`{\n  "event_id": "${inspectAudit.id}",\n  "trace_id": "tr-7f9a8820c4",\n  "auth_method": "mTLS + RBAC v2",\n  "enforced_policy": "ZeroTrust_Level_4",\n  "blocked": ${blockedIps.includes(inspectAudit.ip)}\n}`}
                   </code>
                 </div>
               </div>
             </AkDialog>
           )}
+        </div>
+      )}
+
+      {/* 场景 04：故障应急作战室与服务网格 */}
+      {activeScenario === 'warroom' && (
+        <div className="demo-scenario-content">
+          {/* 事故作战室紧急横幅 */}
+          <div className={`demo-warroom__banner ${incidentStatus === 'resolved' ? 'is-resolved' : ''}`}>
+            <div className="demo-warroom__banner-left">
+              <div className="demo-warroom__banner-title">
+                <span
+                  className="demo-hero__badge-dot"
+                  style={{
+                    background: incidentStatus === 'resolved' ? 'var(--ak-signal-action)' : 'var(--ak-signal-danger)',
+                  }}
+                />
+                <span>
+                  {incidentStatus === 'resolved'
+                    ? 'INC-2026-8841 // ALL SYSTEMS RESTORED NOMINAL'
+                    : 'SEV-1 PRODUCTION INCIDENT // EU-WEST CORE CHECKOUT DEGRADATION'}
+                </span>
+                <AkTag variant={incidentStatus === 'resolved' ? 'advanced' : incidentStatus === 'mitigated' ? 'default' : 'danger'}>
+                  {incidentStatus === 'resolved' ? 'RESOLVED' : incidentStatus === 'mitigated' ? 'MITIGATED' : 'ACTIVE OUTAGE'}
+                </AkTag>
+              </div>
+              <div className="demo-warroom__banner-meta">
+                COMMANDER: DOCTOR // INCIDENT TIME: 00:24:18 (UTC+8) · AFFECTED SCOPE: 14.8% OF CHECKOUT CALLS
+              </div>
+            </div>
+
+            <div className="demo-warroom__banner-actions">
+              <AkButton
+                size="sm"
+                variant={incidentStatus === 'resolved' ? 'outline' : 'danger'}
+                chamfer
+                onClick={() => setPageDialogOpen(true)}
+              >
+                PAGE ON-CALL COMMANDER // 呼叫值班 SRE
+              </AkButton>
+
+              <AkButton
+                size="sm"
+                variant={isCheckoutTripped ? 'action' : 'outline'}
+                onClick={toggleCircuitBreaker}
+              >
+                {isCheckoutTripped ? 'RESET BREAKER // 重置熔断' : 'TRIP CIRCUIT BREAKER // 熔断故障核心'}
+              </AkButton>
+
+              <AkButton
+                size="sm"
+                variant={incidentStatus === 'resolved' ? 'outline' : 'action'}
+                chamfer
+                onClick={handleResolveIncident}
+              >
+                {incidentStatus === 'resolved' ? 'REOPEN INCIDENT // 重新打开' : 'RESOLVE INCIDENT // 标记事故已恢复'}
+              </AkButton>
+            </div>
+          </div>
+
+          {warroomNotice && (
+            <AkNotice
+              title="INCIDENT ACTION LOG"
+              variant={incidentStatus === 'resolved' ? 'success' : 'warning'}
+              code="SRE_DISPATCH"
+              style={{ marginBottom: '1.25rem' }}
+            >
+              {warroomNotice}
+            </AkNotice>
+          )}
+
+          {/* 服务网格微服务矩阵 */}
+          <div className="demo-warroom__grid">
+            {meshServices.map((svc) => {
+              const isSelected = selectedMeshService.id === svc.id
+              return (
+                <div
+                  key={svc.id}
+                  onClick={() => {
+                    playTactileSound('click', 0.15)
+                    setSelectedServiceId(svc.id)
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <AkCard
+                    variant={isSelected ? 'tactical' : 'outline'}
+                    chamfer={isSelected}
+                    hoverable
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <span style={{ fontFamily: 'var(--ak-font-mono)', fontWeight: 800, fontSize: '0.82rem' }}>{svc.name}</span>
+                      <AkStatus
+                        size="sm"
+                        variant={svc.status === 'healthy' ? 'default' : svc.status === 'degraded' ? 'warning' : 'critical'}
+                        label={svc.status.toUpperCase()}
+                      />
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--ak-text-muted)', fontFamily: 'var(--ak-font-mono)', marginBottom: '0.6rem' }}>
+                      {svc.role}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.75rem', fontFamily: 'var(--ak-font-mono)' }}>
+                      <div>
+                        <span style={{ color: 'var(--ak-text-muted)' }}>LATENCY: </span>
+                        <strong style={{ color: svc.latency > 200 ? 'var(--ak-signal-danger)' : 'inherit' }}>{svc.latency}ms</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--ak-text-muted)' }}>P99: </span>
+                        <strong style={{ color: svc.p99 > 500 ? 'var(--ak-signal-danger)' : 'inherit' }}>{svc.p99}ms</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--ak-text-muted)' }}>ERR: </span>
+                        <strong style={{ color: svc.errorRate > 1 ? 'var(--ak-signal-danger)' : 'inherit' }}>{svc.errorRate}%</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--ak-text-muted)' }}>BREAKER: </span>
+                        <strong>{svc.circuitBreaker.toUpperCase()}</strong>
+                      </div>
+                    </div>
+                  </AkCard>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* 跨区域流量热切编排机匣 */}
+          <AkCard variant="chassis" chamfer>
+            <AkCardHeader>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <AkBilingual cn="跨区域流量热切编排" en="CROSS-REGION TRAFFIC FAILOVER STEERING" />
+                  <AkCardDescription>
+                    Adjust ingress gateway traffic ratio between EU-West (Degraded) and US-East (Standby).
+                  </AkCardDescription>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <AkTag variant={trafficRatio >= 80 ? 'advanced' : 'danger'}>
+                    {`US-EAST: ${trafficRatio}% / EU-WEST: ${100 - trafficRatio}%`}
+                  </AkTag>
+                </div>
+              </div>
+            </AkCardHeader>
+            <AkCardContent>
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(18rem, 24rem) 1fr', gap: '1.5rem', alignItems: 'center' }}>
+                <div>
+                  <AkField>
+                    <AkFieldLabel>{`TRAFFIC FAILOVER (US-EAST RATIO: ${trafficRatio}%)`}</AkFieldLabel>
+                    <AkSlider
+                      label={`TRAFFIC FAILOVER (US-EAST: ${trafficRatio}%)`}
+                      value={trafficRatio}
+                      min={0}
+                      max={100}
+                      step={10}
+                      onValueChange={(val) => {
+                        playTactileSound('dial', 0.12)
+                        setTrafficRatio(val)
+                        if (val >= 80 && incidentStatus === 'active') {
+                          setIncidentStatus('mitigated')
+                          setWarroomNotice('[FAILOVER APPLIED] 80%+ traffic routed to US-East standby pool. Customer impact mitigated.')
+                        }
+                      }}
+                    />
+                  </AkField>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--ak-text-muted)', fontFamily: 'var(--ak-font-mono)', marginTop: '0.4rem' }}>
+                    <span>EU-WEST 100%</span>
+                    <span>50/50 SPLIT</span>
+                    <span>US-EAST 100% (FULL DRAIN)</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                  <AkCard variant="outline" chamfer>
+                    <AkProgress label="INGRESS HEALTH RATIO" value={trafficRatio >= 80 ? 99 : 86} variant={trafficRatio >= 80 ? 'default' : 'warning'} />
+                  </AkCard>
+                  <AkCard variant="outline" chamfer>
+                    <AkGauge value={trafficRatio >= 80 ? 99.92 : 85.2} label="AVAILABILITY SLA" max={100} />
+                  </AkCard>
+                  <AkCard variant="outline" chamfer>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--ak-text-muted)', fontFamily: 'var(--ak-font-mono)' }}>DRAIN COMPLETION</span>
+                      <strong style={{ fontSize: '1.4rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-signal-info)' }}>{trafficRatio}%</strong>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--ak-text-muted)' }}>Standby cluster healthy</span>
+                    </div>
+                  </AkCard>
+                </div>
+              </div>
+            </AkCardContent>
+          </AkCard>
+
+          {/* 呼叫值班弹窗 */}
+          <AkDialog
+            open={pageDialogOpen}
+            onOpenChange={setPageDialogOpen}
+            eyebrow="EMERGENCY ESCALATION // ON-CALL ROTATION"
+            title="PAGE ON-CALL COMMANDER & SRE TIER-1"
+            footer={
+              <>
+                <AkButton variant="outline" size="sm" onClick={() => setPageDialogOpen(false)}>
+                  CANCEL // 取消
+                </AkButton>
+                <AkButton
+                  variant="action"
+                  chamfer
+                  size="sm"
+                  onClick={() => {
+                    playTactileSound('confirm', 0.25)
+                    setPageDialogOpen(false)
+                    setWarroomNotice('[PAGER SENT] High-urgency SMS & PagerDuty notification delivered to SRE Commander.')
+                  }}
+                >
+                  DISPATCH PAGER // 确认呼叫
+                </AkButton>
+              </>
+            }
+          >
+            <p className="ak-text">
+              此操作将向值班应急梯队发送 P1 级电话唤醒与工单指派，确认针对 <strong>EU-WEST Core Checkout Degradation</strong> 建立跨组指挥会话。
+            </p>
+          </AkDialog>
         </div>
       )}
     </div>
@@ -856,7 +1433,7 @@ export function TacticalScenariosView({ onBrowseCatalogue }: TacticalScenariosVi
 function getCodeSnippet(scenario: ScenarioId): string {
   switch (scenario) {
     case 'cluster':
-      return `import { AkCard, AkTable, AkStatus, AkProgress, AkGauge, AkButton, AkDialog } from '@swufefox/ak-ui-react'
+      return `import { AkCard, AkTable, AkStatus, AkProgress, AkGauge, AkButton, AkDialog, AkCountUp } from '@swufefox/ak-ui-react'
 
 export function ClusterStation() {
   const [selectedNode, setSelectedNode] = useState('node-alpha-01')
@@ -867,6 +1444,7 @@ export function ClusterStation() {
       {/* 1. Global Metrics */}
       <AkCard variant="glass" chamfer>
         <AkProgress value={68} label="CORE USAGE (128 vCPUs)" />
+        <AkCountUp value={68} />
       </AkCard>
 
       {/* 2. Process Table with Sortable Columns */}
@@ -894,7 +1472,7 @@ export function ClusterStation() {
   )
 }`
     case 'pipeline':
-      return `import { AkCard, AkNoticeStack, AkNotice, AkInputNumber, AkChoice, AkButton, AkDialog } from '@swufefox/ak-ui-react'
+      return `import { AkCard, AkNoticeStack, AkNotice, AkInputNumber, AkChoice, AkButton, AkDialog, AkProgress } from '@swufefox/ak-ui-react'
 
 export function PipelineConsole() {
   const [stage, setStage] = useState(2)
@@ -944,6 +1522,28 @@ export function AuditDeck() {
       />
       <AkPagination page={1} total={10} />
     </AkCard>
+  )
+}`
+    case 'warroom':
+      return `import { AkCard, AkStatus, AkSlider, AkGauge, AkProgress, AkButton, AkDialog, AkTag } from '@swufefox/ak-ui-react'
+
+export function IncidentWarRoom() {
+  const [trafficRatio, setTrafficRatio] = useState(20)
+  const [tripped, setTripped] = useState(false)
+
+  return (
+    <div className="war-room">
+      <AkCard variant="chassis" chamfer>
+        <AkSlider
+          value={trafficRatio}
+          onValueChange={setTrafficRatio}
+          label="FAILOVER RATIO (STANDBY CLUSTER)"
+        />
+        <AkButton variant={tripped ? 'action' : 'danger'} onClick={() => setTripped(!tripped)}>
+          {tripped ? 'RESET BREAKER' : 'TRIP CIRCUIT BREAKER'}
+        </AkButton>
+      </AkCard>
+    </div>
   )
 }`
   }

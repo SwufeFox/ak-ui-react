@@ -1783,7 +1783,7 @@ body {
 
 .demo-scenarios__code-box {
   margin-bottom: 1.75rem;
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 95%, black);
+  background: var(--demo-code-bg);
   border: 1px solid var(--ak-signal-info, #4aabea);
   box-shadow: 0 0 24px color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, transparent);
   animation: ak-fade-in 240ms ease both;
@@ -1928,3 +1928,115 @@ body {
   justify-content: space-between;
   gap: 1rem;
 }
+
+/* ── 场景 04：故障应急作战室 (War Room) ───────────────────────────── */
+
+.demo-warroom__banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--ak-signal-danger, #ff4d4f);
+  background: color-mix(in srgb, var(--ak-signal-danger, #ff4d4f) 10%, var(--ak-surface-sunken-2));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--ak-signal-danger, #ff4d4f) 15%, transparent);
+}
+
+.demo-warroom__banner.is-resolved {
+  border-color: var(--ak-signal-action, #ffd800);
+  background: color-mix(in srgb, var(--ak-signal-action, #ffd800) 8%, var(--ak-surface-sunken-2));
+  box-shadow: none;
+}
+
+.demo-warroom__banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.demo-warroom__banner-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--demo-text-strong);
+}
+
+.demo-warroom__banner-meta {
+  font-size: 0.78rem;
+  font-family: var(--ak-font-mono, monospace);
+  color: var(--demo-text-muted);
+}
+
+.demo-warroom__banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.demo-warroom__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1080px) {
+  .demo-warroom__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .demo-warroom__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-warroom__service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.demo-ticker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  background: var(--ak-surface-sunken-2);
+  border: 1px solid var(--demo-hairline);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--demo-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo-ticker__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ak-signal-info, #4aabea);
+  animation: demo-status-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.demo-pipeline__runner-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: var(--ak-surface-sunken-2);
+  border: 1px solid var(--demo-hairline);
+}
+
