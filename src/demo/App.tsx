@@ -124,6 +124,24 @@ import './demo.css'
 
 type Theme = 'terminal' | 'archive'
 
+// The showcase overlays use the browser's modal focus containment and inert background.
+function useShowcaseDialog(open: boolean) {
+  const ref = useRef<HTMLDialogElement>(null)
+  useLayoutEffect(() => {
+    const dialog = ref.current
+    if (!open || !dialog) return
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    dialog.showModal()
+    return () => {
+      if (dialog.open) dialog.close()
+      trigger?.focus()
+    }
+  }, [open])
+  return ref
+}
+
+const showcaseDialogStyle = { position: 'fixed', inset: 0, width: '100%', height: '100%', maxWidth: 'none', maxHeight: 'none', margin: 0, padding: 0, border: 0, background: 'transparent', overflow: 'auto' } as const
+
 /**
  * 组件目录的分类清单。顺序即编号顺序（01…17），也是「上一组 / 下一组」的遍历顺序。
  * id 与各 `Block` 的锚点一一对应，深链接 `#components-N` 仍然可用。
@@ -189,8 +207,8 @@ const CATEGORY_COMPONENTS: Record<(typeof CATEGORIES)[number]['id'], readonly st
   'components-17': ['AkCommandGrid', 'AkCommand', 'AkCommandGroup', 'AkSlot', 'AkItem', 'AkScreen'],
 }
 
-/** 舞台上下文：当前激活的分类 id + 切换函数。 */
-const StageContext = createContext<{ active: string; select: (id: string) => void } | null>(null)
+/** 舞台上下文：当前激活的分类 id。 */
+const StageContext = createContext<{ active: string } | null>(null)
 
 /** 菜单与指令共享动作集。 */
 const MENU_ACTIONS = new Set(['inspect', 'deploy', 'cancel', 'archive', 'file', 'edit', 'view'])
@@ -575,7 +593,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement)?.tagName)) {
+      if (event.key === '/' && !document.querySelector('dialog[open]') && !['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement)?.tagName)) {
         event.preventDefault()
         searchInputRef.current?.focus()
         searchInputRef.current?.select()
@@ -590,7 +608,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
     if (!list) return
     const revealActive = () => {
       if (list.scrollWidth <= list.clientWidth) return
-      const item = list.querySelector<HTMLElement>('[aria-current="true"]')
+      const item = list.querySelector<HTMLElement>('[aria-current="page"]')
       if (!item) return
       const rail = list.getBoundingClientRect()
       const selected = item.getBoundingClientRect()
@@ -653,19 +671,21 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
         ) : filteredCategories.map((category) => {
           const originalIndex = CATEGORIES.findIndex((item) => item.id === category.id)
           return (
-            <button
+            <a
               key={category.id}
-              type="button"
+              href={`#${category.id}`}
               className="demo-rail__item"
-              aria-current={active === category.id ? 'true' : undefined}
-              onClick={() => {
+              aria-current={active === category.id ? 'page' : undefined}
+              onClick={(event) => {
+                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+                event.preventDefault()
                 playTactileSound('tab', 0.16)
                 selectCategory(category.id)
               }}
             >
               <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
               <span className="demo-rail__label">{t(category.title)}</span>
-            </button>
+            </a>
           )
         })}
       </div>
@@ -1211,6 +1231,7 @@ function ReferenceView() {
   // 理智计数演示状态
   const [loadingReady, setLoadingReady] = useState(false)
   const [screenOpen, setScreenOpen] = useState(false)
+  const screenDialogRef = useShowcaseDialog(screenOpen)
   const [screenCategory, setScreenCategory] = useState<DepotCategory>('all')
   const [screenSearch, setScreenSearch] = useState('')
   const [selectedDepotId, setSelectedDepotId] = useState<string>('mat-d32')
@@ -1248,17 +1269,13 @@ function ReferenceView() {
     })
   }, [screenCategory, screenSearch])
 
-  const selectedDepotItem = DEPOT_ITEMS.find((item) => item.id === selectedDepotId) ?? DEPOT_ITEMS[0]
+  const selectedDepotItem = filteredDepotItems.find((item) => item.id === selectedDepotId) ?? filteredDepotItems[0]
   const mobileMenuRef = useRef<AkMobileMenuHandle>(null)
   const [sanCurrent, setSanCurrent] = useState(41)
   const sanLimit = 135
   const [sanTotal] = useState(135)
 
-  /**
-   * 当前激活的分类。初始值从 hash 推导，所以 `#components-14` 这样的深链接可以直接落到对应面板。
-   * 注意这里读的是**初始值**，不是每次 hash 变化都跟随 —— 面板切换本身会写 hash，
-   * 若再反向同步会形成回环。
-   */
+  /** Initialize the active category from a shareable deep link. */
   const [active, setActive] = useState<string>(() => {
     if (typeof window === 'undefined') return CATEGORIES[0].id
     const hash = window.location.hash.replace(/^#/, '')
@@ -1267,13 +1284,13 @@ function ReferenceView() {
   const activeIndex = Math.max(0, CATEGORIES.findIndex((c) => c.id === active))
   const stageRef = useRef<HTMLDivElement>(null)
   const entranceRef = useRef<AkEntranceHandle>(null)
-  const stageValue = useMemo(() => ({ active, select: setActive }), [active])
+  const stageValue = useMemo(() => ({ active }), [active])
 
-  /** 切换分类：写 hash（可分享）并把舞台滚回顶部（原位替换而不是继承上一块的滚动位置）。 */
+  /** Switch category, recording navigation so browser back and forward work. */
   const selectCategory = useCallback((id: string) => {
     setActive(id)
     const url = `${window.location.pathname}${window.location.search}#${id}`
-    window.history.replaceState(null, '', url)
+    if (window.location.hash !== `#${id}`) window.history.pushState(null, '', url)
     // 滚动回分类顶部
     stageRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
   }, [])
@@ -1291,7 +1308,10 @@ function ReferenceView() {
   useEffect(() => {
     const onHashChange = () => {
       const hash = window.location.hash.replace(/^#/, '')
-      if (CATEGORIES.some((c) => c.id === hash)) setActive(hash)
+      if (CATEGORIES.some((c) => c.id === hash) || !hash) {
+        setActive(hash || CATEGORIES[0].id)
+        stageRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
+      }
     }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
@@ -1307,7 +1327,7 @@ function ReferenceView() {
   const [albumFront, albumBack] = items
 
   return (
-    <main className="demo-main">
+    <main id="demo-main" className="demo-main" tabIndex={-1}>
       <header className="demo-hero">
         <div className="demo-hero__intro">
           <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
@@ -2668,22 +2688,23 @@ function ReferenceView() {
                 variant="action"
                 icon={<span>⤢</span>}
                 sound={false}
-                onClick={() => {
+                onClick={(event) => {
+                  event.currentTarget.focus()
                   setScreenOpen(true)
                 }}
               >
-                OPEN TERMINAL SCREEN (Esc to close) // 打开终端功能大屏
+                {t('screen.open')}
               </AkButton>
             </div>
 
             {screenOpen ? (
-              <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
+              <dialog className="demo-screen-dialog" ref={screenDialogRef} aria-label={t('screen.title')} onCancel={(event) => { event.preventDefault(); setScreenOpen(false) }} style={showcaseDialogStyle}>
                 <AkScreen
                   tone="dark"
                   title="DEPOT & LOGISTICS // 罗德岛后勤与战术物资总览"
                   eyebrow="PRTS TERMINAL OS // SECTOR-07"
                   watermark="PRTS-DEPOT"
-                  closeOnEsc
+                  closeOnEsc={false}
                   status={
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                       <AkStatus size="sm" variant="default" label="PRTS-LINKED" detail="LATENCY // 0.12ms" />
@@ -2717,22 +2738,23 @@ function ReferenceView() {
                   onBack={() => {
                     setScreenOpen(false)
                   }}
-                  backLabel="PRTS // RETURN"
+                  backLabel={t('screen.back')}
                 >
                   <div className="demo-screen-dashboard">
                     {/* 顶部搜索与分类过滤栏 */}
                     <div className="demo-screen-toolbar">
-                      <div className="demo-screen-tabs" role="tablist" aria-label="Inventory categories">
+                      <div className="demo-screen-tabs" role="group" aria-label={t('screen.categories')}>
                         {[
-                          { id: 'all' as const, label: 'ALL PROTOCOLS', count: DEPOT_ITEMS.length },
-                          { id: 'materials' as const, label: 'ELITE MATERIALS', count: DEPOT_ITEMS.filter((i) => i.kind === 'material' && i.subCategory === 'materials').length },
-                          { id: 'chips' as const, label: 'DUAL CHIPS', count: DEPOT_ITEMS.filter((i) => i.kind === 'material' && i.subCategory === 'chips').length },
-                          { id: 'operators' as const, label: 'OPERATOR SLOTS', count: DEPOT_ITEMS.filter((i) => i.kind === 'operator').length },
+                          { id: 'all' as const, label: t('screen.all'), count: DEPOT_ITEMS.length },
+                          { id: 'materials' as const, label: t('screen.materials'), count: DEPOT_ITEMS.filter((i) => i.kind === 'material' && i.subCategory === 'materials').length },
+                          { id: 'chips' as const, label: t('screen.chips'), count: DEPOT_ITEMS.filter((i) => i.kind === 'material' && i.subCategory === 'chips').length },
+                          { id: 'operators' as const, label: t('screen.operators'), count: DEPOT_ITEMS.filter((i) => i.kind === 'operator').length },
                         ].map((cat) => (
                           <button
                             key={cat.id}
                             type="button"
                             className={`demo-screen-tab ${screenCategory === cat.id ? 'is-active' : ''}`}
+                            aria-pressed={screenCategory === cat.id}
                             onClick={() => {
                               playTactileSound('tab', 0.16)
                               setScreenCategory(cat.id)
@@ -2745,9 +2767,11 @@ function ReferenceView() {
                       </div>
 
                       <div className="demo-screen-search">
+                        <label className="demo-screen-search-label" htmlFor="demo-screen-search">{t('screen.search')}</label>
                         <AkInput
+                          id="demo-screen-search"
                           size="sm"
-                          placeholder="FILTER ASSETS // 检索物资或干员代号..."
+                          placeholder={t('screen.searchPlaceholder')}
                           value={screenSearch}
                           onChange={(e) => setScreenSearch(e.target.value)}
                         />
@@ -2764,9 +2788,18 @@ function ReferenceView() {
                     <div className="ak-screen__split">
                       {/* 左侧库存网格 */}
                       <div className="demo-screen-inventory">
-                        {filteredDepotItems.map((item) => {
+                        {filteredDepotItems.length === 0 ? (
+                          <div className="demo-screen-empty" role="status">
+                            <p>{t('screen.empty')}</p>
+                            <button type="button" onClick={() => {
+                              setScreenSearch('')
+                              setScreenCategory('all')
+                              document.getElementById('demo-screen-search')?.focus()
+                            }}>{t('screen.reset')}</button>
+                          </div>
+                        ) : filteredDepotItems.map((item) => {
                           if (item.kind === 'material') {
-                            const isSelected = selectedDepotId === item.id
+                            const isSelected = selectedDepotItem?.id === item.id
                             const countVal = materialStock[item.id] ?? item.initialCount
                             return (
                               <AkItem
@@ -2782,7 +2815,7 @@ function ReferenceView() {
                               />
                             )
                           }
-                          const isSelected = selectedDepotId === item.id
+                          const isSelected = selectedDepotItem?.id === item.id
                           return (
                             <AkSlot
                               key={item.id}
@@ -2987,7 +3020,7 @@ function ReferenceView() {
                     </div>
                   </div>
                 </AkScreen>
-              </div>
+              </dialog>
             ) : null}
           </div>
         </div>
@@ -3037,7 +3070,10 @@ export function App() {
   const [theme, setTheme] = useState<Theme>('terminal')
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
-  const [llmCopied, setLlmCopied] = useState(false)
+  const [llmCopyState, setLlmCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const llmDialogRef = useShowcaseDialog(llmModalOpen)
+  const llmCopyTimer = useRef<number | null>(null)
+  const llmCopyGeneration = useRef(0)
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
@@ -3049,14 +3085,34 @@ export function App() {
     document.documentElement.dataset.akDensity = density
   }, [density])
 
-  const copyLlmText = () => {
-    navigator.clipboard.writeText(llmsRawText)
-    setLlmCopied(true)
-    setTimeout(() => setLlmCopied(false), 2000)
+  useEffect(() => () => {
+    llmCopyGeneration.current += 1
+    if (llmCopyTimer.current !== null) window.clearTimeout(llmCopyTimer.current)
+  }, [])
+
+  const closeLlmModal = () => {
+    llmCopyGeneration.current += 1
+    if (llmCopyTimer.current !== null) window.clearTimeout(llmCopyTimer.current)
+    setLlmCopyState('idle')
+    setLlmModalOpen(false)
+  }
+
+  const copyLlmText = async () => {
+    const generation = ++llmCopyGeneration.current
+    if (llmCopyTimer.current !== null) window.clearTimeout(llmCopyTimer.current)
+    try {
+      await navigator.clipboard.writeText(llmsRawText)
+      if (generation !== llmCopyGeneration.current) return
+      setLlmCopyState('copied')
+      llmCopyTimer.current = window.setTimeout(() => setLlmCopyState('idle'), 2000)
+    } catch {
+      if (generation === llmCopyGeneration.current) setLlmCopyState('error')
+    }
   }
 
   return (
     <div className="demo-app">
+      <a className="demo-skip-link" href="#demo-main">{t('app.skip')}</a>
       <header className="demo-topbar">
         <div className="demo-topbar__brand">
           <AkDisplay>{t('app.name')}</AkDisplay>
@@ -3066,8 +3122,9 @@ export function App() {
 
         {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
-          <button type="button" className="demo-topbar__link" onClick={() => {
+          <button type="button" className="demo-topbar__link" onClick={(event) => {
             playTactileSound('click', 0.16)
+            event.currentTarget.focus()
             setLlmModalOpen(true)
           }}>
             llms.txt
@@ -3130,12 +3187,13 @@ export function App() {
       <ReferenceView />
 
       {llmModalOpen ? (
-        <div className="demo-llm-overlay" onClick={() => setLlmModalOpen(false)}>
+        <dialog className="demo-llm-dialog" ref={llmDialogRef} aria-labelledby="demo-llm-title" onCancel={(event) => { event.preventDefault(); closeLlmModal() }} style={showcaseDialogStyle} onClick={(event) => { if (event.target === event.currentTarget) closeLlmModal() }}>
+        <div className="demo-llm-overlay" onClick={closeLlmModal}>
           <div className="demo-llm-modal" onClick={(e) => e.stopPropagation()}>
             <div className="demo-llm-modal__head">
               <div className="demo-llm-modal__title">
-                <span className="demo-spec-dot">◆</span>
-                <span>PRTS // llms.txt SPECIFICATION</span>
+                <span className="demo-spec-dot" aria-hidden="true">◆</span>
+                <span id="demo-llm-title">{t('app.llm.title')}</span>
               </div>
               <div className="demo-llm-modal__actions">
                 <button
@@ -3143,7 +3201,7 @@ export function App() {
                   className="demo-copy-btn"
                   onClick={copyLlmText}
                 >
-                  {llmCopied ? '✓ COPIED ALL' : 'COPY ALL'}
+                  {t(llmCopyState === 'copied' ? 'app.llm.copied' : 'app.llm.copy')}
                 </button>
                 <a
                   href="/llms.txt"
@@ -3151,22 +3209,24 @@ export function App() {
                   rel="noreferrer"
                   className="demo-raw-link"
                 >
-                  RAW FILE ↗
+                  {t('app.llm.raw')} ↗
                 </a>
                 <button
                   type="button"
                   className="demo-copy-btn"
-                  onClick={() => setLlmModalOpen(false)}
+                  onClick={closeLlmModal}
                 >
-                  CLOSE ⎋
+                  {t('app.llm.close')} ⎋
                 </button>
               </div>
             </div>
+            <div className="demo-llm-modal__feedback" aria-live="polite">{llmCopyState === 'error' ? t('app.llm.error') : llmCopyState === 'copied' ? t('app.llm.copied') : ''}</div>
             <pre className="demo-llm-modal__body">
               <code>{llmsRawText}</code>
             </pre>
           </div>
         </div>
+        </dialog>
       ) : null}
     </div>
   )

@@ -15,6 +15,8 @@
   inset: 0;
   container-type: size;
   display: grid;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   color: #f7f7f4;
   background:
@@ -23,7 +25,7 @@
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4rem),
     var(--ak-screen-surface);
   font-family: $font-sans-serif;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, auto) minmax(0, 1fr);
   isolation: isolate;
   animation: ak-screen-in 320ms var(--ak-ease-standard, ease) both;
 
@@ -92,6 +94,8 @@
     position: relative;
     z-index: 2;
     display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
     min-height: clamp(3rem, 7.5cqh, 4.5rem);
     color: var(--ak-screen-bar-text);
     background: var(--ak-screen-bar);
@@ -229,6 +233,7 @@
   & &__body {
     position: relative;
     display: grid;
+    min-width: 0;
     min-height: 0;
     padding: var(--ak-screen-padding);
     overflow: auto;
@@ -443,34 +448,52 @@
     box-shadow: 0 0 2px var(--ak-screen-signal);
   }
 }
-
 @container (max-width: 48rem) {
-  .ak-screen__split {
-    grid-template-columns: 1fr;
+  .ak-screen .ak-screen__split {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .ak-screen__split {
-    grid-template-columns: 1fr;
+  .ak-screen .ak-screen__split {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
+
+@media (max-width: 480px) {
+  .ak-screen .ak-screen__meta {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+    margin-left: 0;
+    padding-right: var(--ak-screen-padding);
+    white-space: normal;
+  }
+  .ak-screen .ak-screen__heading {
+    padding-inline: var(--ak-screen-padding);
+  }
+
+
+  .ak-screen .ak-screen__back {
+    padding-right: 0.75rem;
+    padding-left: 0.65rem;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .ak-screen,
   .ak-screen.is-leaving,
-  .ak-screen__bar::after,
-  .ak-screen__body {
+  .ak-screen .ak-screen__bar::after,
+  .ak-screen .ak-screen__body,
+  .ak-screen .ak-screen__back,
+  .ak-screen .ak-screen__back::before {
     animation: none;
+    transition: none;
   }
 
   .ak-screen::before {
     display: none;
-  }
-
-  .ak-screen__back,
-  .ak-screen__back::before {
     animation: none;
-    transition: none;
   }
 }

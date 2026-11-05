@@ -328,6 +328,11 @@ available. Theme, density, and sound controls are grouped under Settings. On nar
 category list scrolls horizontally and reveals the current selection. The showcase deploys to
 **Cloudflare Pages** on every push to `master`, independently of the npm release.
 
+Use the skip link to reach the catalogue. Category links support sharing and opening in a new tab,
+and browser back and forward restore the selected category. The `llms.txt` viewer and inventory
+terminal are modal dialogs; Escape closes them and returns focus to the opening control. The
+terminal's search and category filters can be cleared when no items match.
+
 ```bash
 npm run dev          # local, http://localhost:5273
 npm run build:demo   # builds the showcase into dist-demo/
