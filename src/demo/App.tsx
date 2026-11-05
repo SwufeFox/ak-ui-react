@@ -1007,6 +1007,40 @@ function ReferenceView() {
   const [tableStriped, setTableStriped] = useState(true)
   const [tableTactical, setTableTactical] = useState(true)
   const [tableSticky, setTableSticky] = useState(false)
+  const [tableSortKey, setTableSortKey] = useState<'name' | 'atk' | 'def'>('atk')
+  const [tableSortDir, setTableSortDir] = useState<'ascending' | 'descending' | 'none'>('descending')
+
+  const handleTableSort = (key: 'name' | 'atk' | 'def') => {
+    playTactileSound('dial', 0.15)
+    if (tableSortKey !== key) {
+      setTableSortKey(key)
+      setTableSortDir('descending')
+    } else if (tableSortDir === 'descending') {
+      setTableSortDir('ascending')
+    } else if (tableSortDir === 'ascending') {
+      setTableSortDir('none')
+    } else {
+      setTableSortDir('descending')
+    }
+  }
+
+  const tableData = useMemo(() => {
+    const raw = [
+      { id: 'r1', name: 'Amiya', atk: 512, def: 128, role: 'CASTER' },
+      { id: 'r2', name: 'Kaltsit', atk: 480, def: 210, role: 'MEDIC' },
+      { id: 'r3', name: 'Ifrit', atk: 620, def: 90, role: 'CASTER' },
+      { id: 'r4', name: 'Saria', atk: 485, def: 590, role: 'DEFENDER' },
+    ]
+    if (tableSortDir === 'none') return raw
+    return [...raw].sort((a, b) => {
+      const valA = a[tableSortKey]
+      const valB = b[tableSortKey]
+      const diff = typeof valA === 'number' && typeof valB === 'number'
+        ? valA - valB
+        : String(valA).localeCompare(String(valB))
+      return tableSortDir === 'ascending' ? diff : -diff
+    })
+  }, [tableSortKey, tableSortDir])
   const [selectedItem, setSelectedItem] = useState('D32')
   const [selectedSlot, setSelectedSlot] = useState('silverash')
   // 「外观展台」那排按钮的点击回显：让纯展示按钮也有反馈
@@ -1118,15 +1152,6 @@ function ReferenceView() {
     [activeIndex, selectCategory],
   )
 
-  const randomCategory = useCallback(() => {
-    const otherCategories = CATEGORIES.filter((c) => c.id !== active)
-    const pick = otherCategories[Math.floor(Math.random() * otherCategories.length)]
-    if (pick) {
-      playTactileSound('confirm', 0.2)
-      selectCategory(pick.id)
-    }
-  }, [active, selectCategory])
-
   const filteredCategories = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return CATEGORIES
@@ -1151,14 +1176,9 @@ function ReferenceView() {
         searchInputRef.current?.select()
       }
     }
-    const handleRandom = () => randomCategory()
     window.addEventListener('keydown', handleKey)
-    window.addEventListener('ak:random-module', handleRandom)
-    return () => {
-      window.removeEventListener('keydown', handleKey)
-      window.removeEventListener('ak:random-module', handleRandom)
-    }
-  }, [randomCategory])
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [])
 
   /** 浏览器前进/后退或者直接改 hash 时跟随。（只处理落在已知分类上的 hash。） */
   useEffect(() => {
@@ -1174,7 +1194,6 @@ function ReferenceView() {
     { label: t('common.all'), value: 'all', icon: <span>◈</span>, badge: '12' },
     { label: t('ref.inputs.ground'), value: 'ground', icon: <span>▼</span>, badge: '8' },
     { label: t('ref.inputs.air'), value: 'air', icon: <span>▲</span>, badge: '4' },
-    { label: 'CLASSIFIED', value: 'classified', icon: <span>⚿</span>, disabled: true },
   ]
   const items: GalleryItem[] = galleryItems(t)
   // 画廊素材展示项
@@ -1224,31 +1243,6 @@ function ReferenceView() {
                   <span className={`demo-hero__install-btn ${installCopied ? 'demo-hero__install-btn--copied' : ''}`}>
                     {installCopied ? 'COPIED ✓' : 'COPY'}
                   </span>
-                </div>
-
-                <div className="demo-hero__btn-group">
-                  <AkButton
-                    variant="action"
-                    chamfer
-                    subtitle="EXPLORE // 快速开始"
-                    onClick={() => {
-                      playTactileSound('click', 0.15)
-                      selectCategory('components-1')
-                    }}
-                    iconEnd={<span aria-hidden="true">↓</span>}
-                  >
-                    BROWSE CATALOGUE
-                  </AkButton>
-                  <AkButton
-                    variant="outline"
-                    onClick={() => {
-                      playTactileSound('click', 0.15)
-                      window.open('https://github.com/swufefox/ak-ui-react', '_blank', 'noreferrer')
-                    }}
-                    iconEnd={<span aria-hidden="true">↗</span>}
-                  >
-                    GITHUB
-                  </AkButton>
                 </div>
               </div>
             </div>
@@ -1332,16 +1326,6 @@ function ReferenceView() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="demo-rail__llm-banner"
-            onClick={() => window.dispatchEvent(new CustomEvent('ak:open-llm-spec'))}
-          >
-            <span className="demo-rail__llm-tag">AI SPEC</span>
-            <span className="demo-rail__llm-title">llms.txt</span>
-            <span className="demo-rail__llm-desc">SPECIFICATION ↗</span>
-          </button>
-
           {filteredCategories.length === 0 ? (
             <div className="demo-rail__empty">
               <span className="demo-rail__empty-title">NO MATCH // 无匹配</span>
@@ -1391,10 +1375,6 @@ function ReferenceView() {
           <AkButton variant="ghost" subtitle="PASSIVE" onClick={() => hitButton('ghost')}>GHOST</AkButton>
           <AkButton variant="advanced" onClick={() => hitButton('advanced')}>{t('common.advanced')}</AkButton>
           <AkButton variant="light" onClick={() => hitButton('light')}>{t('common.light')}</AkButton>
-          <AkTag>{t('common.tag')}</AkTag>
-          <AkTag variant="advanced">{t('common.advanced')}</AkTag>
-          <AkTag variant="danger">{t('common.danger')}</AkTag>
-          <AkTag variant="neutral">{t('common.neutral')}</AkTag>
         </div>
         <div className="demo-row">
           <AkButton variant="action" chamfer subtitle="TACTICAL" icon={<span aria-hidden="true">◆</span>} onClick={() => hitButton('action+icon')}>
@@ -1717,26 +1697,15 @@ function ReferenceView() {
       <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} api={DOC_REGISTRY['components-6']?.api}>
         <AkTabs
           ariaLabel={t('ref.navigation.aria')}
-          items={[
-            ...tabSpec.map((item, index) => ({
-              value: item.value,
-              label: t(item.label),
-              icon: item.icon ? <span>{item.icon}</span> : undefined,
-              badge: item.badge,
-              eyebrow: t('ref.navigation.eyebrowText', { n: String(index + 1).padStart(3, '0') }),
-              title: t(item.title),
-              description: t(item.description),
-            })),
-            {
-              value: 'restricted',
-              label: 'RESTRICTED',
-              icon: <span>⚿</span>,
-              disabled: true,
-              title: 'RESTRICTED SECTOR',
-              eyebrow: '004 // CLASSIFIED',
-              description: 'Access denied: Level 4 credentials required.',
-            },
-          ]}
+          items={tabSpec.map((item, index) => ({
+            value: item.value,
+            label: t(item.label),
+            icon: item.icon ? <span>{item.icon}</span> : undefined,
+            badge: item.badge,
+            eyebrow: t('ref.navigation.eyebrowText', { n: String(index + 1).padStart(3, '0') }),
+            title: t(item.title),
+            description: t(item.description),
+          }))}
           value={tab}
           onValueChange={(v) => setTab(v ?? 'overview')}
           renderPanel={(item) => <p className="ak-text">{t('ref.navigation.panelBody', { value: String(item.title) })}</p>}
@@ -2028,13 +1997,13 @@ function ReferenceView() {
           {/* 上游特效层：这三样才是 ak-ui 的动效语言（都是 CSS animation infinite） */}
           <div className="demo-fx-row">
             <AkGlow>
-              <AkButton variant="outline">{t('common.glow')}</AkButton>
+              <AkButton variant="outline" onClick={() => playTactileSound('click', 0.15)}>{t('common.glow')}</AkButton>
             </AkGlow>
             <AkGlow tone="action">
-              <AkButton variant="action">{t('common.glowAction')}</AkButton>
+              <AkButton variant="action" onClick={() => playTactileSound('action', 0.2)}>{t('common.glowAction')}</AkButton>
             </AkGlow>
             <AkOutline color="var(--ak-signal-info)">
-              <AkButton variant="outline">{t('common.outlineRing')}</AkButton>
+              <AkButton variant="outline" onClick={() => playTactileSound('dial', 0.15)}>{t('common.outlineRing')}</AkButton>
             </AkOutline>
             <AkSkew direction="left" style={{ display: 'inline-block' }}>
               <AkInverse style={{ padding: '0.375rem 0.75rem' }}>{t('common.skewLeft')}</AkInverse>
@@ -2444,17 +2413,16 @@ function ReferenceView() {
               hoverable
               onRowClick={(row) => setSelectedTableRow(row.id)}
               columns={[
-                { key: 'name', header: t('common.colName'), sort: 'none', onSortChange: () => {} },
-                { key: 'atk', header: t('common.colAtk'), numeric: true, sort: 'descending', onSortChange: () => {} },
-                { key: 'def', header: t('common.colDef'), numeric: true, sort: 'none', onSortChange: () => {} },
+                { key: 'name', header: t('common.colName'), sort: tableSortKey === 'name' ? tableSortDir : 'none', onSortChange: () => handleTableSort('name') },
+                { key: 'atk', header: t('common.colAtk'), numeric: true, sort: tableSortKey === 'atk' ? tableSortDir : 'none', onSortChange: () => handleTableSort('atk') },
+                { key: 'def', header: t('common.colDef'), numeric: true, sort: tableSortKey === 'def' ? tableSortDir : 'none', onSortChange: () => handleTableSort('def') },
                 { key: 'role', header: 'ROLE' },
               ]}
-              rows={[
-                { id: 'r1', cells: { name: 'Amiya', atk: '512', def: '128', role: 'CASTER' }, selected: selectedTableRow === 'r1' },
-                { id: 'r2', cells: { name: 'Kaltsit', atk: '480', def: '210', role: 'MEDIC' }, selected: selectedTableRow === 'r2' },
-                { id: 'r3', cells: { name: 'Ifrit', atk: '620', def: '90', role: 'CASTER' }, selected: selectedTableRow === 'r3' },
-                { id: 'r4', cells: { name: 'Saria', atk: '485', def: '590', role: 'DEFENDER' }, selected: selectedTableRow === 'r4' },
-              ]}
+              rows={tableData.map((r) => ({
+                id: r.id,
+                cells: { name: r.name, atk: String(r.atk), def: String(r.def), role: r.role },
+                selected: selectedTableRow === r.id,
+              }))}
               footer={{ name: t('common.total'), atk: '2097', def: '1018', role: '4 UNITS' }}
             />
 
@@ -3077,14 +3045,6 @@ function ReferenceView() {
                 {t('ref.catalogue.previous')}
               </AkButton>
               <AkButton
-                variant="ghost"
-                onClick={randomCategory}
-                title="Random Module // 随机巡检"
-                icon={<span aria-hidden="true">🎲</span>}
-              >
-                RANDOM
-              </AkButton>
-              <AkButton
                 variant="outline"
                 disabled={activeIndex === CATEGORIES.length - 1}
                 onClick={() => {
@@ -3122,12 +3082,6 @@ export function App() {
     document.documentElement.dataset.akDensity = density
   }, [density])
 
-  useEffect(() => {
-    const handleOpen = () => setLlmModalOpen(true)
-    window.addEventListener('ak:open-llm-spec', handleOpen)
-    return () => window.removeEventListener('ak:open-llm-spec', handleOpen)
-  }, [])
-
   const copyLlmText = () => {
     navigator.clipboard.writeText(llmsRawText)
     setLlmCopied(true)
@@ -3149,25 +3103,15 @@ export function App() {
 
         {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
-          <div className="demo-topbar__group">
-            <AkButton
-              size="sm"
-              variant="light"
-              onClick={() => setLlmModalOpen(true)}
-              title="View llms.txt AI Agent Specification"
-              icon={<span className="demo-spec-dot">◆</span>}
-            >
-              LLMS.TXT
-            </AkButton>
-            <AkButton
-              size="sm"
-              variant="light"
-              onClick={() => window.open('/llms.txt', '_blank', 'noreferrer')}
-              iconEnd={<span aria-hidden="true">↗</span>}
-            >
-              RAW
-            </AkButton>
-          </div>
+          <AkButton
+            size="sm"
+            variant="light"
+            onClick={() => setLlmModalOpen(true)}
+            title="View llms.txt AI Agent Specification"
+            icon={<span className="demo-spec-dot">◆</span>}
+          >
+            LLMS.TXT
+          </AkButton>
 
           <AkSegmented
             size="sm"

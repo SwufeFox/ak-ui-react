@@ -398,12 +398,6 @@ body {
   font-weight: 900 !important;
 }
 
-.demo-hero__btn-group {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
 .demo-hero__specs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1401,49 +1395,6 @@ body {
   color: var(--ak-signal-info, #4aabea);
 }
 
-.demo-rail__llm-banner {
-  display: grid;
-  gap: 0.25rem;
-  padding: 0.65rem 0.75rem;
-  margin: 0.5rem 0 0.75rem;
-  border: 1px solid var(--ak-signal-info, #4aabea);
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 10%, transparent);
-  clip-path: polygon(0 0, calc(100% - 0.5rem) 0, 100% 0.5rem, 100% 100%, 0 100%);
-  cursor: pointer;
-  text-align: left;
-  transition:
-    background-color var(--demo-motion-fast) var(--demo-motion-ease),
-    box-shadow var(--demo-motion-fast) var(--demo-motion-ease),
-    transform var(--demo-motion-fast) var(--demo-motion-ease);
-}
-
-.demo-rail__llm-banner:hover {
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 20%, transparent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--ak-signal-info, #4aabea) 30%, transparent);
-  transform: translateY(-1px);
-}
-
-.demo-rail__llm-tag {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: var(--ak-signal-info, #4aabea);
-}
-
-.demo-rail__llm-title {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.82rem;
-  font-weight: 900;
-  color: var(--ak-text-primary);
-}
-
-.demo-rail__llm-desc {
-  font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
-  color: var(--demo-text-muted);
-}
-
 .demo-llm-overlay {
   position: fixed;
   inset: 0;
@@ -1743,7 +1694,6 @@ body {
   .demo-rail__item,
   .demo-doc-tab,
   .demo-copy-btn,
-  .demo-rail__llm-banner,
   .demo-raw-link,
   .demo-tune-panel select,
   .demo-tune-panel input { transition-duration: 0.01ms; }
