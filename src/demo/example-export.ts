@@ -1,0 +1,120 @@
+import tuneSource from './example-tune.ts?raw'
+import demoStyles from './demo.css?raw'
+import { getLocaleMessages, type Locale } from './i18n'
+import type { TuneOverrides } from './example-tune'
+
+/** Scope comma-separated selectors without splitting inside functions or attributes. */
+function scopeSelectors(selectors: string): string {
+  const parts: string[] = []
+  let start = 0
+  let depth = 0
+  let quote = ''
+  for (let i = 0; i < selectors.length; i++) {
+    const char = selectors[i]!
+    if (quote) {
+      if (char === '\\') i++
+      else if (char === quote) quote = ''
+    } else if (char === '"' || char === "'") quote = char
+    else if (char === '(' || char === '[') depth++
+    else if (char === ')' || char === ']') depth--
+    else if (char === ',' && depth === 0) {
+      parts.push(selectors.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+  parts.push(selectors.slice(start).trim())
+  return parts.map((part) => `:where(.example-standalone) ${part}`).join(', ')
+}
+
+const styleCache = new Map<string, string>()
+let showcaseRules: CSSRule[] | undefined
+
+function getShowcaseRules(): CSSRule[] {
+  if (showcaseRules) return showcaseRules
+  const style = document.createElement('style')
+  style.media = 'not all'
+  style.textContent = demoStyles
+  document.head.appendChild(style)
+  try {
+    if (!style.sheet) throw new Error('Unable to read example styles')
+    showcaseRules = Array.from(style.sheet.cssRules)
+  } finally {
+    style.remove()
+  }
+  return showcaseRules
+}
+
+/** Copy only matching loaded showcase rules, scoped to the standalone root. */
+export function standaloneCss(source: string): string {
+  const classes = new Set(source.match(/\bdemo-[\w-]+/g) ?? [])
+  const key = [...classes].sort().join('|')
+  const cached = styleCache.get(key)
+  if (cached !== undefined) return cached
+  const keyframes: CSSKeyframesRule[] = []
+  const select = (rules: Iterable<CSSRule>): string[] => Array.from(rules).flatMap((rule) => {
+    if (rule instanceof CSSStyleRule) {
+      if (rule.selectorText === ':root') {
+        const variables = Array.from(rule.style).filter((name) => name.startsWith('--demo-')).map((name) => `${name}: ${rule.style.getPropertyValue(name)};`).join(' ')
+        return variables ? [`.example-standalone { ${variables} }`] : []
+      }
+      const names = rule.selectorText.match(/\.demo-[\w-]+/g)?.map((name) => name.slice(1)) ?? []
+      return names.some((name) => classes.has(name)) ? [`${scopeSelectors(rule.selectorText)} { ${rule.style.cssText} }`] : []
+    }
+    if (rule instanceof CSSKeyframesRule) {
+      keyframes.push(rule)
+      return []
+    }
+    if ('cssRules' in rule && /^(?:@media|@supports|@container)\b/.test(rule.cssText)) {
+      const children = select((rule as CSSGroupingRule).cssRules)
+      return children.length ? [`${rule.cssText.slice(0, rule.cssText.indexOf('{'))}{${children.join('\n')}}`] : []
+    }
+    return []
+  })
+  const selected = select(getShowcaseRules()).join('\n')
+  const animations = keyframes.filter((rule) => selected.includes(rule.name)).map((rule) => rule.cssText).join('\n')
+  const result = `${selected}\n${animations}\n.example-standalone > :not(style) ~ :not(style) { margin-block-start: 1rem; }`
+  styleCache.set(key, result)
+  return result
+}
+
+export function exampleMessages(locale: Locale, source: string, extraKeys: readonly string[] = []): Record<string, string> {
+  const dictionary = getLocaleMessages(locale)
+  const keys = new Set(extraKeys)
+  for (const match of source.matchAll(/(['"])([\w.-]+)\1/g)) {
+    if (Object.hasOwn(dictionary, match[2]!)) keys.add(match[2]!)
+  }
+  return Object.fromEntries([...keys].map((key) => [key, dictionary[key as keyof typeof dictionary] ?? key]))
+}
+
+/** Assemble the authored example, real state setup, and the same override adapter. */
+export function buildStandalone({ source, locale, overrides, setup, render, extraKeys = [], additionalSource = '' }: {
+  source: string
+  locale: Locale
+  overrides: TuneOverrides
+  setup: string
+  render: string
+  extraKeys?: readonly string[]
+  additionalSource?: string
+}): string {
+  const allSource = `${source}\n${additionalSource}`
+  const imports = new Map<string, string>()
+  for (const match of allSource.matchAll(/^import\s+(type\s+)?\{([^}]+)\}\s+from\s+['"]\.\.\/\.\.\/ak['"]\s*$/gm)) {
+    for (const part of match[2]!.split(',')) {
+      const specifier = part.trim()
+      if (!specifier) continue
+      const typeOnly = Boolean(match[1]) || specifier.startsWith('type ')
+      const name = specifier.replace(/^type\s+/, '').trim()
+      const binding = name.split(/\s+as\s+/).at(-1)!
+      const previous = imports.get(binding)
+      if (!previous || (previous.startsWith('type ') && !typeOnly)) imports.set(binding, `${typeOnly ? 'type ' : ''}${name}`)
+    }
+  }
+  const body = allSource.replace(/^import .*\n/gm, '')
+  const core = tuneSource.replace(/^import .*\n/, '')
+  const used = `${body}\n${setup}\n${render}\n${core}`
+  const values = ['cloneElement', 'useState', 'useRef', 'useEffect', 'useLayoutEffect', 'useMemo', 'useCallback'].filter((name) => new RegExp(`\\b${name}\\b`).test(used))
+  const types = ['ReactElement', 'ReactNode', 'Dispatch', 'SetStateAction', 'RefObject', 'CSSProperties', 'MouseEvent'].filter((name) => new RegExp(`\\b${name}\\b`).test(used))
+  const messages = exampleMessages(locale, `${allSource}\n${setup}\n${render}`, extraKeys)
+  const css = standaloneCss(allSource)
+  return `import { ${[...values, ...types.map((name) => `type ${name}`)].join(', ')} } from 'react'\nimport { ${[...imports.values()].join(', ')} } from '@swufefox/ak-ui-react'\nimport '@swufefox/ak-ui-react/style.css'\n\nexport type MessageKey = string\nexport type I18nValue = { t: (key: MessageKey, vars?: Record<string, string | number>) => string }\n${core}\n${body}\nconst messages: Record<string, string> = ${JSON.stringify(messages, null, 2)}\nconst overrides: TuneOverrides = ${JSON.stringify(overrides, null, 2)}\nconst styles = ${JSON.stringify(css)}\n\nexport default function Example() {\n  const t: I18nValue['t'] = (key, vars) => (messages[key] ?? key).replace(/\\{(\\w+)\\}/g, (match, name: string) => vars && name in vars ? String(vars[name]) : match)\n  ${setup}\n  const { tune } = createTuneSession(overrides)\n  return <div className="example-standalone"><style>{styles}</style>${render}</div>\n}\n`
+}

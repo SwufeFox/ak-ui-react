@@ -1,173 +1,182 @@
+import type { Locale } from './i18n'
+
 export interface BlockPropDoc {
   name: string
   type: string
   default?: string
-  desc: string
+  desc: Record<Locale, string>
 }
 
 export interface BlockDoc {
   api: BlockPropDoc[]
 }
 
+const localizedDescription = (zhCN: string, en: string): Record<Locale, string> => ({
+  'zh-CN': zhCN,
+  en,
+})
+
 export const DOC_REGISTRY: Record<string, BlockDoc> = {
   'components-1': {
     api: [
-      { name: 'variant', type: "'default' | 'outline' | 'action' | 'advanced' | 'light' | 'danger' | 'ghost'", default: "'default'", desc: '外观样式档位，决定底色与强调信号（danger 为紧急撤退红，ghost 为高透 HUD 按钮）' },
-      { name: 'chamfer', type: 'boolean', default: 'false', desc: '是否开启右上角 10px 战术斜切角' },
-      { name: 'subtitle', type: 'ReactNode', desc: '副标题 / 战术代号（大写等宽小字，常用于双语排版如「部署 // DEPLOY」）' },
-      { name: 'icon', type: 'ReactNode', desc: '前置图标节点插槽' },
-      { name: 'block', type: 'boolean', default: 'false', desc: '是否撑满父容器 100% 宽度' },
-      { name: 'disabled', type: 'boolean', default: 'false', desc: '原生禁用状态，带置灰与禁止光标' },
-      { name: 'type', type: "'button' | 'submit' | 'reset'", default: "'button'", desc: '原生按钮类型' },
+      { name: 'variant', type: "'default' | 'outline' | 'action' | 'advanced' | 'light' | 'danger' | 'ghost'", default: "'default'", desc: localizedDescription('外观样式档位，决定底色与强调信号（danger 为紧急撤退红，ghost 为高透 HUD 按钮）', 'Visual style that sets the surface and signal treatment (danger uses retreat red; ghost is a translucent HUD button).') },
+      { name: 'chamfer', type: 'boolean', default: 'false', desc: localizedDescription('是否开启右上角 10px 战术斜切角', 'Whether to cut a 10px tactical chamfer from the top-right corner.') },
+      { name: 'subtitle', type: 'ReactNode', desc: localizedDescription('副标题 / 战术代号（大写等宽小字，常用于双语排版如「部署 // DEPLOY」）', 'Secondary label or call sign, usually set in small uppercase monospace text (for example, “DEPLOY”).') },
+      { name: 'icon', type: 'ReactNode', desc: localizedDescription('前置图标节点插槽', 'Content slot for a leading icon.') },
+      { name: 'block', type: 'boolean', default: 'false', desc: localizedDescription('是否撑满父容器 100% 宽度', 'Whether the button fills its container width.') },
+      { name: 'disabled', type: 'boolean', default: 'false', desc: localizedDescription('原生禁用状态，带置灰与禁止光标', 'Uses the native disabled state with muted styling and a disabled cursor.') },
+      { name: 'type', type: "'button' | 'submit' | 'reset'", default: "'button'", desc: localizedDescription('原生按钮类型', 'Native button type.') },
     ],
   },
 
   'components-2': {
     api: [
-      { name: 'label', type: 'ReactNode', desc: '下拉菜单触发器按钮的显示内容' },
-      { name: 'items', type: 'readonly AkMenuItem[]', desc: '菜单条目数组（含 label, onSelect, disabled, destructive, shortcut）' },
-      { name: 'className', type: 'string', desc: '触发器与菜单容器的附加类名' },
+      { name: 'label', type: 'ReactNode', desc: localizedDescription('下拉菜单触发器按钮的显示内容', 'Content displayed by the dropdown trigger button.') },
+      { name: 'items', type: 'readonly AkMenuItem[]', desc: localizedDescription('菜单条目数组（含 label, onSelect, disabled, destructive, shortcut）', 'Menu items with label, onSelect, disabled, destructive, and shortcut fields.') },
+      { name: 'className', type: 'string', desc: localizedDescription('触发器与菜单容器的附加类名', 'Additional class name for the trigger and menu container.') },
     ],
   },
 
   'components-3': {
     api: [
-      { name: 'as', type: 'ElementType', default: "'div'", desc: '底层渲染的 HTML 标签（如 article, section）' },
-      { name: 'variant', type: "'default' | 'outline' | 'stripe' | 'place' | 'tactical' | 'glass' | 'chassis'", default: "'default'", desc: '卡片外观风格：默认复合面板、线框、斑马纹、放置槽、4角准星终端、亚克力毛玻璃或重型装甲机匣' },
-      { name: 'chamfer', type: 'boolean', default: 'false', desc: '是否开启右上角 45° 战术斜切角' },
-      { name: 'hoverable', type: 'boolean', default: 'false', desc: '是否开启悬停微浮与辉光动效' },
-      { name: 'interactive', type: 'boolean', default: 'false', desc: '是否为可交互卡片（带点击反馈与焦点管理）' },
-      { name: 'children', type: 'ReactNode', desc: '卡片主体或槽位组件' },
+      { name: 'as', type: 'ElementType', default: "'div'", desc: localizedDescription('底层渲染的 HTML 标签（如 article, section）', 'HTML element used to render the card (for example, article or section).') },
+      { name: 'variant', type: "'default' | 'outline' | 'stripe' | 'place' | 'tactical' | 'glass' | 'chassis'", default: "'default'", desc: localizedDescription('卡片外观风格：默认复合面板、线框、斑马纹、放置槽、4角准星终端、亚克力毛玻璃或重型装甲机匣', 'Card treatment: standard panel, outline, stripe, placement slot, four-corner tactical, acrylic glass, or armored chassis.') },
+      { name: 'chamfer', type: 'boolean', default: 'false', desc: localizedDescription('是否开启右上角 45° 战术斜切角', 'Whether to cut a 45° tactical chamfer from the top-right corner.') },
+      { name: 'hoverable', type: 'boolean', default: 'false', desc: localizedDescription('是否开启悬停微浮与辉光动效', 'Whether the card lifts slightly and glows on hover.') },
+      { name: 'interactive', type: 'boolean', default: 'false', desc: localizedDescription('是否为可交互卡片（带点击反馈与焦点管理）', 'Whether the card is interactive, with click feedback and focus handling.') },
+      { name: 'children', type: 'ReactNode', desc: localizedDescription('卡片主体或槽位组件', 'Card content or slot components.') },
     ],
   },
 
   'components-4': {
     api: [
-      { name: 'title', type: 'ReactNode', desc: '公告或通知卡片的主标题' },
-      { name: 'code', type: 'ReactNode', desc: '左侧等宽技术状态代码（如 SEC.04）' },
-      { name: 'variant', type: "'info' | 'warning' | 'danger' | 'success'", default: "'info'", desc: '状态信号颜色档位' },
-      { name: 'value', type: 'number', desc: '进度或计量当前数值' },
-      { name: 'max', type: 'number', default: '100', desc: '进度或计量上限值' },
+      { name: 'title', type: 'ReactNode', desc: localizedDescription('公告或通知卡片的主标题', 'Main heading for the notice card.') },
+      { name: 'code', type: 'ReactNode', desc: localizedDescription('左侧等宽技术状态代码（如 SEC.04）', 'Monospace status code shown on the left (for example, SEC.04).') },
+      { name: 'variant', type: "'info' | 'warning' | 'danger' | 'success'", default: "'info'", desc: localizedDescription('状态信号颜色档位', 'Status signal color variant.') },
+      { name: 'value', type: 'number', desc: localizedDescription('进度或计量当前数值', 'Current progress or meter value.') },
+      { name: 'max', type: 'number', default: '100', desc: localizedDescription('进度或计量上限值', 'Maximum progress or meter value.') },
     ],
   },
 
   'components-5': {
     api: [
-      { name: 'value', type: 'number | string', desc: '受控当前选定值' },
-      { name: 'onValueChange', type: '(value: any) => void', desc: '数值变化时的受控回调' },
-      { name: 'min / max', type: 'number', desc: '滑动条或数字步进器的范围极值' },
-      { name: 'options', type: 'readonly (string | AkSegmentedOption)[]', desc: '分段控制器的选项清单' },
+      { name: 'value', type: 'number | string', desc: localizedDescription('受控当前选定值', 'Currently selected controlled value.') },
+      { name: 'onValueChange', type: '(value: any) => void', desc: localizedDescription('数值变化时的受控回调', 'Called with the new value when the selection changes.') },
+      { name: 'min / max', type: 'number', desc: localizedDescription('滑动条或数字步进器的范围极值', 'Lower and upper bounds for the slider or number stepper.') },
+      { name: 'options', type: 'readonly (string | AkSegmentedOption)[]', desc: localizedDescription('分段控制器的选项清单', 'Options displayed by the segmented control.') },
     ],
   },
 
   'components-6': {
     api: [
-      { name: 'items', type: 'readonly AkTabsItem[]', desc: '标签页定义数组（包含 id, label, eyebrow, content）' },
-      { name: 'value', type: 'string', desc: '当前激活的标签页 id' },
-      { name: 'onValueChange', type: '(value: string) => void', desc: '切换标签页时的回调' },
-      { name: 'ariaLabel', type: 'string', desc: '标签栏无障碍名称' },
+      { name: 'items', type: 'readonly AkTabsItem[]', desc: localizedDescription('标签项数组；每项必需包含 value、label、title，可选 description', 'Tab items; each requires value, label, and title, with an optional description.') },
+      { name: 'value', type: 'string', desc: localizedDescription('当前激活标签页的受控 value 值', 'Value of the currently active tab.') },
+      { name: 'onValueChange', type: '(value: string) => void', desc: localizedDescription('切换标签页时以新 value 调用', 'Called with the new value when the active tab changes.') },
+      { name: 'ariaLabel', type: 'string', desc: localizedDescription('标签栏无障碍名称', 'Accessible name for the tab list.') },
     ],
   },
 
   'components-7': {
     api: [
-      { name: 'ref', type: 'Ref<AkEntranceHandle>', desc: '进场动画句柄，通过 replay() 可重新播放入场动效' },
-      { name: 'value', type: 'number', desc: 'AkCountUp 目标数值' },
-      { name: 'duration', type: 'number', default: '600', desc: '数字滚动动画持续毫秒数' },
-      { name: 'threeD', type: 'boolean', default: 'false', desc: 'AkDepth 是否启用倾斜透视立体位移' },
+      { name: 'ref', type: 'Ref<AkEntranceHandle>', desc: localizedDescription('进场动画句柄，通过 replay() 可重新播放入场动效', 'Entrance animation handle; call replay() to play the entrance again.') },
+      { name: 'value', type: 'number', desc: localizedDescription('AkCountUp 目标数值', 'Target value displayed by AkCountUp.') },
+      { name: 'duration', type: 'number', default: '600', desc: localizedDescription('数字滚动动画持续毫秒数', 'Duration of the count-up animation, in milliseconds.') },
+      { name: 'threeD', type: 'boolean', default: 'false', desc: localizedDescription('AkDepth 是否启用倾斜透视立体位移', 'Whether AkDepth applies perspective tilt and 3D displacement.') },
     ],
   },
 
   'components-8': {
     api: [
-      { name: 'items', type: 'readonly GalleryItem[]', desc: '画廊多媒体条目数组（含 title, src, alt, thumb 等）' },
-      { name: 'value', type: 'number', desc: '当前焦点大图的索引' },
-      { name: 'onValueChange', type: '(index: number) => void', desc: '切换画廊相片时的回调' },
-      { name: 'src', type: 'string', desc: '拍立得倾斜相册图片的地址' },
+      { name: 'items', type: 'readonly GalleryItem[]', desc: localizedDescription('画廊多媒体条目数组（含 title, src, alt, thumb 等）', 'Gallery media items with fields such as title, src, alt, and thumb.') },
+      { name: 'value', type: 'number', desc: localizedDescription('当前焦点大图的索引', 'Index of the currently focused image.') },
+      { name: 'onValueChange', type: '(index: number) => void', desc: localizedDescription('切换画廊相片时的回调', 'Called with the new image index when the gallery selection changes.') },
+      { name: 'src', type: 'string', desc: localizedDescription('拍立得倾斜相册图片的地址', 'Image URL displayed by the tilted polaroid album.') },
     ],
   },
 
   'components-9': {
     api: [
-      { name: 'tasks', type: 'readonly AssetTask[]', desc: '资源预加载异步任务集合' },
-      { name: 'label', type: 'string', default: "'Resources'", desc: '加载状态行前缀名称' },
-      { name: 'retryLabel', type: 'string', default: "'Retry'", desc: '失败时重试按钮文字' },
-      { name: 'onChange', type: '(state: AssetState) => void', desc: '加载状态流转回调' },
+      { name: 'tasks', type: 'readonly AssetTask[]', desc: localizedDescription('资源预加载异步任务集合', 'Asynchronous tasks used to preload assets.') },
+      { name: 'label', type: 'string', default: "'Resources'", desc: localizedDescription('加载状态行前缀名称', 'Prefix shown beside the loading status.') },
+      { name: 'retryLabel', type: 'string', default: "'Retry'", desc: localizedDescription('失败时重试按钮文字', 'Text for the retry button shown after a failure.') },
+      { name: 'onChange', type: '(state: AssetState) => void', desc: localizedDescription('加载状态流转回调', 'Called when the loading state changes.') },
     ],
   },
 
   'components-10': {
     api: [
-      { name: 'sections', type: 'readonly SectionSpec[]', desc: '整页全屏吸附导航分节定义（id 对应锚点容器）' },
-      { name: 'viewportSelector', type: 'string', desc: '吸附滚动视口容器的选择器' },
+      { name: 'children', type: 'React.ReactNode', desc: localizedDescription('视口内容；必须包含 [data-ak-section-viewport] 视口元素及带唯一 id 的区块', 'Viewport content; must include a [data-ak-section-viewport] element and sections with unique IDs.') },
+      { name: 'syncHash', type: 'boolean', default: 'true', desc: localizedDescription('是否将当前区块写入 URL hash', 'Whether to write the current section to the URL hash.') },
+      { name: 'duration', type: 'number', default: '650', desc: localizedDescription('区块切换动画时长，单位毫秒', 'Section transition duration, in milliseconds.') },
+      { name: 'onChange', type: '(id: string, index: number) => void', desc: localizedDescription('区块切换时以区块 id 和序号调用', 'Called with the section ID and index when the active section changes.') },
     ],
   },
 
   'components-11': {
     api: [
-      { name: 'variant', type: 'string', desc: '装饰类型（条纹: default|strong|warning|danger|hazard；网格: grid|dots|diag|scanlines）' },
-      { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", desc: 'AkCut 裁角四档尺寸' },
-      { name: 'corner', type: "'tr' | 'tl' | 'br' | 'bl' | 'all'", default: "'tr'", desc: '裁切角方位' },
-      { name: 'tone', type: "'info' | 'yellow' | 'red'", default: "'info'", desc: 'AkCorner 战术三角提示色调' },
+      { name: 'variant', type: 'string', desc: localizedDescription('装饰类型（条纹: default|strong|warning|danger|hazard；网格: grid|dots|diag|scanlines）', 'Decoration style (stripes: default|strong|warning|danger|hazard; backdrops: grid|dots|diag|scanlines).') },
+      { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", desc: localizedDescription('AkCut 裁角四档尺寸', 'AkCut chamfer size.') },
+      { name: 'corner', type: "'tr' | 'tl' | 'br' | 'bl' | 'all'", default: "'tr'", desc: localizedDescription('裁切角方位', 'Corner or corners to cut.') },
+      { name: 'tone', type: "'info' | 'yellow' | 'red'", default: "'info'", desc: localizedDescription('AkCorner 战术三角提示色调', 'AkCorner tactical corner marker tone.') },
     ],
   },
 
   'components-12': {
     api: [
-      { name: 'level', type: '1 | 2 | 3 | 4 | 5 | 6', desc: '稀有度星级（1 至 6 星）' },
-      { name: 'prof', type: 'AkProfessionName', desc: '八大职业标识（pioneer, warrior, tank, sniper, caster, medic, support, special）' },
-      { name: 'value', type: 'AkSkillLevel', desc: '技能专精等级（1..7, M1, M2, M3）' },
-      { name: 'label', type: 'ReactNode', desc: '属性拉丁代码（如 ATK, DEF, RST）' },
+      { name: 'level', type: '1 | 2 | 3 | 4 | 5 | 6', desc: localizedDescription('稀有度星级（1 至 6 星）', 'Rarity in stars (1 to 6).') },
+      { name: 'prof', type: 'AkProfessionName', desc: localizedDescription('八大职业标识（pioneer, warrior, tank, sniper, caster, medic, support, special）', 'One of the eight profession identifiers: pioneer, warrior, tank, sniper, caster, medic, support, or special.') },
+      { name: 'value', type: 'AkSkillLevel', desc: localizedDescription('技能专精等级（1..7, M1, M2, M3）', 'Skill level (1–7 or mastery M1, M2, M3).') },
+      { name: 'label', type: 'ReactNode', desc: localizedDescription('属性拉丁代码（如 ATK, DEF, RST）', 'Latin stat code (for example, ATK, DEF, or RST).') },
     ],
   },
 
   'components-13': {
     api: [
-      { name: 'open', type: 'boolean', desc: '浮层受控显示状态' },
-      { name: 'onOpenChange', type: '(open: boolean) => void', desc: '浮层展开/关闭回调' },
-      { name: 'title', type: 'ReactNode', desc: '对话框或气泡的标题' },
-      { name: 'trigger', type: 'ReactNode', desc: 'AkPopover 触发器节点' },
-      { name: 'kind', type: "'popover' | 'tooltip'", default: "'popover'", desc: '气泡卡片外观变体' },
+      { name: 'open', type: 'boolean', desc: localizedDescription('浮层受控显示状态', 'Controlled open state of the overlay.') },
+      { name: 'onOpenChange', type: '(open: boolean) => void', desc: localizedDescription('浮层展开/关闭回调', 'Called when the overlay opens or closes.') },
+      { name: 'title', type: 'ReactNode', desc: localizedDescription('对话框或气泡的标题', 'Dialog or popover title.') },
+      { name: 'trigger', type: 'ReactNode', desc: localizedDescription('AkPopover 触发器节点', 'Trigger element rendered by AkPopover.') },
+      { name: 'kind', type: "'popover' | 'tooltip'", default: "'popover'", desc: localizedDescription('气泡卡片外观变体', 'Popover appearance variant.') },
     ],
   },
 
   'components-14': {
     api: [
-      { name: 'hint', type: 'ReactNode', desc: '表单字段底部的技术说明文字' },
-      { name: 'invalid', type: 'boolean', default: 'false', desc: '输入框校验失败告警状态（红框指示）' },
-      { name: 'htmlFor', type: 'string', desc: '标签关联的 input 元素 id' },
-      { name: 'variant', type: "'checkbox' | 'radio' | 'switch'", default: "'checkbox'", desc: '选择控件的形态' },
+      { name: 'hint', type: 'ReactNode', desc: localizedDescription('表单字段底部的技术说明文字', 'Helper text displayed below the form field.') },
+      { name: 'invalid', type: 'boolean', default: 'false', desc: localizedDescription('输入框校验失败告警状态（红框指示）', 'Validation error state, shown with a red field outline.') },
+      { name: 'htmlFor', type: 'string', desc: localizedDescription('标签关联的 input 元素 id', 'ID of the input associated with this label.') },
+      { name: 'variant', type: "'checkbox' | 'radio' | 'switch'", default: "'checkbox'", desc: localizedDescription('选择控件的形态', 'Choice control style.') },
     ],
   },
 
   'components-15': {
     api: [
-      { name: 'current', type: 'number | string', desc: '当前理智值或度量读数' },
-      { name: 'total', type: 'number | string', desc: '理智上限' },
-      { name: 'onAdd', type: '() => void', desc: '点击加号动作回调' },
-      { name: 'variant', type: "'compact' | 'terminal'", default: "'compact'", desc: '理智面板容器外观' },
-      { name: 'color', type: 'string', desc: 'AkSpinner 加载菱形主色' },
+      { name: 'current', type: 'number | string', desc: localizedDescription('当前理智值或度量读数', 'Current sanity value or meter reading.') },
+      { name: 'total', type: 'number | string', desc: localizedDescription('理智上限', 'Maximum sanity value.') },
+      { name: 'onAdd', type: '() => void', desc: localizedDescription('点击加号动作回调', 'Called when the add button is clicked.') },
+      { name: 'variant', type: "'compact' | 'terminal'", default: "'compact'", desc: localizedDescription('理智面板容器外观', 'Sanity panel container style.') },
+      { name: 'color', type: 'string', desc: localizedDescription('AkSpinner 加载菱形主色', 'Primary color of the AkSpinner loading diamond.') },
     ],
   },
 
   'components-16': {
     api: [
-      { name: 'columns', type: 'readonly AkTableColumn[]', desc: '表格列定义（key, header, numeric, sort 等）' },
-      { name: 'rows', type: 'readonly AkTableRow[]', desc: '表格行数据' },
-      { name: 'tactical', type: 'boolean', default: 'false', desc: '是否开启战术沉浸式深色指挥台外观' },
-      { name: 'fallback', type: 'ReactNode', desc: '头像无图时的缩写首字母' },
-      { name: 'cut', type: 'boolean', default: 'false', desc: '头像右上切角机能风' },
-      { name: 'items', type: 'readonly AkNewsListItem[]', desc: '公告条目列表' },
+      { name: 'columns', type: 'readonly AkTableColumn[]', desc: localizedDescription('表格列定义（key, header, numeric, sort 等）', 'Table column definitions with fields such as key, header, numeric, and sort.') },
+      { name: 'rows', type: 'readonly AkTableRow[]', desc: localizedDescription('表格行数据', 'Table row data.') },
+      { name: 'tactical', type: 'boolean', default: 'false', desc: localizedDescription('是否开启战术沉浸式深色指挥台外观', 'Whether to use the immersive dark tactical console style.') },
+      { name: 'fallback', type: 'ReactNode', desc: localizedDescription('头像无图时的缩写首字母', 'Initials shown when an avatar image is unavailable.') },
+      { name: 'cut', type: 'boolean', default: 'false', desc: localizedDescription('头像右上切角机能风', 'Whether to add a functional chamfer to the avatar’s top-right corner.') },
+      { name: 'items', type: 'readonly AkNewsListItem[]', desc: localizedDescription('公告条目列表', 'List of news items.') },
     ],
   },
 
   'components-17': {
     api: [
-      { name: 'tone', type: "'paper' | 'dark' | 'cyan' | 'accent' | 'muted'", desc: '指令牌或屏幕的色调主题' },
-      { name: 'rarity', type: '1 | 2 | 3 | 4 | 5 | 6', desc: 'AkSlot 干员槽位星级' },
-      { name: 'role', type: 'AkSlotRole', desc: 'AkSlot 职业类别，决定底部特征色条' },
-      { name: 'tier', type: '1 | 2 | 3 | 4 | 5 | 6', desc: 'AkItem 材料方块品质阶层' },
-      { name: 'onBack', type: '() => void', desc: 'AkScreen 顶栏返回按钮动作' },
+      { name: 'tone', type: "'paper' | 'dark' | 'cyan' | 'accent' | 'muted'", desc: localizedDescription('指令牌或屏幕的色调主题', 'Tone theme for the command tile or screen.') },
+      { name: 'rarity', type: '1 | 2 | 3 | 4 | 5 | 6', desc: localizedDescription('AkSlot 干员槽位星级', 'Operator rarity shown in AkSlot.') },
+      { name: 'role', type: 'AkSlotRole', desc: localizedDescription('AkSlot 职业类别，决定底部特征色条', 'AkSlot profession, which determines the bottom signal bar color.') },
+      { name: 'tier', type: '1 | 2 | 3 | 4 | 5 | 6', desc: localizedDescription('AkItem 材料方块品质阶层', 'Quality tier of the material tile in AkItem.') },
+      { name: 'onBack', type: '() => void', desc: localizedDescription('AkScreen 顶栏返回按钮动作', 'Action called by the AkScreen header back button.') },
     ],
   },
 }

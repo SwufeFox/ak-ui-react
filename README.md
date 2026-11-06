@@ -63,7 +63,7 @@ export function Panel() {
 `AkButton` · `AkCard` (`Header`/`Title`/`Description`/`Content`/`Footer`) · `AkTag` · `AkStatus` ·
 `AkNotice` · `AkProgress` · `AkGauge` · `AkSlider` · `AkInputNumber` · `AkTabs` · `AkSegmented` ·
 `AkCountUp` · `AkEntrance` · `AkAssetLoader` · `AkMediaGallery` · `AkMobileMenu` ·
-`AkParticleField` · `AkSectionNavigator`
+`AkParticleField` · `AkSectionNavigator` · `AkScreen` · `AkSlot` · `AkItem`
 
 Decoration (`decor`) — ported from prts-design:
 
@@ -142,7 +142,9 @@ shipped too (`dist/scss/`) if you want to recompile or theme it:
 
 ## Design references
 
-Parts of this library are ported from **[MooncellWiki/prts-design](https://github.com/MooncellWiki/prts-design)**,
+[YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) added reusable terminal function screens, operator slots, material items, and shared rarity, role, and terminal-tone tokens in upstream commit [`d92da22`](https://github.com/YunYouJun/ak-ui/commit/d92da22192af7f631dc1abb960decad7f2c1c2c5). This package exports them as `AkScreen`, `AkSlot`, and `AkItem`.
+
+Parts of this library are also ported from **[MooncellWiki/prts-design](https://github.com/MooncellWiki/prts-design)**,
 a design system for the Arknights-themed prts.wiki (MIT License, Copyright (c) 2026-present
 MooncellWiki; verified against the repository's `LICENSE` file on 2026-10-18). Two layers were
 brought over:
@@ -324,9 +326,19 @@ npm ≥ 11.5.1 and Node ≥ 22.14.0).
 The component showcase is the same Vite app used for development (`src/demo/`). Search by
 component name or category; `/` focuses search, and Enter opens a single matching category. The
 categories provide live previews and generated code, with prop tuning and API notes where
-available. Theme, density, and sound controls are grouped under Settings. On narrow screens, the
-category list scrolls horizontally and reveals the current selection. The showcase deploys to
-**Cloudflare Pages** on every push to `master`, independently of the npm release.
+available. API property descriptions follow the selected language. On phones, Tune stacks the
+preview and property controls vertically; the preview can be collapsed to focus on tuning. Theme,
+density, and sound controls are grouped under Settings. The category list scrolls horizontally on
+narrow screens and reveals the current selection. The showcase deploys to **Cloudflare Pages** on
+every push to `master`, independently of the npm release.
+
+Code copies a standalone TSX example from the same source as the preview, including its handlers,
+selected language, Tune edits, and current shared controlled values. The output imports the package
+and its stylesheet and includes the scoped showcase styles it needs. Component-internal transient
+state, such as loader progress, starts fresh when the copied example mounts. The site example also
+includes its linked category examples and their committed Tune settings. Hovering or focusing the Code
+tab starts generation using the current language, Tune edits, and shared values; the panel appears on
+activation. If generation fails, the panel shows an error; reload the page to try again.
 
 Use the skip link to reach the catalogue. Category links support sharing and opening in a new tab,
 and browser back and forward restore the selected category. The `llms.txt` viewer and inventory
@@ -379,13 +391,13 @@ least one `include` rule**, so `"include": []` is invalid and the deploy is reje
 The deployment is deliberately **purely static** — no Pages Functions, no `_worker.js`, no
 `_routes.json`. Cloudflare's docs are explicit that "on a purely static project, Pages offers
 unlimited free requests"; adding Functions is what makes requests count against the daily limit
-and prompts the whole `_routes.json` exclusion dance. So the build output stays four files:
+and prompts the whole `_routes.json` exclusion dance. The build contains the static entry point, the Cloudflare headers file, and the hashed assets Vite emits for the current bundle:
 
 ```
 dist-demo/index.html
 dist-demo/_headers        # response headers, parsed by Pages, not served as an asset
-dist-demo/assets/*.js     # 269 KB
-dist-demo/assets/*.css    # 107 KB
+dist-demo/assets/*.js     # hashed entry and chunks; example Code sources load on demand
+dist-demo/assets/*.css    # hashed stylesheets
 ```
 
 > The deployed URL is `https://<project-name>.pages.dev`. If that project name is taken, pick

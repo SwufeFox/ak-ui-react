@@ -165,6 +165,8 @@ const en = {
   'common.copyCode': 'Copy code',
   'common.codeCopied': 'Copied',
   'common.codeCopyError': 'Copy failed — retry',
+  'common.codeLoading': 'Loading code…',
+  'common.codeLoadError': 'Could not load code. Reload the page to try again.',
   'common.apiDocs': 'API DOCS',
   'common.propName': 'Prop',
   'common.propType': 'Type',
@@ -700,6 +702,8 @@ const zhCN: Record<MessageKey, string> = {
   'common.copyCode': '复制代码',
   'common.codeCopied': '已复制',
   'common.codeCopyError': '复制失败，重试',
+  'common.codeLoading': '正在加载代码…',
+  'common.codeLoadError': '代码加载失败，请刷新页面后重试。',
   'common.apiDocs': '属性文档',
   'common.propName': '属性',
   'common.propType': '类型',
@@ -1087,6 +1091,11 @@ const zhCN: Record<MessageKey, string> = {
 }
 
 const dictionaries: Record<Locale, Record<MessageKey, string>> = { en, 'zh-CN': zhCN }
+
+/** The current dictionary is used when producing standalone example source. */
+export function getLocaleMessages(locale: Locale): Readonly<Record<MessageKey, string>> {
+  return dictionaries[locale]
+}
 
 export const LOCALES: Locale[] = ['zh-CN', 'en']
 

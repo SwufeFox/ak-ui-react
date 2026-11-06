@@ -1429,6 +1429,7 @@ dialog.demo-llm-dialog::backdrop {
 .demo-tune-preview-shell { min-width: 0; }
 .demo-tune-workspace .demo-tune-preview-toggle { display: none; }
 .demo-tune-preview-toggle[hidden] { display: none !important; }
+.demo-tune-workspace .demo-tune-preview-toggle:focus-visible { outline-color: var(--demo-text-strong); }
 
 .demo-tune-preview {
   min-width: 0;
@@ -1510,6 +1511,7 @@ dialog.demo-llm-dialog::backdrop {
   .demo-topbar__tagline { display: none; }
   .demo-topbar__controls {
     position: relative;
+    z-index: 1;
     width: 100%;
     justify-content: flex-start;
     gap: 0.15rem;
@@ -1517,11 +1519,18 @@ dialog.demo-llm-dialog::backdrop {
   .demo-settings { position: static; }
   .demo-stage { scroll-margin-top: 1rem; }
   .demo-rail__search-input { font-size: 1rem; }
+  .demo-hero { gap: 0.75rem; margin-bottom: 1.25rem; padding: 0.9rem; }
+  .demo-hero__intro { gap: 0.4rem; }
+  .demo-hero__title { font-size: 1.5rem; }
+  .demo-hero__desc { line-height: 1.5; }
+  .demo-hero__install-box { padding: 0.5rem 0.65rem; }
   .demo-block__tabs { box-sizing: border-box; overflow-x: auto; }
   .demo-doc-tab { padding-inline: 0.5rem; }
+  .demo-tune-panel .ak-input,
+  .demo-tune-panel .ak-select { font-size: 1rem; }
 
   .demo-tune-preview { padding: 0.85rem; }
-  .demo-tune-workspace[data-tuning="true"] { --demo-workspace-height: min(36dvh, 22rem); }
+  .demo-tune-workspace[data-tuning="true"] { --demo-workspace-height: min(30dvh, 16rem); }
   .demo-tune-workspace[data-tuning="true"] .demo-tune-preview-toggle:not([hidden]) { display: inline-flex; margin-bottom: 0.5rem; }
   .demo-tune-workspace[data-tuning="true"] .demo-tune-preview-shell[data-expanded="false"] .demo-tune-preview { display: none; }
 }
