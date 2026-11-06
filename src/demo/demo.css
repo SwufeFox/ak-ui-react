@@ -266,6 +266,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 .demo-hero__title {
   margin: 0;
   color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
   font-size: clamp(1.65rem, 2.5vw, 2.1rem);
   font-weight: 700;
   line-height: 1.2;
@@ -635,6 +636,10 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--demo-hairline);
+}
+
+.demo-block__header h2 {
+  font-family: var(--ak-font-display);
 }
 
 .demo-block__tabs {
