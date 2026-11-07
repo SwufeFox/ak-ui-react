@@ -51,6 +51,8 @@ main.tsx → App → I18nProvider
 
 `StageContext` shares the active id plus an `overrideRegistry` ref so exporters can snapshot other categories' Tune edits. Code generation is deduped by `(tree, exporter, overrides, locale)` identity — stale results must never be displayed or copied.
 
+**Bundle trade-off (deliberate):** every category's preview renderer and both locale dictionaries load eagerly, so switching categories never shows a spinner; only the Code exporters are split into per-category chunks. Splitting previews would trade first-paint weight for a loading state on every category switch — do not do it without measuring that trade.
+
 ## Key Directories
 
 | Path | Purpose |
