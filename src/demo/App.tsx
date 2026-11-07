@@ -387,7 +387,7 @@ function Block({
       </div>
 
       {tab === 'api' && api && (
-        <div id={`${id}-api`} className="demo-api-container" role="tabpanel" aria-labelledby={`${id}-tab-api`}>
+        <div id={`${id}-api`} className="demo-api-container" role="tabpanel" aria-labelledby={`${id}-tab-api`} tabIndex={0}>
           <table className="ak-table ak-table--tactical ak-table--hoverable">
             <thead className="ak-table__head">
               <tr>

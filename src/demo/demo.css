@@ -642,6 +642,9 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-family: var(--ak-font-display);
 }
 
+/* Keyboard category switches move focus here; without a ring the move is invisible. */
+.demo-block__header h2:focus-visible { outline: 2px solid var(--ak-signal-info); outline-offset: 4px; }
+
 .demo-block__tabs {
   position: relative;
   display: inline-flex;
@@ -774,6 +777,9 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   background: var(--ak-surface-sunken);
   animation: demo-view-enter 200ms var(--demo-motion-ease);
 }
+
+/* The table scrolls horizontally on narrow screens, so the panel itself must be reachable by keyboard. */
+.demo-api-container:focus-visible { outline: 2px solid var(--ak-signal-info); outline-offset: -2px; }
 
 .demo-api-container .ak-table {
   /* Narrow viewports scroll this table instead of collapsing the type/description columns. */
