@@ -620,12 +620,6 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   gap: var(--ak-space-3, 0.75rem);
 }
 
-.demo-grid-3 {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: var(--ak-space-3, 0.75rem);
-}
-
 /* ── 组件文档切换：预览 / 代码 / 属性 ────────────────────────────────────── */
 
 .demo-block__header {
@@ -1201,15 +1195,6 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 /* ── llms.txt 视觉与模态弹窗 ────────────────────────────────────────────── */
-
-.demo-tactical-btn.is-spec {
-  color: var(--ak-signal-info, #4aabea);
-  border-right: 1px solid var(--demo-hairline);
-}
-
-.demo-tactical-btn.is-spec:hover {
-  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 15%, transparent);
-}
 
 .demo-spec-dot {
   font-size: 0.6rem;

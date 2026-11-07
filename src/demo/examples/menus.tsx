@@ -3,15 +3,26 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { I18nValue, MessageKey } from '../i18n'
 import type { Tune } from '../example-tune'
 
-const MENU_ACTIONS: Record<string, true> = {
-  inspect: true,
-  deploy: true,
-  cancel: true,
-  archive: true,
-  file: true,
-  edit: true,
-  view: true,
+/**
+ * Menu actions map to translation keys explicitly so renaming a key breaks the build.
+ * `selectedCommand` is shared with the command deck and holds values that have no menu
+ * label, so unknown actions must resolve to `undefined` rather than a made-up key.
+ */
+const MENU_ACTION_LABELS: Partial<Record<string, MessageKey>> = {
+  inspect: 'ref.menu.inspect',
+  deploy: 'ref.menu.deploy',
+  cancel: 'ref.menu.cancel',
+  archive: 'ref.menu.archive',
+  file: 'ref.menu.file',
+  edit: 'ref.menu.edit',
+  view: 'ref.menu.view',
 }
+
+const MENUBAR_ITEMS = [
+  { action: 'file', label: 'ref.menu.file' },
+  { action: 'edit', label: 'ref.menu.edit' },
+  { action: 'view', label: 'ref.menu.view' },
+] as const satisfies readonly { action: string; label: MessageKey }[]
 
 export type MenusModel = {
   t: I18nValue['t']
@@ -22,6 +33,7 @@ export type MenusModel = {
 }
 
 export function renderMenus({ t, selectedCommand, setSelectedCommand, count, setCount }: MenusModel, tune: Tune) {
+  const lastActionLabel = MENU_ACTION_LABELS[selectedCommand]
   return <div className="demo-stack">
     <div className="demo-row">
       {tune('dropdown-menu', <AkDropdownMenu label={t('ref.menu.open')} items={[
@@ -30,16 +42,16 @@ export function renderMenus({ t, selectedCommand, setSelectedCommand, count, set
         { label: t('ref.menu.disabled'), disabled: true },
         { label: t('ref.menu.cancel'), destructive: true, onSelect: () => setSelectedCommand('cancel') },
       ]} />)}
-      {MENU_ACTIONS[selectedCommand] ? (
+      {lastActionLabel ? (
         <span className="demo-note">
-          {t('ref.menu.lastAction')}: {t(`ref.menu.${selectedCommand}` as MessageKey)}
+          {t('ref.menu.lastAction')}: {t(lastActionLabel)}
         </span>
       ) : null}
     </div>
     {tune('menubar', <AkMenubar aria-label={t('ref.menu.scope')}>
-      {(['file', 'edit', 'view'] as const).map((item) => (
-        <button key={item} type="button" role="menuitem" onClick={() => setSelectedCommand(item)}>
-          {t(`ref.menu.${item}` as MessageKey)}
+      {MENUBAR_ITEMS.map(({ action, label }) => (
+        <button key={action} type="button" role="menuitem" onClick={() => setSelectedCommand(action)}>
+          {t(label)}
         </button>
       ))}
     </AkMenubar>)}
