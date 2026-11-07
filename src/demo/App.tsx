@@ -368,7 +368,7 @@ function Block({
           </span>
           <AkButton type="button" variant="outline" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
         </div>
-        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0}><code>{codeTokens.map((token, index) => token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>)}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
+        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0} aria-label={t('common.code')}><code>{codeTokens.map((token, index) => token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>)}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
       </div>
 
       {tab === 'api' && api && (
