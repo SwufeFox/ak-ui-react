@@ -793,6 +793,31 @@ export function App() {
   const llmDialogRef = useShowcaseDialog(llmModalOpen)
   const llmCopyTimer = useRef<number | null>(null)
   const llmCopyGeneration = useRef(0)
+  const settingsRef = useRef<HTMLDetailsElement>(null)
+
+  /**
+   * `<details>` only closes by clicking its summary. A settings panel that floats over the
+   * page also needs Escape and light dismiss, the way a popover behaves.
+   */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const details = settingsRef.current
+      if (!details?.open || event.key !== 'Escape') return
+      details.open = false
+      details.querySelector('summary')?.focus()
+    }
+    const onPointerDown = (event: PointerEvent) => {
+      const details = settingsRef.current
+      if (!details?.open || details.contains(event.target as Node)) return
+      details.open = false
+    }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('pointerdown', onPointerDown, true)
+    }
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
@@ -863,7 +888,7 @@ export function App() {
             onValueChange={(v) => setLocale(v as 'zh-CN' | 'en')}
           />
 
-          <details className="demo-settings">
+          <details className="demo-settings" ref={settingsRef}>
             <summary>{t('app.settings.label')}</summary>
             <div className="demo-settings__panel">
               <div className="demo-settings__group">
