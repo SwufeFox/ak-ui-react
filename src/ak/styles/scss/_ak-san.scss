@@ -77,6 +77,27 @@
   }
 }
 
+// 裸用 AkSan（不放在 compact / terminal 容器里）时的加号按钮：
+// 容器变体各自定义了尺寸，基线这里补一份，免得退化成浏览器默认按钮（29×21px）。
+.ak-san__add {
+  display: grid;
+  box-sizing: border-box;
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  place-items: center;
+  color: #f3f4ef;
+  background: #111315;
+  cursor: pointer;
+
+  .ak-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
 .ak-san-container {
   display: flex;
   position: relative;
@@ -378,8 +399,9 @@
     top: 41%;
     left: 15.5%;
     display: grid;
-    width: 18cqh;
-    height: 18cqh;
+    // 下限 1.65rem：小容器里 18cqh 会缩到 20px 出头，低于 24px 的可点下限。
+    width: max(1.65rem, 18cqh);
+    height: max(1.65rem, 18cqh);
     padding: 0;
     border: 0;
     border-radius: 50%;

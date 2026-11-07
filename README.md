@@ -421,6 +421,18 @@ Vue → React mapping: `defineProps`→typed props · named slots→`ReactNode` 
 emits colons, which are invalid in `id` attributes and break `getElementById`-based ARIA wiring,
 so tab/menu components use an internal `useInstanceId` instead.
 
+### Local fixes to vendored CSS
+
+Three upstream rules were changed on purpose. They are defects, not a new visual language, and
+each change leaves the rendered layout identical except where noted:
+
+| Rule | Problem | Change |
+| --- | --- | --- |
+| `.ak-breadcrumb__link` | 12px-tall hit area — impossible to tap | `padding-block` with matching negative `margin-block` → 24px target (WCAG 2.2 minimum), same spacing |
+| `.ak-choice` | `sm` variant is 20px tall, below the 24px target minimum | `min-height: 24px` on the label row; the box itself is unchanged |
+| `.ak-san__add` | `AkSan` used outside a container had no sizing rule and fell back to a 29×21px browser button | baseline sizing rule for the standalone case |
+| `.ak-loading-track__label` | `right: -5.3rem` hung the label off the track; the loading screen clipped it | label sits at the track's right end; the progress box no longer clips |
+
 ## License
 
 MIT. This repository is a port of [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) and

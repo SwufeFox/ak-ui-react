@@ -134,6 +134,8 @@
 
   display: inline-grid;
   align-items: center;
+  // 命中区：sm 档的方框只有 20px 高，触屏点不准；标签行保底 24px，视觉方框不变。
+  min-height: 24px;
   color: var(--ak-text-primary, #f8f8f5);
   cursor: pointer;
   user-select: none;

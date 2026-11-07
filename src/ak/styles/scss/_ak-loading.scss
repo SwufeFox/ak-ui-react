@@ -53,7 +53,9 @@
 .ak-loading-track__label {
   position: absolute;
   top: -2.2rem;
-  right: -5.3rem;
+  // 原本挂在轨道右端外侧（right: -5.3rem）：窄屏时会被加载屏自己切掉半截。
+  // 贴住轨道右端即可，语义不变（还是「这一行的进度说明」）。
+  right: 0;
   color: var(--ak-loading-label-color, #016d8d);
   font-family: $font-monospace;
   font-size: 1rem;

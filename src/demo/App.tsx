@@ -60,6 +60,26 @@ const THEME_LABELS: Record<Theme, MessageKey> = {
 /** peerDependencies 里 React 的最低主版本，用于首屏读数。 */
 const REACT_PEER_MAJOR = /(\d+)/.exec(peerDependencies.react)?.[1] ?? '18'
 
+/** 示例块的四个视图。 */
+type DemoView = 'preview' | 'tune' | 'code' | 'api'
+
+/** 当前视图写在地址栏的 ?view= 上，这样代码页与属性页可以直接分享。 */
+function readViewParam(): string | null {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('view')
+}
+
+function writeViewParam(view: DemoView) {
+  if (typeof window === 'undefined') return
+  const url = new URL(window.location.href)
+  if (view === 'preview') url.searchParams.delete('view')
+  else url.searchParams.set('view', view)
+  const next = `${url.pathname}${url.search}${url.hash}`
+  if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+    window.history.replaceState(null, '', next)
+  }
+}
+
 
 /**
  * 组件目录的分类清单。顺序即编号顺序（01…17），也是「上一组 / 下一组」的遍历顺序。
@@ -183,7 +203,13 @@ function Block({
 }) {
   const stage = useContext(StageContext)
   const { t, locale } = useI18n()
-  const [tab, setTab] = useState<'preview' | 'code' | 'api' | 'tune'>('preview')
+  // 视图清单决定这一块有哪些标签页；地址栏里的 ?view= 只在清单里才算数。
+  const views = ['preview', 'tune', 'code', ...(api ? ['api' as const] : [])] as const
+  const [tab, setTab] = useState<DemoView>(() => {
+    const wanted = readViewParam()
+    const known = wanted && (views as readonly string[]).includes(wanted)
+    return known ? (wanted as DemoView) : 'preview'
+  })
   const [copyResult, setCopyResult] = useState<{ text: string; state: 'copied' | 'error' } | null>(null)
   const copyTimer = useRef<number | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
@@ -195,6 +221,11 @@ function Block({
   const tabsRef = useRef<HTMLDivElement>(null)
   const active = !stage || stage.active === id
   const overrideRegistry = stage?.overrides
+  // 地址栏始终反映当前视图：代码页与属性页可以直接分享链接。
+  useEffect(() => {
+    if (!active) return
+    writeViewParam(tab)
+  }, [active, tab])
   // Drive the sliding underline from the active tab's box; the indicator itself only translates.
   useLayoutEffect(() => {
     const list = tabsRef.current
@@ -280,7 +311,6 @@ function Block({
   const index = CATEGORIES.findIndex((category) => category.id === id)
   const displayEyebrow = index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow}`
 
-  const views = ['preview', 'tune', 'code', ...(api ? ['api' as const] : [])] as const
   const copyCode = async () => {
     if (!codeReady) return
     const text = codeText

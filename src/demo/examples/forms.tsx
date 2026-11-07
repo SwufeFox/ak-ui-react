@@ -35,7 +35,9 @@ export function renderForms({ t, fieldName, setFieldName, selectPick, setSelectP
         </AkField>)}
 
         {tune("field-3", <AkField>
+          {tune("field-label-3", <AkFieldLabel htmlFor="demo-note">{t('common.noteLabel')}</AkFieldLabel>)}
           {tune("textarea-1", <AkTextarea
+            id="demo-note"
             rows={3}
             placeholder={t('common.textareaPlaceholder')}
             value={noteText}
@@ -44,7 +46,8 @@ export function renderForms({ t, fieldName, setFieldName, selectPick, setSelectP
         </AkField>)}
 
         {tune("field-4", <AkField invalid hint={t('common.fieldHint')}>
-          {tune("input-2", <AkInput defaultValue="bad!" aria-invalid="true" />)}
+          {tune("field-label-4", <AkFieldLabel htmlFor="demo-invalid">{t('common.invalidLabel')}</AkFieldLabel>)}
+          {tune("input-2", <AkInput id="demo-invalid" defaultValue="bad!" aria-invalid="true" />)}
         </AkField>)}
 
         <div className="demo-row">

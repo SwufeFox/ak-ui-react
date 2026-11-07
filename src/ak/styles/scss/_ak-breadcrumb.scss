@@ -37,6 +37,10 @@
 }
 
 .ak-breadcrumb__link {
+  // 命中区：链接只有一行文字高（12px），触屏根本点不准。
+  // 用等量负外边距把命中区撑到 24px（WCAG 2.2 目标尺寸下限），行距与视觉不变。
+  padding-block: 0.4rem;
+  margin-block: -0.4rem;
   color: var(--ak-text-secondary);
   text-decoration: none;
   transition:
