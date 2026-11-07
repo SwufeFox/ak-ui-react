@@ -59,7 +59,7 @@ main.tsx → App → I18nProvider
 | `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useId.ts`, `audio.ts`, `size.ts`, `tokens.ts` |
 | `src/ak/core/` | Vendored `.mjs` + `.d.mts` controllers; published as `…/core`, `…/core/effects`, `…/core/depth` |
 | `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`) |
-| `src/demo/` | Showcase app; `examples/*.tsx` are per-category preview renderers |
+| `src/demo/` | Showcase app; `examples/*.tsx` are per-category preview renderers; `highlight.ts` colorizes generated code |
 | `src/demo/example-*.ts` | Code-export pipeline (manifest, TSX assembly, tune adapter, standalone site/shell) |
 | `scripts/` | `build.mjs` (4-stage library build), `gen-api.mjs` (d.ts → `docs/api.md`) |
 | `docs/`, `llms.txt` | **Generated**: `docs/api.md`, `public/llms.txt`. **Authored**: root `llms.txt` |
