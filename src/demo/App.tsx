@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { version as packageVersion } from '../../package.json'
+import { version as packageVersion, peerDependencies } from '../../package.json'
 import { AkButton, AkChoice, AkDisplay, AkFieldLabel, AkInput, AkSelect, AkSegmented, useTactileSound, playTactileSound } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
@@ -48,6 +48,17 @@ const exportCommand = (snapshot: CommandSnapshot, overrides: TuneOverrides, loca
   loadCommand().then(([command, helpers, source]) => command.exportCommand(snapshot, overrides, helpers.exampleMessages(locale, source.default), helpers.standaloneCss(source.default)))
 
 type Theme = 'terminal' | 'archive'
+
+/** 可选主题：设置面板与首屏读数共用这一份，主题名也从这张表取。 */
+const THEMES = ['terminal', 'archive'] as const satisfies readonly Theme[]
+
+const THEME_LABELS: Record<Theme, MessageKey> = {
+  terminal: 'app.theme.terminal',
+  archive: 'app.theme.archive',
+}
+
+/** peerDependencies 里 React 的最低主版本，用于首屏读数。 */
+const REACT_PEER_MAJOR = /(\d+)/.exec(peerDependencies.react)?.[1] ?? '18'
 
 
 /**
@@ -551,7 +562,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
 }
 
 
-function ReferenceView() {
+function ReferenceView({ theme }: { theme: Theme }) {
   const { t, locale } = useI18n()
   const [tab, setTab] = useState('overview')
   const [segment, setSegment] = useState('all')
@@ -645,6 +656,8 @@ function ReferenceView() {
     return CATEGORIES.some((c) => c.id === hash) ? hash : CATEGORIES[0].id
   })
   const activeIndex = Math.max(0, CATEGORIES.findIndex((c) => c.id === active))
+  const prevCategory = activeIndex > 0 ? CATEGORIES[activeIndex - 1] : undefined
+  const nextCategory = activeIndex < CATEGORIES.length - 1 ? CATEGORIES[activeIndex + 1] : undefined
   /** Name the open category in the tab and in shared links; the hash alone does not say what it holds. */
   useEffect(() => {
     const category = CATEGORIES[activeIndex]
@@ -717,6 +730,21 @@ function ReferenceView() {
             {t(installCopyState === 'copied' ? 'ref.catalogue.copied' : installCopyState === 'error' ? 'ref.catalogue.copyError' : 'ref.catalogue.copy')}
           </span>
         </button>
+        {/* 读数条：把分类数、当前主题、React 版本摆成事实，填掉标题右侧的空档。 */}
+        <dl className="demo-hero__readout">
+          <div className="demo-hero__stat">
+            <dt>{t('ref.catalogue.statCategories')}</dt>
+            <dd>{CATEGORIES.length}</dd>
+          </div>
+          <div className="demo-hero__stat">
+            <dt>{t('ref.catalogue.statTheme')}</dt>
+            <dd>{t(THEME_LABELS[theme])}</dd>
+          </div>
+          <div className="demo-hero__stat">
+            <dt>{t('ref.catalogue.statReact')}</dt>
+            <dd>{REACT_PEER_MAJOR}+</dd>
+          </div>
+        </dl>
       </header>
 
       <div className="demo-catalogue">
@@ -776,28 +804,36 @@ function ReferenceView() {
           </StageContext.Provider>
 
           <div className="demo-stage__foot">
+            <p className="demo-stage__index">
+              <span className="demo-stage__index-num">{String(activeIndex + 1).padStart(2, '0')}</span>
+              <span aria-hidden="true">/</span>
+              <span>{CATEGORIES.length}</span>
+              <span className="demo-stage__index-title">{t(CATEGORIES[activeIndex]!.title)}</span>
+            </p>
             <div className="demo-row">
               <button
                 type="button"
                 className="demo-stage__page"
-                disabled={activeIndex === 0}
+                disabled={!prevCategory}
+                aria-label={prevCategory ? `${t('ref.catalogue.previous')}: ${t(prevCategory.title)}` : t('ref.catalogue.previous')}
                 onClick={() => {
                   playTactileSound('tab', 0.16)
                   step(-1)
                 }}
               >
-                {t('ref.catalogue.previous')}
+                {prevCategory ? t('ref.catalogue.prevNamed', { name: t(prevCategory.title) }) : '‹'}
               </button>
               <button
                 type="button"
                 className="demo-stage__page"
-                disabled={activeIndex === CATEGORIES.length - 1}
+                disabled={!nextCategory}
+                aria-label={nextCategory ? `${t('ref.catalogue.next')}: ${t(nextCategory.title)}` : t('ref.catalogue.next')}
                 onClick={() => {
                   playTactileSound('tab', 0.16)
                   step(1)
                 }}
               >
-                {t('ref.catalogue.next')}
+                {nextCategory ? t('ref.catalogue.nextNamed', { name: t(nextCategory.title) }) : '›'}
               </button>
             </div>
           </div>
@@ -922,10 +958,7 @@ export function App() {
                 <AkSegmented
                   size="sm"
                   ariaLabel={t('app.theme.label')}
-                  options={[
-                    { label: t('app.theme.terminal'), value: 'terminal' },
-                    { label: t('app.theme.archive'), value: 'archive' },
-                  ]}
+                  options={THEMES.map((value) => ({ label: t(THEME_LABELS[value]), value }))}
                   value={theme}
                   onValueChange={(v) => setTheme(v as Theme)}
                 />
@@ -956,7 +989,7 @@ export function App() {
         </div>
       </header>
 
-      <ReferenceView />
+      <ReferenceView theme={theme} />
 
       {llmModalOpen ? (
         <dialog className="demo-llm-dialog" ref={llmDialogRef} aria-labelledby="demo-llm-title" onCancel={(event) => { event.preventDefault(); closeLlmModal() }} style={showcaseDialogStyle} onClick={(event) => { if (event.target === event.currentTarget) closeLlmModal() }}>

@@ -396,6 +396,11 @@ const en = {
   'ref.catalogue.copyError': 'Copy failed',
   'ref.catalogue.previous': 'Previous',
   'ref.catalogue.next': 'Next',
+  'ref.catalogue.statCategories': 'Categories',
+  'ref.catalogue.statTheme': 'Theme',
+  'ref.catalogue.statReact': 'React',
+  'ref.catalogue.prevNamed': '‹ {name}',
+  'ref.catalogue.nextNamed': '{name} ›',
 
   'ref.decor.watermark': 'RHODES',
   'ref.decor.arknightsCn': '明日方舟',
@@ -789,6 +794,11 @@ const zhCN: Record<MessageKey, string> = {
   'ref.catalogue.copyError': '复制失败',
   'ref.catalogue.previous': '上一分类',
   'ref.catalogue.next': '下一分类',
+  'ref.catalogue.statCategories': '分类',
+  'ref.catalogue.statTheme': '主题',
+  'ref.catalogue.statReact': 'React',
+  'ref.catalogue.prevNamed': '‹ {name}',
+  'ref.catalogue.nextNamed': '{name} ›',
 
   'ref.decor.watermark': '罗德岛',
   'ref.decor.arknightsCn': '明日方舟',

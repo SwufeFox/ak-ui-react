@@ -265,11 +265,19 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem);
   align-items: end;
-  gap: 1.5rem;
+  gap: 1.5rem clamp(1.5rem, 3vw, 2.5rem);
   margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
   padding: clamp(1.25rem, 2.5vw, 2rem);
   border-left: 2px solid var(--ak-signal-info);
   background: color-mix(in srgb, var(--ak-surface-sunken) 76%, transparent);
+  /* 切右上角：复用库里的切角语言，不另造一套形状 */
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ak-cut-md, 0.75rem)) 0,
+    100% var(--ak-cut-md, 0.75rem),
+    100% 100%,
+    0 100%
+  );
 }
 
 .demo-hero__intro {
@@ -293,6 +301,39 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   color: var(--demo-text);
   font-size: 0.95rem;
   line-height: 1.65;
+}
+
+/* 首屏读数条：横跨整个横幅，把「多少分类 / 当前主题 / React 版本」摆成事实，
+   而不是拿装饰图去填标题右侧的空档。 */
+.demo-hero__readout {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem clamp(1.25rem, 3vw, 2.5rem);
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--demo-hairline);
+}
+
+.demo-hero__stat {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.demo-hero__stat dt {
+  color: var(--demo-text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.demo-hero__stat dd {
+  margin: 0;
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .demo-hero__install-box {
@@ -554,11 +595,34 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--ak-space-3, 0.75rem);
   margin-top: clamp(1.5rem, 3vw, 2.5rem);
   padding-top: 1rem;
   border-top: 1px solid var(--demo-hairline);
+}
+
+/* 底栏左端报当前分类：翻页键不再只是「上一分类」这种无信息量的箭头。 */
+.demo-stage__index {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.demo-stage__index-num {
+  color: var(--demo-accent-text);
+  font-weight: 700;
+}
+
+.demo-stage__index-title {
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-sans, system-ui, sans-serif);
+  letter-spacing: 0;
 }
 
 .demo-stage__page {
