@@ -738,6 +738,14 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   background: transparent;
 }
 
+/* Signal colors mixed with the theme's text color so both themes keep contrast. */
+.demo-code-box .tok-comment { color: var(--demo-text-muted); }
+.demo-code-box .tok-string { color: color-mix(in srgb, var(--ak-signal-success) 72%, var(--ak-text-primary)); }
+.demo-code-box .tok-tag { color: color-mix(in srgb, var(--ak-signal-info) 80%, var(--ak-text-primary)); }
+.demo-code-box .tok-attr { color: color-mix(in srgb, var(--ak-signal-info) 45%, var(--ak-text-primary)); }
+.demo-code-box .tok-keyword { color: color-mix(in srgb, var(--ak-signal-action) 80%, var(--ak-text-primary)); }
+.demo-code-box .tok-number { color: color-mix(in srgb, var(--ak-signal-success) 72%, var(--ak-text-primary)); }
+
 .demo-api-container {
   overflow-x: auto;
   border: 1px solid var(--demo-hairline);

@@ -29,6 +29,7 @@ import { renderForms } from './examples/forms'
 import { renderReadouts } from './examples/readouts'
 import { renderCollections, sortTableRows, nextTableSort } from './examples/collections'
 import { DEPOT_ITEMS, filterDepotItems, renderCommand, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command'
+import { tokenizeTsx } from './highlight'
 import './demo.css'
 
 const loadCategory = () => import('./example-manifest')
@@ -236,6 +237,8 @@ function Block({
     return () => { cancelled = true }
   }, [active, tab, actualTree, exportCode, overrides, locale])
   const codeText = codeResult.status === 'ready' ? codeResult.text : ''
+  /** Pure and linear; recompute only when the generated source changes. */
+  const codeTokens = useMemo(() => tokenizeTsx(codeText), [codeText])
   const cachedCode = codeCache.current
   const codeReady = active && tab === 'code' && codeResult.status === 'ready' && cachedCode?.text === codeResult.text && cachedCode.tree === actualTree && cachedCode.exportCode === exportCode && cachedCode.overrides === overrides && cachedCode.locale === locale
   const targetPrefix = target ? `${target.id}|` : ''
@@ -365,7 +368,7 @@ function Block({
           </span>
           <AkButton type="button" variant="outline" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
         </div>
-        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0}><code>{codeText}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
+        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0}><code>{codeTokens.map((token, index) => token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>)}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
       </div>
 
       {tab === 'api' && api && (
@@ -502,7 +505,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
               key={category.id}
               href={`#${category.id}`}
               className="demo-rail__item"
-              aria-current={active === category.id ? 'page' : undefined}
+              aria-current={active === category.id ? 'location' : undefined}
               onClick={(event) => {
                 if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
                 event.preventDefault()
@@ -615,6 +618,11 @@ function ReferenceView() {
     return CATEGORIES.some((c) => c.id === hash) ? hash : CATEGORIES[0].id
   })
   const activeIndex = Math.max(0, CATEGORIES.findIndex((c) => c.id === active))
+  /** Name the open category in the tab and in shared links; the hash alone does not say what it holds. */
+  useEffect(() => {
+    const category = CATEGORIES[activeIndex]
+    if (category) document.title = `${t(category.title)} · ak-ui`
+  }, [activeIndex, t])
   const stageRef = useRef<HTMLDivElement>(null)
   const focusDestination = useRef<string | null>(null)
   const [focusRequest, setFocusRequest] = useState(0)
