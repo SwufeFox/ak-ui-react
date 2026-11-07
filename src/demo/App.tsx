@@ -487,6 +487,9 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
         <input
           ref={searchInputRef}
           type="text"
+          name="catalogue-search"
+          autoComplete="off"
+          spellCheck={false}
           className="demo-rail__search-input"
           aria-label={t('ref.catalogue.search')}
           placeholder={t('ref.catalogue.searchPlaceholder')}

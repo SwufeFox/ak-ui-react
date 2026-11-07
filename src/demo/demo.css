@@ -7,19 +7,33 @@
    现在只写一次，两套主题自动跟随 —— 新增主题也不用再改这里。 */
 
 :root {
+  color-scheme: dark;
   --demo-canvas: var(--ak-surface-canvas);
   /* 发丝线：取文字色的 14%，暗底得白线、亮底得黑线，与手写 rgba 的观感一致 */
   --demo-hairline: color-mix(in srgb, var(--ak-text-primary) 14%, transparent);
   --demo-topbar: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
   --demo-text: var(--ak-text-secondary);
   --demo-text-strong: var(--ak-text-primary);
+  /* Accent used as *text*: mixed toward body text so it clears 4.5:1 on both canvases. */
+  --demo-accent-text: color-mix(in srgb, var(--ak-signal-info) 70%, var(--ak-text-primary));
   --demo-text-muted: color-mix(in srgb, var(--ak-text-secondary) 92%, transparent);
   /* 代码块用下沉面 + 一点画布混色，两主题各自成立 */
   --demo-code-bg: color-mix(in srgb, var(--ak-surface-canvas) 70%, var(--ak-surface-sunken-2));
   --demo-code-head: var(--ak-surface-sunken-2);
-  --demo-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --demo-motion-fast: 180ms;
+  /* Motion, tuned to M3 Expressive's web curve table: colours and opacity use "effects"
+     timing, position and size use "spatial" timing (slight overshoot on small travel). */
+  --demo-motion-fast: 150ms;
+  --demo-motion-ease: cubic-bezier(0.34, 0.8, 0.34, 1);
+  --demo-motion-spatial: 260ms;
+  --demo-motion-ease-spatial: cubic-bezier(0.27, 1.06, 0.18, 1);
   --demo-motion-enter: 240ms;
+}
+
+/* Native scrollbars, form controls and the caret follow the active theme.
+   The accent used as text needs a darker mix on the light canvas: signal cyan alone is ~3:1 there. */
+:root[data-ak-theme='archive'] {
+  color-scheme: light;
+  --demo-accent-text: color-mix(in srgb, var(--ak-signal-info) 34%, var(--ak-text-primary));
 }
 
 body {
@@ -270,6 +284,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-size: clamp(1.65rem, 2.5vw, 2.1rem);
   font-weight: 700;
   line-height: 1.2;
+  text-wrap: balance;
 }
 
 .demo-hero__desc {
@@ -315,7 +330,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-family: var(--ak-font-mono, monospace);
   font-weight: 900;
   font-size: 0.85rem;
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
 }
 
 .demo-hero__install-code {
@@ -329,7 +344,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 .demo-hero__install-btn {
   flex: none;
   margin-left: auto;
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
   font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
@@ -375,7 +390,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 .demo-rail__eyebrow {
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--demo-accent-text);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.7rem;
   font-weight: 700;
@@ -403,11 +418,13 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-rail__search-box:focus-within {
   border-color: var(--ak-signal-info, #4aabea);
+  outline: 2px solid color-mix(in srgb, var(--ak-signal-info, #4aabea) 55%, transparent);
+  outline-offset: 1px;
 }
 
 .demo-rail__search-icon {
   padding-left: 0.35rem;
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--demo-accent-text);
   font-size: 0.85rem;
   pointer-events: none;
   font-weight: 900;
@@ -469,7 +486,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   padding: 0.25rem 0.65rem;
   background: transparent;
   border: 1px solid var(--ak-signal-info);
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.62rem;
   cursor: pointer;
@@ -497,6 +514,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   text-align: left;
   text-decoration: none;
   cursor: pointer;
+  touch-action: manipulation;
   transition:
     color var(--demo-motion-fast) var(--demo-motion-ease),
     background-color var(--demo-motion-fast) var(--demo-motion-ease),
@@ -525,7 +543,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   letter-spacing: 0.08em;
 }
 
- .demo-rail__item[aria-current] .demo-rail__index { color: var(--ak-signal-info); }
+ .demo-rail__item[aria-current] .demo-rail__index { color: var(--demo-accent-text); }
 
 .demo-stage {
   min-width: 0;
@@ -552,11 +570,19 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   cursor: pointer;
   font: inherit;
   font-size: 0.8rem;
+  touch-action: manipulation;
+  transform-origin: center;
+  transition:
+    border-color var(--demo-motion-fast) var(--demo-motion-ease),
+    color var(--demo-motion-fast) var(--demo-motion-ease),
+    transform var(--demo-motion-spatial) var(--demo-motion-ease-spatial);
 }
+
+.demo-stage__page:active:not(:disabled) { transform: scale(0.97); }
 
 .demo-stage__page:not(:disabled):hover {
   border-color: var(--ak-signal-info);
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
 }
 
 .demo-stage__page:disabled { color: var(--demo-text-muted); cursor: default; opacity: 0.55; }
@@ -592,7 +618,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-eyebrow {
   display: block;
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
   font-family: var(--ak-font-mono, ui-monospace, monospace);
   font-size: 0.72rem;
   font-weight: 700;
@@ -612,6 +638,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   color: var(--demo-text-muted);
   font-size: 0.88rem;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .demo-row {
@@ -640,6 +667,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-block__header h2 {
   font-family: var(--ak-font-display);
+  text-wrap: balance;
 }
 
 /* Keyboard category switches move focus here; without a ring the move is invisible. */
@@ -666,7 +694,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 .demo-block__tabs[data-measured] .demo-doc-tab-indicator {
-  transition: transform var(--demo-motion-fast) var(--demo-motion-ease), width var(--demo-motion-fast) var(--demo-motion-ease);
+  transition: transform var(--demo-motion-spatial) var(--demo-motion-ease-spatial), width var(--demo-motion-spatial) var(--demo-motion-ease-spatial);
 }
 
 .demo-doc-tab {
@@ -681,8 +709,16 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--demo-motion-fast) ease, border-color var(--demo-motion-fast) ease;
+  touch-action: manipulation;
+  transform-origin: center;
+  transition:
+    color var(--demo-motion-fast) var(--demo-motion-ease),
+    border-color var(--demo-motion-fast) var(--demo-motion-ease),
+    transform var(--demo-motion-spatial) var(--demo-motion-ease-spatial);
 }
+
+/* Press reacts immediately; release springs back on the spatial curve. */
+.demo-doc-tab:active { transform: scale(0.97); }
 
 .demo-doc-tab:hover,
 .demo-doc-tab.is-active { color: var(--demo-text-strong); }
@@ -704,7 +740,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   padding: 0.55rem 1rem;
   background: var(--demo-code-head);
   border-bottom: 1px solid var(--demo-hairline);
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.72rem;
   font-weight: 800;
@@ -791,7 +827,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-api-container .ak-table__head th {
   background: color-mix(in srgb, var(--ak-surface-sunken-2) 90%, transparent);
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--demo-accent-text);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
@@ -812,7 +848,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.78rem;
   padding: 0.15rem 0.35rem;
-  background: rgba(0, 0, 0, 0.25);
+  background: color-mix(in srgb, var(--ak-text-primary) 7%, transparent);
   border: 1px solid var(--demo-hairline);
 }
 
@@ -822,11 +858,11 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 .demo-api-type {
-  color: var(--ak-signal-info, #4aabea) !important;
+  color: var(--demo-accent-text) !important;
 }
 
 .demo-api-default {
-  color: var(--demo-text-muted) !important;
+  color: var(--demo-text) !important;
 }
 
 .demo-api-desc {
@@ -1123,7 +1159,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.12em;
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--demo-accent-text);
   text-transform: uppercase;
 }
 
@@ -1236,7 +1272,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-spec-dot {
   font-size: 0.6rem;
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--demo-accent-text);
 }
 
 dialog.demo-screen-dialog::backdrop,
@@ -1331,7 +1367,7 @@ dialog.demo-llm-dialog::backdrop {
 
 .demo-raw-link:hover {
   border-color: var(--ak-signal-info);
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
 }
 
 .demo-llm-modal__body {
@@ -1580,6 +1616,7 @@ dialog.demo-llm-dialog::backdrop {
 
   .demo-rail__item,
   .demo-doc-tab,
+  .demo-stage__page,
   .demo-copy-btn,
   .demo-raw-link,
   .demo-tune-panel select,
