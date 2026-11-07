@@ -250,8 +250,7 @@ function Block({
   if (!active) return null
 
   const index = CATEGORIES.findIndex((category) => category.id === id)
-  const displayEyebrow =
-    index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow.replace(/^\s*\d+\s*\/\s*/, '')}`
+  const displayEyebrow = index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow}`
 
   const views = ['preview', 'tune', 'code', ...(api ? ['api' as const] : [])] as const
   const copyCode = async () => {
@@ -742,9 +741,6 @@ function ReferenceView() {
           </StageContext.Provider>
 
           <div className="demo-stage__foot">
-            <span className="demo-note">
-              {t('ref.catalogue.position', { n: activeIndex + 1, m: CATEGORIES.length })}
-            </span>
             <div className="demo-row">
               <button
                 type="button"

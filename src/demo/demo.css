@@ -536,7 +536,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--ak-space-3, 0.75rem);
   margin-top: clamp(1.5rem, 3vw, 2.5rem);
   padding-top: 1rem;
