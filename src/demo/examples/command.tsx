@@ -405,7 +405,7 @@ export type CommandModel = { t: I18nValue['t']; selectedCommand: string; setSele
 
 export function renderCommand({ t, selectedCommand, setSelectedCommand, selectedSlot, setSelectedSlot, selectedItem, setSelectedItem, screenOpen, setScreenOpen, screenDialogRef, screenCategory, setScreenCategory, screenSearch, setScreenSearch, selectedDepotItem, setSelectedDepotId, filteredDepotItems, materialStock, setMaterialStock, screenNotice, showScreenNotice, sanCurrent, setSanCurrent, sanTotal, sanLimit, showcaseDialogStyle }: CommandModel, tune: Tune) {
   return <div className="demo-stack">
-          {tune("command-grid-1", <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
+          {tune("command-grid-1", <AkCommandGrid style={{ gridAutoRows: '7.5rem', width: 'min(50rem, 100%)' }}>
             {tune("command-1", <AkCommand
               label={t('common.commandDeploy')}
               meta="OPERATOR / 01"
@@ -460,7 +460,7 @@ export function renderCommand({ t, selectedCommand, setSelectedCommand, selected
             />)}
           </AkCommandGroup>)}
 
-          {tune("command-grid-2", <AkCommandGrid style={{ gridAutoRows: '7.5rem' }}>
+          {tune("command-grid-2", <AkCommandGrid style={{ gridAutoRows: '7.5rem', width: 'min(50rem, 100%)' }}>
             {tune("command-6", <AkCommand
               label="OPERATION"
               current="01-07"

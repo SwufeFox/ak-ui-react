@@ -912,7 +912,14 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-size: 0.82rem;
   line-height: 1.6;
   color: var(--ak-text-primary);
-  background: transparent;
+  /* 横向可滚动：用两组背景做纯 CSS 滚动阴影，提示右边还有内容；
+     local 那组随内容滚，滚到尽头时会把 scroll 那组盖掉。 */
+  background:
+    linear-gradient(to right, var(--demo-code-bg), transparent) left / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--demo-code-bg), transparent) right / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.45), transparent) left / 1rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.45), transparent) right / 1rem 100% no-repeat scroll,
+    var(--demo-code-bg);
 }
 
 /* Signal colors mixed with the theme text color: ≥4.5:1 in both themes at 0.82rem. */

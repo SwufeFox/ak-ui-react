@@ -362,7 +362,7 @@ const en = {
   'common.status.cancelled': 'cancelled',
   'common.menu': 'Menu',
   'common.close': 'Close',
-  'ref.site.openMenu': 'Open mobile menu',
+  'ref.site.openMenu': 'OPEN MOBILE MENU',
 
   'ref.shell.command': 'Command',
   'ref.shell.archive': 'Archive',
@@ -763,7 +763,7 @@ const zhCN: Record<MessageKey, string> = {
   'common.status.cancelled': '已取消',
   'common.menu': '菜单',
   'common.close': '关闭',
-  'ref.site.openMenu': '打开移动菜单',
+  'ref.site.openMenu': '打开移动菜单 // OPEN MOBILE MENU',
 
   'ref.shell.command': '指挥',
   'ref.shell.archive': '档案',

@@ -29,7 +29,7 @@ export function renderSite({ t, mobileMenuRef, selectCategory }: SiteModel, tune
     />)}
     <div>
       {tune('open-menu', <AkButton variant="action" icon={<span>☰</span>} onClick={() => mobileMenuRef.current?.open()}>
-        {t('ref.site.openMenu')} // OPEN MOBILE MENU
+        {t('ref.site.openMenu')}
       </AkButton>)}
     </div>
     <div>
