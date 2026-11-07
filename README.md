@@ -345,6 +345,13 @@ and browser back and forward restore the selected category. The `llms.txt` viewe
 terminal are modal dialogs; Escape closes them and returns focus to the opening control. The
 terminal's search and category filters can be cleared when no items match.
 
+The page opens on a short PRTS terminal boot sequence that prints the real version and category
+count, then retracts to hand the page over; any key or pointer press skips it, and it is skipped
+outright when the OS asks for reduced motion. On pointer-fine devices a HUD reticle trails the
+cursor and reads out the component underneath — it is an overlay, so the native cursor, text
+selection, and copy all keep working, and it hides itself over text fields. Switching categories
+slides the incoming block in from the direction you came from.
+
 ```bash
 npm run dev          # local, http://localhost:5273
 npm run build:demo   # builds the showcase into dist-demo/

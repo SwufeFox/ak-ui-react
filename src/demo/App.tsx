@@ -13,6 +13,8 @@ import type { exportCategory as GenerateCategory } from './example-manifest'
 import type { exportShell as GenerateShell } from './example-source'
 import type { exportSite as GenerateSite } from './example-site-export'
 import { renderActions } from './examples/actions'
+import { BootSequence } from './boot'
+import { HudReticle } from './hud'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
 import { renderMenus } from './examples/menus'
@@ -104,6 +106,14 @@ const CATEGORIES = [
   { id: 'components-16', title: 'ref.collection.title' },
   { id: 'components-17', title: 'ref.command.title' },
 ] as const satisfies readonly { id: string; title: MessageKey }[]
+
+/** 开机序列打的都是真数据：版本号与分类数都从上面的常量取。 */
+const BOOT_LINES = [
+  'PRTS TERMINAL OS // SECTOR-07',
+  `MOUNTING ${CATEGORIES.length} CATEGORIES`,
+  `LIB @swufefox/ak-ui-react v${packageVersion}`,
+  'ALL SYSTEMS NOMINAL',
+] as const
 
 const CATEGORY_KEYWORDS: Record<string, readonly string[]> = {
   'components-1': ['button', 'actions', 'chamfer', 'subtitle', 'danger', 'ghost', 'group', '按钮', '动作'],
@@ -688,12 +698,21 @@ function ReferenceView({ theme }: { theme: Theme }) {
   const activeIndex = Math.max(0, CATEGORIES.findIndex((c) => c.id === active))
   const prevCategory = activeIndex > 0 ? CATEGORIES[activeIndex - 1] : undefined
   const nextCategory = activeIndex < CATEGORIES.length - 1 ? CATEGORIES[activeIndex + 1] : undefined
+  // 分类切换的方向感：新块从来路方向滑入，而不是每次都往上冒一次。
+  const previousIndex = useRef(activeIndex)
   /** Name the open category in the tab and in shared links; the hash alone does not say what it holds. */
   useEffect(() => {
     const category = CATEGORIES[activeIndex]
     if (category) document.title = `${t(category.title)} · ak-ui`
   }, [activeIndex, t])
   const stageRef = useRef<HTMLDivElement>(null)
+  // 方向写进舞台的自定义属性：CSS 用它决定新块从哪边滑入。
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    stage.style.setProperty('--demo-stage-dir', activeIndex >= previousIndex.current ? '1' : '-1')
+    previousIndex.current = activeIndex
+  }, [activeIndex])
   const focusDestination = useRef<string | null>(null)
   const [focusRequest, setFocusRequest] = useState(0)
   useLayoutEffect(() => {
@@ -719,7 +738,7 @@ function ReferenceView({ theme }: { theme: Theme }) {
     const url = `${window.location.pathname}${window.location.search}#${id}`
     if (window.location.hash !== `#${id}`) window.history.pushState(null, '', url)
     // 滚动回分类顶部
-    stageRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
+    stageRef.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
   }, [active])
 
   const step = useCallback(
@@ -737,7 +756,7 @@ function ReferenceView({ theme }: { theme: Theme }) {
       const hash = window.location.hash.replace(/^#/, '')
       if (CATEGORIES.some((c) => c.id === hash) || !hash) {
         setActive(hash || CATEGORIES[0].id)
-        stageRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
+        stageRef.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
       }
     }
     window.addEventListener('hashchange', onHashChange)
@@ -881,6 +900,7 @@ export function App() {
   const [theme, setTheme] = useState<Theme>('terminal')
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
+  const [booting, setBooting] = useState(true)
   const [llmCopyState, setLlmCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const llmDialogRef = useShowcaseDialog(llmModalOpen)
   const topbarRef = useRef<HTMLElement>(null)
@@ -994,6 +1014,8 @@ export function App() {
 
   return (
     <div className="demo-app">
+      {booting ? <BootSequence lines={BOOT_LINES} onDone={() => setBooting(false)} /> : null}
+      <HudReticle />
       <a className="demo-skip-link" href="#demo-main">{t('app.skip')}</a>
       <header className="demo-topbar" ref={topbarRef}>
         <div className="demo-topbar__brand">
