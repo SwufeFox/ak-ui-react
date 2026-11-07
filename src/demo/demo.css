@@ -13,7 +13,7 @@
   --demo-topbar: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
   --demo-text: var(--ak-text-secondary);
   --demo-text-strong: var(--ak-text-primary);
-  --demo-text-muted: color-mix(in srgb, var(--ak-text-secondary) 82%, transparent);
+  --demo-text-muted: color-mix(in srgb, var(--ak-text-secondary) 92%, transparent);
   /* 代码块用下沉面 + 一点画布混色，两主题各自成立 */
   --demo-code-bg: color-mix(in srgb, var(--ak-surface-canvas) 70%, var(--ak-surface-sunken-2));
   --demo-code-head: var(--ak-surface-sunken-2);
