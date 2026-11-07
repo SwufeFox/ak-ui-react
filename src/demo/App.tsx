@@ -189,8 +189,12 @@ function Block({
     const list = tabsRef.current
     const activeTab = list?.querySelector<HTMLElement>('[aria-selected="true"]')
     if (!list || !activeTab) return
-    list.style.setProperty('--demo-tab-x', `${activeTab.offsetLeft}px`)
-    list.style.setProperty('--demo-tab-w', `${activeTab.offsetWidth}px`)
+    // Fractional layout offsets keep the underline flush with sub-pixel tab edges; add scrollLeft
+    // because the tablist itself scrolls horizontally on narrow screens.
+    const listRect = list.getBoundingClientRect()
+    const tabRect = activeTab.getBoundingClientRect()
+    list.style.setProperty('--demo-tab-x', `${tabRect.left - listRect.left + list.scrollLeft}px`)
+    list.style.setProperty('--demo-tab-w', `${tabRect.width}px`)
     list.dataset.measured = 'true'
   }, [tab, active])
   useLayoutEffect(() => {
