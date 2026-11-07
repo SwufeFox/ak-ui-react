@@ -754,6 +754,8 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 .demo-api-container .ak-table {
+  /* Narrow viewports scroll this table instead of collapsing the type/description columns. */
+  min-width: 40rem;
   width: 100%;
   margin: 0;
   border: none;
@@ -1524,6 +1526,7 @@ dialog.demo-llm-dialog::backdrop {
   .demo-hero__install-box { padding: 0.5rem 0.65rem; }
   .demo-block__tabs { box-sizing: border-box; overflow-x: auto; }
   .demo-doc-tab { padding-inline: 0.5rem; }
+  .demo-code-box { padding: 1rem 0.85rem; }
   .demo-tune-panel .ak-input,
   .demo-tune-panel .ak-select { font-size: 1rem; }
 
