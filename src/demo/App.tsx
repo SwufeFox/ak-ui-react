@@ -399,7 +399,7 @@ function Block({
   )
 }
 
-function CatalogueRail({ active, selectCategory }: { active: string; selectCategory: (id: string) => void }) {
+function CatalogueRail({ active, selectCategory }: { active: string; selectCategory: (id: string, focus?: boolean) => void }) {
   const { t } = useI18n()
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -438,7 +438,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
     if (!list) return
     const revealActive = () => {
       if (list.scrollWidth <= list.clientWidth) return
-      const item = list.querySelector<HTMLElement>('[aria-current="page"]')
+      const item = list.querySelector<HTMLElement>('[aria-current]')
       if (!item) return
       const rail = list.getBoundingClientRect()
       const selected = item.getBoundingClientRect()
@@ -474,7 +474,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
             if (event.key === 'Escape') setSearchQuery('')
             if (event.key === 'Enter' && filteredCategories.length === 1) {
               event.preventDefault()
-              selectCategory(filteredCategories[0]!.id)
+              selectCategory(filteredCategories[0]!.id, true)
             }
           }}
         />
@@ -510,7 +510,8 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
                 if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
                 event.preventDefault()
                 playTactileSound('tab', 0.16)
-                selectCategory(category.id)
+                // Keyboard activation moves focus to the new section; mouse clicks keep focus on the rail.
+                selectCategory(category.id, event.detail === 0)
               }}
             >
               <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
@@ -795,6 +796,8 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
+    // Keep the mobile browser chrome in step with the canvas instead of flashing a stale color.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'archive' ? '#eef0f1' : '#111315')
   }, [theme])
 
   // 密度挂在 <html> 上，于是整个示例站点（包括每个演示块里的组件）
