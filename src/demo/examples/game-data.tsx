@@ -38,10 +38,10 @@ export function renderGameData({ t, skillLevel, setSkillLevel }: GameDataModel, 
               subProf={<span aria-hidden="true">✚</span>}
               subProfLabel={t('ref.arknights.subProf')}
             />)}
-            {tune("elite-1", <AkElite level={2} icon={<b>E2</b>} title={t('console.detail.eliteTitle', { n: 2 })} />)}
+            {tune("elite-1", <AkElite level={2} icon={<b>E2</b>} title={t('common.eliteTitle', { n: 2 })} />)}
             {tune("potential-1", <AkPotential label={t('common.potentialN', { n: 6 })} icon={<b>S3</b>} />)}
             {tune("spec-1", <AkSpec label={t('common.mastery3')} icon={<b>S3</b>} bare />)}
-            {tune("trust-1", <AkTrust value={t('console.detail.trustValue', { n: 200 })} />)}
+            {tune("trust-1", <AkTrust value={t('common.trustValue', { n: 200 })} />)}
           </div>
 
           {tune("skill-levels-1", <AkSkillLevels value={skillLevel} onValueChange={setSkillLevel} max="M3" ariaLabel={t('common.skillLevelAria')} />)}

@@ -50,7 +50,7 @@ export function renderInputs({ t, slider, setSlider, segment, setSegment }: Inpu
       </div>
     </div>
     {tune('segmented-roster-filter', <AkSegmented
-      ariaLabel={t('console.roster.filter')}
+      ariaLabel={t('common.rosterFilter')}
       options={segmentOptions}
       value={segment}
       onValueChange={(value) => setSegment(value ?? 'all')}
