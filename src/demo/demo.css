@@ -583,6 +583,12 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
+/* Referenced by `.demo-screen-san-icon` and `.demo-screen-feedback`; opacity only, so it stays on the compositor. */
+@keyframes demo-status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 
 .demo-eyebrow {
   display: block;
@@ -637,10 +643,27 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 .demo-block__tabs {
+  position: relative;
   display: inline-flex;
   gap: 0.125rem;
   max-width: 100%;
   border-bottom: 1px solid var(--demo-hairline);
+}
+
+/* One underline for the whole tablist: it slides between tabs instead of every tab drawing its own. */
+.demo-doc-tab-indicator {
+  position: absolute;
+  inset-block-end: -1px;
+  inset-inline-start: 0;
+  width: var(--demo-tab-w, 0px);
+  height: 2px;
+  background: var(--ak-signal-info);
+  transform: translateX(var(--demo-tab-x, 0px));
+  pointer-events: none;
+}
+
+.demo-block__tabs[data-measured] .demo-doc-tab-indicator {
+  transition: transform var(--demo-motion-fast) var(--demo-motion-ease), width var(--demo-motion-fast) var(--demo-motion-ease);
 }
 
 .demo-doc-tab {
@@ -660,7 +683,6 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-doc-tab:hover,
 .demo-doc-tab.is-active { color: var(--demo-text-strong); }
-.demo-doc-tab.is-active { border-bottom-color: var(--ak-signal-info); }
 .demo-doc-tab:focus-visible { outline: 2px solid var(--ak-signal-info); outline-offset: -2px; }
 
 
@@ -1556,6 +1578,10 @@ dialog.demo-llm-dialog::backdrop {
   .demo-raw-link,
   .demo-tune-panel select,
   .demo-tune-panel input { transition-duration: 0.01ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-block__tabs[data-measured] .demo-doc-tab-indicator { transition: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

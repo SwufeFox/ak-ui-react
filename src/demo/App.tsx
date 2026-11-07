@@ -181,8 +181,18 @@ function Block({
   const [resetVersion, setResetVersion] = useState(0)
   const [codeResult, setCodeResult] = useState<{ status: 'loading' | 'error' } | { status: 'ready'; text: string }>({ status: 'loading' })
   const codeCache = useRef<{ tree: ReactNode; exportCode: typeof exportCode; overrides: typeof overrides; locale: Locale; promise: Promise<string>; text?: string } | null>(null)
+  const tabsRef = useRef<HTMLDivElement>(null)
   const active = !stage || stage.active === id
   const overrideRegistry = stage?.overrides
+  // Drive the sliding underline from the active tab's box; the indicator itself only translates.
+  useLayoutEffect(() => {
+    const list = tabsRef.current
+    const activeTab = list?.querySelector<HTMLElement>('[aria-selected="true"]')
+    if (!list || !activeTab) return
+    list.style.setProperty('--demo-tab-x', `${activeTab.offsetLeft}px`)
+    list.style.setProperty('--demo-tab-w', `${activeTab.offsetWidth}px`)
+    list.dataset.measured = 'true'
+  }, [tab, active])
   useLayoutEffect(() => {
     if (!overrideRegistry) return
     overrideRegistry.current[id] = overrides
@@ -279,7 +289,8 @@ function Block({
           <h2 id={`${id}-title`} tabIndex={-1}>{title}</h2>
           {note ? <p className="demo-note">{note}</p> : null}
         </div>
-          <div className="demo-block__tabs" role="tablist" aria-label={t('common.demoViews')}>
+          <div className="demo-block__tabs" role="tablist" aria-label={t('common.demoViews')} ref={tabsRef}>
+            <span className="demo-doc-tab-indicator" aria-hidden="true" />
             {views.map((view) => (
               <button
                 key={view}
@@ -436,7 +447,11 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
   useLayoutEffect(() => {
     const list = categoryListRef.current
     if (!list) return
+    // Only the horizontal rail (≤900px) needs the active item scrolled into view. On desktop
+    // these geometry reads would force layout of the category block that just mounted.
+    const horizontalRail = window.matchMedia('(max-width: 900px)')
     const revealActive = () => {
+      if (!horizontalRail.matches) return
       if (list.scrollWidth <= list.clientWidth) return
       const item = list.querySelector<HTMLElement>('[aria-current]')
       if (!item) return
@@ -448,9 +463,13 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
         list.scrollLeft += selected.right - rail.right
       }
     }
-    revealActive()
+    // Run after the browser has laid out the new block instead of inside the commit.
+    const frame = requestAnimationFrame(revealActive)
     window.addEventListener('resize', revealActive)
-    return () => window.removeEventListener('resize', revealActive)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', revealActive)
+    }
   }, [active, filteredCategories])
 
   return (
