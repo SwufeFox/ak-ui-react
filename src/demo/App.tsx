@@ -457,7 +457,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
     <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
       <div className="demo-rail__head">
         <span className="demo-rail__eyebrow">{t('ref.catalogue.rail')}</span>
-        <span className="demo-rail__count">{t('ref.catalogue.count', { n: CATEGORIES.length })}</span>
+        <span className="demo-rail__count" aria-live="polite">{t('ref.catalogue.count', { n: filteredCategories.length })}</span>
       </div>
       <div className="demo-rail__search-box">
         <span className="demo-rail__search-icon" aria-hidden="true">⌕</span>
