@@ -725,7 +725,7 @@ function ReferenceView({ theme }: { theme: Theme }) {
         </div>
         <button type="button" className="demo-hero__install-box" onClick={copyInstall} aria-label={t('ref.catalogue.copyInstall')}>
           <span className="demo-hero__install-prefix" aria-hidden="true">$</span>
-          <code className="demo-hero__install-code">{installCmd}</code>
+          <code className="demo-hero__install-code" translate="no">{installCmd}</code>
           <span className="demo-hero__install-btn" aria-live="polite">
             {t(installCopyState === 'copied' ? 'ref.catalogue.copied' : installCopyState === 'error' ? 'ref.catalogue.copyError' : 'ref.catalogue.copy')}
           </span>
@@ -853,6 +853,7 @@ export function App() {
   const [llmModalOpen, setLlmModalOpen] = useState(false)
   const [llmCopyState, setLlmCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const llmDialogRef = useShowcaseDialog(llmModalOpen)
+  const topbarRef = useRef<HTMLElement>(null)
   const llmCopyTimer = useRef<number | null>(null)
   const llmCopyGeneration = useRef(0)
   const settingsRef = useRef<HTMLDetailsElement>(null)
@@ -884,7 +885,10 @@ export function App() {
   useEffect(() => {
     document.documentElement.dataset.akTheme = theme
     // Keep the mobile browser chrome in step with the canvas instead of flashing a stale color.
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'archive' ? '#eef0f1' : '#111315')
+    // 读令牌而不是写死两套十六进制：新增主题时这一行不用跟着改。
+    const meta = document.querySelector('meta[name="theme-color"]')
+    const canvas = getComputedStyle(document.documentElement).getPropertyValue('--ak-surface-canvas').trim()
+    if (meta && canvas) meta.setAttribute('content', canvas)
   }, [theme])
 
   // 密度挂在 <html> 上，于是整个示例站点（包括每个演示块里的组件）
@@ -896,6 +900,46 @@ export function App() {
   useEffect(() => () => {
     llmCopyGeneration.current += 1
     if (llmCopyTimer.current !== null) window.clearTimeout(llmCopyTimer.current)
+  }, [])
+
+  // 顶栏随滚动方向收起：向下滚动把阅读空间让出来，向上滚动立刻回来。
+  // 直接改 DOM 属性而不用 React 状态：一次状态更新会把 17 个示例树全部重渲染。
+  useEffect(() => {
+    const topbar = topbarRef.current
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let last = window.scrollY
+    let frame = 0
+    let hidden = false
+    const update = () => {
+      frame = 0
+      const now = window.scrollY
+      const delta = now - last
+      last = now
+      if (Math.abs(delta) < 4) return
+      if (settingsRef.current?.open) return
+      // 降级动效时顶栏常驻：位移本身就是要被关掉的那类运动。
+      if (reduceMotion.matches) return
+      const next = delta > 0 && now > 120
+      // 只在状态翻转时写属性：滚动回调里每帧都写会把样式重算带起来。
+      if (next === hidden) return
+      hidden = next
+      if (hidden) {
+        topbar?.setAttribute('data-hidden', '')
+        document.documentElement.dataset.chrome = 'hidden'
+      } else {
+        topbar?.removeAttribute('data-hidden')
+        document.documentElement.dataset.chrome = 'shown'
+      }
+    }
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(update)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+    }
   }, [])
 
   const closeLlmModal = () => {
@@ -921,16 +965,16 @@ export function App() {
   return (
     <div className="demo-app">
       <a className="demo-skip-link" href="#demo-main">{t('app.skip')}</a>
-      <header className="demo-topbar">
+      <header className="demo-topbar" ref={topbarRef}>
         <div className="demo-topbar__brand">
-          <AkDisplay>{t('app.name')}</AkDisplay>
+          <AkDisplay translate="no">{t('app.name')}</AkDisplay>
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
-          <span className="demo-topbar__version">v{packageVersion}</span>
+          <span className="demo-topbar__version" translate="no">v{packageVersion}</span>
         </div>
 
         {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
-          <button type="button" className="demo-topbar__link" onClick={(event) => {
+          <button type="button" className="demo-topbar__link" translate="no" onClick={(event) => {
             playTactileSound('click', 0.16)
             event.currentTarget.focus()
             setLlmModalOpen(true)

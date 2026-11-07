@@ -9,6 +9,8 @@
 :root {
   color-scheme: dark;
   --demo-canvas: var(--ak-surface-canvas);
+  /* 终端显示基底的微噪点：铺在画布上做质感，透明度压到 3% 以免脏了文字。 */
+  --demo-substrate: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
   /* 发丝线：取文字色的 14%，暗底得白线、亮底得黑线，与手写 rgba 的观感一致 */
   --demo-hairline: color-mix(in srgb, var(--ak-text-primary) 14%, transparent);
   --demo-topbar: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
@@ -43,6 +45,11 @@ body {
   font-family: var(--ak-font-sans, system-ui, sans-serif);
 }
 
+/* 桌面指针设备上关掉页面的橡皮筋回弹；触屏设备保留系统默认的拉动刷新。 */
+@media (pointer: fine) {
+  html { overscroll-behavior: none; }
+}
+
 /* ── 全局战术高精滚动条 ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
@@ -70,7 +77,10 @@ body {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   min-height: 100vh;
-  background: var(--demo-canvas);
+  /* 噪点铺在画布这一层（内容之下），面板与文字都保持干净。 */
+  background-color: var(--demo-canvas);
+  background-image: var(--demo-substrate);
+  background-size: 128px 128px;
 }
 
 .demo-topbar {
@@ -84,10 +94,40 @@ body {
   box-sizing: border-box;
   gap: 0.75rem 1.5rem;
   min-height: 4.5rem;
-  padding: 0.65rem clamp(1rem, 3vw, 2.5rem);
+  padding:
+    0.65rem
+    max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-right))
+    0.65rem
+    max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-left));
   border-bottom: 1px solid var(--demo-hairline);
   background: var(--demo-topbar);
   backdrop-filter: blur(16px);
+  transition:
+    transform var(--demo-motion-fast) var(--demo-motion-ease),
+    opacity var(--demo-motion-fast) linear;
+}
+
+/* 向下滚动收起顶栏让出阅读空间，向上滚动立刻回来。只动 transform/opacity。 */
+.demo-topbar[data-hidden] {
+  transform: translate3d(0, -100%, 0);
+  opacity: 0;
+}
+
+/* 触屏高亮：给交互件一个有意的信号色反馈，而不是浏览器默认的灰块。 */
+.demo-app a,
+.demo-app button,
+.demo-app summary,
+.demo-app input,
+.demo-app select,
+.demo-app [role='button'] {
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--ak-signal-info) 22%, transparent);
+}
+
+/* 首屏只编排一次入场：标题 → 描述 → 安装条 → 读数条。换分类时走 .demo-block 的另一套，
+   两者互不打扰。 */
+@keyframes demo-hero-rise {
+  from { opacity: 0; transform: translate3d(0, 0.6rem, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 .demo-topbar__brand {
@@ -289,10 +329,11 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   margin: 0;
   color: var(--demo-text-strong);
   font-family: var(--ak-font-display);
-  font-size: clamp(1.65rem, 2.5vw, 2.1rem);
+  font-size: clamp(1.9rem, 3.2vw, 2.9rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
   text-wrap: balance;
+  animation: demo-hero-rise 420ms var(--demo-motion-ease) both;
 }
 
 .demo-hero__desc {
@@ -301,6 +342,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   color: var(--demo-text);
   font-size: 0.95rem;
   line-height: 1.65;
+  animation: demo-hero-rise 420ms var(--demo-motion-ease) 70ms both;
 }
 
 /* 首屏读数条：横跨整个横幅，把「多少分类 / 当前主题 / React 版本」摆成事实，
@@ -313,6 +355,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   margin: 0;
   padding-top: 0.9rem;
   border-top: 1px solid var(--demo-hairline);
+  animation: demo-hero-rise 420ms var(--demo-motion-ease) 210ms both;
 }
 
 .demo-hero__stat {
@@ -334,6 +377,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 .demo-hero__install-box {
@@ -354,6 +398,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
     background-color var(--demo-motion-fast) ease,
     box-shadow var(--demo-motion-fast) ease;
   user-select: none;
+  animation: demo-hero-rise 420ms var(--demo-motion-ease) 140ms both;
 }
 
 .demo-hero__install-box:hover {
@@ -409,6 +454,12 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   padding-right: 0.4rem;
   scrollbar-width: thin;
   scrollbar-color: var(--demo-hairline) transparent;
+}
+
+/* 顶栏收起后，粘在下面的分类轨跟着贴到视口顶端，不留一条空带。 */
+:root[data-chrome='hidden'] .demo-rail {
+  top: 0;
+  max-height: calc(100vh - 1rem);
 }
 
 .demo-rail__list {
@@ -612,6 +663,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
 }
 
 .demo-stage__index-num {
@@ -1438,6 +1490,7 @@ dialog.demo-llm-dialog::backdrop {
   margin: 0;
   padding: 1.25rem 1.5rem;
   overflow: auto;
+  overscroll-behavior: contain;
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.82rem;
   line-height: 1.6;
@@ -1677,6 +1730,25 @@ dialog.demo-llm-dialog::backdrop {
   .demo-tune-fields,
   .demo-code-container,
   .demo-api-container { animation: none; }
+
+  /* 首屏入场与顶栏收起都是纯位移，降级后直接给最终状态。 */
+  .demo-hero__title,
+  .demo-hero__desc,
+  .demo-hero__install-box,
+  .demo-hero__readout { animation: none; }
+
+  .demo-topbar { transition: none; }
+
+  .demo-topbar[data-hidden] {
+    transform: none;
+    opacity: 1;
+  }
+
+  /* 顶栏常驻时，分类轨仍要停在它下面，不能顶上。 */
+  :root[data-chrome='hidden'] .demo-rail {
+    top: 5.5rem;
+    max-height: calc(100vh - 7.5rem);
+  }
 
   .demo-rail__item,
   .demo-doc-tab,
