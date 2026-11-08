@@ -16,6 +16,7 @@ import { renderActions } from './examples/actions'
 import { BootSequence } from './boot'
 import { HudReticle } from './hud'
 import { StageProgress, SystemStatus } from './status'
+import { pushReceipt, Receipts } from './receipt'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
 import { renderMenus } from './examples/menus'
@@ -330,6 +331,7 @@ function Block({
       await navigator.clipboard.writeText(text)
       playTactileSound('confirm', 0.2)
       setCopyResult({ text, state: 'copied' })
+      pushReceipt({ label: t('common.codeCopied'), detail: `${(text.length / 1024).toFixed(1)} KB` })
     } catch {
       playTactileSound('warn', 0.2)
       setCopyResult({ text, state: 'error' })
@@ -433,7 +435,7 @@ function Block({
             <span className="demo-code-dot" />
             JSX / TSX
           </span>
-          <AkButton type="button" variant="outline" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
+          <AkButton type="button" variant="action" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
         </div>
         {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0} aria-label={t('common.code')}><code>{codeTokens.map((token, index) => token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>)}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
       </div>
@@ -454,7 +456,7 @@ function Block({
                 <tr key={item.name}>
                   <td><code className="demo-api-prop">{item.name}</code></td>
                   <td><code className="demo-api-type">{item.type}</code></td>
-                  <td><code className="demo-api-default">{item.default ?? '—'}</code></td>
+                  <td><code className="demo-api-default" data-empty={item.default ? undefined : ''}>{item.default ?? '—'}</code></td>
                   <td className="demo-api-desc">{item.desc[locale]}</td>
                 </tr>
               ))}
@@ -685,6 +687,7 @@ function ReferenceView({ theme }: { theme: Theme }) {
       await navigator.clipboard.writeText(installCmd)
       playTactileSound('confirm', 0.2)
       setInstallCopyState('copied')
+      pushReceipt({ label: t('ref.catalogue.copied'), detail: installCmd.replace(/^npm install /, '') })
     } catch {
       setInstallCopyState('error')
     }
@@ -1035,6 +1038,7 @@ export function App() {
       await navigator.clipboard.writeText(llmsRawText)
       if (generation !== llmCopyGeneration.current) return
       setLlmCopyState('copied')
+      pushReceipt({ label: t('app.llm.copied'), detail: `${(llmsRawText.length / 1024).toFixed(1)} KB` })
       llmCopyTimer.current = window.setTimeout(() => setLlmCopyState('idle'), 2000)
     } catch {
       if (generation === llmCopyGeneration.current) setLlmCopyState('error')
@@ -1045,6 +1049,7 @@ export function App() {
     <div className="demo-app">
       {booting ? <BootSequence lines={BOOT_LINES} onDone={() => setBooting(false)} /> : null}
       <HudReticle />
+      <Receipts />
       <a className="demo-skip-link" href="#demo-main">{t('app.skip')}</a>
       <header className="demo-topbar" ref={topbarRef}>
         <div className="demo-topbar__brand">

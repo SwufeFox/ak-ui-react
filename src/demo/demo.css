@@ -1003,17 +1003,30 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   border: 1px solid var(--demo-hairline);
 }
 
-.demo-api-prop {
+/* 属性名是标签不是按钮：去掉方框，只留等宽字重差。
+   选择器要比 `.demo-api-container code` 更具体，否则背景与边框会盖回来。 */
+.demo-api-container code.demo-api-prop {
+  padding-inline: 0;
+  border-color: transparent;
+  background: none;
+  color: var(--demo-text-strong);
   font-weight: 800;
-  color: var(--demo-text-strong) !important;
 }
 
-.demo-api-type {
-  color: var(--demo-accent-text) !important;
+.demo-api-container code.demo-api-type {
+  color: var(--demo-accent-text);
 }
 
-.demo-api-default {
-  color: var(--demo-text) !important;
+/* 没有默认值的「—」不该长得像一个可点的胶囊。 */
+.demo-api-container code.demo-api-default[data-empty] {
+  padding-inline: 0;
+  border-color: transparent;
+  background: none;
+  color: var(--demo-text-muted);
+}
+
+.demo-api-container code.demo-api-default {
+  color: var(--demo-text);
 }
 
 .demo-api-desc {
@@ -1617,6 +1630,83 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 .demo-hud__lock-corner--bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
 .demo-hud__lock-corner--br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
+/* 终端回执：复制动作的可见回音（做了什么 / 多大 / 何时）。 */
+.demo-receipts {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  z-index: 450;
+  display: grid;
+  gap: 0.5rem;
+  max-width: min(26rem, calc(100vw - 2.5rem));
+  pointer-events: none;
+}
+
+.demo-receipt {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.6rem 0.85rem 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  border-left: 2px solid var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-surface-sunken) 92%, transparent);
+  backdrop-filter: blur(10px);
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  animation: demo-receipt-in 320ms var(--demo-motion-ease-spatial) both;
+}
+
+.demo-receipt__mark {
+  color: var(--ak-signal-info);
+  font-size: 0.6rem;
+  line-height: 1.7;
+}
+
+.demo-receipt__body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.demo-receipt__label {
+  color: var(--ak-signal-info);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.demo-receipt__detail {
+  overflow-wrap: anywhere;
+  color: var(--demo-text-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+
+/* 倒计时线与 LIFETIME 同长：2600ms。 */
+.demo-receipt__timer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--ak-signal-info);
+  transform-origin: left center;
+  animation: demo-receipt-timer 2600ms linear both;
+}
+
+@keyframes demo-receipt-in {
+  from { opacity: 0; transform: translate3d(-0.75rem, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes demo-receipt-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
 @media (max-width: 900px) {
   .demo-catalogue { grid-template-columns: minmax(0, 1fr); }
 
@@ -2032,6 +2122,11 @@ dialog.demo-llm-dialog::backdrop {
     transform: none;
     opacity: 1;
   }
+
+  /* 回执不需要滑入与倒计时线，内容本身还在。 */
+  .demo-receipt { animation: none; }
+
+  .demo-receipt__timer { display: none; }
 
   /* 顶栏常驻时，分类轨仍要停在它下面，不能顶上。 */
   :root[data-chrome='hidden'] .demo-rail {
