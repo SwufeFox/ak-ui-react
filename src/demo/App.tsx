@@ -670,6 +670,17 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
           onKeyDown={(event) => {
             if (event.nativeEvent.isComposing) return
             if (event.key === 'Escape') setSearchQuery('')
+            if (event.key === 'ArrowDown' && filteredCategories.length > 0) {
+              event.preventDefault()
+              categoryListRef.current?.querySelector<HTMLElement>('.demo-rail__item')?.focus()
+              return
+            }
+            if (event.key === 'ArrowUp' && filteredCategories.length > 0) {
+              event.preventDefault()
+              const results = categoryListRef.current?.querySelectorAll<HTMLElement>('.demo-rail__item')
+              results?.item(filteredCategories.length - 1)?.focus()
+              return
+            }
             if (event.key === 'Enter' && filteredCategories.length === 1) {
               event.preventDefault()
               selectCategory(filteredCategories[0]!.id, true)
@@ -974,13 +985,26 @@ function ReferenceView({ theme }: { theme: Theme }) {
           <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
           <p className="demo-hero__desc">{t('ref.catalogue.description')}</p>
         </div>
-        <button type="button" className="demo-hero__install-box" onClick={copyInstall} aria-label={t('ref.catalogue.copyInstall')}>
-          <span className="demo-hero__install-prefix" aria-hidden="true">$</span>
-          <code className="demo-hero__install-code" translate="no">{installCmd}</code>
-          <span className="demo-hero__install-btn" aria-live="polite">
-            {t(installCopyState === 'copied' ? 'ref.catalogue.copied' : installCopyState === 'error' ? 'ref.catalogue.copyError' : 'ref.catalogue.copy')}
-          </span>
-        </button>
+        <div className="demo-hero__instrument">
+          <div className="demo-hero__well" aria-hidden="true">
+            <div className="demo-hero__well-stack">
+              <span className="demo-hero__well-grid" />
+              <span className="demo-hero__well-plate demo-hero__well-plate--far" />
+              <span className="demo-hero__well-plate demo-hero__well-plate--mid" />
+              <span className="demo-hero__well-plate demo-hero__well-plate--near" />
+              <span className="demo-hero__well-beacon" />
+            </div>
+            <span className="demo-hero__well-index">SECTOR 07</span>
+            <span className="demo-hero__well-core">PRTS</span>
+          </div>
+          <button type="button" className="demo-hero__install-box" onClick={copyInstall} aria-label={t('ref.catalogue.copyInstall')}>
+            <span className="demo-hero__install-prefix" aria-hidden="true">$</span>
+            <code className="demo-hero__install-code" translate="no">{installCmd}</code>
+            <span className="demo-hero__install-btn" aria-live="polite">
+              {t(installCopyState === 'copied' ? 'ref.catalogue.copied' : installCopyState === 'error' ? 'ref.catalogue.copyError' : 'ref.catalogue.copy')}
+            </span>
+          </button>
+        </div>
         {/* 读数条：把分类数、当前主题、React 版本摆成事实，填掉标题右侧的空档。 */}
         <dl className="demo-hero__readout">
           <div className="demo-hero__stat">

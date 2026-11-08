@@ -329,6 +329,142 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
     0 100%
   );
 }
+/* A layered PRTS survey well: the grid falls away, armor plates rise, the core sits forward. */
+.demo-hero__intro {
+  grid-column: 1;
+  grid-row: 1;
+  z-index: 2;
+  align-self: center;
+}
+
+.demo-hero__instrument {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 15rem;
+  isolation: isolate;
+  perspective: 54rem;
+  perspective-origin: 52% 45%;
+}
+
+.demo-hero__well {
+  position: absolute;
+  inset: 0 0 0.5rem;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.demo-hero__well-stack {
+  position: absolute;
+  inset: 3% 6% 5% 2%;
+  transform: rotateX(54deg) rotateZ(-27deg) rotateY(calc(var(--hero-dx) * 3deg)) rotateX(calc(var(--hero-dy) * -2deg));
+  transform-origin: 55% 48%;
+  transform-style: preserve-3d;
+}
+
+.demo-hero__well-grid {
+  position: absolute;
+  inset: 5% 6% 0;
+  border: 1px solid color-mix(in srgb, var(--ak-signal-info) 28%, transparent);
+  background-image:
+    repeating-radial-gradient(circle at 54% 50%, transparent 0 1.25rem, color-mix(in srgb, var(--ak-signal-info) 16%, transparent) 1.28rem 1.34rem),
+    linear-gradient(var(--ak-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ak-grid-color) 1px, transparent 1px);
+  background-size: auto, 1rem 1rem, 1rem 1rem;
+  opacity: 0.62;
+  transform: translate3d(calc(var(--hero-dx) * -9px), calc(var(--hero-dy) * -6px), -96px) scale(0.9);
+}
+
+.demo-hero__well-plate {
+  position: absolute;
+  display: block;
+  clip-path: polygon(7% 0, 93% 0, 100% 12%, 100% 88%, 93% 100%, 7% 100%, 0 88%, 0 12%);
+  transform-style: preserve-3d;
+}
+
+.demo-hero__well-plate--far {
+  inset: 13% 15% 8% 8%;
+  border: 1px solid color-mix(in srgb, var(--ak-text-primary) 24%, transparent);
+  background: color-mix(in srgb, var(--ak-surface-inverse) 10%, var(--ak-surface-sunken));
+  box-shadow: 0 16px 0 color-mix(in srgb, var(--ak-surface-canvas) 72%, transparent);
+  transform: translate3d(calc(var(--hero-dx) * -7px), calc(var(--hero-dy) * -5px), -68px) scale(0.88);
+}
+
+.demo-hero__well-plate--mid {
+  inset: 9% 10% 6% 12%;
+  border: 1px solid color-mix(in srgb, var(--ak-signal-info) 46%, var(--demo-hairline));
+  background: color-mix(in srgb, var(--ak-surface-inverse) 16%, var(--ak-surface-sunken-2));
+  box-shadow: 0 18px 0 color-mix(in srgb, var(--ak-surface-canvas) 70%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ak-text-primary) 7%, transparent);
+  transform: translate3d(calc(var(--hero-dx) * -2px), calc(var(--hero-dy) * -1px), -20px) scale(0.96);
+}
+
+.demo-hero__well-plate--near {
+  inset: 5% 5% 3% 9%;
+  border: 1px solid color-mix(in srgb, var(--ak-signal-info) 56%, var(--demo-hairline));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ak-signal-info) 11%, var(--ak-surface-sunken-2)), color-mix(in srgb, var(--ak-surface-sunken) 84%, transparent) 64%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ak-text-primary) 8%, transparent), 0 1.2rem 1.5rem -1rem color-mix(in srgb, var(--ak-signal-info) 38%, transparent);
+  transform: translate3d(calc(var(--hero-dx) * 5px), calc(var(--hero-dy) * 4px), 28px);
+}
+
+.demo-hero__well-index {
+  position: absolute;
+  top: 9%;
+  left: 19%;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  transform: translate3d(calc(var(--hero-dx) * -3px), calc(var(--hero-dy) * -2px), 48px);
+}
+
+.demo-hero__well-core {
+  position: absolute;
+  top: 46%;
+  left: 53%;
+  display: grid;
+  width: 6rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--ak-signal-info) 82%, var(--demo-hairline));
+  background: var(--ak-surface-inverse);
+  box-shadow: 0 1.4rem 1.8rem -1rem color-mix(in srgb, var(--ak-signal-info) 48%, transparent), 0 0 1.5rem color-mix(in srgb, var(--ak-signal-info) 20%, transparent), inset 0 0 1rem color-mix(in srgb, var(--ak-signal-info) 10%, transparent);
+  clip-path: polygon(18% 0, 82% 0, 100% 18%, 100% 82%, 82% 100%, 18% 100%, 0 82%, 0 18%);
+  color: var(--ak-text-inverse);
+  font-family: var(--ak-font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transform-origin: center;
+  transform: translate3d(calc(-50% + var(--hero-dx) * 9px), calc(-50% + var(--hero-dy) * 7px), 98px) rotateY(calc(var(--hero-dx) * 3deg)) rotateX(calc(var(--hero-dy) * -3deg));
+}
+
+.demo-hero__well-core::before {
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ak-signal-info) 24%, transparent);
+  clip-path: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.demo-hero__well-beacon {
+  position: absolute;
+  top: 22%;
+  right: 18%;
+  width: 0.42rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--ak-signal-action) 72%, transparent);
+  background: var(--ak-signal-action);
+  box-shadow: 0 0 0.8rem color-mix(in srgb, var(--ak-signal-action) 44%, transparent);
+  transform: translate3d(calc(var(--hero-dx) * 5px), calc(var(--hero-dy) * 3px), 62px);
+}
+
+.demo-hero__install-box {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  bottom: 0;
+}
 
 /* 指针景深：两个归一化偏移 + 光斑中心，由 useHeroDepth 写入。 */
 .demo-hero {
@@ -381,7 +517,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   max-width: 65ch;
   margin: 0;
   color: var(--demo-text);
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.65;
   animation: demo-hero-rise 420ms var(--demo-motion-ease) 70ms both;
 }
@@ -2492,6 +2628,12 @@ dialog.demo-llm-dialog::backdrop {
 
 @media (max-width: 760px) {
   .demo-hero { grid-template-columns: minmax(0, 1fr); }
+  .demo-hero__intro,
+  .demo-hero__instrument {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .demo-hero__instrument { min-height: 10.5rem; }
 }
 
 @media (max-width: 640px) {

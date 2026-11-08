@@ -28,7 +28,7 @@ function Snippet({ snippet, copyLabel, copiedLabel }: { snippet: GuideSnippet; c
     <figure className="demo-snippet">
       <figcaption className="demo-snippet__bar">
         <span className="demo-snippet__label">{snippet.label}</span>
-        <button type="button" className="demo-snippet__copy" onClick={copy}>
+        <button type="button" className="demo-snippet__copy" onClick={copy} aria-live="polite">
           {copied ? copiedLabel : copyLabel}
         </button>
       </figcaption>
