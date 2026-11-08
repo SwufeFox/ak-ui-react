@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { playTactileSound } from '../ak'
 
 /**
  * PRTS 终端开机序列。
@@ -36,8 +37,11 @@ export function BootSequence({ lines, onDone }: BootSequenceProps) {
     const total = LINE_MS * lines.length + TYPE_MS + 140
     const outTimer = window.setTimeout(() => setPhase('out'), total)
     const doneTimer = window.setTimeout(() => doneRef.current(), total + OUT_MS)
-    // 任何输入都能跳过：把跳过动作交给外层去收尾，这里只负责切到收拢态。
-    const skip = () => setPhase('out')
+    // 任何输入都能跳过：跳过动作本身给一声确认音（此时正处在用户手势里，浏览器允许发声）。
+    const skip = () => {
+      playTactileSound('confirm', 0.18)
+      setPhase('out')
+    }
     window.addEventListener('keydown', skip)
     window.addEventListener('pointerdown', skip)
     return () => {

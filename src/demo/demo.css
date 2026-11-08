@@ -1348,6 +1348,59 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 /* ── PRTS 交互层：开机序列 + 战术准星 ─────────────────────────────────── */
 
+/* 顶栏中段的实时读数：时钟与视口。不加分隔符——两段 mono 数字自己站得住。 */
+.demo-status {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-left: auto;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+/* 阅读进度发丝线：固定在视口顶端，填的是「当前分类读到哪里」。 */
+.demo-progress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 60;
+  height: 2px;
+  pointer-events: none;
+}
+
+.demo-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--ak-signal-info);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 90ms linear;
+}
+
+/* 预览区扫描：分类切换后光带扫过一次，像在读这块组件。 */
+.demo-tune-preview {
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-tune-preview::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--ak-signal-info) 14%, transparent), transparent);
+  transform: translate3d(0, -100%, 0);
+  animation: demo-scan 780ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes demo-scan {
+  from { transform: translate3d(0, -100%, 0); }
+  to { transform: translate3d(0, 100%, 0); }
+}
+
 /* 开机：终端自检。逐行打出真实库信息，然后横向收拢把页面交还给人。 */
 .demo-boot {
   position: fixed;
@@ -1874,6 +1927,7 @@ dialog.demo-llm-dialog::backdrop {
 }
 
 @media (max-width: 640px) {
+  .demo-status { display: none; }
   .demo-topbar {
     position: relative;
     display: grid;

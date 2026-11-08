@@ -15,6 +15,7 @@ import type { exportSite as GenerateSite } from './example-site-export'
 import { renderActions } from './examples/actions'
 import { BootSequence } from './boot'
 import { HudReticle } from './hud'
+import { StageProgress, SystemStatus } from './status'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
 import { renderMenus } from './examples/menus'
@@ -796,6 +797,8 @@ function ReferenceView({ theme }: { theme: Theme }) {
         </dl>
       </header>
 
+      <StageProgress target={stageRef} />
+
       <div className="demo-catalogue">
         <CatalogueRail active={active} selectCategory={selectCategory} />
 
@@ -1023,6 +1026,8 @@ export function App() {
           <span className="demo-topbar__tagline">{t('app.tagline')}</span>
           <span className="demo-topbar__version" translate="no">v{packageVersion}</span>
         </div>
+
+        <SystemStatus />
 
         {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
