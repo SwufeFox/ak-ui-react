@@ -472,6 +472,7 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 }
 
 .demo-rail__list {
+  position: relative;
   display: grid;
   gap: 2px;
   min-width: 0;
@@ -630,8 +631,25 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
 
 .demo-rail__item:focus-visible { outline: 2px solid var(--ak-signal-info); outline-offset: -2px; }
 
+/* 选中标记：在分类之间滑动，而不是每个选中项各画一根静态竖线。 */
+.demo-rail__marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 0;
+  background: var(--ak-signal-info);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--demo-motion-spatial) var(--demo-motion-ease-spatial),
+    height var(--demo-motion-fast) var(--demo-motion-ease),
+    opacity var(--demo-motion-fast) linear;
+}
+
+.demo-rail__marker[data-visible='true'] { opacity: 1; }
+
  .demo-rail__item[aria-current] {
-  border-left-color: var(--ak-signal-info);
   background: color-mix(in srgb, var(--ak-signal-info) 10%, var(--ak-surface-sunken-2));
   color: var(--demo-text-strong);
   font-weight: 700;
@@ -1573,6 +1591,31 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
+
+/* 锁定框：罩住指针下的交互件，四角靶标。 */
+.demo-hud__lock {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 399;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms linear;
+}
+
+.demo-hud__lock[data-visible='true'] { opacity: 1; }
+
+.demo-hud__lock-corner {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ak-signal-action);
+}
+
+.demo-hud__lock-corner--tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.demo-hud__lock-corner--tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.demo-hud__lock-corner--bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.demo-hud__lock-corner--br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
 @media (max-width: 900px) {
   .demo-catalogue { grid-template-columns: minmax(0, 1fr); }

@@ -471,6 +471,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
   const categoryListRef = useRef<HTMLDivElement>(null)
+  const markerRef = useRef<HTMLSpanElement>(null)
   const filteredCategories = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return CATEGORIES
@@ -528,6 +529,30 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
     }
   }, [active, filteredCategories])
 
+  // 选中标记滑到当前分类：桌面纵向轨道用滑动竖线，横向轨道用下边线。
+  useLayoutEffect(() => {
+    const list = categoryListRef.current
+    const marker = markerRef.current
+    if (!list || !marker) return
+    const place = () => {
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        marker.dataset.visible = 'false'
+        return
+      }
+      const item = list.querySelector<HTMLElement>('[aria-current]')
+      if (!item) {
+        marker.dataset.visible = 'false'
+        return
+      }
+      marker.dataset.visible = 'true'
+      marker.style.transform = `translate3d(0, ${item.offsetTop}px, 0)`
+      marker.style.height = `${item.offsetHeight}px`
+    }
+    place()
+    window.addEventListener('resize', place)
+    return () => window.removeEventListener('resize', place)
+  }, [active, filteredCategories])
+
   return (
     <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
       <div className="demo-rail__head">
@@ -566,6 +591,7 @@ function CatalogueRail({ active, selectCategory }: { active: string; selectCateg
         )}
       </div>
       <div ref={categoryListRef} className="demo-rail__list">
+        <span className="demo-rail__marker" ref={markerRef} data-visible="false" aria-hidden="true" />
         {filteredCategories.length === 0 ? (
           <div className="demo-rail__empty">
             <span className="demo-rail__empty-title">{t('ref.catalogue.empty')}</span>
