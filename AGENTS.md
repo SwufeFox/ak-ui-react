@@ -87,7 +87,7 @@ dedicated site / shell / command exporters instead. Code generation is lazy and 
 
 | Path | Purpose |
 |---|---|
-| `src/ak/ui/<feature>/Ak*.tsx` | React components, one folder per feature |
+| `src/ak/ui/<feature>/Ak*.tsx` | React components, one folder per feature — e.g. `src/ak/ui/button/AkButton.tsx`, `src/ak/ui/tabs/AkTabs.tsx` |
 | `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useId.ts`, `audio.ts`, `size.ts`, `tokens.ts` |
 | `src/ak/core/` | Vendored `.mjs` controllers + `.d.mts`; published as `…/core`, `…/core/effects`, `…/core/depth` |
 | `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`) |
