@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import { version as packageVersion, peerDependencies } from '../../package.json'
 import { AkButton, AkChoice, AkDisplay, AkFieldLabel, AkInput, AkSelect, AkSegmented, useTactileSound, playTactileSound } from '../ak'
@@ -199,7 +199,7 @@ function TuneNumberField({ value, onChange }: { value: number; onChange: (value:
 }
 
 /** 组件分类面板容器。 */
-function Block({
+const Block = memo(function Block({
   id,
   eyebrow,
   title,
@@ -270,14 +270,40 @@ function Block({
     document.body.style.overflow = 'hidden'
     inspectCloseRef.current?.focus()
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
-      event.preventDefault()
-      exitInspect()
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        exitInspect()
+        return
+      }
+      if (event.key !== 'Tab') return
+      const dialog = inspectCloseRef.current?.closest<HTMLElement>('[role="dialog"]')
+      if (!dialog) return
+      const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'a[href],area[href],button,input:not([type="hidden"]),select,textarea,summary,[tabindex],[contenteditable]:not([contenteditable="false"]),audio[controls],video[controls]',
+      )).filter((control) =>
+        !control.matches(':disabled,[aria-hidden="true"],[inert]') &&
+        control.tabIndex >= 0 &&
+        control.getClientRects().length > 0,
+      )
+      const first = controls[0]
+      const last = controls.at(-1)
+      if (!first || !last) {
+        event.preventDefault()
+        return
+      }
+      const focusInside = dialog.contains(document.activeElement)
+      if (event.shiftKey && (document.activeElement === first || !focusInside)) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && (document.activeElement === last || !focusInside)) {
+        event.preventDefault()
+        first.focus()
+      }
     }
-    window.addEventListener('keydown', onKey)
+    window.addEventListener('keydown', onKey, true)
     return () => {
       document.body.style.overflow = previous
-      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keydown', onKey, true)
     }
   }, [inspecting, exitInspect])
   // Drive the sliding underline from the active tab's box; the indicator itself only translates.
@@ -533,7 +559,7 @@ function Block({
       ) : null}
     </section>
   )
-}
+})
 
 function CatalogueRail({ active, selectCategory }: { active: string; selectCategory: (id: string, focus?: boolean) => void }) {
   const { t } = useI18n()
@@ -715,11 +741,12 @@ function ReferenceView({ theme }: { theme: Theme }) {
   const [tableSortKey, setTableSortKey] = useState<'name' | 'atk' | 'def'>('atk')
   const [tableSortDir, setTableSortDir] = useState<'ascending' | 'descending' | 'none'>('descending')
 
-  const handleTableSort = (key: 'name' | 'atk' | 'def') => {
+  const handleTableSort = useCallback((key: 'name' | 'atk' | 'def') => {
     playTactileSound('dial', 0.15)
     setTableSortDir(nextTableSort(tableSortKey, tableSortDir, key))
     setTableSortKey(key)
-  }
+  }, [tableSortKey, tableSortDir])
+
   const tableData = useMemo(() => sortTableRows(tableSortKey, tableSortDir), [tableSortKey, tableSortDir])
   const [selectedItem, setSelectedItem] = useState('D32')
   const [selectedSlot, setSelectedSlot] = useState('silverash')
@@ -735,10 +762,11 @@ function ReferenceView({ theme }: { theme: Theme }) {
   const [noteText, setNoteText] = useState('')
   const [choiceA, setChoiceA] = useState(false)
   const [choiceB, setChoiceB] = useState(false)
-  const hitButton = (name: string) => {
+  const hitButton = useCallback((name: string) => {
     setButtonHit(name)
     setButtonHits((n) => n + 1)
-  }
+  }, [setButtonHit, setButtonHits])
+
 
   const [installCopyState, setInstallCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const installCopyTimer = useRef<number | null>(null)
@@ -862,7 +890,82 @@ function ReferenceView({ theme }: { theme: Theme }) {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  const items: GalleryItem[] = galleryItems(t)
+  const items = useMemo<GalleryItem[]>(() => galleryItems(t), [t])
+  const actionCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderActions({ t, buttonHit, buttonHits, hitButton }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(1, locale, overrides, { buttonHit, buttonHits }),
+  }), [t, locale, buttonHit, buttonHits, hitButton])
+  const menuCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderMenus({ t, selectedCommand, setSelectedCommand, count, setCount }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(2, locale, overrides, { selectedCommand, count }),
+  }), [t, locale, selectedCommand, setSelectedCommand, count, setCount])
+  const surfaceCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderSurfaces({ t, groupPick, setGroupPick, cardDialog, setCardDialog }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(3, locale, overrides, { groupPick, cardDialog }),
+  }), [t, locale, groupPick, setGroupPick, cardDialog, setCardDialog])
+  const feedbackCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderFeedback({ t }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(4, locale, overrides, {}),
+  }), [t, locale])
+  const inputCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderInputs({ t, slider, setSlider, segment, setSegment }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(5, locale, overrides, { slider, segment }),
+  }), [t, locale, slider, setSlider, segment, setSegment])
+  const navigationCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderNavigation({ t, tab, setTab }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(6, locale, overrides, { tab }),
+  }), [t, locale, tab, setTab])
+  const effectCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderEffects({ t, count, setCount, entranceRef }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(7, locale, overrides, { count }),
+  }), [t, locale, count, setCount, entranceRef])
+  const galleryCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderGallery({ t, galleryIndex, setGalleryIndex, items }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(8, locale, overrides, { galleryIndex, items }),
+  }), [t, locale, galleryIndex, setGalleryIndex, items])
+  const siteExample = useCallback<ExampleFactory>(
+    (tune) => renderSite({ t, mobileMenuRef, selectCategory }, tune),
+    [t, mobileMenuRef, selectCategory],
+  )
+  const siteExporter = useCallback((overrides: Record<string, unknown>) => exportSite(
+    locale,
+    overrides,
+    { ...overrideRegistry.current },
+    { buttonHit, buttonHits, count, selectedCommand, selectedSlot, selectedItem, screenOpen, screenCategory, screenSearch, selectedDepotId, materialStock, screenNotice, screenNoticeExpiresAt, sanCurrent, sanTotal, sanLimit, loadingReady, dialogOpen },
+  ), [locale, overrideRegistry, buttonHit, buttonHits, count, selectedCommand, selectedSlot, selectedItem, screenOpen, screenCategory, screenSearch, selectedDepotId, materialStock, screenNotice, screenNoticeExpiresAt, sanCurrent, sanTotal, sanLimit, loadingReady, dialogOpen])
+  const shellCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderShell({ t, current: shellCurrent, setCurrent: setShellCurrent }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportShell({ t, current: shellCurrent, setCurrent: setShellCurrent }, overrides),
+  }), [t, shellCurrent, setShellCurrent])
+  const decorCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderDecor({ t }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(11, locale, overrides, { shellOverrides: overrideRegistry.current['components-10'] ?? {} }),
+  }), [t, locale, overrideRegistry])
+  const gameDataCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderGameData({ t, skillLevel, setSkillLevel }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(12, locale, overrides, { skillLevel }),
+  }), [t, locale, skillLevel, setSkillLevel])
+  const controlCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderControls({ t, groupPick, setGroupPick, pageIndex, setPageIndex }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(13, locale, overrides, { groupPick, pageIndex }),
+  }), [t, locale, groupPick, setGroupPick, pageIndex, setPageIndex])
+  const formCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderForms({ t, fieldName, setFieldName, selectPick, setSelectPick, noteText, setNoteText, choiceA, setChoiceA, choiceB, setChoiceB }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(14, locale, overrides, { fieldName, selectPick, noteText, choiceA, choiceB }),
+  }), [t, locale, fieldName, setFieldName, selectPick, setSelectPick, noteText, setNoteText, choiceA, setChoiceA, choiceB, setChoiceB])
+  const readoutCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderReadouts({ t, sanCurrent, setSanCurrent, sanTotal, sanLimit, loadingReady, setLoadingReady, dialogOpen, setDialogOpen }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(15, locale, overrides, { sanCurrent, sanTotal, sanLimit, loadingReady, dialogOpen }),
+  }), [t, locale, sanCurrent, setSanCurrent, sanTotal, sanLimit, loadingReady, setLoadingReady, dialogOpen, setDialogOpen])
+  const collectionCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderCollections({ t, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(16, locale, overrides, { selectedTableRow, tableStriped, tableTactical, tableSticky, tableSortKey, tableSortDir }),
+  }), [t, locale, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData])
+  const commandCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderCommand({ t, selectedCommand, setSelectedCommand, selectedSlot, setSelectedSlot, selectedItem, setSelectedItem, screenOpen, setScreenOpen, screenDialogRef, screenCategory, setScreenCategory, screenSearch, setScreenSearch, selectedDepotItem, setSelectedDepotId, filteredDepotItems, materialStock, setMaterialStock, screenNotice, showScreenNotice, sanCurrent, setSanCurrent, sanTotal, sanLimit, showcaseDialogStyle }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCommand({ selectedCommand, selectedSlot, selectedItem, screenOpen, screenCategory, screenSearch, selectedDepotId, materialStock, screenNotice, screenNoticeExpiresAt, sanCurrent, sanTotal, sanLimit }, overrides, locale),
+  }), [t, locale, selectedCommand, setSelectedCommand, selectedSlot, setSelectedSlot, selectedItem, setSelectedItem, screenOpen, setScreenOpen, screenDialogRef, screenCategory, setScreenCategory, screenSearch, setScreenSearch, selectedDepotItem, setSelectedDepotId, filteredDepotItems, materialStock, setMaterialStock, screenNotice, showScreenNotice, screenNoticeExpiresAt, sanCurrent, setSanCurrent, sanTotal, sanLimit, showcaseDialogStyle])
+
 
   return (
     <main id="demo-main" className="demo-main" tabIndex={-1}>
@@ -902,55 +1005,39 @@ function ReferenceView({ theme }: { theme: Theme }) {
 
         <div className="demo-stage" ref={stageRef}>
           <StageContext.Provider value={stageValue}>
-      <Block
-        id="components-1"
-        eyebrow={t('ref.actions.eyebrow')}
-        title={t('ref.actions.title')}
-        note={t('ref.actions.note')}
-        api={DOC_REGISTRY['components-1']?.api}
-        example={(tune: Tune) => renderActions({ t, buttonHit, buttonHits, hitButton }, tune)}
-        exportCode={(overrides) => exportCategory(1, locale, overrides, { buttonHit, buttonHits })}
-      />
-
-      <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')} api={DOC_REGISTRY['components-2']?.api} example={(tune) => renderMenus({ t, selectedCommand, setSelectedCommand, count, setCount }, tune)} exportCode={(overrides) => exportCategory(2, locale, overrides, { selectedCommand, count })} />
-
-      <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')} api={DOC_REGISTRY['components-3']?.api} example={(tune) => renderSurfaces({ t, groupPick, setGroupPick, cardDialog, setCardDialog }, tune)} exportCode={(overrides) => exportCategory(3, locale, overrides, { groupPick, cardDialog })} />
-
-      <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')} api={DOC_REGISTRY['components-4']?.api} example={(tune) => renderFeedback({ t }, tune)} exportCode={(overrides) => exportCategory(4, locale, overrides, {})} />
-
-      <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')} api={DOC_REGISTRY['components-5']?.api} example={(tune) => renderInputs({ t, slider, setSlider, segment, setSegment }, tune)} exportCode={(overrides) => exportCategory(5, locale, overrides, { slider, segment })} />
-
-      <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} api={DOC_REGISTRY['components-6']?.api} example={(tune) => renderNavigation({ t, tab, setTab }, tune)} exportCode={(overrides) => exportCategory(6, locale, overrides, { tab })} />
-
-      <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')} api={DOC_REGISTRY['components-7']?.api} example={(tune) => renderEffects({ t, count, setCount, entranceRef }, tune)} exportCode={(overrides) => exportCategory(7, locale, overrides, { count })} />
-
-      <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')} api={DOC_REGISTRY['components-8']?.api} example={(tune) => renderGallery({ t, galleryIndex, setGalleryIndex, items }, tune)} exportCode={(overrides) => exportCategory(8, locale, overrides, { galleryIndex, items })} />
-
-      <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')} api={DOC_REGISTRY['components-9']?.api} example={(tune) => renderSite({ t, mobileMenuRef, selectCategory }, tune)} exportCode={(overrides) => exportSite(locale, overrides, { ...overrideRegistry.current }, { buttonHit, buttonHits, count, selectedCommand, selectedSlot, selectedItem, screenOpen, screenCategory, screenSearch, selectedDepotId, materialStock, screenNotice, screenNoticeExpiresAt, sanCurrent, sanTotal, sanLimit, loadingReady, dialogOpen })} />
-
-      <Block
-        id="components-10"
-        eyebrow={t('ref.shell.eyebrow')}
-        title={t('ref.shell.title')}
-        note={t('ref.shell.note')}
-        api={DOC_REGISTRY['components-10']?.api}
-        example={(tune) => renderShell({ t, current: shellCurrent, setCurrent: setShellCurrent }, tune)}
-        exportCode={(overrides) => exportShell({ t, current: shellCurrent, setCurrent: setShellCurrent }, overrides)}
-      />
-
-      <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')} api={DOC_REGISTRY['components-11']?.api} example={(tune) => renderDecor({ t }, tune)} exportCode={(overrides) => exportCategory(11, locale, overrides, { shellOverrides: overrideRegistry.current['components-10'] ?? {} })} />
-
-      <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')} api={DOC_REGISTRY['components-12']?.api} example={(tune) => renderGameData({ t, skillLevel, setSkillLevel }, tune)} exportCode={(overrides) => exportCategory(12, locale, overrides, { skillLevel })} />
-
-      <Block id="components-13" eyebrow={t('ref.controls.eyebrow')} title={t('ref.controls.title')} note={t('ref.controls.note')} api={DOC_REGISTRY['components-13']?.api} example={(tune) => renderControls({ t, groupPick, setGroupPick, pageIndex, setPageIndex }, tune)} exportCode={(overrides) => exportCategory(13, locale, overrides, { groupPick, pageIndex })} />
-
-      <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')} api={DOC_REGISTRY['components-14']?.api} example={(tune) => renderForms({ t, fieldName, setFieldName, selectPick, setSelectPick, noteText, setNoteText, choiceA, setChoiceA, choiceB, setChoiceB }, tune)} exportCode={(overrides) => exportCategory(14, locale, overrides, { fieldName, selectPick, noteText, choiceA, choiceB })} />
-
-      <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} api={DOC_REGISTRY['components-15']?.api} example={(tune) => renderReadouts({ t, sanCurrent, setSanCurrent, sanTotal, sanLimit, loadingReady, setLoadingReady, dialogOpen, setDialogOpen }, tune)} exportCode={(overrides) => exportCategory(15, locale, overrides, { sanCurrent, sanTotal, sanLimit, loadingReady, dialogOpen })} />
-
-      <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} api={DOC_REGISTRY['components-16']?.api} example={(tune) => renderCollections({ t, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData }, tune)} exportCode={(overrides) => exportCategory(16, locale, overrides, { selectedTableRow, tableStriped, tableTactical, tableSticky, tableSortKey, tableSortDir })} />
-
-      <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} api={DOC_REGISTRY['components-17']?.api} example={(tune) => renderCommand({ t, selectedCommand, setSelectedCommand, selectedSlot, setSelectedSlot, selectedItem, setSelectedItem, screenOpen, setScreenOpen, screenDialogRef, screenCategory, setScreenCategory, screenSearch, setScreenSearch, selectedDepotItem, setSelectedDepotId, filteredDepotItems, materialStock, setMaterialStock, screenNotice, showScreenNotice, sanCurrent, setSanCurrent, sanTotal, sanLimit, showcaseDialogStyle }, tune)} exportCode={(overrides) => exportCommand({ selectedCommand, selectedSlot, selectedItem, screenOpen, screenCategory, screenSearch, selectedDepotId, materialStock, screenNotice, screenNoticeExpiresAt, sanCurrent, sanTotal, sanLimit }, overrides, locale)} />
+            <Block
+              id="components-1"
+              eyebrow={t('ref.actions.eyebrow')}
+              title={t('ref.actions.title')}
+              note={t('ref.actions.note')}
+              api={DOC_REGISTRY['components-1']?.api}
+              example={actionCallbacks.example}
+              exportCode={actionCallbacks.exportCode}
+            />
+            <Block id="components-2" eyebrow={t('ref.menu.eyebrow')} title={t('ref.menu.title')} note={t('ref.menu.note')} api={DOC_REGISTRY['components-2']?.api} example={menuCallbacks.example} exportCode={menuCallbacks.exportCode} />
+            <Block id="components-3" eyebrow={t('ref.surfaces.eyebrow')} title={t('ref.surfaces.title')} note={t('ref.surfaces.note')} api={DOC_REGISTRY['components-3']?.api} example={surfaceCallbacks.example} exportCode={surfaceCallbacks.exportCode} />
+            <Block id="components-4" eyebrow={t('ref.feedback.eyebrow')} title={t('ref.feedback.title')} note={t('ref.feedback.note')} api={DOC_REGISTRY['components-4']?.api} example={feedbackCallbacks.example} exportCode={feedbackCallbacks.exportCode} />
+            <Block id="components-5" eyebrow={t('ref.inputs.eyebrow')} title={t('ref.inputs.title')} note={t('ref.inputs.note')} api={DOC_REGISTRY['components-5']?.api} example={inputCallbacks.example} exportCode={inputCallbacks.exportCode} />
+            <Block id="components-6" eyebrow={t('ref.navigation.eyebrow')} title={t('ref.navigation.title')} note={t('ref.navigation.note')} api={DOC_REGISTRY['components-6']?.api} example={navigationCallbacks.example} exportCode={navigationCallbacks.exportCode} />
+            <Block id="components-7" eyebrow={t('ref.effects.eyebrow')} title={t('ref.effects.title')} note={t('ref.effects.note')} api={DOC_REGISTRY['components-7']?.api} example={effectCallbacks.example} exportCode={effectCallbacks.exportCode} />
+            <Block id="components-8" eyebrow={t('ref.gallery.eyebrow')} title={t('ref.gallery.title')} note={t('ref.gallery.note')} api={DOC_REGISTRY['components-8']?.api} example={galleryCallbacks.example} exportCode={galleryCallbacks.exportCode} />
+            <Block id="components-9" eyebrow={t('ref.site.eyebrow')} title={t('ref.site.title')} note={t('ref.site.note')} api={DOC_REGISTRY['components-9']?.api} example={siteExample} exportCode={siteExporter} />
+            <Block
+              id="components-10"
+              eyebrow={t('ref.shell.eyebrow')}
+              title={t('ref.shell.title')}
+              note={t('ref.shell.note')}
+              api={DOC_REGISTRY['components-10']?.api}
+              example={shellCallbacks.example}
+              exportCode={shellCallbacks.exportCode}
+            />
+            <Block id="components-11" eyebrow={t('ref.decor.eyebrow')} title={t('ref.decor.title')} note={t('ref.decor.note')} api={DOC_REGISTRY['components-11']?.api} example={decorCallbacks.example} exportCode={decorCallbacks.exportCode} />
+            <Block id="components-12" eyebrow={t('ref.arknights.eyebrow')} title={t('ref.arknights.title')} note={t('ref.arknights.note')} api={DOC_REGISTRY['components-12']?.api} example={gameDataCallbacks.example} exportCode={gameDataCallbacks.exportCode} />
+            <Block id="components-13" eyebrow={t('ref.controls.eyebrow')} title={t('ref.controls.title')} note={t('ref.controls.note')} api={DOC_REGISTRY['components-13']?.api} example={controlCallbacks.example} exportCode={controlCallbacks.exportCode} />
+            <Block id="components-14" eyebrow={t('ref.form.eyebrow')} title={t('ref.form.title')} note={t('ref.form.note')} api={DOC_REGISTRY['components-14']?.api} example={formCallbacks.example} exportCode={formCallbacks.exportCode} />
+            <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} api={DOC_REGISTRY['components-15']?.api} example={readoutCallbacks.example} exportCode={readoutCallbacks.exportCode} />
+            <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} api={DOC_REGISTRY['components-16']?.api} example={collectionCallbacks.example} exportCode={collectionCallbacks.exportCode} />
+            <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} api={DOC_REGISTRY['components-17']?.api} example={commandCallbacks.example} exportCode={commandCallbacks.exportCode} />
           </StageContext.Provider>
 
           <div className="demo-stage__foot">
