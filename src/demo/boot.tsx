@@ -22,6 +22,8 @@ interface BootSequenceProps {
 const LINE_MS = 120
 const TYPE_MS = 260
 const OUT_MS = 480
+/** 面板要等显像管展开后才浮上来；与 `.demo-boot__panel` 的 animation-delay 保持一致。 */
+const PANEL_DELAY = 300
 
 export function BootSequence({ lines, onDone }: BootSequenceProps) {
   const [phase, setPhase] = useState<'typing' | 'out'>('typing')
@@ -34,7 +36,8 @@ export function BootSequence({ lines, onDone }: BootSequenceProps) {
       doneRef.current()
       return
     }
-    const total = LINE_MS * lines.length + TYPE_MS + 140
+    // 最后一行打完再留一点呼吸，然后收拢。
+    const total = PANEL_DELAY + LINE_MS * lines.length + TYPE_MS + 80
     const outTimer = window.setTimeout(() => setPhase('out'), total)
     const doneTimer = window.setTimeout(() => doneRef.current(), total + OUT_MS)
     // 任何输入都能跳过：跳过动作本身给一声确认音（此时正处在用户手势里，浏览器允许发声）。
@@ -54,6 +57,7 @@ export function BootSequence({ lines, onDone }: BootSequenceProps) {
 
   return (
     <div className="demo-boot" data-phase={phase} aria-hidden="true">
+      <div className="demo-boot__crt" />
       <div className="demo-boot__scan" />
       <div className="demo-boot__panel">
         <span className="demo-boot__brand">AK-UI</span>

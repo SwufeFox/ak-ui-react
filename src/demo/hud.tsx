@@ -42,11 +42,15 @@ function describe(target: Element | null): string | null {
 export function HudReticle() {
   const rootRef = useRef<HTMLDivElement>(null)
   const readoutRef = useRef<HTMLSpanElement>(null)
+  const metaRef = useRef<HTMLSpanElement>(null)
+  const swatchRef = useRef<HTMLSpanElement>(null)
   const lockRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const root = rootRef.current
     const readout = readoutRef.current
+    const meta = metaRef.current
+    const swatch = swatchRef.current
     const lock = lockRef.current
     if (!root || !readout || !lock) return
     const fine = window.matchMedia('(pointer: fine)')
@@ -62,6 +66,7 @@ export function HudReticle() {
     let posX = targetX
     let posY = targetY
     let frame = 0
+    let dirty = true
     let lastLabel = ''
     let hovered: Element | null = null
 
@@ -80,12 +85,37 @@ export function HudReticle() {
       lock.style.transform = `translate3d(${rect.left.toFixed(1)}px, ${rect.top.toFixed(1)}px, 0)`
       lock.style.width = `${rect.width.toFixed(1)}px`
       lock.style.height = `${rect.height.toFixed(1)}px`
+      // 遥测：尺寸进读数，底色给一枚色块。每帧最多一次，指针静止后不再执行。
+      if (meta) meta.textContent = `${Math.round(rect.width)}×${Math.round(rect.height)}`
+    }
+
+    /** 命中解析：每帧最多一次 elementFromPoint + getComputedStyle。 */
+    const resolve = () => {
+      const under = document.elementFromPoint(targetX, targetY)
+      const lockable = under?.closest(LOCKABLE) ?? null
+      hovered = lockable
+      root.dataset.locked = lockable ? 'true' : 'false'
+      root.dataset.editing = under?.closest('input, textarea, [contenteditable="true"]') ? 'true' : 'false'
+      if (swatch && lockable) {
+        const bg = getComputedStyle(lockable).backgroundColor
+        swatch.style.backgroundColor = bg === 'rgba(0, 0, 0, 0)' ? 'transparent' : bg
+      }
+      const label = describe(under)
+      if (label !== lastLabel) {
+        lastLabel = label ?? ''
+        readout.textContent = lastLabel
+        root.dataset.hasLabel = lastLabel ? 'true' : 'false'
+      }
     }
 
     const paint = () => {
       posX += (targetX - posX) * FOLLOW
       posY += (targetY - posY) * FOLLOW
       root.style.transform = `translate3d(${posX.toFixed(2)}px, ${posY.toFixed(2)}px, 0)`
+      if (dirty) {
+        dirty = false
+        resolve()
+      }
       paintLock()
       // 追上目标就停：静止时不该有 rAF 在空转。
       if (Math.abs(targetX - posX) < SETTLE && Math.abs(targetY - posY) < SETTLE) {
@@ -101,19 +131,9 @@ export function HudReticle() {
     const onMove = (event: PointerEvent) => {
       targetX = event.clientX
       targetY = event.clientY
+      dirty = true
       root.dataset.visible = 'true'
       wake()
-      const under = document.elementFromPoint(targetX, targetY)
-      const lockable = under?.closest(LOCKABLE) ?? null
-      hovered = lockable
-      root.dataset.locked = lockable ? 'true' : 'false'
-      root.dataset.editing = under?.closest('input, textarea, [contenteditable="true"]') ? 'true' : 'false'
-      const label = describe(under)
-      if (label !== lastLabel) {
-        lastLabel = label ?? ''
-        readout.textContent = lastLabel
-        root.dataset.hasLabel = lastLabel ? 'true' : 'false'
-      }
     }
     const onLeave = () => {
       root.dataset.visible = 'false'
@@ -149,6 +169,10 @@ export function HudReticle() {
         <span className="demo-hud__corner demo-hud__corner--br" />
         <span className="demo-hud__dot" />
         <span className="demo-hud__readout" ref={readoutRef} />
+        <span className="demo-hud__spec">
+          <span className="demo-hud__swatch" ref={swatchRef} />
+          <span className="demo-hud__meta" ref={metaRef} />
+        </span>
       </div>
       <div className="demo-hud__lock" ref={lockRef} data-visible="false" aria-hidden="true">
         <span className="demo-hud__lock-corner demo-hud__lock-corner--tl" />

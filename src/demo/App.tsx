@@ -17,6 +17,7 @@ import { BootSequence } from './boot'
 import { HudReticle } from './hud'
 import { StageProgress, SystemStatus } from './status'
 import { pushReceipt, Receipts } from './receipt'
+import { useHeroDepth } from './depth'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
 import { renderMenus } from './examples/menus'
@@ -736,6 +737,8 @@ function ReferenceView({ theme }: { theme: Theme }) {
     if (category) document.title = `${t(category.title)} · ak-ui`
   }, [activeIndex, t])
   const stageRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLElement>(null)
+  useHeroDepth(heroRef)
   // 方向写进舞台的自定义属性：CSS 用它决定新块从哪边滑入。
   useEffect(() => {
     const stage = stageRef.current
@@ -797,7 +800,7 @@ function ReferenceView({ theme }: { theme: Theme }) {
 
   return (
     <main id="demo-main" className="demo-main" tabIndex={-1}>
-      <header className="demo-hero">
+      <header className="demo-hero" ref={heroRef}>
         <div className="demo-hero__intro">
           <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
           <p className="demo-hero__desc">{t('ref.catalogue.description')}</p>
