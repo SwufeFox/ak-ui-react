@@ -1939,6 +1939,209 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   animation-timing-function: cubic-bezier(0.27, 1.06, 0.18, 1);
 }
 
+/* ── 指南视图：站点自己的说明书 ───────────────────────────────────────── */
+
+.demo-guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 2.5vw, 2rem);
+  background: color-mix(in srgb, var(--demo-canvas) 90%, transparent);
+  backdrop-filter: blur(8px);
+  animation: demo-guide-in 240ms var(--demo-motion-ease) both;
+}
+
+@keyframes demo-guide-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.demo-guide-panel {
+  display: grid;
+  width: min(100%, 64rem);
+  max-height: calc(100dvh - 2 * clamp(0.75rem, 2.5vw, 2rem));
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  border-top: 2px solid var(--ak-signal-info);
+  background: var(--ak-surface-sunken);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 35%);
+}
+
+.demo-guide {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.demo-guide__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--ak-signal-info);
+}
+
+.demo-guide__title {
+  margin: 0.35rem 0 0.55rem;
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.demo-guide__lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--demo-text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.demo-guide__back {
+  flex: none;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text);
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.demo-guide__back:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-guide__back:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-guide__body {
+  display: grid;
+  gap: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+.demo-guide__section {
+  display: grid;
+  gap: 0.8rem;
+  padding-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  border-top: 1px solid var(--demo-hairline);
+}
+
+.demo-guide__section h2 {
+  margin: 0;
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.demo-guide__section p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--demo-text);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.demo-guide__list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.3rem 0 0;
+}
+
+.demo-guide__row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+  gap: 0.35rem 1.25rem;
+  align-items: baseline;
+}
+
+.demo-guide__row dt {
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.demo-guide__row dd {
+  margin: 0;
+  color: var(--demo-text);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* 代码片段 */
+.demo-snippet {
+  margin: 0.4rem 0 0;
+  border: 1px solid var(--demo-hairline);
+  background: var(--demo-code-bg);
+}
+
+.demo-snippet__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--demo-hairline);
+  background: var(--demo-code-head);
+}
+
+.demo-snippet__label {
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.demo-snippet__copy {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.demo-snippet__copy:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-snippet__copy:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-snippet__code {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  overflow: auto;
+  color: var(--ak-text-primary);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
 @media (max-width: 900px) {
   .demo-catalogue { grid-template-columns: minmax(0, 1fr); }
 
@@ -2293,6 +2496,8 @@ dialog.demo-llm-dialog::backdrop {
 
 @media (max-width: 640px) {
   .demo-status { display: none; }
+
+  .demo-guide__row { grid-template-columns: minmax(0, 1fr); }
   .demo-topbar {
     position: relative;
     display: grid;

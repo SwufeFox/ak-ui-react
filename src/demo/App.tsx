@@ -17,8 +17,9 @@ import { renderActions } from './examples/actions'
 import { BootSequence } from './boot'
 import { HudReticle } from './hud'
 import { StageProgress, SystemStatus } from './status'
-import { pushReceipt, Receipts } from './receipt'
+import { pushReceipt, Receipts, formatBytes } from './receipt'
 import { useHeroDepth } from './depth'
+import { GuideView } from './guide'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
 import { renderMenus } from './examples/menus'
@@ -372,7 +373,7 @@ function Block({
       await navigator.clipboard.writeText(text)
       playTactileSound('confirm', 0.2)
       setCopyResult({ text, state: 'copied' })
-      pushReceipt({ label: t('common.codeCopied'), detail: `${(text.length / 1024).toFixed(1)} KB` })
+      pushReceipt({ label: t('common.codeCopied'), detail: formatBytes(text.length) })
     } catch {
       playTactileSound('warn', 0.2)
       setCopyResult({ text, state: 'error' })
@@ -1001,6 +1002,10 @@ export function App() {
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
   const [booting, setBooting] = useState(true)
+  // 指南是叠在目录之上的文档层：目录保持挂载，示例状态与调参结果都不会丢。
+  const [guideOpen, setGuideOpen] = useState(() => typeof window !== 'undefined' && window.location.hash === '#guide')
+  const guideDialogRef = useShowcaseDialog(guideOpen)
+  const lastHash = useRef('#components-1')
   const [llmCopyState, setLlmCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const llmDialogRef = useShowcaseDialog(llmModalOpen)
   const topbarRef = useRef<HTMLElement>(null)
@@ -1092,6 +1097,22 @@ export function App() {
     }
   }, [])
 
+  const openGuide = useCallback(() => {
+    lastHash.current = window.location.hash || '#components-1'
+    window.history.pushState(null, '', '#guide')
+    setGuideOpen(true)
+  }, [])
+  const closeGuide = useCallback(() => {
+    setGuideOpen(false)
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${lastHash.current}`)
+  }, [])
+  // 浏览器后退把 hash 带走时，指南要跟着收起。
+  useEffect(() => {
+    const onPop = () => { if (window.location.hash !== '#guide') setGuideOpen(false) }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
   const closeLlmModal = () => {
     llmCopyGeneration.current += 1
     if (llmCopyTimer.current !== null) window.clearTimeout(llmCopyTimer.current)
@@ -1106,7 +1127,7 @@ export function App() {
       await navigator.clipboard.writeText(llmsRawText)
       if (generation !== llmCopyGeneration.current) return
       setLlmCopyState('copied')
-      pushReceipt({ label: t('app.llm.copied'), detail: `${(llmsRawText.length / 1024).toFixed(1)} KB` })
+      pushReceipt({ label: t('app.llm.copied'), detail: formatBytes(llmsRawText.length) })
       llmCopyTimer.current = window.setTimeout(() => setLlmCopyState('idle'), 2000)
     } catch {
       if (generation === llmCopyGeneration.current) setLlmCopyState('error')
@@ -1130,6 +1151,13 @@ export function App() {
 
         {/* 顶栏操作控件 */}
         <div className="demo-topbar__controls">
+          <button type="button" className="demo-topbar__link" onClick={(event) => {
+            playTactileSound('click', 0.16)
+            event.currentTarget.focus()
+            openGuide()
+          }}>
+            {t('app.guide')}
+          </button>
           <button type="button" className="demo-topbar__link" translate="no" onClick={(event) => {
             playTactileSound('click', 0.16)
             event.currentTarget.focus()
@@ -1190,6 +1218,22 @@ export function App() {
       </header>
 
       <ReferenceView theme={theme} />
+
+      {guideOpen ? (
+        <dialog
+          className="demo-guide-dialog"
+          ref={guideDialogRef}
+          aria-label={t('app.guide')}
+          onCancel={(event) => { event.preventDefault(); closeGuide() }}
+          style={showcaseDialogStyle}
+        >
+          <div className="demo-guide-overlay" onClick={closeGuide}>
+            <div className="demo-guide-panel" onClick={(event) => event.stopPropagation()}>
+              <GuideView onBack={closeGuide} />
+            </div>
+          </div>
+        </dialog>
+      ) : null}
 
       {llmModalOpen ? (
         <dialog className="demo-llm-dialog" ref={llmDialogRef} aria-labelledby="demo-llm-title" onCancel={(event) => { event.preventDefault(); closeLlmModal() }} style={showcaseDialogStyle} onClick={(event) => { if (event.target === event.currentTarget) closeLlmModal() }}>

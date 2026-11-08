@@ -36,6 +36,11 @@ export function pushReceipt(input: ReceiptInput): void {
 const LIFETIME = 2600
 const LIMIT = 3
 
+/** 字节数的人话格式：小于 1KB 就别显示成 0.0 KB。 */
+export function formatBytes(length: number): string {
+  return length < 1024 ? `${length} B` : `${(length / 1024).toFixed(1)} KB`
+}
+
 export function Receipts() {
   const [items, setItems] = useState<Receipt[]>([])
 
