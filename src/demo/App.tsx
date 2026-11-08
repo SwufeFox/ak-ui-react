@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { flushSync } from 'react-dom'
 import { version as packageVersion, peerDependencies } from '../../package.json'
 import { AkButton, AkChoice, AkDisplay, AkFieldLabel, AkInput, AkSelect, AkSegmented, useTactileSound, playTactileSound } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
@@ -228,6 +229,9 @@ function Block({
   const [selected, setSelected] = useState<string | null>(null)
   const [overrides, setOverrides] = useState<Record<string, unknown>>({})
   const [previewExpanded, setPreviewExpanded] = useState(true)
+  const [inspecting, setInspecting] = useState(false)
+  const inspectButtonRef = useRef<HTMLButtonElement>(null)
+  const inspectCloseRef = useRef<HTMLButtonElement>(null)
   const [resetVersion, setResetVersion] = useState(0)
   const [codeResult, setCodeResult] = useState<{ status: 'loading' | 'error' } | { status: 'ready'; text: string }>({ status: 'loading' })
   const codeCache = useRef<{ tree: ReactNode; exportCode: typeof exportCode; overrides: typeof overrides; locale: Locale; promise: Promise<string>; text?: string } | null>(null)
@@ -239,6 +243,42 @@ function Block({
     if (!active) return
     writeViewParam(tab)
   }, [active, tab])
+
+  // 全屏检视：支持的浏览器里用 View Transition 让预览面板「长」成整屏，
+  // 面板与检视框共用同一个 view-transition-name，浏览器负责补间。
+  const enterInspect = useCallback(() => {
+    const start = document.startViewTransition
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && typeof start === 'function') {
+      start.call(document, () => flushSync(() => setInspecting(true)))
+      return
+    }
+    setInspecting(true)
+  }, [])
+  const exitInspect = useCallback(() => {
+    const start = document.startViewTransition
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && typeof start === 'function') {
+      start.call(document, () => flushSync(() => setInspecting(false)))
+    } else {
+      setInspecting(false)
+    }
+    window.setTimeout(() => inspectButtonRef.current?.focus(), 0)
+  }, [])
+  useEffect(() => {
+    if (!inspecting) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    inspectCloseRef.current?.focus()
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      exitInspect()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [inspecting, exitInspect])
   // Drive the sliding underline from the active tab's box; the indicator itself only translates.
   useLayoutEffect(() => {
     const list = tabsRef.current
@@ -383,10 +423,14 @@ function Block({
               </button>
             ))}
           </div>
+          <button type="button" className="demo-block__inspect" ref={inspectButtonRef} onClick={enterInspect} aria-haspopup="dialog">
+            <span className="demo-block__inspect-glyph" aria-hidden="true">⤢</span>
+            {t('common.inspect')}
+          </button>
       </div>
 
       <div id={`${id}-workspace`} className="demo-tune-workspace" role="tabpanel" aria-labelledby={`${id}-tab-${tab === 'tune' ? 'tune' : 'preview'}`} data-tuning={tab === 'tune'} hidden={tab !== 'preview' && tab !== 'tune'}>
-        <div className="demo-tune-preview-shell" data-expanded={previewExpanded}>
+        <div className="demo-tune-preview-shell" data-expanded={previewExpanded} hidden={inspecting}>
           <AkButton type="button" variant="outline" size="sm" className="demo-tune-preview-toggle" hidden={tab !== 'tune'} aria-expanded={previewExpanded} aria-controls={`${id}-preview`} onClick={() => setPreviewExpanded((value) => !value)}>
             {t(previewExpanded ? 'common.tuneHidePreview' : 'common.tuneShowPreview')}
           </AkButton>
@@ -465,6 +509,27 @@ function Block({
           </table>
         </div>
       )}
+
+      {inspecting ? (
+        <div
+          className="demo-inspect"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${t('common.inspect')} — ${title}`}
+          onClick={(event) => { if (event.target === event.currentTarget) exitInspect() }}
+        >
+          <div className="demo-inspect__frame">
+            <div className="demo-inspect__bar">
+              <span className="demo-inspect__eyebrow">{displayEyebrow}</span>
+              <span className="demo-inspect__title">{title}</span>
+              <button type="button" className="demo-inspect__close" ref={inspectCloseRef} onClick={exitInspect}>
+                {t('common.close')} <span aria-hidden="true">⎋</span>
+              </button>
+            </div>
+            <div className="demo-inspect__stage">{actualTree}</div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

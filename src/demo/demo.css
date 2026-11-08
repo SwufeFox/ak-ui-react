@@ -1798,6 +1798,147 @@ html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
   to { transform: scaleX(0); }
 }
 
+/* ── 全屏检视：预览面板长成整屏 ─────────────────────────────────────── */
+
+.demo-block__inspect {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: start;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    color var(--demo-motion-fast) var(--demo-motion-ease),
+    border-color var(--demo-motion-fast) var(--demo-motion-ease),
+    background-color var(--demo-motion-fast) var(--demo-motion-ease);
+}
+
+.demo-block__inspect:hover {
+  border-color: var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-signal-info) 8%, transparent);
+  color: var(--demo-accent-text);
+}
+
+.demo-block__inspect:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-block__inspect-glyph {
+  font-size: 0.85rem;
+  letter-spacing: 0;
+}
+
+.demo-inspect {
+  position: fixed;
+  inset: 0;
+  z-index: 390;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  background: color-mix(in srgb, var(--demo-canvas) 88%, transparent);
+  backdrop-filter: blur(6px);
+  animation: demo-inspect-in 260ms var(--demo-motion-ease) both;
+}
+
+@keyframes demo-inspect-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.demo-inspect__frame {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(100%, 92rem);
+  height: min(100%, 90vh);
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  border-top: 2px solid var(--ak-signal-info);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-inspect__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken-2);
+}
+
+.demo-inspect__eyebrow {
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+}
+
+.demo-inspect__title {
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: 0.95rem;
+}
+
+.demo-inspect__close {
+  margin-left: auto;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.demo-inspect__close:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-inspect__close:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-inspect__stage {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  /* 检视台面：极淡的战术网格，标记「这是被检视的内容区」。 */
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ak-signal-info) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ak-signal-info) 4%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* 面板与检视框共用同一个转场名：浏览器负责把前者补间成后者。 */
+.demo-tune-preview-shell { view-transition-name: demo-preview; }
+.demo-tune-preview-shell[hidden] { display: none; }
+.demo-inspect__frame { view-transition-name: demo-preview; }
+
+::view-transition-group(demo-preview) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.27, 1.06, 0.18, 1);
+}
+
 @media (max-width: 900px) {
   .demo-catalogue { grid-template-columns: minmax(0, 1fr); }
 
@@ -2221,6 +2362,8 @@ dialog.demo-llm-dialog::backdrop {
 
   /* 指针景深与扫描光斑是纯氛围，降级时整层去掉。 */
   .demo-hero::after { display: none; }
+
+  .demo-inspect { animation: none; }
 
   .demo-hero__title,
   .demo-hero__desc,
