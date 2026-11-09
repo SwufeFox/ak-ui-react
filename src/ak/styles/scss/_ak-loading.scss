@@ -194,26 +194,20 @@
 }
 
 @keyframes ak-loading-track-move {
+  // 位置不再靠 left 推进：left 每帧触发布局。整条轨迹写在 transform 里，
+  // 位移量直接读轨道宽度令牌，因此分支（cqw / 90vw 覆盖）自动跟随。
+  // 中段的「变大」用 scale 表达（同样可合成），不再动画 width/height。
   0% {
-    left: 0;
+    transform: translate(-50%, -50%) rotate(0deg);
   }
 
-  50% {
-    left: 100%;
-    width: clamp(6.25rem, 10.417cqw, 9.375rem);
-    height: clamp(6.25rem, 10.417cqw, 9.375rem);
-    transform: translate(-50%, -50%) rotate(450deg);
-  }
-
+  50%,
   75% {
-    left: 100%;
-    width: clamp(6.25rem, 10.417cqw, 9.375rem);
-    height: clamp(6.25rem, 10.417cqw, 9.375rem);
-    transform: translate(-50%, -50%) rotate(450deg);
+    transform: translate(calc(var(--ak-loading-track-width) - 50%), -50%) rotate(450deg) scale(2.5);
   }
 
   100% {
-    left: 0;
+    transform: translate(-50%, -50%) rotate(0deg);
   }
 }
 

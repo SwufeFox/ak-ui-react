@@ -1,23 +1,37 @@
 import type { CSSProperties, InputHTMLAttributes } from 'react'
 import { clampRange, finite } from '../../lib/utils'
+import { useControllableState } from '../../lib/useControllableState'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 import { playTactileSound } from '../../lib/audio'
 
 // ⚠️ 原生 <input> 的 `size` 是字符数（number），我们这枚是外观档位（string）。
 // 不 Omit 会报 TS2430。
-export interface AkSliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'size'> {
-  /** Accessible name for the range input. */
-  label: string
+export interface AkSliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'size'> {
+  /**
+   * Accessible name for the range input, exposed as `aria-label`. Optional when
+   * the input is named by a visible `<label>` or a native `aria-label`; the
+   * native `aria-label` wins when both are provided.
+   */
+  label?: string
   /** 区间下限。 */
   min?: number
   /** 区间上限。 */
   max?: number
   /** 步长。 */
   step?: number
-  /** 当前值。 */
-  value: number
-  /** 拖动时回调。 */
+  /**
+   * Controlled value. When defined the slider is controlled and this value
+   * wins; when `undefined` the component is uncontrolled. Out-of-range values
+   * are displayed clamped.
+   */
+  value?: number
+  /**
+   * Initial value in uncontrolled mode. Ignored whenever `value` is defined.
+   * Out-of-range values are clamped. Defaults to `min`.
+   */
+  defaultValue?: number
+  /** Called with the clamped value while dragging, in both modes. */
   onValueChange?: (value: number) => void
   /** 尺寸档：控件高度、轨道粗细与拇指尺寸一起缩。 */
   size?: AkControlSize
@@ -25,11 +39,16 @@ export interface AkSliderProps extends Omit<InputHTMLAttributes<HTMLInputElement
   tokens?: AkTokens
 }
 
-export function AkSlider({ label, min = 0, max = 100, step = 1, value, onValueChange, disabled = false, size = 'md', tokens, className, style, ...rest }: AkSliderProps) {
+export function AkSlider({ label, min = 0, max = 100, step = 1, value, defaultValue, onValueChange, disabled = false, size = 'md', tokens, className, style, ...rest }: AkSliderProps) {
   const lower = finite(min, 0)
   const upper = Math.max(lower, finite(max, 100))
   const increment = Number.isFinite(step) && step > 0 ? step : 1
-  const current = clampRange(value, lower, upper)
+  const [stateValue, setValue] = useControllableState<number>(
+    value,
+    clampRange(defaultValue, lower, upper),
+    onValueChange,
+  )
+  const current = clampRange(stateValue, lower, upper)
   const fill = upper === lower ? 0 : ((current - lower) / (upper - lower)) * 100
 
   return (
@@ -39,7 +58,7 @@ export function AkSlider({ label, min = 0, max = 100, step = 1, value, onValueCh
       className={className ? `ak-slider ${className}` : 'ak-slider'}
       data-slot="ak-slider"
       type="range"
-      aria-label={label}
+      aria-label={rest['aria-label'] ?? label}
       min={lower}
       max={upper}
       step={increment}
@@ -50,7 +69,7 @@ export function AkSlider({ label, min = 0, max = 100, step = 1, value, onValueCh
       onChange={(event) => {
         if (!disabled) {
           playTactileSound('step', 0.1)
-          onValueChange?.(event.target.valueAsNumber)
+          setValue(clampRange(event.target.valueAsNumber, lower, upper))
         }
       }}
     />

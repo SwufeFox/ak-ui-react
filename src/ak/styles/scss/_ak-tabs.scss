@@ -38,7 +38,7 @@
     min-height: var(--ak-tabs-tab-h);
     padding: var(--ak-tabs-tab-pad);
     border: 0;
-    color: rgba(243, 244, 239, 0.62);
+    color: var(--ak-text-secondary);
     background: transparent;
     cursor: pointer;
     font-family: $font-monospace;
@@ -53,7 +53,7 @@
       transform var(--ak-motion-fast, 120ms) ease;
 
     & + & {
-      border-left: 1px solid rgba(243, 244, 239, 0.18);
+      border-left: 1px solid color-mix(in srgb, var(--ak-text-primary) 18%, transparent);
     }
 
     &:hover:not([aria-selected="true"]):not(:disabled):not(.ak-tabs__tab--disabled) {
@@ -188,7 +188,7 @@
       background-color var(--ak-motion-fast, 120ms) ease,
       box-shadow var(--ak-motion-fast, 120ms) ease,
       transform var(--ak-motion-fast, 120ms) ease;
-    color: rgba(243, 244, 239, 0.62);
+    color: var(--ak-text-secondary);
     background: transparent;
     cursor: pointer;
     font-family: $font-monospace;
@@ -256,7 +256,7 @@
   }
 
   .ak-tabs__tab + .ak-tabs__tab {
-    border-top: 1px solid rgba(243, 244, 239, 0.18);
+    border-top: 1px solid color-mix(in srgb, var(--ak-text-primary) 18%, transparent);
     border-left: 0;
   }
 
@@ -271,25 +271,6 @@
   }
 }
 
-
-[data-ak-theme="archive"] .ak-segmented {
-  background: var(--ak-surface-sunken, #e4e7e9);
-  border-color: var(--ak-border, #d2d5d7);
-
-  &__item {
-    color: var(--ak-text-secondary, #50565b);
-
-    &:hover:not([aria-pressed="true"]) {
-      color: var(--ak-text-primary, #111315);
-      background: rgba(0, 0, 0, 0.04);
-    }
-
-    &[aria-pressed="true"] {
-      color: var(--ak-surface-canvas);
-      background: var(--ak-segmented-signal);
-    }
-  }
-}
 
 // 选中态的信号条从中间展开（Tabs）
 @keyframes ak-tabs-signal-in {

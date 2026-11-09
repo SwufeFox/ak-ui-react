@@ -61,6 +61,10 @@ function MenuSurface({ id, children, open, onOpenChange, className, surfaceRef, 
     const toggle = (event: Event) => {
       const nextOpen = (event as ToggleEvent).newState === 'open'
       onOpenChange(nextOpen)
+      // Focus ownership: while open the menu surface owns focus, but the
+      // trigger/region that opened it is the only element that owns focus once
+      // it closes. Hand it back on every dismissal path (Escape, light dismiss,
+      // entry selection) so the native popover cannot strand focus on <body>.
       if (!nextOpen) returnFocusRef?.current?.focus()
     }
     el.addEventListener('toggle', toggle)
@@ -121,8 +125,9 @@ export interface AkDropdownMenuProps {
 }
 
 /**
- * A button-triggered menu backed by the browser Popover API.
- * Escape, outside dismissal, and top-layer placement remain native browser behavior.
+ * A button-triggered menu backed by the browser Popover API. Escape and outside
+ * dismissal close the menu and hand focus back to the trigger; top-layer
+ * placement remains native browser behavior.
  */
 export function AkDropdownMenu({ label, items, className, size = 'md', tokens }: AkDropdownMenuProps) {
   const [open, setOpen] = useState(false)
@@ -132,6 +137,17 @@ export function AkDropdownMenu({ label, items, className, size = 'md', tokens }:
   const onOpenChange = (next: boolean) => setOpen(next)
 
   function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Escape') {
+      // Focus ownership: close explicitly and move focus back to the trigger in
+      // the same handler. Relying on the native popover dismissal alone lets
+      // focus fall to <body> (the popover contains the focused menuitem), so we
+      // own the hand-back instead of racing the browser's default action. This
+      // runs even when every entry is disabled.
+      event.preventDefault()
+      setOpen(false)
+      triggerRef.current?.focus()
+      return
+    }
     const options = [...(panelRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? [])]
     if (!options.length) return
     const current = options.indexOf(document.activeElement as HTMLButtonElement)
@@ -141,8 +157,6 @@ export function AkDropdownMenu({ label, items, className, size = 'md', tokens }:
     } else if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault()
       options[event.key === 'Home' ? 0 : options.length - 1].focus()
-    } else if (event.key === 'Escape') {
-      setOpen(false)
     }
   }
 
@@ -277,7 +291,12 @@ export function AkContextMenu({ children, items, label = 'Context menu', classNa
           margin: 0,
         }}
         onKeyDown={(event) => {
-          if (event.key === 'Escape') setOpen(false)
+          if (event.key === 'Escape') {
+            // Same focus ownership as the dropdown: the region owns focus again.
+            event.preventDefault()
+            setOpen(false)
+            regionRef.current?.focus()
+          }
           if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             const options = [...(panelRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not(:disabled)') ?? [])]
             const i = options.indexOf(document.activeElement as HTMLButtonElement)

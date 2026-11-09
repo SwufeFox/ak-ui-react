@@ -1,6 +1,7 @@
 @use "variables" as *;
 
-:root {
+:root,
+[data-ak-theme="terminal"] {
   // 全局亚像素抗锯齿与排版优化，保证深色界面下拉丁展示字与数据标签的边缘极度锐利细腻
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -188,7 +189,13 @@
   --ak-focus-offset: 3px;
 }
 
-:root[data-theme="light"],
+// ══════════════════════════════════════════════════════════════════════════
+//  Theme contract: `data-ak-theme="terminal"` (default, :root) and
+//  `data-ak-theme="archive"` (light paper). The old light-theme alias on
+//  :root is gone on purpose — one contract, one selector. Every archive-only
+//  colour lives here as a semantic token; component partials must not branch
+//  on the theme for colour.
+// ══════════════════════════════════════════════════════════════════════════
 [data-ak-theme="archive"] {
   --ak-surface-canvas: #eef0f1;
   --ak-surface-panel: rgba(253, 253, 251, 0.96);
@@ -249,4 +256,12 @@
   --ak-vignette-color: rgba(0, 0, 0, 0.32);
   --ak-grain-color: rgba(0, 0, 0, 0.05);
   --ak-grain-opacity: 0.12;
+}
+
+// ── Theme-invariant exceptions ────────────────────────────────────────────
+// 极少数无法表达成令牌值的 archive 差异集中在这里，组件 partial 不再开第二个
+// 主题分支。信号灯在浅色纸面上不需要发光、也改回直角（保持「档案印刷」语气）。
+[data-ak-theme="archive"] .ak-status__signal {
+  border-radius: 0;
+  box-shadow: none;
 }

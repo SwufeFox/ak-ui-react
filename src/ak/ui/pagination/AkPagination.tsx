@@ -86,12 +86,16 @@ export function AkPagination({
         {previousIcon ?? <span aria-hidden="true">‹</span>}
       </button>
 
-      <div className="cur" aria-live="polite">
+      <div className="cur">
         {title ? <span className="title">{title}</span> : null}
-        <span className="label">
+        {/* Live region covers only the page indicator, so the whole control
+            (and its static title) is not re-announced on every page change. */}
+        <span className="label" aria-live="polite" aria-atomic="true">
           {current} / {last}
         </span>
-        <span className="number">{String(current).padStart(2, '0')}</span>
+        {/* The padded number repeats the label visually; keep it out of the
+            accessibility tree so the page is announced only once. */}
+        <span className="number" aria-hidden="true">{String(current).padStart(2, '0')}</span>
       </div>
 
       <button

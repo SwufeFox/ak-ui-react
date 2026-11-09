@@ -785,6 +785,8 @@
 }
 
 @keyframes ak-terminal-focus {
-  from { filter: blur(10px); scale: 1.08; }
-  to { filter: blur(0); scale: 1; }
+  // filter: blur() 无法合成（每帧都要重新栅格化整层）。这里改用等价的
+  // 「焦点拉入」观感：稍微放大的底图 + 透明度渐入，两者都在合成器上完成。
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: scale(1); }
 }

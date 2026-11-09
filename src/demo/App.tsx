@@ -1,14 +1,17 @@
-import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { flushSync } from 'react-dom'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { version as packageVersion, peerDependencies } from '../../package.json'
-import { AkButton, AkChoice, AkDisplay, AkFieldLabel, AkInput, AkSelect, AkSegmented, useTactileSound, playTactileSound } from '../ak'
+import { AkDisplay, AkSegmented, useTactileSound, playTactileSound } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
 import { useI18n, type Locale, type MessageKey } from './i18n'
-import { DOC_REGISTRY, type BlockPropDoc } from './doc-data'
+import { DOC_REGISTRY } from './doc-data'
+import { Block } from './block'
+import { CATEGORIES } from './catalogue-data'
+import { CatalogueRail } from './catalogue-rail'
+import { StageContext } from './stage-context'
 import llmsRawText from '../../llms.txt?raw'
 import type { AkMobileMenuHandle } from '../ak/ui/site/AkMobileMenu'
-import { createTuneSession, type ExampleFactory, type Tune, type TuneOverrides } from './example-tune'
+import type { ExampleFactory, Tune, TuneOverrides } from './example-tune'
 import type { CommandSnapshot } from './examples/command-export'
 import type { exportCategory as GenerateCategory } from './example-manifest'
 import type { exportShell as GenerateShell } from './example-source'
@@ -18,7 +21,6 @@ import { BootSequence } from './boot'
 import { HudReticle } from './hud'
 import { StageProgress, SystemStatus } from './status'
 import { pushReceipt, Receipts, formatBytes } from './receipt'
-import { useHeroDepth } from './depth'
 import { GuideView } from './guide'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
@@ -36,7 +38,6 @@ import { renderForms } from './examples/forms'
 import { renderReadouts } from './examples/readouts'
 import { renderCollections, sortTableRows, nextTableSort } from './examples/collections'
 import { DEPOT_ITEMS, filterDepotItems, renderCommand, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command'
-import { tokenizeTsx } from './highlight'
 import './demo.css'
 
 const loadCategory = () => import('./example-manifest')
@@ -67,51 +68,6 @@ const THEME_LABELS: Record<Theme, MessageKey> = {
 /** peerDependencies 里 React 的最低主版本，用于首屏读数。 */
 const REACT_PEER_MAJOR = /(\d+)/.exec(peerDependencies.react)?.[1] ?? '18'
 
-/** 示例块的四个视图。 */
-type DemoView = 'preview' | 'tune' | 'code' | 'api'
-
-/** 当前视图写在地址栏的 ?view= 上，这样代码页与属性页可以直接分享。 */
-function readViewParam(): string | null {
-  if (typeof window === 'undefined') return null
-  return new URLSearchParams(window.location.search).get('view')
-}
-
-function writeViewParam(view: DemoView) {
-  if (typeof window === 'undefined') return
-  const url = new URL(window.location.href)
-  if (view === 'preview') url.searchParams.delete('view')
-  else url.searchParams.set('view', view)
-  const next = `${url.pathname}${url.search}${url.hash}`
-  if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-    window.history.replaceState(null, '', next)
-  }
-}
-
-
-/**
- * 组件目录的分类清单。顺序即编号顺序（01…17），也是「上一组 / 下一组」的遍历顺序。
- * id 与各 `Block` 的锚点一一对应，深链接 `#components-N` 仍然可用。
- */
-const CATEGORIES = [
-  { id: 'components-1', title: 'ref.actions.title' },
-  { id: 'components-2', title: 'ref.menu.title' },
-  { id: 'components-3', title: 'ref.surfaces.title' },
-  { id: 'components-4', title: 'ref.feedback.title' },
-  { id: 'components-5', title: 'ref.inputs.title' },
-  { id: 'components-6', title: 'ref.navigation.title' },
-  { id: 'components-7', title: 'ref.effects.title' },
-  { id: 'components-8', title: 'ref.gallery.title' },
-  { id: 'components-9', title: 'ref.site.title' },
-  { id: 'components-10', title: 'ref.shell.title' },
-  { id: 'components-11', title: 'ref.decor.title' },
-  { id: 'components-12', title: 'ref.arknights.title' },
-  { id: 'components-13', title: 'ref.controls.title' },
-  { id: 'components-14', title: 'ref.form.title' },
-  { id: 'components-15', title: 'ref.data.title' },
-  { id: 'components-16', title: 'ref.collection.title' },
-  { id: 'components-17', title: 'ref.command.title' },
-] as const satisfies readonly { id: string; title: MessageKey }[]
-
 /** 开机序列打的都是真数据：版本号与分类数都从上面的常量取。 */
 const BOOT_LINES = [
   'PRTS TERMINAL OS // SECTOR-07',
@@ -119,620 +75,6 @@ const BOOT_LINES = [
   `LIB @swufefox/ak-ui-react v${packageVersion}`,
   'ALL SYSTEMS NOMINAL',
 ] as const
-
-const CATEGORY_KEYWORDS: Record<string, readonly string[]> = {
-  'components-1': ['button', 'actions', 'chamfer', 'subtitle', 'danger', 'ghost', 'group', '按钮', '动作'],
-  'components-2': ['menu', 'menubar', 'dropdown', 'toolbar', 'contextmenu', 'collapsible', '菜单', '工具栏', '折叠'],
-  'components-3': ['card', 'glass', 'chassis', 'tactical', 'outline', 'stripe', 'place', 'surface', '卡片', '毛玻璃', '机匣', '面板'],
-  'components-4': ['notice', 'alert', 'progress', 'gauge', 'laser', '通知', '公告', '进度条', '仪表盘'],
-  'components-5': ['slider', 'inputnumber', 'segmented', 'step', '滑动条', '步进器', '分段器'],
-  'components-6': ['tabs', 'navigation', 'breadcrumb', 'segmented', '标签页', '导航', '面包屑'],
-  'components-7': ['effects', 'countup', 'depth', 'entrance', 'glow', 'skew', 'outline', '特效', '数字滚动', '景深', '入场'],
-  'components-8': ['gallery', 'album', 'polaroid', 'media', '画廊', '相册', '拍立得'],
-  'components-9': ['loader', 'assetloader', 'loading', '资源加载', '预加载'],
-  'components-10': ['site', 'shell', 'sectionnavigator', 'mobilemenu', 'particlefield', '粒子', '整页导航', '移动端菜单'],
-  'components-11': ['decor', 'laser', 'reticle', 'stripes', 'halftone', 'corner', 'cut', 'barcode', 'watermark', 'bilingual', '装饰', '准星', '斜纹', '网点', '切角', '条形码'],
-  'components-12': ['arknights', 'rarity', 'profession', 'elite', 'potential', 'skilllevels', 'attrs', 'trust', '游戏数据', '稀有度', '职业', '精二', '潜能', '专精'],
-  'components-13': ['popover', 'tooltip', 'dialog', 'modal', '浮层', '气泡', '提示', '对话框', '弹窗'],
-  'components-14': ['form', 'input', 'field', 'textarea', 'select', 'choice', 'checkbox', 'switch', '表单', '输入框', '选择器', '开关'],
-  'components-15': ['data', 'san', 'sanity', 'counter', 'level', 'skeleton', 'spinner', '理智', '计数器', '关卡', '骨架屏', '加载中'],
-  'components-16': ['collection', 'table', 'avatar', 'thumbnail', 'scrollarea', 'newslist', '表格', '头像', '缩略图', '滚动区', '快讯'],
-  'components-17': ['command', 'screen', 'item', 'slot', '大屏', '指令牌', '材料方块', '槽位'],
-}
-
-// Component names are indexed by their primary example, so searches lead to useful results.
-const CATEGORY_COMPONENTS: Record<(typeof CATEGORIES)[number]['id'], readonly string[]> = {
-  'components-1': ['AkButton'],
-  'components-2': ['AkDropdownMenu', 'AkContextMenu', 'AkMenubar', 'AkToolbar', 'AkCollapsible', 'AkMenuGroup', 'AkMenuSeparator'],
-  'components-3': ['AkCard', 'AkCardHeader', 'AkCardTitle', 'AkCardDescription', 'AkCardContent', 'AkCardFooter'],
-  'components-4': ['AkNotice', 'AkNoticeStack', 'AkStatus', 'AkProgress', 'AkProgressStack', 'AkGauge'],
-  'components-5': ['AkSlider', 'AkInputNumber', 'AkSegmented'],
-  'components-6': ['AkTabs'],
-  'components-7': ['AkCountUp', 'AkEntrance', 'AkDepth', 'AkDepthLayer', 'AkParticleField'],
-  'components-8': ['AkMediaGallery', 'AkMediaAlbum'],
-  'components-9': ['AkAssetLoader', 'AkMobileMenu'],
-  'components-10': ['AkSectionNavigator'],
-  'components-11': ['AkStripes', 'AkGridBackdrop', 'AkCorner', 'AkBrackets', 'AkReticle', 'AkBarcode', 'AkHalftone', 'AkGlyphBox', 'AkGlyph', 'AkMotion', 'AkInverse', 'AkLaser', 'AkStripeEdge', 'AkCut', 'AkCodeId', 'AkBlueBand', 'AkChevrons', 'AkDisplay', 'AkWatermark', 'AkGlow', 'AkOutline', 'AkSkew', 'AkVignette', 'AkGrain', 'AkMosaic', 'AkBackdrop', 'AkOverline', 'AkNum', 'AkEn', 'AkBilingual'],
-  'components-12': ['AkRarity', 'AkRarityChip', 'AkRarityBar', 'AkRarityScope', 'AkProfession', 'AkProfessionLabel', 'AkElite', 'AkPotential', 'AkSpec', 'AkTrust', 'AkSkillLevels', 'AkPotList', 'AkPot', 'AkAttrs', 'AkAttr', 'AkKv', 'AkKvItem'],
-  'components-13': ['AkDivider', 'AkButtonGroup', 'AkPopover', 'AkTag', 'AkTagGroup', 'AkStatusGroup', 'AkPagination'],
-  'components-14': ['AkFormStack', 'AkField', 'AkFieldLabel', 'AkInput', 'AkSelect', 'AkTextarea', 'AkChoice'],
-  'components-15': ['AkCounter', 'AkLevel', 'AkSpinner', 'AkSan', 'AkSanContainer', 'AkSkeleton', 'AkLoadingScreen', 'AkDialog'],
-  'components-16': ['AkBreadcrumb', 'AkTable', 'AkAvatar', 'AkAvatarGroup', 'AkThumbnail', 'AkScrollArea', 'AkNewsList'],
-  'components-17': ['AkCommandGrid', 'AkCommand', 'AkCommandGroup', 'AkSlot', 'AkItem', 'AkScreen'],
-}
-
-/** 舞台上下文：当前激活的分类 id。 */
-const StageContext = createContext<{ active: string; overrides: { current: Record<string, Record<string, unknown>> } } | null>(null)
-
-
-
-/** Keep incomplete numeric input (such as `1.`) intact until blur, with keyboard ArrowUp/ArrowDown stepping support. */
-function TuneNumberField({ value, onChange }: { value: number; onChange: (value: number) => void }) {
-  const [draft, setDraft] = useState<string | null>(null)
-  return <AkInput
-    size="sm"
-    inputMode="decimal"
-    value={draft ?? String(value)}
-    onFocus={() => setDraft(String(value))}
-    onChange={(event) => {
-      const text = event.target.value
-      setDraft(text)
-      if (text.trim() && Number.isFinite(Number(text))) onChange(Number(text))
-    }}
-    onKeyDown={(event) => {
-      if (event.key === 'ArrowUp') {
-        event.preventDefault()
-        const delta = event.shiftKey ? 10 : 1
-        const next = Number((value + delta).toFixed(4))
-        onChange(next)
-        setDraft(String(next))
-      } else if (event.key === 'ArrowDown') {
-        event.preventDefault()
-        const delta = event.shiftKey ? 10 : 1
-        const next = Number((value - delta).toFixed(4))
-        onChange(next)
-        setDraft(String(next))
-      }
-    }}
-    onBlur={() => setDraft(null)}
-  />
-}
-
-/** 组件分类面板容器。 */
-const Block = memo(function Block({
-  id,
-  eyebrow,
-  title,
-  note,
-  api,
-  example,
-  exportCode,
-}: {
-  id: string
-  eyebrow: string
-  title: string
-  note?: ReactNode
-  api?: BlockPropDoc[]
-  example: ExampleFactory
-  exportCode: (overrides: Record<string, unknown>) => Promise<string>
-}) {
-  const stage = useContext(StageContext)
-  const { t, locale } = useI18n()
-  // 视图清单决定这一块有哪些标签页；地址栏里的 ?view= 只在清单里才算数。
-  const views = ['preview', 'tune', 'code', ...(api ? ['api' as const] : [])] as const
-  const [tab, setTab] = useState<DemoView>(() => {
-    const wanted = readViewParam()
-    const known = wanted && (views as readonly string[]).includes(wanted)
-    return known ? (wanted as DemoView) : 'preview'
-  })
-  const [copyResult, setCopyResult] = useState<{ text: string; state: 'copied' | 'error' } | null>(null)
-  const copyTimer = useRef<number | null>(null)
-  const [selected, setSelected] = useState<string | null>(null)
-  const [overrides, setOverrides] = useState<Record<string, unknown>>({})
-  const [previewExpanded, setPreviewExpanded] = useState(true)
-  const [inspecting, setInspecting] = useState(false)
-  const inspectButtonRef = useRef<HTMLButtonElement>(null)
-  const inspectCloseRef = useRef<HTMLButtonElement>(null)
-  const [resetVersion, setResetVersion] = useState(0)
-  const [codeResult, setCodeResult] = useState<{ status: 'loading' | 'error' } | { status: 'ready'; text: string }>({ status: 'loading' })
-  const codeCache = useRef<{ tree: ReactNode; exportCode: typeof exportCode; overrides: typeof overrides; locale: Locale; promise: Promise<string>; text?: string } | null>(null)
-  const tabsRef = useRef<HTMLDivElement>(null)
-  const active = !stage || stage.active === id
-  const overrideRegistry = stage?.overrides
-  // 地址栏始终反映当前视图：代码页与属性页可以直接分享链接。
-  useEffect(() => {
-    if (!active) return
-    writeViewParam(tab)
-  }, [active, tab])
-
-  // 全屏检视：支持的浏览器里用 View Transition 让预览面板「长」成整屏，
-  // 面板与检视框共用同一个 view-transition-name，浏览器负责补间。
-  const enterInspect = useCallback(() => {
-    const start = document.startViewTransition
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && typeof start === 'function') {
-      start.call(document, () => flushSync(() => setInspecting(true)))
-      return
-    }
-    setInspecting(true)
-  }, [])
-  const exitInspect = useCallback(() => {
-    const start = document.startViewTransition
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && typeof start === 'function') {
-      start.call(document, () => flushSync(() => setInspecting(false)))
-    } else {
-      setInspecting(false)
-    }
-    window.setTimeout(() => inspectButtonRef.current?.focus(), 0)
-  }, [])
-  useEffect(() => {
-    if (!inspecting) return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    inspectCloseRef.current?.focus()
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        exitInspect()
-        return
-      }
-      if (event.key !== 'Tab') return
-      const dialog = inspectCloseRef.current?.closest<HTMLElement>('[role="dialog"]')
-      if (!dialog) return
-      const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
-        'a[href],area[href],button,input:not([type="hidden"]),select,textarea,summary,[tabindex],[contenteditable]:not([contenteditable="false"]),audio[controls],video[controls]',
-      )).filter((control) =>
-        !control.matches(':disabled,[aria-hidden="true"],[inert]') &&
-        control.tabIndex >= 0 &&
-        control.getClientRects().length > 0,
-      )
-      const first = controls[0]
-      const last = controls.at(-1)
-      if (!first || !last) {
-        event.preventDefault()
-        return
-      }
-      const focusInside = dialog.contains(document.activeElement)
-      if (event.shiftKey && (document.activeElement === first || !focusInside)) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && (document.activeElement === last || !focusInside)) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-    window.addEventListener('keydown', onKey, true)
-    return () => {
-      document.body.style.overflow = previous
-      window.removeEventListener('keydown', onKey, true)
-    }
-  }, [inspecting, exitInspect])
-  // Drive the sliding underline from the active tab's box; the indicator itself only translates.
-  useLayoutEffect(() => {
-    const list = tabsRef.current
-    const activeTab = list?.querySelector<HTMLElement>('[aria-selected="true"]')
-    if (!list || !activeTab) return
-    // Fractional layout offsets keep the underline flush with sub-pixel tab edges; add scrollLeft
-    // because the tablist itself scrolls horizontally on narrow screens.
-    const listRect = list.getBoundingClientRect()
-    const tabRect = activeTab.getBoundingClientRect()
-    list.style.setProperty('--demo-tab-x', `${tabRect.left - listRect.left + list.scrollLeft}px`)
-    list.style.setProperty('--demo-tab-w', `${tabRect.width}px`)
-    list.dataset.measured = 'true'
-  }, [tab, active])
-  useLayoutEffect(() => {
-    if (!overrideRegistry) return
-    overrideRegistry.current[id] = overrides
-    return () => { delete overrideRegistry.current[id] }
-  }, [id, overrideRegistry, overrides])
-  // Keep the inspector's DOM and scroll range intact while other views are visible.
-  const session = useMemo(() => {
-    if (!active) return null
-    const result = createTuneSession(overrides)
-    return { tree: example(result.tune), targets: result.targets }
-  }, [active, example, overrides])
-  const tunables = session?.targets ?? []
-  const target = tunables.find((item) => item.id === selected) ?? tunables[0]
-  useLayoutEffect(() => {
-    if (active && selected !== (target?.id ?? null)) setSelected(target?.id ?? null)
-  }, [active, selected, target?.id])
-  const actualTree = session?.tree
-  const startCode = () => {
-    const cached = codeCache.current
-    if (cached && cached.tree === actualTree && cached.exportCode === exportCode && cached.overrides === overrides && cached.locale === locale) return cached
-    let promise: Promise<string>
-    try {
-      // Capture the current model and shared overrides at intent time.
-      promise = exportCode(overrides)
-    } catch (error) {
-      promise = Promise.reject(error)
-    }
-    const entry = { tree: actualTree, exportCode, overrides, locale, promise, text: undefined as string | undefined }
-    codeCache.current = entry
-    // Intent can be abandoned; handle rejection even if Code is never opened.
-    void promise.then((text) => { entry.text = text }, () => {})
-    return entry
-  }
-  useLayoutEffect(() => {
-    if (!active || tab !== 'code') return
-    const entry = startCode()
-    if (entry.text !== undefined) {
-      setCodeResult({ status: 'ready', text: entry.text })
-      return
-    }
-    let cancelled = false
-    setCodeResult({ status: 'loading' })
-    entry.promise.then(
-      (text) => { if (!cancelled && codeCache.current === entry) setCodeResult({ status: 'ready', text }) },
-      () => {
-        if (!cancelled && codeCache.current === entry) {
-          codeCache.current = null
-          setCodeResult({ status: 'error' })
-        }
-      },
-    )
-    return () => { cancelled = true }
-  }, [active, tab, actualTree, exportCode, overrides, locale])
-  const codeText = codeResult.status === 'ready' ? codeResult.text : ''
-  /** Pure and linear; recompute only when the generated source changes. */
-  const codeTokens = useMemo(() => tokenizeTsx(codeText), [codeText])
-  const cachedCode = codeCache.current
-  const codeReady = active && tab === 'code' && codeResult.status === 'ready' && cachedCode?.text === codeResult.text && cachedCode.tree === actualTree && cachedCode.exportCode === exportCode && cachedCode.overrides === overrides && cachedCode.locale === locale
-  const targetPrefix = target ? `${target.id}|` : ''
-  const modifiedCount = target ? Object.keys(overrides).filter((key) => key.startsWith(targetPrefix)).length : 0
-  const hasControlledValue = Boolean(target && ['value', 'checked'].some((key) => key in target.props) && ['onValueChange', 'onChange', 'onInput'].some((key) => typeof target.props[key] === 'function'))
-  const editable = target ? [...Object.entries(target.props).filter(([key, value]) => !['key','ref','children','className','style'].includes(key) && !/^on[A-Z]/.test(key) && !(['value','checked'].includes(key) && hasControlledValue) && ['string','number','boolean'].includes(typeof value)), ...(typeof target.props.children === 'string' || typeof target.props.children === 'number' ? [['children', target.props.children] as [string, unknown]] : [])] : []
-  const copyState = copyResult?.text === codeText ? copyResult.state : 'idle'
-  useEffect(() => () => {
-    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current)
-  }, [])
-
-  if (!active) return null
-
-  const index = CATEGORIES.findIndex((category) => category.id === id)
-  const displayEyebrow = index === -1 ? eyebrow : `${String(index + 1).padStart(2, '0')} / ${eyebrow}`
-
-  const copyCode = async () => {
-    if (!codeReady) return
-    const text = codeText
-    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current)
-    try {
-      await navigator.clipboard.writeText(text)
-      playTactileSound('confirm', 0.2)
-      setCopyResult({ text, state: 'copied' })
-      pushReceipt({ label: t('common.codeCopied'), detail: formatBytes(text.length) })
-    } catch {
-      playTactileSound('warn', 0.2)
-      setCopyResult({ text, state: 'error' })
-    }
-    copyTimer.current = window.setTimeout(() => setCopyResult(null), 2000)
-  }
-
-  return (
-    <section id={id} className="demo-block" aria-labelledby={`${id}-title`}>
-      <div className="demo-block__header">
-        <div>
-          <span className="demo-eyebrow">{displayEyebrow}</span>
-          <h2 id={`${id}-title`} tabIndex={-1}>{title}</h2>
-          {note ? <p className="demo-note">{note}</p> : null}
-        </div>
-          <div className="demo-block__tabs" role="tablist" aria-label={t('common.demoViews')} ref={tabsRef}>
-            <span className="demo-doc-tab-indicator" aria-hidden="true" />
-            {views.map((view) => (
-              <button
-                key={view}
-                id={`${id}-tab-${view}`}
-                type="button"
-                role="tab"
-                aria-selected={tab === view}
-                aria-controls={`${id}-${view === 'preview' || view === 'tune' ? 'workspace' : view}`}
-                tabIndex={tab === view ? 0 : -1}
-                className={`demo-doc-tab ${tab === view ? 'is-active' : ''}`}
-                onPointerEnter={() => { if (view === 'code') startCode() }}
-                onFocus={() => { if (view === 'code') startCode() }}
-                onClick={() => {
-                  playTactileSound('tab', 0.16)
-                  setTab(view)
-                }}
-                onKeyDown={(event) => {
-                  let next = views.indexOf(view)
-                  if (event.key === 'ArrowRight') next = (next + 1) % views.length
-                  else if (event.key === 'ArrowLeft') next = (next - 1 + views.length) % views.length
-                  else if (event.key === 'Home') next = 0
-                  else if (event.key === 'End') next = views.length - 1
-                  else return
-                  event.preventDefault()
-                  playTactileSound('tab', 0.16)
-                  setTab(views[next]!)
-                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus()
-                }}
-              >
-                {view === 'preview' ? t('common.preview') : view === 'tune' ? t('common.tune') : view === 'code' ? t('common.code') : t('common.apiDocs')}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="demo-block__inspect" ref={inspectButtonRef} onClick={enterInspect} aria-haspopup="dialog">
-            <span className="demo-block__inspect-glyph" aria-hidden="true">⤢</span>
-            {t('common.inspect')}
-          </button>
-      </div>
-
-      <div id={`${id}-workspace`} className="demo-tune-workspace" role="tabpanel" aria-labelledby={`${id}-tab-${tab === 'tune' ? 'tune' : 'preview'}`} data-tuning={tab === 'tune'} hidden={tab !== 'preview' && tab !== 'tune'}>
-        <div className="demo-tune-preview-shell" data-expanded={previewExpanded} hidden={inspecting}>
-          <AkButton type="button" variant="outline" size="sm" className="demo-tune-preview-toggle" hidden={tab !== 'tune'} aria-expanded={previewExpanded} aria-controls={`${id}-preview`} onClick={() => setPreviewExpanded((value) => !value)}>
-            {t(previewExpanded ? 'common.tuneHidePreview' : 'common.tuneShowPreview')}
-          </AkButton>
-          <div id={`${id}-preview`} className="demo-tune-preview">{actualTree}</div>
-        </div>
-        <div className="demo-tune-panel" hidden={tab !== 'tune'}>
-          {tunables.length === 0 ? <p>{t('common.tuneEmpty')}</p> : <>
-            <AkFieldLabel className="demo-tune-instance">{t('common.tuneInstance')}
-              <AkSelect size="sm" value={target?.id ?? ''} onChange={(event) => setSelected(event.target.value)}>
-                {tunables.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-              </AkSelect>
-            </AkFieldLabel>
-            <div className="demo-tune-fields" key={`${target?.id ?? 'empty'}-${resetVersion}`}>
-              {hasControlledValue && <p className="demo-note">{t('common.tuneControlled')}</p>}
-              {editable.length === 0 ? <p>{t('common.tuneEmptyProps')}</p> : editable.map(([prop, value]) => {
-                const key = `${targetPrefix}${prop}`
-                const current = overrides[key] ?? value
-                const change = (next: unknown) => setOverrides((prev) => {
-                  const nextOverrides = { ...prev }
-                  if (Object.is(next, value)) delete nextOverrides[key]
-                  else nextOverrides[key] = next
-                  return nextOverrides
-                })
-                return typeof value === 'boolean'
-                  ? <AkChoice key={prop} size="sm" checked={Boolean(current)} onChange={(event) => change(event.target.checked)}>{prop}</AkChoice>
-                  : <AkFieldLabel key={prop}>{prop}{prop === 'size' && ['sm', 'md', 'lg'].includes(String(value))
-                    ? <AkSelect size="sm" value={String(current)} onChange={(event) => change(event.target.value)}>{['sm', 'md', 'lg'].map((size) => <option key={size}>{size}</option>)}</AkSelect>
-                    : typeof value === 'number'
-                      ? <TuneNumberField value={Number(current)} onChange={change} />
-                      : <AkInput size="sm" value={String(current)} onChange={(event) => change(event.target.value)} />}
-                  </AkFieldLabel>
-              })}
-            </div>
-            <div className="demo-tune-actions">
-              <AkButton variant="outline" size="sm" sound="confirm" disabled={modifiedCount === 0} onClick={() => {
-                setOverrides((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith(targetPrefix))))
-                setResetVersion((version) => version + 1)
-              }}>{t('common.tuneReset')}</AkButton>
-              <span className="demo-note" aria-live="polite">{t('common.tuneModified', { n: modifiedCount })}</span>
-            </div>
-          </>}
-        </div>
-      </div>
-      <div id={`${id}-code`} className="demo-code-container" role="tabpanel" aria-labelledby={`${id}-tab-code`} aria-busy={codeResult.status === 'loading'} hidden={tab !== 'code'}>
-        <div className="demo-code-header">
-          <span className="demo-code-title">
-            <span className="demo-code-dot" />
-            JSX / TSX
-          </span>
-          <AkButton type="button" variant="action" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
-        </div>
-        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0} aria-label={t('common.code')}><code>{codeTokens.map((token, index) => token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>)}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
-      </div>
-
-      {tab === 'api' && api && (
-        <div id={`${id}-api`} className="demo-api-container" role="tabpanel" aria-labelledby={`${id}-tab-api`} tabIndex={0}>
-          <table className="ak-table ak-table--tactical ak-table--hoverable">
-            <thead className="ak-table__head">
-              <tr>
-                <th>{t('common.propName')}</th>
-                <th>{t('common.propType')}</th>
-                <th>{t('common.propDefault')}</th>
-                <th>{t('common.propDesc')}</th>
-              </tr>
-            </thead>
-            <tbody className="ak-table__body">
-              {api.map((item) => (
-                <tr key={item.name}>
-                  <td><code className="demo-api-prop">{item.name}</code></td>
-                  <td><code className="demo-api-type">{item.type}</code></td>
-                  <td><code className="demo-api-default" data-empty={item.default ? undefined : ''}>{item.default ?? '—'}</code></td>
-                  <td className="demo-api-desc">{item.desc[locale]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {inspecting ? (
-        <div
-          className="demo-inspect"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${t('common.inspect')} — ${title}`}
-          onClick={(event) => { if (event.target === event.currentTarget) exitInspect() }}
-        >
-          <div className="demo-inspect__frame">
-            <div className="demo-inspect__bar">
-              <span className="demo-inspect__eyebrow">{displayEyebrow}</span>
-              <span className="demo-inspect__title">{title}</span>
-              <button type="button" className="demo-inspect__close" ref={inspectCloseRef} onClick={exitInspect}>
-                {t('common.close')} <span aria-hidden="true">⎋</span>
-              </button>
-            </div>
-            <div className="demo-inspect__stage">{actualTree}</div>
-          </div>
-        </div>
-      ) : null}
-    </section>
-  )
-})
-
-function CatalogueRail({ active, selectCategory }: { active: string; selectCategory: (id: string, focus?: boolean) => void }) {
-  const { t } = useI18n()
-  const [searchQuery, setSearchQuery] = useState('')
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const categoryListRef = useRef<HTMLDivElement>(null)
-  const markerRef = useRef<HTMLSpanElement>(null)
-  const filteredCategories = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return CATEGORIES
-    return CATEGORIES.filter((category, index) => {
-      const num = String(index + 1).padStart(2, '0')
-      const title = t(category.title).toLowerCase()
-      const keywords = CATEGORY_KEYWORDS[category.id] ?? []
-      return (
-        num.includes(query) ||
-        category.id.includes(query) ||
-        title.includes(query) ||
-        CATEGORY_COMPONENTS[category.id].some((name) => name.toLowerCase().includes(query)) ||
-        keywords.some((kw) => kw.toLowerCase().includes(query))
-      )
-    })
-  }, [searchQuery, t])
-
-  useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === '/' && !document.querySelector('dialog[open]') && !['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement)?.tagName)) {
-        event.preventDefault()
-        searchInputRef.current?.focus()
-        searchInputRef.current?.select()
-      }
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [])
-
-  useLayoutEffect(() => {
-    const list = categoryListRef.current
-    if (!list) return
-    // Only the horizontal rail (≤900px) needs the active item scrolled into view. On desktop
-    // these geometry reads would force layout of the category block that just mounted.
-    const horizontalRail = window.matchMedia('(max-width: 900px)')
-    const revealActive = () => {
-      if (!horizontalRail.matches) return
-      if (list.scrollWidth <= list.clientWidth) return
-      const item = list.querySelector<HTMLElement>('[aria-current]')
-      if (!item) return
-      const rail = list.getBoundingClientRect()
-      const selected = item.getBoundingClientRect()
-      if (selected.left < rail.left || selected.width > list.clientWidth) {
-        list.scrollLeft += selected.left - rail.left
-      } else if (selected.right > rail.right) {
-        list.scrollLeft += selected.right - rail.right
-      }
-    }
-    // Run after the browser has laid out the new block instead of inside the commit.
-    const frame = requestAnimationFrame(revealActive)
-    window.addEventListener('resize', revealActive)
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('resize', revealActive)
-    }
-  }, [active, filteredCategories])
-
-  // 选中标记滑到当前分类：桌面纵向轨道用滑动竖线，横向轨道用下边线。
-  useLayoutEffect(() => {
-    const list = categoryListRef.current
-    const marker = markerRef.current
-    if (!list || !marker) return
-    const place = () => {
-      if (window.matchMedia('(max-width: 900px)').matches) {
-        marker.dataset.visible = 'false'
-        return
-      }
-      const item = list.querySelector<HTMLElement>('[aria-current]')
-      if (!item) {
-        marker.dataset.visible = 'false'
-        return
-      }
-      marker.dataset.visible = 'true'
-      marker.style.transform = `translate3d(0, ${item.offsetTop}px, 0)`
-      marker.style.height = `${item.offsetHeight}px`
-    }
-    place()
-    window.addEventListener('resize', place)
-    return () => window.removeEventListener('resize', place)
-  }, [active, filteredCategories])
-
-  return (
-    <nav className="demo-rail" aria-label={t('ref.catalogue.rail')}>
-      <div className="demo-rail__head">
-        <span className="demo-rail__eyebrow">{t('ref.catalogue.rail')}</span>
-        <span className="demo-rail__count" aria-live="polite">{t('ref.catalogue.count', { n: filteredCategories.length })}</span>
-      </div>
-      <div className="demo-rail__search-box">
-        <span className="demo-rail__search-icon" aria-hidden="true">⌕</span>
-        <input
-          ref={searchInputRef}
-          type="text"
-          name="catalogue-search"
-          autoComplete="off"
-          spellCheck={false}
-          className="demo-rail__search-input"
-          aria-label={t('ref.catalogue.search')}
-          placeholder={t('ref.catalogue.searchPlaceholder')}
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.nativeEvent.isComposing) return
-            if (event.key === 'Escape') setSearchQuery('')
-            if (event.key === 'ArrowDown' && filteredCategories.length > 0) {
-              event.preventDefault()
-              categoryListRef.current?.querySelector<HTMLElement>('.demo-rail__item')?.focus()
-              return
-            }
-            if (event.key === 'ArrowUp' && filteredCategories.length > 0) {
-              event.preventDefault()
-              const results = categoryListRef.current?.querySelectorAll<HTMLElement>('.demo-rail__item')
-              results?.item(filteredCategories.length - 1)?.focus()
-              return
-            }
-            if (event.key === 'Enter' && filteredCategories.length === 1) {
-              event.preventDefault()
-              selectCategory(filteredCategories[0]!.id, true)
-            }
-          }}
-        />
-        {searchQuery && (
-          <button type="button" className="demo-rail__search-clear" aria-label={t('ref.catalogue.clearSearch')} onClick={() => {
-            setSearchQuery('')
-            searchInputRef.current?.focus()
-          }}>
-            ✕
-          </button>
-        )}
-      </div>
-      <div ref={categoryListRef} className="demo-rail__list">
-        <span className="demo-rail__marker" ref={markerRef} data-visible="false" aria-hidden="true" />
-        {filteredCategories.length === 0 ? (
-          <div className="demo-rail__empty">
-            <span className="demo-rail__empty-title">{t('ref.catalogue.empty')}</span>
-            <button type="button" className="demo-rail__empty-reset" onClick={() => {
-              setSearchQuery('')
-              searchInputRef.current?.focus()
-            }}>
-              {t('ref.catalogue.reset')}
-            </button>
-          </div>
-        ) : filteredCategories.map((category) => {
-          const originalIndex = CATEGORIES.findIndex((item) => item.id === category.id)
-          return (
-            <a
-              key={category.id}
-              href={`#${category.id}`}
-              className="demo-rail__item"
-              aria-current={active === category.id ? 'location' : undefined}
-              onClick={(event) => {
-                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-                event.preventDefault()
-                playTactileSound('tab', 0.16)
-                // Keyboard activation moves focus to the new section; mouse clicks keep focus on the rail.
-                selectCategory(category.id, event.detail === 0)
-              }}
-            >
-              <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
-              <span className="demo-rail__label">{t(category.title)}</span>
-            </a>
-          )
-        })}
-      </div>
-    </nav>
-  )
-}
 
 
 function ReferenceView({ theme }: { theme: Theme }) {
@@ -843,7 +185,6 @@ function ReferenceView({ theme }: { theme: Theme }) {
   }, [activeIndex, t])
   const stageRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLElement>(null)
-  useHeroDepth(heroRef)
   // 方向写进舞台的自定义属性：CSS 用它决定新块从哪边滑入。
   useEffect(() => {
     const stage = stageRef.current
@@ -982,21 +323,14 @@ function ReferenceView({ theme }: { theme: Theme }) {
     <main id="demo-main" className="demo-main" tabIndex={-1}>
       <header className="demo-hero" ref={heroRef}>
         <div className="demo-hero__intro">
+          <p className="demo-hero__kicker">
+            <span>RHODES ISLAND</span>
+            <span aria-hidden="true">//</span>
+            <span>COMPONENT SYSTEM</span>
+            <span className="demo-hero__kicker-build" translate="no">BUILD {packageVersion}</span>
+          </p>
           <h1 className="demo-hero__title">{t('ref.catalogue.title')}</h1>
           <p className="demo-hero__desc">{t('ref.catalogue.description')}</p>
-        </div>
-        <div className="demo-hero__instrument">
-          <div className="demo-hero__well" aria-hidden="true">
-            <div className="demo-hero__well-stack">
-              <span className="demo-hero__well-grid" />
-              <span className="demo-hero__well-plate demo-hero__well-plate--far" />
-              <span className="demo-hero__well-plate demo-hero__well-plate--mid" />
-              <span className="demo-hero__well-plate demo-hero__well-plate--near" />
-              <span className="demo-hero__well-beacon" />
-            </div>
-            <span className="demo-hero__well-index">SECTOR 07</span>
-            <span className="demo-hero__well-core">PRTS</span>
-          </div>
           <button type="button" className="demo-hero__install-box" onClick={copyInstall} aria-label={t('ref.catalogue.copyInstall')}>
             <span className="demo-hero__install-prefix" aria-hidden="true">$</span>
             <code className="demo-hero__install-code" translate="no">{installCmd}</code>
@@ -1004,6 +338,23 @@ function ReferenceView({ theme }: { theme: Theme }) {
               {t(installCopyState === 'copied' ? 'ref.catalogue.copied' : installCopyState === 'error' ? 'ref.catalogue.copyError' : 'ref.catalogue.copy')}
             </span>
           </button>
+        </div>
+        {/* 测绘阵列：网格、三层装甲板与核心。纯静态几何，不再跟随指针。 */}
+        <div className="demo-hero__array" aria-hidden="true">
+          <span className="demo-hero__array-ghost" translate="no">{String(CATEGORIES.length).padStart(2, '0')}</span>
+          <div className="demo-hero__array-frame">
+            <span className="demo-hero__array-grid" />
+            <span className="demo-hero__array-plate demo-hero__array-plate--far" />
+            <span className="demo-hero__array-plate demo-hero__array-plate--mid" />
+            <span className="demo-hero__array-plate demo-hero__array-plate--near" />
+            <span className="demo-hero__array-core">PRTS</span>
+            <span className="demo-hero__array-sweep" />
+          </div>
+          <span className="demo-hero__array-caption">
+            <span>SURVEY ARRAY</span>
+            <span className="demo-hero__array-state">LIVE</span>
+            <span>SECTOR 07</span>
+          </span>
         </div>
         {/* 读数条：把分类数、当前主题、React 版本摆成事实，填掉标题右侧的空档。 */}
         <dl className="demo-hero__readout">

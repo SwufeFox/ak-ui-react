@@ -99,9 +99,8 @@ Extends `HTMLAttributes<HTMLElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
-| `strength` | `AkBackdropStrength` | yes | `light` 对齐上游 dialog 的 3px；`heavy` 12px，用于整层覆盖。 |
-| `blur` | `number` | yes | 直接给模糊半径，覆盖 `strength`。 |
-| `surface` | `string` | yes | 玻璃底色。默认取 `--ak-surface-raised`。 |
+| `strength` | `AkBackdropStrength` | yes | 叠层厚度：`light` 为轻覆盖，`heavy` 为整层覆盖。 |
+| `surface` | `string` | yes | 覆盖层底色。默认取 `--ak-surface-raised`。 |
 | `children` | `ReactNode` | yes | 子内容。 |
 
 ## AkBarcode
@@ -174,13 +173,14 @@ Extends `HTMLAttributes<HTMLElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `as` | `ElementType` | yes | Element to render as, e.g. 'div' \| 'article' \| 'section' \| 'li'. |
+| `as` | `ElementType` | yes | 渲染标签，例如 'div' \| 'article' \| 'section' \| 'li'。省略时，可按压且无嵌套控件的卡片会升级为原生 `<button>`。 |
 | `variant` | `AkCardVariant` | yes | 外观档位：default / outline / stripe / place / tactical / glass / chassis。 |
 | `size` | `AkControlSize` | yes | 尺寸档：控制内边距、子块间距与标题字号。 |
 | `chamfer` | `boolean` | yes | 是否开启右上角 45° 战术切角。 |
 | `hoverable` | `boolean` | yes | 是否开启悬停提亮/浮起动效。 |
 | `interactive` | `boolean` | yes | 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 |
 | `selected` | `boolean` | yes | 是否处于选中状态。 |
+| `disabled` | `boolean` | yes | 是否禁用；禁用后不响应点击，也无法用键盘激活。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-card-bg': '#171a1d' }`。 |
 
 ## AkCardContent
@@ -364,8 +364,9 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'title'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `open` | `boolean` | no | 受控开合。 |
-| `onOpenChange` | `(open: boolean) => void` | yes | 开合变化回调。Esc 与点击遮罩关闭时也会触发（原生 dialog 的 cancel/close 事件）。 |
+| `open` | `boolean` | yes | Controlled open state. When defined the dialog is controlled and this value wins; when `undefined` the component is uncontrolled and owns the state. |
+| `defaultOpen` | `boolean` | yes | Initial open state in uncontrolled mode. Ignored whenever `open` is defined. Defaults to `false`. |
+| `onOpenChange` | `(open: boolean) => void` | yes | Called with the requested state in both modes: close button, backdrop click, Esc and the native `close` event all funnel through it. |
 | `eyebrow` | `ReactNode` | yes | 顶部小标与标题，对应样式表的 `__eyebrow` / `__title`。 |
 | `title` | `ReactNode` | yes | — |
 | `footer` | `ReactNode` | yes | 底部操作区。 |
@@ -429,15 +430,15 @@ Extends `SlotProps<HTMLSpanElement>`.
 
 表单控件。 这一组同样是「上游 SCSS 早已写好、但没有 React 组件」： `.ak-field` / `.ak-label` / `.ak-input` / `.ak-textarea` / `.ak-select` / `.ak-choice` 在 `_ak-form.scss` 里是完整的（含 focus 环、invalid 态、disabled 态、勾选框的 对勾绘制、开关滑块），只是从没被暴露出来。本文件只做包装，不加新样式。 `ak-choice` 的三种外观由样式表的 `&--radio` / `&--switch` 决定， 所以这里也照搬那三个类名，而不是另起一套。
 
+Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children'>`.
+
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | no | 字段内的控件。 |
 | `hint` | `ReactNode` | yes | 字段下方的提示或错误文字。 |
 | `invalid` | `boolean` | yes | 给出错误时把提示标成错误态，并把信号色接到字段上。 |
-| `className` | `string` | yes | — |
 | `size` | `AkControlSize` | yes | 尺寸档：字段内控件的统一高度档（同时下发到子控件）。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-field-signal': '#e33b3b' }`。 |
-| `style` | `CSSProperties` | yes | — |
 
 ## AkFieldLabel
 
@@ -538,11 +539,11 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>`.
 
 ## AkInputNumber
 
-Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'>`.
+Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | yes | 无障碍名，读屏会念。默认「数值」。 |
+| `label` | `string` | yes | 无障碍名，读屏会念。默认「数值」。 原生 `aria-label` 优先；两者都传时 `aria-label` 覆盖 `label`。 |
 | `increaseLabel` | `string` | yes | 增加按钮的无障碍名。默认「增加」。 |
 | `decreaseLabel` | `string` | yes | 减少按钮的无障碍名。默认「减少」。 |
 | `max` | `number` | yes | 允许的最大值。 |
@@ -550,8 +551,9 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'typ
 | `min` | `number` | yes | 允许的最小值。 |
 | `minLabel` | `string` | yes | 「最小」按钮文字。 |
 | `step` | `number` | yes | 每次增减的步长。 |
-| `value` | `number` | yes | 当前值；越界会立刻写回夹紧值。 |
-| `onValueChange` | `(value: number) => void` | yes | 值变化时回调。 |
+| `value` | `number` | yes | Controlled value. When defined the field is controlled and this value wins; when `undefined` the component is uncontrolled. Out-of-range values are written back clamped through `onValueChange`. |
+| `defaultValue` | `number` | yes | Initial value in uncontrolled mode. Ignored whenever `value` is defined. Out-of-range values are clamped on mount. Defaults to `min`. |
+| `onValueChange` | `(value: number) => void` | yes | 值变化时回调；受控与非受控模式都会触发。 |
 | `size` | `AkControlSize` | yes | 尺寸档：高度、左右快捷按钮和步进图标一起缩放。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖；可用 `--ak-input-number-width` 调整整体宽度。 |
 
@@ -986,10 +988,11 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | yes | 读屏标签，默认 `Options`。 |
+| `ariaLabel` | `string` | yes | 读屏标签，默认 `Options`。 @deprecated Use the native `aria-label` prop instead. When both are set, `aria-label` wins; `ariaLabel` is only the fallback. |
 | `options` | `AkSegmentedOption[]` | no | 选项列表，每项 `label` + `value`。 |
-| `value` | `string` | yes | 当前选中值；不匹配时回退第一项。 |
-| `onValueChange` | `(value: string) => void` | yes | 选中变化时回调。 |
+| `value` | `string` | yes | Controlled selected value. When defined the segmented control is controlled and this value wins; when `undefined` the component is uncontrolled. An unmatched value falls back to the first enabled option. |
+| `defaultValue` | `string` | yes | Initial selected value in uncontrolled mode. Ignored whenever `value` is defined. Defaults to the first enabled option. |
+| `onValueChange` | `(value: string) => void` | yes | Called with the next value on click and keyboard navigation, in both modes. |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
 | `size` | `AkControlSize` | yes | 尺寸档：每项的最小宽高、内边距与字号一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-segmented-inset': '0' }`。 |
@@ -1039,16 +1042,17 @@ Extends `HTMLAttributes<HTMLElement>`.
 
 ## AkSlider
 
-Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'size'>`.
+Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'size'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | no | Accessible name for the range input. |
+| `label` | `string` | yes | Accessible name for the range input, exposed as `aria-label`. Optional when the input is named by a visible `<label>` or a native `aria-label`; the native `aria-label` wins when both are provided. |
 | `min` | `number` | yes | 区间下限。 |
 | `max` | `number` | yes | 区间上限。 |
 | `step` | `number` | yes | 步长。 |
-| `value` | `number` | no | 当前值。 |
-| `onValueChange` | `(value: number) => void` | yes | 拖动时回调。 |
+| `value` | `number` | yes | Controlled value. When defined the slider is controlled and this value wins; when `undefined` the component is uncontrolled. Out-of-range values are displayed clamped. |
+| `defaultValue` | `number` | yes | Initial value in uncontrolled mode. Ignored whenever `value` is defined. Out-of-range values are clamped. Defaults to `min`. |
+| `onValueChange` | `(value: number) => void` | yes | Called with the clamped value while dragging, in both modes. |
 | `size` | `AkControlSize` | yes | 尺寸档：控件高度、轨道粗细与拇指尺寸一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-slider-accent': '#ff5e19' }`。 |
 
@@ -1158,10 +1162,11 @@ Extends `Omit<HTMLAttributes<HTMLElement>, 'children' | 'onChange'>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
-| `ariaLabel` | `string` | yes | 读屏标签，默认 `Tabs`。 |
+| `ariaLabel` | `string` | yes | 读屏标签，默认 `Tabs`。 @deprecated Use the native `aria-label` prop instead. When both are set, `aria-label` wins; `ariaLabel` is only the fallback. |
 | `items` | `AkTabsItem[]` | no | 标签列表；每项含 `value` / `label` / `title`。 |
-| `value` | `string` | yes | Active tab value. Falls back to the first item when unmatched. |
-| `onValueChange` | `(value: string) => void` | yes | 切换时回调。 |
+| `value` | `string` | yes | Controlled active tab value. When defined the tabs are controlled and this value wins; when `undefined` the component is uncontrolled. An unmatched value falls back to the first enabled item without firing `onValueChange`. |
+| `defaultValue` | `string` | yes | Initial active value in uncontrolled mode. Ignored whenever `value` is defined. Defaults to the first enabled item. |
+| `onValueChange` | `(value: string) => void` | yes | Called with the next value on click and keyboard navigation, in both modes. |
 | `renderPanel` | `(item: AkTabsItem) => ReactNode` | yes | Per-panel content, keyed by tab value. |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
 | `size` | `AkControlSize` | yes | 尺寸档：标签高度、内边距、字号与面板内距一起缩。 |

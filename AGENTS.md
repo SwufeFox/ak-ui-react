@@ -17,9 +17,9 @@ API / LLM documentation derived from emitted `.d.ts` JSDoc.
 
 **Two build targets — never interchangeable**
 
-- **Library**: `src/ak/index.ts` → `dist/` (ESM only, `react`/`react-dom`/`react/jsx-runtime`
-  externalized). Declarations via `tsc -p tsconfig.build.json`; CSS via dart-sass; controllers
-  copied verbatim to `dist/core/`.
+- **Library**: `vite.lib.config.ts` + `src/ak/index.ts` → `dist/` (ESM only; `react`, `react-dom`,
+  `react/jsx-runtime` externalized). Declarations via `tsc -p tsconfig.build.json`; CSS via
+  dart-sass; controllers copied verbatim to `dist/core/`.
 - **Showcase**: `vite.config.ts` builds `src/demo/` into `dist-demo/`. The demo imports the library
   **from source** (`../../ak`), never from `dist`.
 
@@ -30,18 +30,30 @@ src/ak/styles/ak-ui.scss  --dart-sass-->  dist/style.css   (scripts/build.mjs, s
 src/ak/styles/scss/       --copy------>    dist/scss/        (consumers can recompile)
 ```
 
-Stage 4 runs **after** the Vite library build and overwrites the CSS Vite emitted; it also strips the
-UTF-8 BOM dart-sass prepends, because an inlined `<style>` would otherwise invalidate the `:root`
-token block.
-
-- `src/ak/styles/ak-ui.scss` is the file the build compiles.
-- `src/ak/styles/scss/ak-ui.scss` is a **legacy duplicate** — editing it changes nothing.
-- `_ak-tuning.scss` is loaded by component partials, so `data-ak-size` / `data-ak-density` rules do
-  reach the output even though the root entry never `@use`s it directly.
+- `src/ak/styles/ak-ui.scss` is the file the build compiles; it `@use`s partials from `scss/`.
+- The legacy duplicate entry `src/ak/styles/scss/ak-ui.scss` and the unused `ak-tokens.scss`
+  shim were removed in 2.0. Keep exactly one entry; a second one silently drifts.
+- `_ak-tuning.scss` is loaded by component partials (e.g. `_ak-button.scss`), so `data-ak-size` /
+  `data-ak-density` rules reach the output without the root entry `@use`ing it.
+- Stage 4 runs **after** Vite and overwrites the emitted CSS; it strips the UTF-8 BOM dart-sass
+  prepends, because an inlined `<style>` would otherwise invalidate the `:root` token block.
 
 **Theming** cascades from ancestor attributes: `data-ak-theme="terminal" | "archive"` and
-`data-ak-density="compact" | "cozy" | "spacious"`. Every tunable is an `--ak-*` custom property in
-`src/ak/styles/scss/_tokens.scss`.
+`data-ak-density="compact" | "cozy" | "spacious"`. `terminal` is the default (`:root`), `archive`
+is the only light mode — the old `data-theme="light"` alias was removed in 2.0. Every tunable is an
+`--ak-*` custom property in `src/ak/styles/scss/_tokens.scss`; do not add per-partial archive
+overrides when a semantic token can express the same value.
+
+**2.0 breaking changes already applied** (do not reintroduce the old shapes)
+
+- Legacy `scss/ak-ui.scss` entry and the `ak-tokens.scss` shim are gone; `src/ak/styles/ak-ui.scss`
+  is the only stylesheet entry.
+- `data-theme="light"` is gone; use `data-ak-theme="archive"`.
+- `AkBackdrop` no longer takes `blur`; it is a matte overlay (no `backdrop-filter`).
+- `AkDialog.open` is optional; `defaultOpen` is the uncontrolled counterpart.
+- `AkSlider` / `AkInputNumber` / `AkTabs` / `AkSegmented` accept `defaultValue`; `value` is optional.
+- `AkCard` / `AkItem` interactive variants accept `disabled` and prefer a real `<button>` when the
+  content has no nested controls.
 
 **Controller contract (the most important pattern)**
 
@@ -51,9 +63,9 @@ render → ref attached → useEffect: create controller → keep instance in a 
 
 Controllers live in `src/ak/core/**/*.mjs`, require a document-attached element
 (`src/ak/core/site/shared.mjs` throws without `ownerDocument.defaultView`), and own their own
-`AbortController` lifetime. `src/ak/lib/useController.ts` is the thin effect wrapper. Never
-instantiate a controller during render, and never recreate it per props change unless the dependency
-truly requires it.
+`AbortController` lifetime. `src/ak/lib/useController.ts` is a thin effect wrapper whose dependency
+list controls recreation. Never instantiate a controller during render; never recreate it per props
+change unless the dependency truly requires it.
 
 **Showcase data flow**
 
@@ -78,20 +90,19 @@ chrome is written straight to the DOM:
 - tab underline, rail marker, stage direction (`--demo-stage-dir`).
 
 **Export pipeline**: `example-manifest.ts` maps numeric category ids to raw source + hook setup +
-render expression → `example-export.ts` builds the standalone TSX (library imports, only referenced
-locale messages, matching `.demo-*` CSS and keyframes under `.example-standalone`). IDs 9, 10, 17 use
-dedicated site / shell / command exporters instead. Code generation is lazy and cached against
+render expression → `example-export.ts` builds the standalone TSX. IDs 9, 10, 17 use dedicated
+site / shell / command exporters. Code generation is lazy and cached against
 `(tree, exporter, overrides, locale)`; stale results must never be shown or copied.
 
 ## Key Directories
 
 | Path | Purpose |
 |---|---|
-| `src/ak/ui/<feature>/Ak*.tsx` | React components, one folder per feature — e.g. `src/ak/ui/button/AkButton.tsx`, `src/ak/ui/tabs/AkTabs.tsx` |
-| `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useId.ts`, `audio.ts`, `size.ts`, `tokens.ts` |
+| `src/ak/ui/<feature>/Ak*.tsx` | React components, one folder per feature — e.g. `src/ak/ui/button/AkButton.tsx` |
+| `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useControllableState.ts`, `useId.ts`, `audio.ts` |
 | `src/ak/core/` | Vendored `.mjs` controllers + `.d.mts`; published as `…/core`, `…/core/effects`, `…/core/depth` |
 | `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`) |
-| `src/demo/` | Showcase: `App.tsx`, `examples/*.tsx`, `example-*.ts`, `i18n.tsx`, `doc-data.ts`, `highlight.ts`, `demo.css`, `boot.tsx`, `hud.tsx`, `status.tsx` |
+| `src/demo/` | Showcase: `App.tsx` (routing/state/chrome), `block.tsx`, `catalogue-rail.tsx`, `catalogue-data.ts`, `view-param.ts`, `examples/*.tsx`, `i18n.tsx`, `doc-data.ts` |
 | `scripts/` | `build.mjs` (4-stage library build), `gen-api.mjs` (`.d.ts` → `docs/api.md`) |
 | `docs/`, `public/llms.txt` | **Generated**. Authored: root `llms.txt`, `README.md` |
 
@@ -109,7 +120,8 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
 
 - `npm run build` deploys the **package**; `npm run build:demo` produces the **site**. Cloudflare
   Pages must use the latter.
-- `gen-api.mjs` reads `dist/ui/**/*.d.ts` and fails if it is missing — build first.
+- `gen-api.mjs` reads `dist/ui/**/*.d.ts` and exits non-zero if it is missing — build first.
+- Only `scripts/build.mjs` populates `dist/scss` and `dist/core`.
 
 ## Code Conventions & Common Patterns
 
@@ -119,26 +131,31 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
 - **Component shape**: plain named function + exported `*Props` extending the native attribute type;
   destructure defaults, spread the rest onto the DOM node, compose classes with `cx` /
   `variantClass` (`default` renders the bare class, anything else appends `--<variant>`).
-  Use `forwardRef` + `useImperativeHandle` only for controller-backed widgets (`AkEntrance.replay`,
-  `AkCountUp.replay`, `AkMobileMenu.open/close`, `AkSectionNavigator`).
-- **State**: controlled via `value` + `onValueChange` (or `onChange` for native inputs); uncontrolled
-  via `defaultValue` / `defaultOpen`; native handlers keep React names.
-- **IDs**: `lib/useId.ts` exports `useInstanceId` — a counter-based id. `React.useId()` emits
-  colons, which break `getElementById`-based ARIA wiring, so do not swap it in.
+- **Imperative handles**: `forwardRef` + `useImperativeHandle` only for controller-backed widgets —
+  `AkEntrance.replay`, `AkCountUp.replay`, `AkMobileMenu.open/close`, `AkSectionNavigator.navigate`.
+- **State (2.0 contract)**: dual-mode everywhere. `value` + `onValueChange` controls; `defaultValue`
+  seeds internal state when `value` is `undefined`. Disclosure uses `open` / `defaultOpen` /
+  `onOpenChange`. A defined `value` (including `0`, `''`, `false`) always wins. `src/ak/lib/useControllableState.ts`
+  is the shared hook. Native handler names (`onChange`, `onClick`) are kept for native event consumers.
+  Accessible names: native `aria-label` takes precedence over the legacy `ariaLabel` prop.
+- **IDs**: `lib/useId.ts` exports `useInstanceId` — a counter-based prefixed id. `React.useId()`
+  emits colons which break `getElementById`-based ARIA wiring; a few components call
+  `useId().replace(/:/g, '')` instead — follow the local component's convention.
 - **CSS**: every `var(--ak-…)` keeps a fallback; consumer overrides are expected. Do **not** move
   demo-only rules into the library stylesheet. In demo CSS, derive `--demo-*` from `--ak-*` — never
   hardcode a second palette.
 - **Animation**: only `transform` / `opacity` / `clip-path`; M3-derived curves in
   `--demo-motion-*`; honour `prefers-reduced-motion` for every non-essential motion.
-- **Accessibility is part of the contract**: roving `tabIndex` + arrow/Home/End on tablists,
+- **Accessibility is part of the contract**: roving `tabIndex` + arrow/Home/End on tablists/menus,
   `aria-current="location"` on in-page anchors, native `<dialog>` via `showModal()`, visible
-  `:focus-visible` rings, ≥24px hit targets, `aria-live` on async copy/status.
+  `:focus-visible` rings, ≥24px hit targets (nav links 44px), `aria-live` on async copy/status.
 - **i18n invariant (showcase)**: `const en = {…} as const` is the authority; `MessageKey = keyof
   typeof en`; `zhCN: Record<MessageKey, string>` must cover every key or `tsc` fails. `t(key, vars)`
   interpolates `{name}`. Never build keys at runtime — use a typed mapping.
-- **Error handling**: nothing throws across component boundaries; audio calls guard `window` and
-  swallow playback errors; failed code generation clears its cache entry and surfaces a localized
-  error with Copy disabled.
+- **Error handling**: audio calls guard `window`/storage and swallow playback errors; failed code
+  generation clears its cache entry and surfaces a localized error with Copy disabled. Public
+  components must not throw on normal prop combinations; vendor controllers may throw on malformed
+  or unattached roots (that is a contract violation, not an error path).
 - **Audio**: `playTactileSound()` respects the persisted on/off flag and lazily creates the
   `AudioContext`; keep both guards when touching audio paths.
 
@@ -148,15 +165,22 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
 |---|---|
 | `src/ak/index.ts` | Package root barrel — every public component **and type** must be exported here |
 | `src/ak/ui/index.ts` | Internal barrel of component values; **not** a substitute for the root |
+| `vite.lib.config.ts` | Library bundle: ESM entry `src/ak/index.ts`, externals, `dist/style.css` |
+| `vite.config.ts` | Showcase dev/build config (`dist-demo/`, port 5273) |
 | `src/ak/styles/ak-ui.scss` | The stylesheet the build compiles |
 | `src/ak/styles/scss/_tokens.scss` | All design tokens + `archive` overrides |
 | `src/ak/styles/scss/_ak-tuning.scss` | `data-ak-size` / `data-ak-density` knobs |
-| `src/demo/App.tsx` | Showcase shell: routing, URL view state, Tune/Code/API panels, chrome |
+| `src/demo/App.tsx` | Showcase shell: routing, shared demo state, topbar/settings/dialogs, hero |
+| `src/demo/block.tsx` | One category panel: preview/tune/code/API tabs, inspect mode, export cache |
+| `src/demo/catalogue-rail.tsx` | Searchable category rail + sliding active marker |
+| `src/demo/catalogue-data.ts` | `CATEGORIES`, `CATEGORY_COMPONENTS`, search keywords |
+| `src/demo/view-param.ts` | `?view=` read/write + `DemoView` type |
 | `src/demo/i18n.tsx` | Locale dictionaries; English is the key authority |
 | `src/demo/example-manifest.ts` | Per-category exporter dispatch (numeric id → standalone TSX) |
+| `src/demo/doc-data.ts` | Authored API rows rendered by each Block's Api tab |
 | `scripts/build.mjs` | Canonical library build; only place `dist/scss` / `dist/core` are populated |
 | `scripts/gen-api.mjs` | Regex-based `.d.ts` parser; fragile to unusual declaration shapes |
-| `package.json` `exports` | `.`, `./style.css`, `./core`, `./core/effects`, `./core/depth`, `./package.json` — no wildcard |
+| `package.json` `exports` | `.`, `./style.css`, `./core`, `./core/effects`, `./core/depth`, `./package.json` |
 | `.github/workflows/publish.yml` | Tag `v*` → publish; tag must equal `package.json` version |
 
 ## Runtime/Tooling Preferences
@@ -173,6 +197,7 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
   `resolveJsonModule`. Dead imports/params fail `npm run typecheck`.
 - **Vite 8** + `@vitejs/plugin-react`; `scripts/build.mjs` shells out via `npx` (`shell: true` on
   Windows).
+- **No ESLint / Prettier / Biome / EditorConfig** — match surrounding style by hand.
 - **Never hand-edit** `docs/api.md`, `public/llms.txt`, `dist*` — they are overwritten by the build.
   Edit source JSDoc / root `llms.txt` instead.
 
@@ -192,6 +217,10 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
    - interaction layer: boot sequence (skip + reduced-motion skip), HUD reticle and lock frame on
      `pointer: fine` only, reading-progress line, directional category transition;
    - focus states, dialog Escape/return-focus, `?view=` deep links.
+
+CI (`.github/workflows/publish.yml`) runs only on `v*` tags or manual dispatch: `npm ci` →
+`typecheck` → `build` → tag/version match → `npm pack --dry-run` → optional dry-run publish. There
+is no push-to-branch QA workflow, so run the ladder above before tagging.
 
 **Known deliberate deviations from upstream CSS** are listed in README → *Port notes → Local fixes
 to vendored CSS* (breadcrumb/choice hit areas, standalone `AkSan` add button, loading-screen label).

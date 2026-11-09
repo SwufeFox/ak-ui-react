@@ -33,21 +33,22 @@
   }
 
   &--glass {
-    background-color: color-mix(in srgb, var(--ak-surface-canvas) 60%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid color-mix(in srgb, var(--ak-signal-info) 32%, transparent);
+    // 哑光覆盖层：实心下沉面 + 发丝边 + 顶部内高光。上层内容与背景的分隔交给
+    // 实心色阶（下沉面比画布更暗/更沉），不再用背景模糊、半透明填充或
+    // 信号色辉光 —— 那三件套正是「通用 SaaS 玻璃」的来源。
+    background-color: var(--ak-surface-sunken-2);
+    border: 1px solid color-mix(in srgb, var(--ak-text-primary) 16%, transparent);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-      0 8px 32px 0 rgba(0, 0, 0, 0.38),
-      0 0 16px color-mix(in srgb, var(--ak-signal-info) 14%, transparent);
+      inset 0 1px 0 0 color-mix(in srgb, var(--ak-text-primary) 12%, transparent),
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 8px 24px rgba(0, 0, 0, 0.28);
 
     &:hover {
-      border-color: var(--ak-signal-info);
+      border-color: color-mix(in srgb, var(--ak-text-primary) 30%, transparent);
       box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-        0 12px 36px 0 rgba(0, 0, 0, 0.45),
-        0 0 24px color-mix(in srgb, var(--ak-signal-info) 28%, transparent);
+        inset 0 1px 0 0 color-mix(in srgb, var(--ak-text-primary) 16%, transparent),
+        0 2px 4px rgba(0, 0, 0, 0.22),
+        0 10px 28px rgba(0, 0, 0, 0.32);
     }
   }
 
@@ -89,8 +90,7 @@
       box-shadow:
         inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
         inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 8px 24px -4px rgba(0, 0, 0, 0.45),
-        0 0 16px color-mix(in srgb, var(--ak-signal-info, #18d1ff) 18%, transparent);
+        0 8px 24px -4px rgba(0, 0, 0, 0.45);
     }
   }
 
@@ -109,13 +109,6 @@
       outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #f1c644);
       outline-offset: 2px;
     }
-  }
-
-  &--selected {
-    border-color: var(--ak-signal-info, #4aabea) !important;
-    box-shadow:
-      inset 0 0 0 1px var(--ak-signal-info, #4aabea),
-      0 0 16px color-mix(in srgb, var(--ak-signal-info, #4aabea) 36%, transparent) !important;
   }
 
   &--tactical {
@@ -246,23 +239,40 @@
   }
 
   &--stripe {
+    position: relative;
+    // 建立层叠上下文，让 z-index:-1 的 ::before 落在卡片底色之上、内容之下
+    isolation: isolate;
+    overflow: hidden;
     width: var(--ak-card-w, 200px);
     height: var(--ak-card-h, 200px);
-    padding: 0;
-    // One 20px tile holds exactly one 45deg stripe period, so the hazard
-    // pattern can scroll on hover without a visible seam.
-    background-image: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 4.714px,
-      rgba(255, 255, 255, 1) 9.428px,
-      rgba(255, 255, 255, 1) 14.142px
-    );
-    background-size: 20px 20px;
+    padding: 0.75rem;
+
+    // 条纹画在 ::before 上而不是元素 background-image 上：background-position
+    // 无法合成，transform 可以。伪元素向左多铺一个 20px 周期，滚动位移
+    // 0 → 20px 的终点与起点相位相同，所以无缝衔接。
+    // 条纹颜色取文字色而不是纯白：亮底上纯白条纹会把浅色文字吞掉。
+    &::before {
+      position: absolute;
+      z-index: -1;
+      content: "";
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4.714px,
+        color-mix(in srgb, var(--ak-text-primary) 14%, transparent) 9.428px,
+        color-mix(in srgb, var(--ak-text-primary) 14%, transparent) 14.142px
+      );
+      background-size: 20px 20px;
+      inset: 0 0 0 -20px;
+      pointer-events: none;
+    }
 
     &:hover {
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-      animation: ak-card-stripe-scroll 900ms linear infinite;
+
+      &::before {
+        animation: ak-card-stripe-scroll 900ms linear infinite;
+      }
     }
   }
 
@@ -285,14 +295,29 @@
       transform: translateY(-10px);
     }
   }
+  // 选中态放在文件末尾：用复合选择器 (0,2,0) 压过 --hoverable/--glass 的
+  // :hover (0,2,0)，靠源码顺序取胜，不需要 !important。
+  &.ak-card--selected {
+    border-color: var(--ak-signal-info, #4aabea);
+    box-shadow:
+      inset 0 0 0 1px var(--ak-signal-info, #4aabea),
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 4px 14px rgba(0, 0, 0, 0.26);
+  }
 }
 
 @keyframes ak-card-stripe-scroll {
   from {
-    background-position: 0 0;
+    transform: translateX(0);
   }
 
   to {
-    background-position: 20px 0;
+    transform: translateX(20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ak-card--stripe:hover::before {
+    animation: none;
   }
 }

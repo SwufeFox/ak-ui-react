@@ -166,7 +166,7 @@
   padding: 0 1rem;
   border: 0;
   border-left: 3px solid transparent;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--ak-text-primary) 6%, transparent);
   background: transparent;
   color: var(--ak-text-secondary, rgba(243, 244, 239, 0.7));
   font-family: var(--ak-font-mono, monospace);
@@ -181,7 +181,7 @@
 .ak-site-menu a:focus-visible {
   border-left-color: var(--ak-signal-info, #19d1ff);
   background: color-mix(in srgb, var(--ak-signal-info, #19d1ff) 10%, transparent);
-  color: #fff;
+  color: var(--ak-text-primary);
   transform: translateX(4px);
 }
 
@@ -242,7 +242,7 @@
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--ak-border, rgba(255, 255, 255, 0.16));
   border-left: 4px solid var(--ak-signal-info, #19d1ff);
-  background: var(--ak-surface-sunken, rgba(14, 16, 18, 0.85));
+  background: color-mix(in srgb, var(--ak-surface-sunken) 88%, var(--ak-surface-canvas));
   clip-path: polygon(0 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% 100%, 0 100%);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
@@ -254,11 +254,11 @@
   height: 6px;
   border: 0;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
   overflow: hidden;
 
   &::-webkit-progress-bar {
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
   }
 
   &::-webkit-progress-value {
@@ -305,39 +305,6 @@
   background: #e33b3b;
   box-shadow: 0 0 6px #e33b3b;
   animation: none;
-}
-
-[data-ak-theme="archive"] {
-  .ak-asset-loader {
-    border-color: var(--ak-border, #d2d5d7);
-    background: var(--ak-surface-panel, #ffffff);
-    color: var(--ak-text-primary, #111315);
-
-    progress {
-      background: #e4e7e9;
-    }
-  }
-
-  .ak-site-menu {
-    border-color: var(--ak-border, #d2d5d7);
-    background: var(--ak-surface-panel, #ffffff);
-    color: var(--ak-text-primary, #111315);
-
-    &::backdrop {
-      background: rgba(30, 32, 35, 0.5);
-    }
-
-    a {
-      border-bottom-color: rgba(0, 0, 0, 0.06);
-      color: var(--ak-text-secondary, #40454a);
-
-      &:hover,
-      &:focus-visible {
-        background: rgba(0, 152, 220, 0.08);
-        color: #000;
-      }
-    }
-  }
 }
 
 @media (max-width: 48rem) {

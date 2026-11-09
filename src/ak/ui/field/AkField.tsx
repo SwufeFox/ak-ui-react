@@ -1,4 +1,4 @@
-import { useId, type CSSProperties, type InputHTMLAttributes, type LabelHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { useId, type InputHTMLAttributes, type LabelHTMLAttributes, type HTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
@@ -18,25 +18,27 @@ import { playTactileSound } from '../../lib/audio'
 
 // ── 字段容器 ────────────────────────────────────────────────────────
 
-export interface AkFieldProps {
+export interface AkFieldProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 字段内的控件。 */
   children: ReactNode
   /** 字段下方的提示或错误文字。 */
   hint?: ReactNode
   /** 给出错误时把提示标成错误态，并把信号色接到字段上。 */
   invalid?: boolean
-  className?: string
   /** 尺寸档：字段内控件的统一高度档（同时下发到子控件）。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-field-signal': '#e33b3b' }`。 */
   tokens?: AkTokens
-  style?: CSSProperties
 }
 
-/** 字段容器：把控件与其标签、提示绑成一组，并统一信号色。 */
-export function AkField({ children, hint, invalid = false, className, size = 'md', tokens, style }: AkFieldProps) {
+/**
+ * 字段容器：把控件与其标签、提示绑成一组，并统一信号色。
+ * 其余原生 `<div>` 属性（`id` / `role` / `data-*` / 事件等）会透传到根节点。
+ */
+export function AkField({ children, hint, invalid = false, className, size = 'md', tokens, style, ...rest }: AkFieldProps) {
   return (
     <div
+      {...rest}
       {...sizeAttrs(size)}
       className={cx('ak-field', className)}
       style={tokenStyle(tokens, style)}

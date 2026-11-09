@@ -1,6 +1,7 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../../lib/utils'
 import { useInstanceId } from '../../lib/useId'
+import { useControllableState } from '../../lib/useControllableState'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 import { playTactileSound } from '../../lib/audio'
@@ -28,13 +29,26 @@ export interface AkTabsItem {
 // className 之外连 `id`、`data-*`、`style` 都传不进去。这里补上继承，
 // 并把与组件语义冲突的键（`children` / `onChange`）显式摘掉。
 export interface AkTabsProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onChange'> {
-  /** 读屏标签，默认 `Tabs`。 */
+  /**
+   * 读屏标签，默认 `Tabs`。
+   * @deprecated Use the native `aria-label` prop instead. When both are set,
+   * `aria-label` wins; `ariaLabel` is only the fallback.
+   */
   ariaLabel?: string
   /** 标签列表；每项含 `value` / `label` / `title`。 */
   items: AkTabsItem[]
-  /** Active tab value. Falls back to the first item when unmatched. */
+  /**
+   * Controlled active tab value. When defined the tabs are controlled and this
+   * value wins; when `undefined` the component is uncontrolled. An unmatched
+   * value falls back to the first enabled item without firing `onValueChange`.
+   */
   value?: string
-  /** 切换时回调。 */
+  /**
+   * Initial active value in uncontrolled mode. Ignored whenever `value` is
+   * defined. Defaults to the first enabled item.
+   */
+  defaultValue?: string
+  /** Called with the next value on click and keyboard navigation, in both modes. */
   onValueChange?: (value: string) => void
   /** Per-panel content, keyed by tab value. */
   renderPanel?: (item: AkTabsItem) => ReactNode
@@ -46,12 +60,29 @@ export interface AkTabsProps extends Omit<HTMLAttributes<HTMLElement>, 'children
   tokens?: AkTokens
 }
 
-export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, className, size = 'md', tokens, style, ...rest }: AkTabsProps) {
+export function AkTabs({
+  ariaLabel,
+  'aria-label': nativeAriaLabel,
+  items,
+  value,
+  defaultValue,
+  onValueChange,
+  renderPanel,
+  className,
+  size = 'md',
+  tokens,
+  style,
+  ...rest
+}: AkTabsProps) {
   const instanceId = useInstanceId('ak-tabs')
-  const matchedItem = items.find((item) => item.value === value)
-  const activeValue = matchedItem
-    ? matchedItem.value
-    : (items.find((item) => !item.disabled)?.value ?? items[0]?.value ?? '')
+  const fallbackValue = items.find((item) => !item.disabled)?.value ?? items[0]?.value ?? ''
+  const [selectedValue, setSelectedValue] = useControllableState<string>(
+    value,
+    defaultValue ?? fallbackValue,
+    onValueChange,
+  )
+  const matchedItem = items.find((item) => item.value === selectedValue)
+  const activeValue = matchedItem ? matchedItem.value : fallbackValue
 
   const tabId = (v: string) => `${instanceId}-tab-${v}`
   const panelId = (v: string) => `${instanceId}-panel-${v}`
@@ -92,7 +123,7 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
     const nextItem = items[targetIndex]
     if (!nextItem) return
     playTactileSound('tab', 0.16)
-    onValueChange?.(nextItem.value)
+    setSelectedValue(nextItem.value)
     window.requestAnimationFrame(() => document.getElementById(tabId(nextItem.value))?.focus())
   }
 
@@ -104,7 +135,7 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
       style={tokenStyle(tokens, style)}
       data-slot="ak-tabs"
     >
-      <div className="ak-tabs__list" role="tablist" aria-label={ariaLabel || 'Tabs'}>
+      <div className="ak-tabs__list" role="tablist" aria-label={nativeAriaLabel ?? (ariaLabel || 'Tabs')}>
         {items.map((item, index) => (
           <button
             key={item.value}
@@ -120,7 +151,7 @@ export function AkTabs({ ariaLabel, items, value, onValueChange, renderPanel, cl
             onClick={() => {
               if (!item.disabled) {
                 playTactileSound('tab', 0.16)
-                onValueChange?.(item.value)
+                setSelectedValue(item.value)
               }
             }}
             onKeyDown={(event) => onKeydown(index, event)}
@@ -165,13 +196,26 @@ export interface AkSegmentedOption {
 }
 
 export interface AkSegmentedProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'> {
-  /** 读屏标签，默认 `Options`。 */
+  /**
+   * 读屏标签，默认 `Options`。
+   * @deprecated Use the native `aria-label` prop instead. When both are set,
+   * `aria-label` wins; `ariaLabel` is only the fallback.
+   */
   ariaLabel?: string
   /** 选项列表，每项 `label` + `value`。 */
   options: AkSegmentedOption[]
-  /** 当前选中值；不匹配时回退第一项。 */
+  /**
+   * Controlled selected value. When defined the segmented control is controlled
+   * and this value wins; when `undefined` the component is uncontrolled. An
+   * unmatched value falls back to the first enabled option.
+   */
   value?: string
-  /** 选中变化时回调。 */
+  /**
+   * Initial selected value in uncontrolled mode. Ignored whenever `value` is
+   * defined. Defaults to the first enabled option.
+   */
+  defaultValue?: string
+  /** Called with the next value on click and keyboard navigation, in both modes. */
   onValueChange?: (value: string) => void
   /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
@@ -181,12 +225,28 @@ export interface AkSegmentedProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   tokens?: AkTokens
 }
 
-export function AkSegmented({ ariaLabel, options, value, onValueChange, className, size = 'md', tokens, style, ...rest }: AkSegmentedProps) {
+export function AkSegmented({
+  ariaLabel,
+  'aria-label': nativeAriaLabel,
+  options,
+  value,
+  defaultValue,
+  onValueChange,
+  className,
+  size = 'md',
+  tokens,
+  style,
+  ...rest
+}: AkSegmentedProps) {
   const instanceId = useInstanceId('ak-seg')
-  const matchedOption = options.find((option) => option.value === value)
-  const activeValue = matchedOption
-    ? matchedOption.value
-    : (options.find((option) => !option.disabled)?.value ?? options[0]?.value)
+  const fallbackValue = options.find((option) => !option.disabled)?.value ?? options[0]?.value
+  const [selectedValue, setSelectedValue] = useControllableState<string>(
+    value,
+    defaultValue ?? fallbackValue ?? '',
+    onValueChange,
+  )
+  const matchedOption = options.find((option) => option.value === selectedValue)
+  const activeValue = matchedOption ? matchedOption.value : fallbackValue
 
   const itemId = (v: string) => `${instanceId}-item-${v}`
 
@@ -226,7 +286,7 @@ export function AkSegmented({ ariaLabel, options, value, onValueChange, classNam
     const nextOption = options[targetIndex]
     if (!nextOption) return
     playTactileSound('toggle')
-    onValueChange?.(nextOption.value)
+    setSelectedValue(nextOption.value)
     window.requestAnimationFrame(() => document.getElementById(itemId(nextOption.value))?.focus())
   }
 
@@ -238,7 +298,7 @@ export function AkSegmented({ ariaLabel, options, value, onValueChange, classNam
       style={tokenStyle(tokens, style)}
       data-slot="ak-segmented"
       role="group"
-      aria-label={ariaLabel || 'Options'}
+      aria-label={nativeAriaLabel ?? (ariaLabel || 'Options')}
     >
       {options.map((option, index) => (
         <button
@@ -253,7 +313,7 @@ export function AkSegmented({ ariaLabel, options, value, onValueChange, classNam
           onClick={() => {
             if (!option.disabled) {
               playTactileSound('toggle')
-              onValueChange?.(option.value)
+              setSelectedValue(option.value)
             }
           }}
           onKeyDown={(event) => onSegmentKeydown(index, event)}

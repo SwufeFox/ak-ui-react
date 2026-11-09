@@ -36,43 +36,36 @@
 }
 
 
-// ── 毛玻璃 / 亚克力质感（AkBackdrop）─────────────────────────────────
+// ── 磨砂层退场：哑光分层（AkBackdrop）────────────────────────────────
+// 以前这里是「背景模糊 + 145° 渐变 + 三层阴影」的毛玻璃配方。
+// 现在改为实心分层：底色 + 顶部一道窄高光 + 发丝内边 + 单层接触阴影。
+// 层与层的前后关系由色阶（surface / sunken / inverse）表达，不再靠模糊。
 .ak-backdrop {
-  -webkit-backdrop-filter: blur(var(--ak-backdrop-blur, 8px));
-  backdrop-filter: blur(var(--ak-backdrop-blur, 8px));
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ak-text-primary) 6%, transparent) 0%,
+      transparent 42%
+    ),
     var(--ak-backdrop-surface, var(--ak-surface-raised));
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 0 color-mix(in srgb, var(--ak-text-primary) 10%, transparent),
     inset 0 0 0 1px var(--ak-backdrop-edge, var(--ak-border-strong)),
-    0 4px 16px rgba(0, 0, 0, 0.2);
+    0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
-// 强度档位。上游那处是最轻的一档，现在升级为柔和通透的标准磨砂。
+// 强度档位只换色阶（不再换模糊半径）。
 .ak-backdrop--light {
-  --ak-backdrop-blur: 8px;
+  --ak-backdrop-surface: var(--ak-surface-sunken-2);
 }
 
 .ak-backdrop--heavy {
-  --ak-backdrop-blur: 18px;
   --ak-backdrop-surface: var(--ak-surface-inverse);
 }
 
-// 不支持 backdrop-filter 时的兜底：给一层不透明底色，避免文字直接压在内容上
-// （@supports not 比让背景透出来更安全）
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .ak-backdrop {
-    background: var(--ak-surface-canvas);
-  }
-}
-
-// 减少动效偏好下无影响（这不是动画），但强制色模式下要放弃模糊：
-// 高对比度场景里模糊会让前景文字反而难读
+// 强制色模式：放弃自定义底色，交给系统 Canvas。
 @media (forced-colors: active) {
   .ak-backdrop {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
     background: Canvas;
   }
 }

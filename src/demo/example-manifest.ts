@@ -18,6 +18,10 @@ import type { Locale } from './i18n'
 import type { TuneOverrides } from './example-tune'
 const sources: Record<number, string> = { 1: actions, 2: menus, 3: surfaces, 4: feedback, 5: inputs, 6: navigation, 7: effects, 8: gallery, 11: decor, 12: gameData, 13: controls, 14: forms, 15: readouts, 16: collections }
 
+// Categories 9 (site), 10 (shell) and 17 (command) compose several authored modules,
+// so they have dedicated exporters (example-site-export.ts, example-source.ts and
+// examples/command-export.ts) instead of an entry here. They are intentionally
+// absent from `sources` and from the switch below.
 
 /** The values are explicit snapshots of the long-lived showcase model. */
 export function exportCategory(id: number, locale: Locale, overrides: TuneOverrides, snapshot: Record<string, unknown>): string {
@@ -81,11 +85,14 @@ export function exportCategory(id: number, locale: Locale, overrides: TuneOverri
       render = `{renderReadouts({ t, sanCurrent, setSanCurrent, sanTotal, sanLimit, loadingReady, setLoadingReady, dialogOpen, setDialogOpen }, tune)}`
       break
     case 16:
+      // `handleTableSort` below calls playTactileSound, which collections.tsx does not
+      // import. buildStandalone rewrites imports from the showcase source alias
+      // '../../ak' into the public package import, so the emitted file imports it once.
       additionalSource = `import { playTactileSound } from '../../ak'\n`
       setup = `const [selectedTableRow, setSelectedTableRow] = useState(${value('selectedTableRow')}); const [tableStriped, setTableStriped] = useState(${value('tableStriped')}); const [tableTactical, setTableTactical] = useState(${value('tableTactical')}); const [tableSticky, setTableSticky] = useState(${value('tableSticky')}); const [tableSortKey, setTableSortKey] = useState<'name' | 'atk' | 'def'>(${value('tableSortKey')}); const [tableSortDir, setTableSortDir] = useState<'ascending' | 'descending' | 'none'>(${value('tableSortDir')}); const tableData = sortTableRows(tableSortKey, tableSortDir); const handleTableSort = (key: 'name' | 'atk' | 'def') => { playTactileSound('dial', 0.15); setTableSortDir(nextTableSort(tableSortKey, tableSortDir, key)); setTableSortKey(key) }`
       render = `{renderCollections({ t, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData }, tune)}`
       break
-    default: throw new Error(`No standalone example for category ${id}`)
+    default: throw new Error(`No standalone example for category ${id} (categories 9, 10 and 17 use dedicated exporters)`)
   }
   const source = sources[id]
   if (!source) throw new Error(`No authored source for category ${id}`)

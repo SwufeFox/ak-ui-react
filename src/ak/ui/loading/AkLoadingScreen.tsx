@@ -63,9 +63,10 @@ export function AkLoadingScreen({
       className={cx('ak-loading-screen', className)}
       data-slot="ak-loading-screen"
       data-state={state}
-      // 就绪后整块被 visibility:hidden，已不在无障碍树里；加载中才播报
+      // 就绪后整块被 visibility:hidden，已不在无障碍树里；加载中才播报。
+      // role="status" 自带 aria-live="polite"，再写一遍会产生重复播报。
       {...(busy
-        ? { role: 'status' as const, 'aria-live': 'polite' as const, 'aria-label': label, 'aria-busy': true }
+        ? { role: 'status' as const, 'aria-label': label, 'aria-busy': true }
         : {})}
     >
       {backdrop ? <img className="ak-loading-screen__backdrop" src={backdrop} alt="" /> : null}

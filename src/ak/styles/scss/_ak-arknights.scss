@@ -115,6 +115,9 @@
   color: #1d1f20;
 }
 
+// Utility: 唯一保留的 !important。它要压过任意未知组件的 border-color
+// （卡片、对话框、表格、按钮…），这些规则的特异性由组件的选择器嵌套决定，
+// 没有稳定写法能在不提高耦合的情况下胜过全部；utility 的语义就是「最终覆盖」。
 .ak-r-border {
   border-color: var(--ak-r) !important;
 }

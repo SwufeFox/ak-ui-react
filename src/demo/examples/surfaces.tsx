@@ -53,13 +53,13 @@ export function renderSurfaces({ t, groupPick, setGroupPick, cardDialog, setCard
       {tune('card-glass', <AkCard as="article" variant="glass" chamfer hoverable>
         {tune('card-header-glass', <AkCardHeader>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {tune('card-title-glass', <AkCardTitle>HUD GLASS // 亚克力面板</AkCardTitle>)}
+            {tune('card-title-glass', <AkCardTitle>HUD LAYER // 哑光叠层</AkCardTitle>)}
             <span style={{ fontSize: '0.65rem', fontFamily: 'var(--ak-font-mono)', color: 'var(--ak-signal-info)' }}>PRTS.HUD</span>
           </div>
-          {tune('card-description-glass', <AkCardDescription>variant="glass" · 战术斜切 + 磨砂毛玻璃</AkCardDescription>)}
+          {tune('card-description-glass', <AkCardDescription>variant="glass" · 战术斜切 + 哑光叠层</AkCardDescription>)}
         </AkCardHeader>)}
         {tune('card-content-glass', <AkCardContent className="ak-text">
-          半透明战术亚克力材质，融合 backdrop-filter 模糊与辉光边界。
+          不透明战术叠层：发丝边、内高光与单层接触阴影。
         </AkCardContent>)}
         {tune('card-footer-glass', <AkCardFooter>
           {tune('card-inspect-glass', <AkButton chamfer variant="ghost" size="sm" onClick={() => setCardDialog(true)}>INSPECT</AkButton>)}

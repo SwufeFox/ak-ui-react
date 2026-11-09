@@ -169,7 +169,22 @@ export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup } from './ui/group/
 export { AkPopover } from './ui/popover/AkPopover'
 export { AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible, AkMenuSeparator, AkMenuGroup, type AkMenuItem, type AkDropdownMenuProps, type AkContextMenuProps, type AkMenubarProps, type AkToolbarProps, type AkCollapsibleProps, type AkMenuGroupProps } from './ui/menu/AkMenu'
 export { AkPagination } from './ui/pagination/AkPagination'
-export { AkChoice, AkField, AkFieldLabel, AkFormStack, AkInput, AkSelect, AkTextarea } from './ui/field/AkField'
+export {
+  AkChoice,
+  AkField,
+  AkFieldLabel,
+  AkFormStack,
+  AkInput,
+  AkSelect,
+  AkTextarea,
+  type AkChoiceProps,
+  type AkFieldLabelProps,
+  type AkFieldProps,
+  type AkFormStackProps,
+  type AkInputProps,
+  type AkSelectProps,
+  type AkTextareaProps,
+} from './ui/field/AkField'
 
 // 上游 SCSS 已有、但一直没有组件出口的第二批（纯包装）
 export { AkDialog, type AkDialogProps } from './ui/dialog/AkDialog'

@@ -1,5 +1,6 @@
 import { useEffect, useRef, type HTMLAttributes, type ReactNode } from 'react'
 import { cx } from '../../lib/utils'
+import { useControllableState } from '../../lib/useControllableState'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
@@ -16,9 +17,20 @@ import { tokenStyle, type AkTokens } from '../../lib/tokens'
  */
 
 export interface AkDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  /** 受控开合。 */
-  open: boolean
-  /** 开合变化回调。Esc 与点击遮罩关闭时也会触发（原生 dialog 的 cancel/close 事件）。 */
+  /**
+   * Controlled open state. When defined the dialog is controlled and this value
+   * wins; when `undefined` the component is uncontrolled and owns the state.
+   */
+  open?: boolean
+  /**
+   * Initial open state in uncontrolled mode. Ignored whenever `open` is defined.
+   * Defaults to `false`.
+   */
+  defaultOpen?: boolean
+  /**
+   * Called with the requested state in both modes: close button, backdrop click,
+   * Esc and the native `close` event all funnel through it.
+   */
   onOpenChange?: (open: boolean) => void
   /** 顶部小标与标题，对应样式表的 `__eyebrow` / `__title`。 */
   eyebrow?: ReactNode
@@ -40,6 +52,7 @@ export interface AkDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
 
 export function AkDialog({
   open,
+  defaultOpen,
   onOpenChange,
   eyebrow,
   title,
@@ -55,21 +68,26 @@ export function AkDialog({
   ...rest
 }: AkDialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
+  const [shown, setOpen] = useControllableState<boolean>(open, defaultOpen ?? false, onOpenChange)
+  // 原生 close 事件会在 effect 关闭 dialog 时同步触发；用 ref 记录本次提交的状态，
+  // 避免「受控 false → effect close → close 事件」重复回调 onOpenChange。
+  const shownRef = useRef(shown)
 
   // React 状态 → 原生 dialog 的开合
   useEffect(() => {
+    shownRef.current = shown
     const el = ref.current
     if (!el) return
     const isOpen = el.hasAttribute('open')
-    if (open && !isOpen) {
+    if (shown && !isOpen) {
       // showModal 才会进置顶层并惰性化背景；show 是普通层
       if (typeof el.showModal === 'function') el.showModal()
       else el.setAttribute('open', '')
-    } else if (!open && isOpen) {
+    } else if (!shown && isOpen) {
       if (typeof el.close === 'function') el.close()
       else el.removeAttribute('open')
     }
-  }, [open])
+  }, [shown])
 
   // Esc 关闭走原生 cancel 事件；<dialog> 也会自己关，所以还要监听 close 把状态同步回去
   useEffect(() => {
@@ -78,19 +96,23 @@ export function AkDialog({
     const onCancel = (e: Event) => {
       if (disableEscape) e.preventDefault()
     }
-    const onClose = () => onOpenChange?.(false)
+    const onClose = () => {
+      // 只有「原生关闭时状态仍为开」才是用户发起的关闭（Esc 等）；
+      // effect 因受控 false 主动 close 时状态已经是 false，不再重复通知。
+      if (shownRef.current) setOpen(false)
+    }
     el.addEventListener('cancel', onCancel)
     el.addEventListener('close', onClose)
     return () => {
       el.removeEventListener('cancel', onCancel)
       el.removeEventListener('close', onClose)
     }
-  }, [disableEscape, onOpenChange])
+  }, [disableEscape, setOpen])
 
   // 点遮罩关闭：dialog 本体铺满视口，点在内容之外即命中 dialog 自己
   const onPointerDown = (e: React.PointerEvent<HTMLDialogElement>) => {
     if (!closeOnBackdrop) return
-    if (e.target === ref.current) onOpenChange?.(false)
+    if (e.target === ref.current) setOpen(false)
   }
 
   return (
@@ -114,7 +136,7 @@ export function AkDialog({
               type="button"
               className="ak-dialog__close"
               aria-label="Close dialog"
-              onClick={() => onOpenChange?.(false)}
+              onClick={() => setOpen(false)}
             >
               ✕
             </button>

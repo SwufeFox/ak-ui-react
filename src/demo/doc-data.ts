@@ -60,10 +60,11 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
 
   'components-5': {
     api: [
-      { name: 'value', type: 'number | string', desc: localizedDescription('受控当前选定值', 'Currently selected controlled value.') },
-      { name: 'onValueChange', type: '(value: any) => void', desc: localizedDescription('数值变化时的受控回调', 'Called with the new value when the selection changes.') },
+      { name: 'value', type: 'number | string', desc: localizedDescription('受控当前值：AkSlider / AkInputNumber 为 number，AkSegmented 为 string；省略时进入非受控模式', 'Controlled value: number for AkSlider / AkInputNumber, string for AkSegmented; omit for uncontrolled mode.') },
+      { name: 'defaultValue', type: 'number | string', desc: localizedDescription('非受控模式下的初始值，value 存在时忽略', 'Initial value in uncontrolled mode; ignored when value is defined.') },
+      { name: 'onValueChange', type: '(value: number) => void / (value: string) => void', desc: localizedDescription('值变化回调（AkSlider / AkInputNumber 回传 number，AkSegmented 回传 string）；受控与非受控模式都会触发', 'Called with the next value in both modes: number for AkSlider / AkInputNumber, string for AkSegmented.') },
       { name: 'min / max', type: 'number', desc: localizedDescription('滑动条或数字步进器的范围极值', 'Lower and upper bounds for the slider or number stepper.') },
-      { name: 'options', type: 'readonly (string | AkSegmentedOption)[]', desc: localizedDescription('分段控制器的选项清单', 'Options displayed by the segmented control.') },
+      { name: 'options', type: 'AkSegmentedOption[]', desc: localizedDescription('分段控制器的选项清单，每项含 label 与 value', 'Segmented-control options; each item carries a label and a value.') },
     ],
   },
 
@@ -87,8 +88,8 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
 
   'components-8': {
     api: [
-      { name: 'items', type: 'readonly GalleryItem[]', desc: localizedDescription('画廊多媒体条目数组（含 title, src, alt, thumb 等）', 'Gallery media items with fields such as title, src, alt, and thumb.') },
-      { name: 'value', type: 'number', desc: localizedDescription('当前焦点大图的索引', 'Index of the currently focused image.') },
+      { name: 'items', type: 'GalleryItem[]', desc: localizedDescription('画廊条目数组；每项必须含 id，可选 title / description / image / alt', 'Gallery items; each requires an id and accepts title, description, image, and alt.') },
+      { name: 'value', type: 'number', desc: localizedDescription('受控当前焦点索引；省略时为非受控', 'Controlled active image index; omit for uncontrolled use.') },
       { name: 'onValueChange', type: '(index: number) => void', desc: localizedDescription('切换画廊相片时的回调', 'Called with the new image index when the gallery selection changes.') },
       { name: 'src', type: 'string', desc: localizedDescription('拍立得倾斜相册图片的地址', 'Image URL displayed by the tilted polaroid album.') },
     ],
@@ -105,10 +106,12 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
 
   'components-10': {
     api: [
-      { name: 'children', type: 'React.ReactNode', desc: localizedDescription('视口内容；必须包含 [data-ak-section-viewport] 视口元素及带唯一 id 的区块', 'Viewport content; must include a [data-ak-section-viewport] element and sections with unique IDs.') },
+      { name: 'children', type: 'React.ReactNode', desc: localizedDescription('视口内容；必须包含 [data-ak-section-viewport] 视口元素及带唯一 id 的区块（可选，但缺失视口时控制器会抛错）', 'Viewport content; must include a [data-ak-section-viewport] element and sections with unique IDs (optional, but the controller throws without a viewport).') },
       { name: 'syncHash', type: 'boolean', default: 'true', desc: localizedDescription('是否将当前区块写入 URL hash', 'Whether to write the current section to the URL hash.') },
       { name: 'duration', type: 'number', default: '650', desc: localizedDescription('区块切换动画时长，单位毫秒', 'Section transition duration, in milliseconds.') },
       { name: 'onChange', type: '(id: string, index: number) => void', desc: localizedDescription('区块切换时以区块 id 和序号调用', 'Called with the section ID and index when the active section changes.') },
+      { name: 'className', type: 'string', desc: localizedDescription('附加类名，拼到 .ak-site 根类之后', 'Additional class name appended to the .ak-site root class.') },
+      { name: 'ref', type: 'Ref<AkSectionNavigatorHandle>', desc: localizedDescription('命令式句柄，调用 navigate(id) 跳转到指定区块', 'Imperative handle; call navigate(id) to jump to a section.') },
     ],
   },
 

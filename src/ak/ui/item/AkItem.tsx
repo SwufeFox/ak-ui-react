@@ -4,6 +4,13 @@ import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 import { playTactileSound, type TactileSoundType } from '../../lib/audio'
 
+/** Nested controls keep their own clicks/keys; the item root is not "nested". */
+function isInteractiveTarget(target: EventTarget | null, root: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement) || target === root) return false
+  const hit = target.closest('button, input, select, textarea, a, [role="button"], [role="checkbox"], [role="switch"]')
+  return hit !== null && hit !== root
+}
+
 export type AkItemTier = 1 | 2 | 3 | 4 | 5 | 6
 
 export interface AkItemProps extends Omit<ButtonHTMLAttributes<HTMLElement>, 'name'> {
@@ -60,6 +67,8 @@ export function AkItem({
   const isButton = Tag === 'button'
   const buttonType = isButton ? type ?? 'button' : undefined
   const itemSound = sound !== undefined ? sound : (tier >= 5 ? 'pip' : 'select')
+  // `<a href>` already turns Enter into one native click; only Space needs help.
+  const nativeEnter = !isButton && Tag === 'a' && 'href' in rest && rest.href !== undefined
 
   return (
     <Tag
@@ -80,8 +89,10 @@ export function AkItem({
       style={tokenStyle(tokens, style)}
       data-slot="ak-item"
       data-tier={tier}
+      role={!isButton && rest.onClick ? 'button' : rest.role}
       tabIndex={isButton ? rest.tabIndex : (disabled ? -1 : (rest.tabIndex ?? (rest.onClick ? 0 : undefined)))}
       onClick={(e: MouseEvent<HTMLElement>) => {
+        if (isInteractiveTarget(e.target, e.currentTarget)) return
         if (disabled) {
           e.preventDefault()
           return
@@ -92,16 +103,18 @@ export function AkItem({
         rest.onClick?.(e)
       }}
       onKeyDown={(e: KeyboardEvent<HTMLElement>) => {
-        if (!isButton && rest.onClick && (e.key === 'Enter' || e.key === ' ')) {
-          if (disabled) {
-            e.preventDefault()
-            return
-          }
+        // A native <button> already maps Enter/Space to exactly one click, so the
+        // manual mapping exists only for role="button" containers and never both.
+        const activationKey = e.key === 'Enter' || e.key === ' '
+        const handledNatively = isButton || (nativeEnter && e.key === 'Enter')
+        if (!handledNatively && rest.onClick && activationKey && !isInteractiveTarget(e.target, e.currentTarget)) {
           e.preventDefault()
-          if (itemSound) {
-            playTactileSound(itemSound, 0.16)
+          if (!disabled && !e.repeat) {
+            if (itemSound) {
+              playTactileSound(itemSound, 0.16)
+            }
+            rest.onClick(e as unknown as MouseEvent<HTMLElement>)
           }
-          rest.onClick(e as unknown as MouseEvent<HTMLElement>)
         }
         rest.onKeyDown?.(e)
       }}

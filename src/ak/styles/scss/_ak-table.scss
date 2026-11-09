@@ -130,11 +130,11 @@
     transition: background-color var(--ak-motion-fast, 120ms) ease;
   }
 
-  .ak-table--hoverable & tr:hover:not(.ak-table__row--selected) td {
+  .ak-table--hoverable & tr:hover:not(:active):not(.ak-table__row--selected) td {
     background: color-mix(in srgb, var(--ak-text-primary) 5%, transparent);
   }
 
-  .ak-table--hoverable & tr.ak-table__row--selected:hover td {
+  .ak-table--hoverable & tr.ak-table__row--selected:hover:not(:active) td {
     background: color-mix(in srgb, var(--ak-signal-info) 11%, transparent);
   }
 }
@@ -157,7 +157,8 @@
   user-select: none;
 
   &:active td {
-    background: color-mix(in srgb, var(--ak-signal-info) 14%, transparent) !important;
+    // 悬停规则用 :not(:active) 让出优先权，这里无需 !important 也能压过悬停底色。
+    background: color-mix(in srgb, var(--ak-signal-info) 14%, transparent);
   }
 
   &:focus-visible {

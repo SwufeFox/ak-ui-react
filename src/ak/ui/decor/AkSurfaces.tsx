@@ -24,33 +24,29 @@ export type AkBackdropStrength = 'light' | 'heavy'
 export interface AkBackdropProps extends HTMLAttributes<HTMLElement> {
   /** 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 */
   as?: ElementType
-  /** `light` 对齐上游 dialog 的 3px；`heavy` 12px，用于整层覆盖。 */
+  /** 叠层厚度：`light` 为轻覆盖，`heavy` 为整层覆盖。 */
   strength?: AkBackdropStrength
-  /** 直接给模糊半径，覆盖 `strength`。 */
-  blur?: number
-  /** 玻璃底色。默认取 `--ak-surface-raised`。 */
+  /** 覆盖层底色。默认取 `--ak-surface-raised`。 */
   surface?: string
   /** 子内容。 */
   children?: ReactNode
 }
 
 /**
- * 毛玻璃层。**模糊的是背后**的内容（`backdrop-filter`），所以它必须盖在别的内容之上，
- * 否则看不出效果 —— 这正是文章说的「覆盖特性」：让人窥见下层页面，降低层级跳转的抗拒。
+ * 叠层（哑光）。2.0 起不再模糊背后内容：层级由底色与发丝边表达，
+ * 避免大面积 `backdrop-filter` 带来的合成开销与「玻璃卡片」观感。
  *
- * ⚠️ 模糊半径 3px 取自上游 dialog 遮罩那唯一一处，不是另调的。
+ * 必须盖在别的内容之上；否则只会看到自己的一层底色。
  */
 export function AkBackdrop({
   as: Tag = 'div',
   strength = 'light',
-  blur,
   surface,
   className,
   children,
   ...rest
 }: AkBackdropProps) {
   const style: CSSProperties = {
-    ...(typeof blur === 'number' ? { '--ak-backdrop-blur': `${blur}px` } : {}),
     ...(surface ? { '--ak-backdrop-surface': surface } : {}),
     ...rest.style,
   } as CSSProperties

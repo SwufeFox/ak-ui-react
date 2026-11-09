@@ -3,10 +3,10 @@
 > React port of [ak-ui](https://github.com/YunYouJun/ak-ui) and [prts-design](https://github.com/MooncellWiki/prts-design) — an Arknights-inspired industrial / tactical terminal design system for React.
 > Framework-agnostic SCSS and DOM controllers are vendored from upstream; components are implemented in modern React (18 & 19).
 
-Package: `@swufefox/ak-ui-react` (v1.3.4)
+Package: `@swufefox/ak-ui-react`
 - Repository: https://github.com/SwufeFox/ak-ui-react
 - Showcase: https://ak-ui-react.pages.dev
-- Generated API Reference: `docs/api.md` (112 components, 118 interfaces)
+- Generated API Reference: `docs/api.md`
 - Stylesheet: `@swufefox/ak-ui-react/style.css`
 
 ---
@@ -36,7 +36,7 @@ import '@swufefox/ak-ui-react/style.css'
 ## 2. Core Design Rules & Principles
 
 1. **Terminal Root is Dark by Default**:
-   Unlike generic design systems, the canonical Arknights PRTS aesthetic is a high-contrast dark industrial tactical terminal (`#0b0d0f` canvas, `#171a1d` raised panels, `#f8f8f5` text). The library supports light archive mode via `[data-ak-theme="archive"]` or `:root[data-theme="light"]`.
+   Unlike generic design systems, the canonical Arknights PRTS aesthetic is a high-contrast dark industrial tactical terminal (`#0b0d0f` canvas, `#171a1d` raised panels, `#f8f8f5` text). The library supports light archive mode via `[data-ak-theme="archive"]`; the default (or explicit `[data-ak-theme="terminal"]`) is dark.
 2. **Sharp Geometries & Cut Corners, No Pill Shapes**:
    Never use generic iOS/macOS 16px/24px rounded corners or bubble buttons. Everything in Arknights is rectangular, chamfered (`AkCut`, `clip-path`), bracketed (`AkBrackets`), or tagged with corner markers (`AkCorner`).
 3. **Typography Disciplines**:
@@ -88,7 +88,7 @@ Industrial tactile button featuring an animated sweeping light-band highlight on
 ```tsx
 import { AkButton } from '@swufefox/ak-ui-react'
 
-// Variants: 'default' | 'outline' | 'action' | 'advanced' | 'light'
+// Variants: 'default' | 'outline' | 'action' | 'advanced' | 'light' | 'danger' | 'ghost'
 <AkButton variant="action" icon={<span>◆</span>} onClick={() => deploy()}>
   CONFIRM DEPLOYMENT
 </AkButton>
@@ -98,7 +98,7 @@ import { AkButton } from '@swufefox/ak-ui-react'
 ```
 
 Props:
-- `variant?: 'default' | 'outline' | 'action' | 'advanced' | 'light'` (default: `'default'`)
+- `variant?: 'default' | 'outline' | 'action' | 'advanced' | 'light' | 'danger' | 'ghost'` (default: `'default'`)
 - `icon?: ReactNode`: Leading inline icon slot
 - `block?: boolean` (default: `false`): Stretches to 100% width
 - `disabled?: boolean`: Native disabled state
@@ -201,7 +201,7 @@ import {
 ```
 
 #### Surface Treatments
-- `AkBackdrop`: Frosted / blurred glass HUD panel with `strength` ('subtle' | 'base' | 'deep')
+- `AkBackdrop`: Matte overlay layer with `strength` ('light' | 'heavy') — no backdrop blur in 2.0
 - `AkGrain`: Procedural noise overlay for vast empty dark fields
 - `AkMosaic`: Data de-sync pixelation block for corrupted/classified data
 - `AkVignette`: Darkened corner gradient pushing visual focus inward
@@ -271,6 +271,10 @@ import {
 <AkSegmented options={['ALL', 'ELITE 1', 'ELITE 2']} value={stage} onValueChange={setStage} />
 ```
 
+**Dual-mode state (2.0):** every value control takes either `value` + `onValueChange` (controlled) or
+`defaultValue` (uncontrolled). A defined `value` always wins; `onValueChange` fires in both modes.
+Disclosure components (`AkDialog`, `AkCollapsible`) use `open` / `defaultOpen` / `onOpenChange`.
+
 ---
 
 ### 3.6 Navigation
@@ -282,9 +286,10 @@ import { AkTabs, AkBreadcrumb } from '@swufefox/ak-ui-react'
   value={activeTab}
   onValueChange={setActiveTab}
   items={[
-    { id: 'ops', label: 'OPERATIONS', eyebrow: 'STAGE / 01', content: <div>Combat Stages</div> },
-    { id: 'roster', label: 'ROSTER', eyebrow: 'PERSONNEL', content: <div>Operator List</div> },
+    { value: 'ops', label: 'OPERATIONS', title: 'Operations' },
+    { value: 'roster', label: 'ROSTER', title: 'Roster' },
   ]}
+  renderPanel={(item) => <div>{item.title}</div>}
 />
 
 <AkBreadcrumb

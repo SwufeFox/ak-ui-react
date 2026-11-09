@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef, type InputHTMLAttributes } from 'react'
 import { clampRange, finite } from '../../lib/utils'
+import { useControllableState } from '../../lib/useControllableState'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 import { playTactileSound } from '../../lib/audio'
 
-export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'> {
-  /** 无障碍名，读屏会念。默认「数值」。 */
+export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'> {
+  /**
+   * 无障碍名，读屏会念。默认「数值」。
+   * 原生 `aria-label` 优先；两者都传时 `aria-label` 覆盖 `label`。
+   */
   label?: string
   /** 增加按钮的无障碍名。默认「增加」。 */
   increaseLabel?: string
@@ -21,9 +25,18 @@ export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputEl
   minLabel?: string
   /** 每次增减的步长。 */
   step?: number
-  /** 当前值；越界会立刻写回夹紧值。 */
+  /**
+   * Controlled value. When defined the field is controlled and this value
+   * wins; when `undefined` the component is uncontrolled. Out-of-range values
+   * are written back clamped through `onValueChange`.
+   */
   value?: number
-  /** 值变化时回调。 */
+  /**
+   * Initial value in uncontrolled mode. Ignored whenever `value` is defined.
+   * Out-of-range values are clamped on mount. Defaults to `min`.
+   */
+  defaultValue?: number
+  /** 值变化时回调；受控与非受控模式都会触发。 */
   onValueChange?: (value: number) => void
   /** 尺寸档：高度、左右快捷按钮和步进图标一起缩放。 */
   size?: AkControlSize
@@ -41,7 +54,8 @@ export function AkInputNumber({
   min = 0,
   minLabel = '最少',
   step = 1,
-  value = 0,
+  value,
+  defaultValue,
   onValueChange,
   size = 'md',
   tokens,
@@ -50,22 +64,30 @@ export function AkInputNumber({
 }: AkInputNumberProps) {
   const lower = finite(min, 0)
   const upper = Math.max(lower, finite(max, 99))
-  const normalizedValue = clampRange(value, lower, upper)
+  const [stateValue, setValue] = useControllableState<number>(
+    value,
+    clampRange(defaultValue, lower, upper),
+    onValueChange,
+  )
+  const normalizedValue = clampRange(stateValue, lower, upper)
   const normalizedStep = Number.isFinite(step) ? Math.abs(step) || 1 : 1
 
   // Mirrors the original's immediate watcher: an out-of-range value is written back clamped.
   useEffect(() => {
-    if (normalizedValue !== value) onValueChange?.(normalizedValue)
-  }, [normalizedValue, value, onValueChange])
-
-  const updateValue = (next: number) => {
-    if (disabled) return
-    onValueChange?.(Number(clampRange(next, lower, upper).toFixed(12)))
-  }
+    if (normalizedValue !== stateValue) setValue(normalizedValue)
+  }, [normalizedValue, stateValue, setValue])
 
   // 长按连按手感优化：按住连续步进，松开即停，单次点击不重复触发。
   const valueRef = useRef(normalizedValue)
   valueRef.current = normalizedValue
+
+  const updateValue = (next: number) => {
+    if (disabled) return
+    const clamped = Number(clampRange(next, lower, upper).toFixed(12))
+    // 同步写 ref，长按连按时不必等下一次渲染才看到新值。
+    valueRef.current = clamped
+    setValue(clamped)
+  }
   const stepRef = useRef(normalizedStep)
   stepRef.current = normalizedStep
   const boundsRef = useRef({ lower, upper })
@@ -211,7 +233,7 @@ export function AkInputNumber({
         {...rest}
         className="ak-input-number__inner"
         type="number"
-        aria-label={label}
+        aria-label={rest['aria-label'] ?? label}
         disabled={disabled}
         max={upper}
         min={lower}

@@ -8,12 +8,14 @@ import { resolve } from 'node:path'
  */
 export default defineConfig({
   plugins: [react()],
+  // `public/` holds showcase-only assets (Cloudflare `_headers`); the library package must not ship them.
+  publicDir: false,
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
     lib: {
-      entry: resolve(__dirname, 'src/ak/index.ts'),
+      entry: resolve(import.meta.dirname, 'src/ak/index.ts'),
       formats: ['es'],
       fileName: () => 'index.js',
 
