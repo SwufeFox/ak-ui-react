@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { version as packageVersion, peerDependencies } from '../../package.json'
 import { AkDisplay, AkSegmented, useTactileSound, playTactileSound } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
@@ -77,7 +77,7 @@ const BOOT_LINES = [
 ] as const
 
 
-function ReferenceView({ theme }: { theme: Theme }) {
+function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topbarRef: RefObject<HTMLElement | null>; navGuardUntil: RefObject<number> }) {
   const { t, locale } = useI18n()
   const [tab, setTab] = useState('overview')
   const [segment, setSegment] = useState('all')
@@ -216,7 +216,11 @@ function ReferenceView({ theme }: { theme: Theme }) {
     setActive(id)
     const url = `${window.location.pathname}${window.location.search}#${id}`
     if (window.location.hash !== `#${id}`) window.history.pushState(null, '', url)
-    // 滚动回分类顶部
+    // 滚动回分类顶部；跳转期间顶栏保持收起，否则短页面上首屏读数条会
+    // 停在顶栏下面，或者顶栏盖住新分类的标题。
+    navGuardUntil.current = performance.now() + 900
+    topbarRef.current?.setAttribute('data-hidden', '')
+    document.documentElement.dataset.chrome = 'hidden'
     stageRef.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
   }, [active])
 
@@ -235,6 +239,9 @@ function ReferenceView({ theme }: { theme: Theme }) {
       const hash = window.location.hash.replace(/^#/, '')
       if (CATEGORIES.some((c) => c.id === hash) || !hash) {
         setActive(hash || CATEGORIES[0].id)
+        navGuardUntil.current = performance.now() + 900
+        topbarRef.current?.setAttribute('data-hidden', '')
+        document.documentElement.dataset.chrome = 'hidden'
         stageRef.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
       }
     }
@@ -471,6 +478,8 @@ export function App() {
   const [llmCopyState, setLlmCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const llmDialogRef = useShowcaseDialog(llmModalOpen)
   const topbarRef = useRef<HTMLElement>(null)
+  // 分类跳转后的短暂窗口内不允许顶栏回弹：否则向上跳转时顶栏会盖住分类标题。
+  const navGuardUntil = useRef(0)
   const llmCopyTimer = useRef<number | null>(null)
   const llmCopyGeneration = useRef(0)
   const settingsRef = useRef<HTMLDetailsElement>(null)
@@ -526,21 +535,22 @@ export function App() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let last = window.scrollY
     let frame = 0
-    let hidden = false
     const update = () => {
       frame = 0
       const now = window.scrollY
       const delta = now - last
       last = now
       if (Math.abs(delta) < 4) return
+      if (performance.now() < navGuardUntil.current) return
       if (settingsRef.current?.open) return
       // 降级动效时顶栏常驻：位移本身就是要被关掉的那类运动。
       if (reduceMotion.matches) return
       const next = delta > 0 && now > 120
-      // 只在状态翻转时写属性：滚动回调里每帧都写会把样式重算带起来。
-      if (next === hidden) return
-      hidden = next
-      if (hidden) {
+      // 翻转基准读 DOM 而不是闭包标志：分类跳转会直接写 data-hidden，
+      // 以 DOM 为准才不会出现「向上滚动顶栏不回来」的失同步。
+      const isHidden = topbar?.hasAttribute('data-hidden') ?? false
+      if (next === isHidden) return
+      if (next) {
         topbar?.setAttribute('data-hidden', '')
         document.documentElement.dataset.chrome = 'hidden'
       } else {
@@ -679,7 +689,7 @@ export function App() {
         </div>
       </header>
 
-      <ReferenceView theme={theme} />
+      <ReferenceView theme={theme} topbarRef={topbarRef} navGuardUntil={navGuardUntil} />
 
       {guideOpen ? (
         <dialog

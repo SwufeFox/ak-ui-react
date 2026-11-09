@@ -71,7 +71,7 @@ export interface AkCardProps extends HTMLAttributes<HTMLElement> {
   hoverable?: boolean
   /** 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 */
   interactive?: boolean
-  /** 是否处于选中状态。 */
+  /** 是否处于选中状态；可交互卡片通过 `aria-pressed` 暴露。 */
   selected?: boolean
   /** 是否禁用；禁用后不响应点击，也无法用键盘激活。 */
   disabled?: boolean
@@ -126,7 +126,7 @@ export function AkCard({
       data-slot="ak-card"
       data-variant={variant}
       data-selected={selected || undefined}
-      aria-selected={selected || undefined}
+      aria-pressed={(isButton || clickable) && selected ? true : undefined}
       role={!isButton && clickable ? 'button' : rest.role}
       tabIndex={interactive && rest.tabIndex === undefined ? 0 : rest.tabIndex}
       onClick={(e: MouseEvent<HTMLElement>) => {

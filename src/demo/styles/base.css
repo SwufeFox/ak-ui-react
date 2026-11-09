@@ -1,0 +1,283 @@
+/* Demo-only layout helpers. Deliberately outside src/ak/styles so the library stylesheet
+   stays a faithful 1:1 port of the upstream SCSS.
+
+   ⚠️ 这些 `--demo-*` **全部派生自库令牌**，不再自带一套颜色。
+   曾经这里的十六进制是硬编码的独立调色板（`#0b0d0f` / `#fff` / `rgb(255 255 255 / 14%)`），
+   于是 `data-ak-theme="archive"` 切换后组件翻面、外壳不翻，示例站点看起来像两个产品拼的。
+   现在只写一次，两套主题自动跟随 —— 新增主题也不用再改这里。 */
+
+:root {
+  color-scheme: dark;
+  --demo-canvas: var(--ak-surface-canvas);
+  /* 终端显示基底的微噪点：铺在画布上做质感，透明度压到 3% 以免脏了文字。 */
+  --demo-substrate: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  /* 发丝线：取文字色的 14%，暗底得白线、亮底得黑线，与手写 rgba 的观感一致 */
+  --demo-hairline: color-mix(in srgb, var(--ak-text-primary) 14%, transparent);
+  --demo-text: var(--ak-text-secondary);
+  --demo-text-strong: var(--ak-text-primary);
+  /* Accent used as *text*: mixed toward body text so it clears 4.5:1 on both canvases. */
+  --demo-accent-text: color-mix(in srgb, var(--ak-signal-info) 70%, var(--ak-text-primary));
+  --demo-text-muted: color-mix(in srgb, var(--ak-text-secondary) 92%, transparent);
+  /* 代码块用下沉面 + 一点画布混色，两主题各自成立 */
+  --demo-code-bg: color-mix(in srgb, var(--ak-surface-canvas) 70%, var(--ak-surface-sunken-2));
+  --demo-code-head: var(--ak-surface-sunken-2);
+  /* Motion, tuned to M3 Expressive's web curve table: colours and opacity use "effects"
+     timing, position and size use "spatial" timing (slight overshoot on small travel). */
+  --demo-motion-fast: 150ms;
+  --demo-motion-ease: cubic-bezier(0.34, 0.8, 0.34, 1);
+  --demo-motion-spatial: 260ms;
+  --demo-motion-ease-spatial: cubic-bezier(0.27, 1.06, 0.18, 1);
+  --demo-motion-enter: 240ms;
+}
+
+/* Native scrollbars, form controls and the caret follow the active theme.
+   The accent used as text needs a darker mix on the light canvas: signal cyan alone is ~3:1 there. */
+:root[data-ak-theme='archive'] {
+  color-scheme: light;
+  --demo-accent-text: color-mix(in srgb, var(--ak-signal-info) 34%, var(--ak-text-primary));
+}
+
+body {
+  margin: 0;
+  background: var(--demo-canvas);
+  color: var(--demo-text);
+  font-family: var(--ak-font-sans, system-ui, sans-serif);
+}
+
+/* 站内跳转用平滑滚动；降级动效时回到瞬时滚动。 */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* 桌面指针设备上关掉页面的橡皮筋回弹；触屏设备保留系统默认的拉动刷新。 */
+@media (pointer: fine) {
+  html { overscroll-behavior: none; }
+}
+
+/* ── 全局战术高精滚动条 ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--demo-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ak-signal-info) 35%, transparent);
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ak-signal-info);
+  box-shadow: 0 0 8px var(--ak-signal-info);
+}
+
+/* ── 应用外壳：顶栏 + 视图 ──────────────────────────────────────────────── */
+
+.demo-app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  /* 噪点铺在画布这一层（内容之下），面板与文字都保持干净。 */
+  background-color: var(--demo-canvas);
+  background-image: var(--demo-substrate);
+  background-size: 128px 128px;
+}
+
+.demo-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  gap: 0.75rem 1.5rem;
+  min-height: 4.5rem;
+  padding:
+    0.65rem
+    max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-right))
+    0.65rem
+    max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-left));
+  border-bottom: 1px solid var(--demo-hairline);
+  /* 不透明底：半透明 + blur 会把下面滚过的内容透出来，也属于玻璃拟态残留。 */
+  background: var(--ak-surface-canvas);
+  transition:
+    transform var(--demo-motion-fast) var(--demo-motion-ease),
+    opacity var(--demo-motion-fast) linear;
+}
+
+/* 向下滚动收起顶栏让出阅读空间，向上滚动立刻回来。只动 transform/opacity。 */
+.demo-topbar[data-hidden] {
+  transform: translate3d(0, -100%, 0);
+  opacity: 0;
+}
+
+/* 触屏高亮：给交互件一个有意的信号色反馈，而不是浏览器默认的灰块。 */
+.demo-app a,
+.demo-app button,
+.demo-app summary,
+.demo-app input,
+.demo-app select,
+.demo-app [role='button'] {
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--ak-signal-info) 22%, transparent);
+}
+
+/* 首屏只编排一次入场：标题 → 描述 → 安装条 → 读数条。换分类时走 .demo-block 的另一套，
+   两者互不打扰。 */
+@keyframes demo-hero-rise {
+  from { opacity: 0; transform: translate3d(0, 0.6rem, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.demo-topbar__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+}
+
+
+.demo-topbar__brand .ak-display {
+  color: var(--demo-text-strong);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.demo-topbar__tagline {
+  color: var(--demo-text-muted);
+  font-size: 0.8rem;
+}
+
+.demo-topbar__version {
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+}
+
+.demo-topbar__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.demo-topbar__link,
+.demo-settings summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  padding: 0 0.6rem;
+  border: 0;
+  background: transparent;
+  color: var(--demo-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.demo-topbar__link:hover,
+.demo-settings summary:hover,
+.demo-settings[open] summary { color: var(--demo-text-strong); }
+
+.demo-topbar__link:focus-visible,
+.demo-settings summary:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+html .demo-topbar__language.ak-segmented {
+  display: inline-flex;
+  width: auto;
+  padding: 2px;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+}
+
+html .demo-topbar__language .ak-segmented__item {
+  min-width: 0;
+  min-height: 2rem;
+  padding: 0 0.5rem;
+  color: var(--demo-text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+html .demo-topbar__language .ak-segmented__item[aria-pressed='true'],
+html .demo-settings__panel .ak-segmented__item[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--ak-signal-info) 12%, var(--ak-surface-sunken-2));
+  color: var(--demo-text-strong);
+  box-shadow: none;
+}
+
+.demo-settings {
+  position: relative;
+}
+
+.demo-settings summary { list-style: none; }
+.demo-settings summary::-webkit-details-marker { display: none; }
+.demo-settings summary::after {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  content: '';
+  transform: translateY(-0.1rem) rotate(45deg);
+}
+.demo-settings[open] summary::after { transform: translateY(0.1rem) rotate(225deg); }
+
+.demo-settings__panel {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: grid;
+  gap: 1rem;
+  box-sizing: border-box;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-canvas);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 16%);
+}
+
+.demo-settings__group {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--demo-text-muted);
+  font-size: 0.75rem;
+}
+
+.demo-settings__sound {
+  min-height: 2.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken-2);
+  color: var(--demo-text-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.demo-settings__sound:hover { border-color: var(--ak-signal-info); }
+.demo-settings__sound:focus-visible { outline: 2px solid var(--ak-signal-info); outline-offset: 2px; }
+

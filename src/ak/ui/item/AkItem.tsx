@@ -28,7 +28,7 @@ export interface AkItemProps extends Omit<ButtonHTMLAttributes<HTMLElement>, 'na
   price?: ReactNode
   /** 是否处于已售罄或置灰状态。 */
   sold?: boolean
-  /** 是否处于选中状态。 */
+  /** 是否处于选中状态；可交互条目通过 `aria-pressed` 暴露。 */
   selected?: boolean
   /** 是否禁用。 */
   disabled?: boolean
@@ -76,7 +76,7 @@ export function AkItem({
       type={buttonType}
       disabled={isButton ? disabled : undefined}
       aria-disabled={disabled || undefined}
-      aria-selected={selected || undefined}
+      aria-pressed={(isButton || rest.onClick !== undefined) && selected ? true : undefined}
       {...sizeAttrs(size)}
       className={cx(
         'ak-item',

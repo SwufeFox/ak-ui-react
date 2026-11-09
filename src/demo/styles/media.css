@@ -1,0 +1,135 @@
+@media (max-width: 1100px) {
+  .demo-tune-workspace[data-tuning="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    --demo-workspace-height: min(45dvh, 30rem);
+  }
+
+  .demo-tune-workspace[data-tuning="true"] .demo-tune-panel {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .demo-tune-panel .demo-tune-instance { position: static; }
+}
+
+@media (max-width: 760px) {
+  .demo-hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "intro"
+      "array"
+      "readout";
+  }
+  .demo-hero__array { min-height: 13rem; }
+  .demo-hero__array-ghost { font-size: 6rem; }
+}
+
+@media (max-width: 640px) {
+  .demo-status { display: none; }
+
+  .demo-guide__row { grid-template-columns: minmax(0, 1fr); }
+  .demo-topbar {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+
+  .demo-topbar__tagline { display: none; }
+  .demo-topbar__controls {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.15rem;
+  }
+  .demo-settings { position: static; }
+  .demo-stage { scroll-margin-top: 1rem; }
+  .demo-rail__search-input { font-size: 1rem; }
+  .demo-hero { gap: 0.75rem; margin-bottom: 1.25rem; padding: 0.9rem; }
+  .demo-hero__intro { gap: 0.4rem; }
+  .demo-hero__title { font-size: 1.5rem; }
+  .demo-hero__desc { line-height: 1.5; }
+  .demo-hero__install-box { padding: 0.5rem 0.65rem; }
+  .demo-block__tabs { box-sizing: border-box; overflow-x: auto; }
+  .demo-doc-tab { padding-inline: 0.5rem; }
+  .demo-code-box { padding: 1rem 0.85rem; }
+  .demo-tune-panel .ak-input,
+  .demo-tune-panel .ak-select { font-size: 1rem; }
+
+  .demo-tune-preview { padding: 0.85rem; }
+  .demo-tune-workspace[data-tuning="true"] { --demo-workspace-height: min(30dvh, 16rem); }
+  .demo-tune-workspace[data-tuning="true"] .demo-tune-preview-toggle:not([hidden]) { display: inline-flex; margin-bottom: 0.5rem; }
+  .demo-tune-workspace[data-tuning="true"] .demo-tune-preview-shell[data-expanded="false"] .demo-tune-preview { display: none; }
+}
+
+@media (max-width: 380px) {
+  .demo-topbar__link,
+  .demo-settings summary { padding-inline: 0.35rem; font-size: 0.72rem; }
+  html .demo-topbar__language .ak-segmented__item { padding-inline: 0.35rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-block,
+  .demo-tune-preview,
+  .demo-tune-panel,
+  .demo-tune-fields,
+  .demo-code-container,
+  .demo-api-container { animation: none; }
+
+  /* 首屏入场是纯位移，降级后直接给最终状态；阵列同样不淡入。 */
+  .demo-hero__title,
+  .demo-hero__desc,
+  .demo-hero__install-box,
+  .demo-hero__readout,
+  .demo-hero__array-frame,
+  .demo-hero__array-sweep { animation: none; }
+
+  .demo-topbar { transition: none; }
+
+  .demo-topbar[data-hidden] {
+    transform: none;
+    opacity: 1;
+  }
+
+  /* 回执不需要滑入与倒计时线，内容本身还在。 */
+  .demo-receipt { animation: none; }
+
+  .demo-receipt__timer { display: none; }
+
+  /* 指针景深与扫描光斑是纯氛围，降级时整层去掉。 */
+  .demo-hero::after { display: none; }
+
+  .demo-inspect { animation: none; }
+
+  /* 顶栏常驻时，分类轨仍要停在它下面，不能顶上。 */
+  :root[data-chrome='hidden'] .demo-rail {
+    top: 5.5rem;
+    max-height: calc(100vh - 7.5rem);
+  }
+
+  /* 降级动效下顶栏永远可见，跳转分类时的偏移也要按可见高度算。 */
+  :root[data-chrome='hidden'] .demo-stage { scroll-margin-top: 4.5rem; }
+
+  .demo-rail__item,
+  .demo-doc-tab,
+  .demo-stage__page,
+  .demo-copy-btn,
+  .demo-raw-link,
+  .demo-tune-panel select,
+  .demo-tune-panel input { transition-duration: 0.01ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-block__tabs[data-measured] .demo-doc-tab-indicator { transition: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-screen-inspect__crystal::after,
+  .demo-screen-san-icon,
+  .demo-screen-feedback,
+  .demo-llm-overlay {
+    animation: none;
+  }
+}
+

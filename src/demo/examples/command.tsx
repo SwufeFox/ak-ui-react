@@ -651,7 +651,7 @@ export function renderCommand({ t, selectedCommand, setSelectedCommand, selected
                       <span className="demo-screen-clearance">CLEARANCE: LV.4</span>
                     </div>
                   }
-                  tokens={{ '--ak-screen-signal': '#ff5e19' }}
+                  tokens={{ '--ak-screen-signal': 'var(--ak-terminal-accent)' }}
                   meta={
                     <div className="demo-screen-meta-row">
                       <div className="demo-screen-san-widget" title="SANITY // 罗德岛神经递质浓度">
@@ -670,9 +670,9 @@ export function renderCommand({ t, selectedCommand, setSelectedCommand, selected
                           +
                         </button>
                       </div>
-                      <AkCounter value="1,248,500" prefixIcon={<span style={{ color: '#ffd800' }}>⯁</span>} title="LMD // 龙门币" />
-                      <AkCounter value="38,400" prefixIcon={<span style={{ color: '#ff5e19' }}>◆</span>} title="ORUNDUM // 合成玉" />
-                      <AkCounter value="142" prefixIcon={<span style={{ color: '#4aabea' }}>◈</span>} title="ORIGINIUM // 至纯源石" />
+                      <AkCounter value="1,248,500" prefixIcon={<span style={{ color: 'var(--ak-signal-action)' }}>⯁</span>} title="LMD // 龙门币" />
+                      <AkCounter value="38,400" prefixIcon={<span style={{ color: 'var(--ak-terminal-accent)' }}>◆</span>} title="ORUNDUM // 合成玉" />
+                      <AkCounter value="142" prefixIcon={<span style={{ color: 'var(--ak-signal-info)' }}>◈</span>} title="ORIGINIUM // 至纯源石" />
                     </div>
                   }
                   onBack={() => {
@@ -852,7 +852,7 @@ export function renderCommand({ t, selectedCommand, setSelectedCommand, selected
                                     <span className="demo-screen-inspect__sec-title">SYNTHESIS REQUIREMENTS // 合成配方需求</span>
                                     <div className="demo-screen-inspect__sec-body">
                                       <div>配方组合: {selectedDepotItem.formula.join(' + ')}</div>
-                                      <div style={{ color: '#ffd800', marginTop: '0.2rem' }}>基础工时费用: {selectedDepotItem.formulaCost}</div>
+                                      <div style={{ color: 'var(--ak-signal-action)', marginTop: '0.2rem' }}>基础工时费用: {selectedDepotItem.formulaCost}</div>
                                     </div>
                                   </div>
                                 ) : null}

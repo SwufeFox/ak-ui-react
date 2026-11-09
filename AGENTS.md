@@ -33,6 +33,9 @@ src/ak/styles/scss/       --copy------>    dist/scss/        (consumers can reco
 - `src/ak/styles/ak-ui.scss` is the file the build compiles; it `@use`s partials from `scss/`.
 - The legacy duplicate entry `src/ak/styles/scss/ak-ui.scss` and the unused `ak-tokens.scss`
   shim were removed in 2.0. Keep exactly one entry; a second one silently drifts.
+- Showcase CSS is split into `src/demo/styles/{base,catalogue,showcase,media}.css`, imported in
+  that order by `src/demo/demo.css` (imports-only entry). `media.css` must stay last — it holds
+  the `@media` / reduced-motion overrides that rely on cascade order.
 - `_ak-tuning.scss` is loaded by component partials (e.g. `_ak-button.scss`), so `data-ak-size` /
   `data-ak-density` rules reach the output without the root entry `@use`ing it.
 - Stage 4 runs **after** Vite and overwrites the emitted CSS; it strips the UTF-8 BOM dart-sass
@@ -102,7 +105,7 @@ site / shell / command exporters. Code generation is lazy and cached against
 | `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useControllableState.ts`, `useId.ts`, `audio.ts` |
 | `src/ak/core/` | Vendored `.mjs` controllers + `.d.mts`; published as `…/core`, `…/core/effects`, `…/core/depth` |
 | `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`) |
-| `src/demo/` | Showcase: `App.tsx` (routing/state/chrome), `block.tsx`, `catalogue-rail.tsx`, `catalogue-data.ts`, `view-param.ts`, `examples/*.tsx`, `i18n.tsx`, `doc-data.ts` |
+| `src/demo/` | Showcase: `App.tsx` (routing/state/chrome), `block.tsx`, `catalogue-rail.tsx`, `catalogue-data.ts`, `view-param.ts`, `examples/*.tsx`, `styles/*.css`, `i18n.tsx`, `doc-data.ts` |
 | `scripts/` | `build.mjs` (4-stage library build), `gen-api.mjs` (`.d.ts` → `docs/api.md`) |
 | `docs/`, `public/llms.txt` | **Generated**. Authored: root `llms.txt`, `README.md` |
 

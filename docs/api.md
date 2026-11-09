@@ -179,7 +179,7 @@ Extends `HTMLAttributes<HTMLElement>`.
 | `chamfer` | `boolean` | yes | 是否开启右上角 45° 战术切角。 |
 | `hoverable` | `boolean` | yes | 是否开启悬停提亮/浮起动效。 |
 | `interactive` | `boolean` | yes | 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 |
-| `selected` | `boolean` | yes | 是否处于选中状态。 |
+| `selected` | `boolean` | yes | 是否处于选中状态；可交互卡片通过 `aria-pressed` 暴露。 |
 | `disabled` | `boolean` | yes | 是否禁用；禁用后不响应点击，也无法用键盘激活。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-card-bg': '#171a1d' }`。 |
 
@@ -578,7 +578,7 @@ Extends `Omit<ButtonHTMLAttributes<HTMLElement>, 'name'>`.
 | `count` | `ReactNode` | yes | 右上角数量角标。 |
 | `price` | `ReactNode` | yes | 价格（商店场景）。 |
 | `sold` | `boolean` | yes | 是否处于已售罄或置灰状态。 |
-| `selected` | `boolean` | yes | 是否处于选中状态。 |
+| `selected` | `boolean` | yes | 是否处于选中状态；可交互条目通过 `aria-pressed` 暴露。 |
 | `disabled` | `boolean` | yes | 是否禁用。 |
 | `size` | `AkControlSize` | yes | 尺寸档：图标边长、内距与文字字号一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-item-tier': '#ff9433' }`。 |

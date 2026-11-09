@@ -1,0 +1,1413 @@
+/* ── 终端大屏（AkScreen）内部 PRTS 战术物资调度控制台 ──────────────── */
+
+.demo-screen-dashboard {
+  display: grid;
+  gap: clamp(0.75rem, 1.4cqw, 1.25rem);
+  min-height: 0;
+  height: 100%;
+}
+
+.demo-screen-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.demo-screen-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+ .demo-screen-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(247, 247, 244, 0.75);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 0.4rem) 0, 100% 0.4rem, 100% 100%, 0 100%);
+  transition:
+    color var(--demo-motion-fast) ease,
+    background-color var(--demo-motion-fast) ease,
+    border-color var(--demo-motion-fast) ease,
+    box-shadow var(--demo-motion-fast) ease;
+}
+.demo-screen-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: var(--ak-terminal-accent);
+}
+
+ .demo-screen-tab.is-active {
+  background: var(--ak-terminal-accent);
+  color: #171a1d;
+  border-color: var(--ak-terminal-accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ak-terminal-accent) 40%, transparent);
+}
+
+.demo-screen-tab__badge {
+  padding: 0.1rem 0.35rem;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.62rem;
+  border-radius: 2px;
+}
+
+.demo-screen-search {
+  min-width: 14rem;
+}
+
+.demo-screen-search-label {
+  color: rgba(247, 247, 244, 0.72);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.demo-screen-empty {
+  color: rgba(247, 247, 244, 0.72);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.demo-screen-inventory {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr));
+  gap: 0.65rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  height: 100%;
+  min-height: 0;
+  padding-right: 0.4rem;
+  align-content: start;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.demo-screen-meta-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.6rem, 1.2cqw, 1.25rem);
+}
+
+.demo-screen-san-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(0, 210, 255, 0.08);
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--ak-signal-info);
+  border-radius: 2px;
+}
+
+.demo-screen-san-icon {
+  font-size: 0.85rem;
+  color: var(--ak-signal-info);
+}
+
+.demo-screen-san-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+
+.demo-screen-san-val {
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.demo-screen-san-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-left: 0.2rem;
+  border: 1px solid var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-signal-info) 18%, transparent);
+  color: var(--ak-signal-info);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--demo-motion-fast) ease,
+    background-color var(--demo-motion-fast) ease,
+    border-color var(--demo-motion-fast) ease,
+    box-shadow var(--demo-motion-fast) ease,
+    transform var(--demo-motion-fast) ease;
+}
+
+.demo-screen-san-btn:hover {
+  background: var(--ak-signal-info);
+  color: #121416;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ak-signal-info) 50%, transparent);
+  transform: scale(1.05);
+}
+
+.demo-screen-san-btn:active {
+  transform: scale(0.95);
+}
+
+.demo-screen-inspect {
+  display: grid;
+  gap: 1rem;
+}
+
+.demo-screen-inspect__hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.demo-screen-inspect__crystal {
+  width: 4.8rem;
+  height: 4.8rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.45) 80%);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    border-color var(--demo-motion-fast) ease,
+    background-color var(--demo-motion-fast) ease,
+    box-shadow var(--demo-motion-fast) ease;
+}
+
+.demo-screen-inspect__crystal::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+.demo-screen-inspect__crystal[data-tier="6"],
+.demo-screen-inspect__crystal[data-rarity="6"] {
+  border-color: var(--ak-signal-action);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ak-signal-action) 25%, transparent) 0%, rgba(24, 18, 0, 0.75) 80%);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--ak-signal-action) 50%, transparent), inset 0 0 15px color-mix(in srgb, var(--ak-signal-action) 25%, transparent);
+}
+
+.demo-screen-inspect__crystal[data-tier="6"]::after,
+.demo-screen-inspect__crystal[data-rarity="6"]::after {
+  border-color: rgba(255, 216, 0, 0.6);
+}
+
+.demo-screen-inspect__crystal[data-tier="5"],
+.demo-screen-inspect__crystal[data-rarity="5"] {
+  border-color: #ff9433;
+  background: radial-gradient(circle, rgba(255, 148, 51, 0.22) 0%, rgba(28, 14, 0, 0.75) 80%);
+  box-shadow: 0 0 22px rgba(255, 148, 51, 0.45), inset 0 0 12px rgba(255, 148, 51, 0.2);
+}
+
+.demo-screen-inspect__crystal[data-tier="5"]::after,
+.demo-screen-inspect__crystal[data-rarity="5"]::after {
+  border-color: rgba(255, 148, 51, 0.55);
+}
+
+.demo-screen-inspect__crystal[data-tier="4"],
+.demo-screen-inspect__crystal[data-rarity="4"] {
+  border-color: #bb86fc;
+  background: radial-gradient(circle, rgba(187, 134, 252, 0.2) 0%, rgba(22, 0, 32, 0.75) 80%);
+  box-shadow: 0 0 18px rgba(187, 134, 252, 0.38), inset 0 0 10px rgba(187, 134, 252, 0.18);
+}
+
+.demo-screen-inspect__crystal[data-tier="4"]::after,
+.demo-screen-inspect__crystal[data-rarity="4"]::after {
+  border-color: rgba(187, 134, 252, 0.5);
+}
+
+.demo-screen-inspect__crystal[data-tier="3"],
+.demo-screen-inspect__crystal[data-rarity="3"] {
+  border-color: var(--ak-signal-info);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ak-signal-info) 20%, transparent) 0%, rgba(0, 22, 32, 0.75) 80%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--ak-signal-info) 38%, transparent), inset 0 0 10px color-mix(in srgb, var(--ak-signal-info) 18%, transparent);
+}
+
+.demo-screen-inspect__crystal[data-tier="3"]::after,
+.demo-screen-inspect__crystal[data-rarity="3"]::after {
+  border-color: color-mix(in srgb, var(--ak-signal-info) 50%, transparent);
+}
+
+.demo-screen-inspect__info {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.demo-screen-inspect__name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.demo-screen-inspect__sub {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  color: rgba(247, 247, 244, 0.6);
+  letter-spacing: 0.08em;
+}
+
+.demo-screen-inspect__section {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.demo-screen-inspect__sec-title {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--demo-accent-text);
+  text-transform: uppercase;
+}
+
+.demo-screen-inspect__sec-body {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(247, 247, 244, 0.85);
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.demo-screen-inspect__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.demo-screen-inspect__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  color: var(--ak-signal-action);
+}
+
+.demo-screen-feedback {
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--ak-signal-action) 15%, transparent);
+  border: 1px solid var(--ak-signal-action);
+  color: var(--ak-signal-action);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.demo-screen-clearance {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--ak-terminal-accent);
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--ak-terminal-accent);
+  background: color-mix(in srgb, var(--ak-terminal-accent) 10%, transparent);
+}
+
+/* ── PRTS 交互层：开机序列 + 战术准星 ─────────────────────────────────── */
+
+/* 顶栏中段的实时读数：时钟与视口。不加分隔符——两段 mono 数字自己站得住。 */
+.demo-status {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-left: auto;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+/* 阅读进度发丝线：固定在视口顶端，填的是「当前分类读到哪里」。 */
+.demo-progress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 60;
+  height: 2px;
+  pointer-events: none;
+}
+
+.demo-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--ak-signal-info);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 90ms linear;
+}
+
+/* 预览区扫描：分类切换后光带扫过一次，像在读这块组件。 */
+.demo-tune-preview {
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-tune-preview::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--ak-signal-info) 14%, transparent), transparent);
+  transform: translate3d(0, -100%, 0);
+  animation: demo-scan 780ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes demo-scan {
+  from { transform: translate3d(0, -100%, 0); }
+  to { transform: translate3d(0, 100%, 0); }
+}
+
+/* 开机：CRT 显像管点亮 → 终端自检 → 横向收拢。 */
+.demo-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 480ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.demo-boot[data-phase='out'] {
+  clip-path: inset(50% 0 50% 0);
+}
+
+/* 显像层：从一条亮线展开成整屏。只动 transform / filter，不动文字。 */
+.demo-boot__crt {
+  position: absolute;
+  inset: 0;
+  background: var(--demo-canvas);
+  transform-origin: center;
+  animation: demo-boot-crt 560ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@keyframes demo-boot-crt {
+  0% { transform: scaleY(0.004); filter: brightness(2.8); }
+  45% { transform: scaleY(0.004); filter: brightness(2.8); }
+  72% { transform: scaleY(1.04); filter: brightness(1.35); }
+  100% { transform: scaleY(1); filter: brightness(1); }
+}
+
+/* 面板在显像之后才浮上来。 */
+.demo-boot__panel {
+  animation: demo-boot-panel 360ms var(--demo-motion-ease) 300ms both;
+}
+
+@keyframes demo-boot-panel {
+  from { opacity: 0; transform: translate3d(0, 0.5rem, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* 扫描光带：只动 transform。 */
+.demo-boot__scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--ak-signal-info) 12%, transparent), transparent);
+  transform: translate3d(0, -100%, 0);
+  animation: demo-boot-scan 1.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes demo-boot-scan {
+  from { transform: translate3d(0, -100%, 0); }
+  to { transform: translate3d(0, 100%, 0); }
+}
+
+.demo-boot__panel {
+  display: grid;
+  gap: 1rem;
+  width: min(36rem, calc(100vw - 3rem));
+}
+
+.demo-boot__brand {
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: clamp(2.2rem, 7vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-align: center;
+}
+
+.demo-boot__lines {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  list-style: none;
+}
+
+.demo-boot__line {
+  display: flex;
+  gap: 0.55rem;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: demo-boot-type 260ms steps(var(--boot-chars)) both;
+}
+
+.demo-boot__caret {
+  opacity: 0.6;
+}
+
+/* 打字机：clip-path 逐字显现，不触发布局。 */
+@keyframes demo-boot-type {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+.demo-boot__bar {
+  height: 2px;
+  background: color-mix(in srgb, var(--ak-signal-info) 16%, transparent);
+  overflow: hidden;
+}
+
+.demo-boot__bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--ak-signal-info);
+  transform-origin: left center;
+  animation: demo-boot-bar 760ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes demo-boot-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* 准星：叠加在原生光标之上的一层 HUD，不替换光标。 */
+.demo-hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms linear;
+  will-change: transform;
+}
+
+.demo-hud[data-visible='true'] { opacity: 1; }
+
+/* 落在输入框里就隐去，把位置让给文字光标。 */
+.demo-hud[data-editing='true'] { opacity: 0; }
+
+.demo-hud__corner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--ak-signal-info);
+  opacity: 0.5;
+  transition:
+    transform 180ms var(--demo-motion-ease),
+    opacity 180ms var(--demo-motion-ease),
+    border-color 180ms var(--demo-motion-ease);
+}
+
+.demo-hud__corner--tl { top: -9px; left: -9px; border-right: 0; border-bottom: 0; }
+.demo-hud__corner--tr { top: -9px; right: -9px; border-left: 0; border-bottom: 0; }
+.demo-hud__corner--bl { bottom: -9px; left: -9px; border-right: 0; border-top: 0; }
+.demo-hud__corner--br { bottom: -9px; right: -9px; border-left: 0; border-top: 0; }
+
+/* 锁定到可交互件：角标收拢并转成动作黄。 */
+.demo-hud[data-locked='true'] .demo-hud__corner {
+  border-color: var(--ak-signal-action);
+  opacity: 1;
+  transform: scale(0.68);
+}
+
+.demo-hud__dot {
+  position: absolute;
+  top: -9px;
+  left: -9px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.45;
+  background:
+    linear-gradient(var(--ak-signal-info), var(--ak-signal-info)) center / 1px 100% no-repeat,
+    linear-gradient(var(--ak-signal-info), var(--ak-signal-info)) center / 100% 1px no-repeat;
+}
+
+.demo-hud__readout {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  padding-left: 8px;
+  border-left: 2px solid var(--ak-signal-info);
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate3d(-6px, 0, 0);
+  transition:
+    opacity 140ms linear,
+    transform 200ms var(--demo-motion-ease);
+}
+
+.demo-hud[data-has-label='true'] .demo-hud__readout {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* 遥测：目标尺寸与底色，只在锁定可交互件时出现。 */
+.demo-hud__spec {
+  position: absolute;
+  top: 32px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 8px;
+  border-left: 2px solid color-mix(in srgb, var(--ak-signal-info) 55%, transparent);
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate3d(-6px, 0, 0);
+  transition:
+    opacity 140ms linear,
+    transform 200ms var(--demo-motion-ease);
+}
+
+.demo-hud[data-locked='true'] .demo-hud__spec {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.demo-hud__swatch {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+}
+
+/* 锁定框：罩住指针下的交互件，四角靶标。 */
+.demo-hud__lock {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 399;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms linear;
+}
+
+.demo-hud__lock[data-visible='true'] { opacity: 1; }
+
+.demo-hud__lock-corner {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ak-signal-action);
+}
+
+.demo-hud__lock-corner--tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.demo-hud__lock-corner--tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.demo-hud__lock-corner--bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.demo-hud__lock-corner--br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+/* 终端回执：复制动作的可见回音（做了什么 / 多大 / 何时）。 */
+.demo-receipts {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  z-index: 450;
+  display: grid;
+  gap: 0.5rem;
+  max-width: min(26rem, calc(100vw - 2.5rem));
+  pointer-events: none;
+}
+
+.demo-receipt {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.6rem 0.85rem 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  border-left: 2px solid var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-surface-sunken) 92%, transparent);
+  backdrop-filter: blur(10px);
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  animation: demo-receipt-in 320ms var(--demo-motion-ease-spatial) both;
+}
+
+.demo-receipt__mark {
+  color: var(--ak-signal-info);
+  font-size: 0.6rem;
+  line-height: 1.7;
+}
+
+.demo-receipt__body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.demo-receipt__label {
+  color: var(--ak-signal-info);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.demo-receipt__detail {
+  overflow-wrap: anywhere;
+  color: var(--demo-text-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+
+/* 倒计时线与 LIFETIME 同长：2600ms。 */
+.demo-receipt__timer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--ak-signal-info);
+  transform-origin: left center;
+  animation: demo-receipt-timer 2600ms linear both;
+}
+
+@keyframes demo-receipt-in {
+  from { opacity: 0; transform: translate3d(-0.75rem, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes demo-receipt-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* ── 全屏检视：预览面板长成整屏 ─────────────────────────────────────── */
+
+.demo-block__inspect {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: start;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    color var(--demo-motion-fast) var(--demo-motion-ease),
+    border-color var(--demo-motion-fast) var(--demo-motion-ease),
+    background-color var(--demo-motion-fast) var(--demo-motion-ease);
+}
+
+.demo-block__inspect:hover {
+  border-color: var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-signal-info) 8%, transparent);
+  color: var(--demo-accent-text);
+}
+
+.demo-block__inspect:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-block__inspect-glyph {
+  font-size: 0.85rem;
+  letter-spacing: 0;
+}
+
+.demo-inspect {
+  position: fixed;
+  inset: 0;
+  z-index: 390;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  background: color-mix(in srgb, var(--demo-canvas) 88%, transparent);
+  backdrop-filter: blur(6px);
+  animation: demo-inspect-in 260ms var(--demo-motion-ease) both;
+}
+
+@keyframes demo-inspect-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.demo-inspect__frame {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(100%, 92rem);
+  height: min(100%, 90vh);
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  border-top: 2px solid var(--ak-signal-info);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-inspect__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken-2);
+}
+
+.demo-inspect__eyebrow {
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+}
+
+.demo-inspect__title {
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: 0.95rem;
+}
+
+.demo-inspect__close {
+  margin-left: auto;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.demo-inspect__close:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-inspect__close:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-inspect__stage {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  /* 检视台面：极淡的战术网格，标记「这是被检视的内容区」。 */
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ak-signal-info) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ak-signal-info) 4%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* 面板与检视框共用同一个转场名：浏览器负责把前者补间成后者。 */
+.demo-tune-preview-shell { view-transition-name: demo-preview; }
+.demo-tune-preview-shell[hidden] { display: none; }
+.demo-inspect__frame { view-transition-name: demo-preview; }
+
+::view-transition-group(demo-preview) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.27, 1.06, 0.18, 1);
+}
+
+/* ── 指南视图：站点自己的说明书 ───────────────────────────────────────── */
+
+.demo-guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 2.5vw, 2rem);
+  background: color-mix(in srgb, var(--demo-canvas) 90%, transparent);
+  backdrop-filter: blur(8px);
+  animation: demo-guide-in 240ms var(--demo-motion-ease) both;
+}
+
+@keyframes demo-guide-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.demo-guide-panel {
+  display: grid;
+  width: min(100%, 64rem);
+  max-height: calc(100dvh - 2 * clamp(0.75rem, 2.5vw, 2rem));
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  border-top: 2px solid var(--ak-signal-info);
+  background: var(--ak-surface-sunken);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 35%);
+}
+
+.demo-guide {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.demo-guide__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--ak-signal-info);
+}
+
+.demo-guide__title {
+  margin: 0.35rem 0 0.55rem;
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.demo-guide__lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--demo-text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.demo-guide__back {
+  flex: none;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text);
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.demo-guide__back:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-guide__back:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-guide__body {
+  display: grid;
+  gap: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+.demo-guide__section {
+  display: grid;
+  gap: 0.8rem;
+  padding-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  border-top: 1px solid var(--demo-hairline);
+}
+
+.demo-guide__section h2 {
+  margin: 0;
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.demo-guide__section p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--demo-text);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+.demo-guide__list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.3rem 0 0;
+}
+
+.demo-guide__row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+  gap: 0.35rem 1.25rem;
+  align-items: baseline;
+}
+
+.demo-guide__row dt {
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.demo-guide__row dd {
+  margin: 0;
+  color: var(--demo-text);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* 代码片段 */
+.demo-snippet {
+  margin: 0.4rem 0 0;
+  border: 1px solid var(--demo-hairline);
+  background: var(--demo-code-bg);
+}
+
+.demo-snippet__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--demo-hairline);
+  background: var(--demo-code-head);
+}
+
+.demo-snippet__label {
+  color: var(--demo-accent-text);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.demo-snippet__copy {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.demo-snippet__copy:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-snippet__copy:focus-visible {
+  outline: 2px solid var(--ak-signal-info);
+  outline-offset: 2px;
+}
+
+.demo-snippet__code {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  overflow: auto;
+  color: var(--ak-text-primary);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .demo-catalogue { grid-template-columns: minmax(0, 1fr); }
+
+  .demo-rail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .demo-rail__list {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--demo-hairline);
+    /* 横向滚动时用边缘渐隐说明「还有内容」，否则被截断的分类名看起来像坏掉。 */
+    mask-image: linear-gradient(90deg, transparent 0, #000 0.85rem, #000 calc(100% - 0.85rem), transparent 100%);
+  }
+
+  .demo-rail__item {
+    flex: 0 0 auto;
+    width: auto;
+    border: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .demo-rail__item[aria-current] { border-bottom-color: var(--ak-signal-info); }
+}
+
+@media (max-width: 768px) {
+  .ak-screen .ak-screen__panel {
+    max-height: none;
+    min-height: 12rem;
+  }
+
+  .demo-screen-dashboard {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .demo-screen-search {
+    min-width: min(14rem, 100%);
+  }
+  .ak-screen .ak-screen__split {
+    grid-template-rows: minmax(16rem, min(48vh, 26rem)) auto;
+    min-height: max-content;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-screen-meta-row {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+}
+
+/* ── llms.txt 视觉与模态弹窗 ────────────────────────────────────────────── */
+
+.demo-spec-dot {
+  font-size: 0.6rem;
+  color: var(--demo-accent-text);
+}
+
+dialog.demo-screen-dialog::backdrop,
+dialog.demo-llm-dialog::backdrop {
+  background: transparent;
+}
+
+.demo-llm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: ak-dialog-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.demo-llm-modal {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  width: min(64rem, 100%);
+  height: min(52rem, 90vh);
+  border: 1px solid var(--ak-border);
+  border-top: 3px solid var(--ak-signal-info);
+  background: var(--ak-surface-canvas);
+  clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
+  box-shadow: var(--ak-shadow-panel);
+}
+
+.demo-llm-modal__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--ak-surface-sunken-2);
+  border-bottom: 1px solid var(--demo-hairline);
+}
+
+.demo-llm-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--ak-text-primary);
+}
+
+.demo-llm-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.demo-llm-modal__feedback {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--demo-text-muted);
+  font-size: 0.78rem;
+}
+
+.demo-llm-modal__feedback:not(:empty) {
+  margin: 0 1.25rem;
+  padding: 0.45rem 0.65rem;
+  border-left: 2px solid var(--ak-signal-info);
+  background: color-mix(in srgb, var(--ak-signal-info) 8%, transparent);
+  color: var(--demo-text-strong);
+}
+
+.demo-raw-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--demo-hairline);
+  background: transparent;
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    color var(--demo-motion-fast) var(--demo-motion-ease),
+    border-color var(--demo-motion-fast) var(--demo-motion-ease);
+}
+
+.demo-raw-link:hover {
+  border-color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
+}
+
+.demo-llm-modal__body {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ak-text-primary);
+  background: var(--ak-surface-canvas);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── 焦距与底图处理：微质感展示行 ────────────────────────────────────────── */
+
+/* 卡片样例：网格对齐。此前 `.demo-grid` 没有样式，卡片按 inline-block 流排，
+   高矮不齐、选中卡还会撑满整行。 */
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--ak-space-4, 1rem);
+  align-items: start;
+  width: 100%;
+}
+
+.demo-surface-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+  gap: var(--ak-space-4, 1rem);
+  width: 100%;
+}
+
+.demo-surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 9.5rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken-2);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.demo-surface p {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--demo-text-muted);
+  line-height: 1.45;
+}
+
+.demo-surface--stack {
+  gap: 0.5rem;
+}
+
+.demo-mosaic-host {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 3.5rem;
+  background: repeating-linear-gradient(45deg, #182026 0 10px, #12181d 10px 20px);
+  border: 1px solid var(--ak-border);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--ak-signal-action);
+  overflow: hidden;
+}
+
+.demo-backdrop-host {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 3.5rem;
+  background:
+    radial-gradient(circle at 30% 50%, var(--ak-signal-info) 0%, transparent 60%),
+    radial-gradient(circle at 75% 50%, var(--ak-signal-action) 0%, transparent 60%),
+    #171a1d;
+  border: 1px solid var(--ak-border);
+  overflow: hidden;
+}
+
+.demo-backdrop-under {
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+}
+
+.demo-backdrop-over {
+  position: absolute;
+  inset: 0.35rem 0.65rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ak-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ── TUNE workspace ─────────────────────────────────────────────────── */
+.demo-tune-workspace {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.demo-tune-workspace[data-tuning="true"] {
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 18rem);
+  --demo-workspace-height: min(65dvh, 40rem);
+}
+
+.demo-tune-workspace[data-tuning="true"] .demo-tune-preview,
+.demo-tune-workspace[data-tuning="true"] .demo-tune-panel {
+  box-sizing: border-box;
+  max-height: var(--demo-workspace-height);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--demo-hairline) transparent;
+}
+
+.demo-tune-workspace[hidden],
+.demo-tune-panel[hidden],
+.demo-code-container[hidden] { display: none; }
+
+.demo-tune-preview-shell { min-width: 0; }
+.demo-tune-workspace .demo-tune-preview-toggle { display: none; }
+.demo-tune-preview-toggle[hidden] { display: none !important; }
+.demo-tune-workspace .demo-tune-preview-toggle:focus-visible { outline-color: var(--demo-text-strong); }
+
+.demo-tune-preview {
+  min-width: 0;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  background: color-mix(in srgb, var(--ak-surface-sunken-2) 72%, transparent);
+  overflow: auto;
+  animation: demo-view-enter 200ms var(--demo-motion-ease);
+}
+
+.demo-tune-preview > * + * { margin-block-start: 1rem; }
+
+.demo-tune-panel {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-tune-fields {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  animation: demo-view-enter 160ms var(--demo-motion-ease);
+}
+
+.demo-tune-panel .ak-label {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.demo-tune-panel .ak-input,
+.demo-tune-panel .ak-select { width: 100%; min-width: 0; }
+
+.demo-tune-panel .demo-tune-instance {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: 0.25rem 0.75rem;
+  background: var(--ak-surface-sunken);
+}
+
+.demo-tune-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
