@@ -1,0 +1,1052 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 方舟档案 / 记录层（records）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/arknights/
+//  （module.css · rich-text.css · voice.css · dossier.css · archive.css · dialogue.css · item.css）
+//
+//  类名与上游逐字一致（.ak-module__story / .ak-voice__play / .ak-dossier / .ak-redacted …）。
+//  上游的 --ak-bg-surface / --ak-fg-* / --ak-accent … 一律换成 ak-ui 的语义令牌：
+//    --ak-bg-surface   → --ak-surface-sunken      --ak-fg          → --ak-text-primary
+//    --ak-bg-surface-2 → --ak-surface-sunken-2    --ak-fg-secondary→ --ak-text-secondary
+//    --ak-bg-inverse   → --ak-surface-inverse     --ak-fg-inverse  → --ak-text-inverse
+//    --ak-accent       → --ak-signal-info         --ak-link        → --ak-signal-info
+//    --ak-focus        → --ak-focus-color         --ak-font-body   → --ak-font-sans
+//  本库没有对应令牌的上游色值（游戏内的模组型号色 / 富文本语义色）落成**组件作用域内**
+//  的局部自定义属性，见下方「局部令牌」。
+//  两套主题（terminal / archive）共用同一份规则：颜色一律走语义令牌，
+//  浅色主题的差异由令牌本身承担，partial 不开第二个主题分支。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 局部令牌 ────────────────────────────────────────────────────────────
+// 上游有、本库没有对应项的值：游戏内的模组型号色 / 富文本语义色。
+// 都落成组件作用域内的自定义属性（不动全局令牌表），两主题共用同一份。
+.ak-module,
+.ak-rich-text,
+.ak-rt-vup,
+.ak-rt-vdown,
+.ak-rt-rem,
+.ak-rt-kw,
+.ak-rt-imp,
+.ak-rt-drop,
+.ak-rt-enemy,
+.ak-rt-gild,
+.ak-rt-acrem,
+.ak-rt-level,
+.ak-rt-talpu,
+.ak-rt-term,
+.ak-delta-up,
+.ak-delta-down,
+.ak-voice,
+.ak-voice-list,
+.ak-dossier,
+.ak-archive,
+.ak-dialogue,
+.ak-item-list {
+  // 游戏内的模组型号色（上游 --ak-red-600 / --ak-blue-500 / --ak-green-500 / --ak-yellow-600 / --ak-purple-500）
+  --ak-module-purple: #9266b2;
+
+  // 富文本语义色（上游 --ak-rt-*）：按本库的语义令牌混出两主题都可读的一档
+  --ak-rt-vup: color-mix(in srgb, var(--ak-signal-info, #0098dc) 72%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-vdown: color-mix(in srgb, var(--ak-signal-danger, #d0421c) 76%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-rem: color-mix(in srgb, var(--ak-signal-action, #b86f00) 72%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-kw: color-mix(in srgb, var(--ak-signal-info, #0098dc) 60%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-imp: color-mix(in srgb, var(--ak-signal-danger, #d40000) 78%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-drop: color-mix(in srgb, var(--ak-signal-info, #0098dc) 48%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-enemy: color-mix(in srgb, var(--ak-signal-danger, #c22f2f) 78%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-gild: color-mix(in srgb, var(--ak-signal-success, #1f8f5f) 60%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-acrem: var(--ak-text-secondary, #727272);
+  --ak-rt-level: color-mix(in srgb, var(--ak-signal-action, #9a7b00) 72%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-talpu: var(--ak-rt-vup);
+
+  // 中文小字的字号下限（上游 --ak-fs-cjk-min）
+  --ak-fs-cjk-min: 10px;
+}
+
+// ── 富文本 Rich text ────────────────────────────────────────────────────
+// 呈现层：增益 / 减益 / 提醒 / 关键词 / 重要 / 敌方 / 镀层 / 关卡名 / 潜能加成 / 术语
+.ak-rt-vup,
+.ak-buff {
+  color: var(--ak-rt-vup);
+  font-weight: 600;
+}
+
+.ak-rt-vdown,
+.ak-debuff {
+  color: var(--ak-rt-vdown);
+  font-weight: 600;
+}
+
+.ak-rt-rem,
+.ak-rem {
+  color: var(--ak-rt-rem);
+  font-weight: 600;
+}
+
+.ak-rt-kw,
+.ak-kw {
+  color: var(--ak-rt-kw);
+  font-weight: 600;
+}
+
+.ak-rt-imp,
+.ak-imp {
+  color: var(--ak-rt-imp);
+  font-weight: 700;
+}
+
+.ak-rt-drop,
+.ak-drop {
+  color: var(--ak-rt-drop);
+}
+
+.ak-rt-enemy,
+.ak-enemy {
+  color: var(--ak-rt-enemy);
+  font-weight: 600;
+}
+
+.ak-rt-gild,
+.ak-gild {
+  color: var(--ak-rt-gild);
+}
+
+.ak-rt-acrem,
+.ak-acrem {
+  color: var(--ak-rt-acrem);
+}
+
+.ak-rt-level,
+.ak-level {
+  color: var(--ak-rt-level);
+  font-weight: 700;
+}
+
+.ak-rt-talpu,
+.ak-talpu {
+  color: var(--ak-rt-talpu);
+}
+
+.ak-rt-term,
+.ak-term {
+  border-bottom: 1px dashed currentcolor;
+  cursor: help;
+}
+
+.ak-rt-pn,
+.ak-pn {
+  font-style: italic;
+}
+
+// 富文本里的小标题（上游没有这一层，本库补的）
+.ak-rt-heading {
+  margin: 0.6em 0 0.3em;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+// 数值变化对比
+.ak-delta-up::after {
+  content: "▲";
+  margin-left: 2px;
+  color: var(--ak-rt-vup);
+  font-size: 0.7em;
+}
+
+.ak-delta-down::after {
+  content: "▼";
+  margin-left: 2px;
+  color: var(--ak-rt-vdown);
+  font-size: 0.7em;
+}
+
+// ── 模组 Module ─────────────────────────────────────────────────────────
+// 结构：.ak-module[data-color] > .ak-module__img + .ak-module__main( head + story + more )
+//        + .ak-module__body( table.ak-module__stages + .ak-module__tasks + table.ak-module__unlock )
+.ak-module {
+  --_bar: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px 16px;
+  padding: 14px;
+  margin: 0 0 var(--ak-space-4);
+  background: var(--ak-surface-sunken, #f5f5f5);
+  border: 1px solid var(--ak-border);
+
+  &[data-color="red"] {
+    --_bar: var(--ak-signal-danger, #c82a36);
+  }
+
+  &[data-color="blue"] {
+    --_bar: var(--ak-signal-info, #0098dc);
+  }
+
+  &[data-color="green"] {
+    --_bar: var(--ak-signal-success, #2fac78);
+  }
+
+  &[data-color="yellow"] {
+    --_bar: var(--ak-signal-action, #ffc90e);
+  }
+
+  &[data-color="purple"] {
+    --_bar: var(--ak-module-purple);
+  }
+}
+
+// 中性占位面：没有模组图时也不塌成空盒子
+.ak-module__img {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  background: #1d1f20;
+
+  img,
+  svg {
+    max-width: 92%;
+    max-height: 92%;
+    object-fit: contain;
+  }
+}
+
+.ak-module__main {
+  min-width: 0;
+}
+
+.ak-module__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: 8px;
+}
+
+.ak-module__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  background: var(--_bar);
+  color: #1d1f20;
+  font-family: var(--ak-font-display);
+  font-size: var(--ak-fs-sm);
+  font-weight: 800;
+  font-variant-numeric: lining-nums;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  img,
+  svg {
+    height: 16px;
+    width: auto;
+  }
+
+  small {
+    font-family: var(--ak-font-label);
+    font-size: 0.72em;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    opacity: 0.85;
+  }
+}
+
+.ak-module__name,
+:is(h1, h2, h3, h4, h5, h6).ak-module__name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.ak-module__hint {
+  padding: 3px 6px;
+  border: 1px solid var(--ak-border-strong);
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  cursor: help;
+}
+
+// 定高可滚动而不是截断成三行加省略号：不展开也读得到全文
+.ak-module__story {
+  max-height: calc(1.7em * 5);
+  overflow-y: auto;
+  color: var(--ak-text-secondary, #454647);
+  font-size: var(--ak-fs-sm);
+  line-height: 1.7;
+
+  p {
+    margin: 0 0 0.6em;
+  }
+
+  p:last-child {
+    margin: 0;
+  }
+}
+
+.ak-module__main.is-open .ak-module__story {
+  max-height: none;
+  overflow: visible;
+}
+
+.ak-module__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--ak-signal-info, #0072a8);
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+
+  > input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  // 开关本身是 0×0 的隐形复选框，键盘焦点画在整个 label 上
+  &:has(> input:focus-visible) {
+    outline: 2px solid var(--ak-focus-color, #ffd800);
+    outline-offset: 2px;
+  }
+}
+
+.ak-module__more > input:checked ~ .off,
+.ak-module__more > input:not(:checked) ~ .on {
+  display: none;
+}
+
+.ak-module__body {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 12px;
+}
+
+.ak-module__stages,
+.ak-module__unlock {
+  width: 100%;
+  border: 1px solid var(--ak-border);
+  border-collapse: collapse;
+  font-size: var(--ak-fs-sm);
+  line-height: 1.6;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border-top: 1px solid var(--ak-border-subtle);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: var(--ak-surface-sunken-2, #ebebeb);
+    border-top: 0;
+    border-bottom: 1px solid var(--ak-border-strong);
+    color: var(--ak-text-secondary, #454647);
+    font-family: var(--ak-font-sans, sans-serif);
+    font-size: var(--ak-fs-xs);
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  tbody tr:first-child > * {
+    border-top: 0;
+  }
+
+  .lv {
+    width: 96px;
+    white-space: nowrap;
+  }
+
+  .stats {
+    width: 150px;
+  }
+}
+
+.ak-module__lv {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1;
+
+  > i {
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  > i > b {
+    width: 12px;
+    height: 6px;
+    background: color-mix(in srgb, var(--ak-surface-sunken-2, #ebebeb) 86%, var(--ak-text-primary, #1b1d1f));
+
+    &.on {
+      background: var(--_bar);
+    }
+  }
+}
+
+.ak-module__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-variant-numeric: tabular-nums;
+
+  > span {
+    white-space: nowrap;
+  }
+}
+
+.ak-module__kicker {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 3px 6px;
+  background: var(--ak-surface-inverse, #fdfdfb);
+  color: var(--ak-text-inverse, #1b1d1f);
+  font-family: var(--ak-font-label);
+  font-size: max(10px, var(--ak-fs-cjk-min));
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+
+.ak-module__tasks {
+  padding: 8px 12px;
+  background: var(--ak-surface-sunken-2, #ebebeb);
+  font-size: var(--ak-fs-sm);
+
+  > ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+  }
+
+  li {
+    margin: 2px 0;
+  }
+}
+
+.ak-module__req {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .ak-trust,
+  .ak-elite {
+    font-size: var(--ak-fs-xs);
+  }
+}
+
+.ak-module__stage {
+  display: inline-flex;
+  gap: 2px;
+
+  > i {
+    width: 22px;
+    height: 6px;
+    background: color-mix(in srgb, var(--ak-surface-sunken-2, #ebebeb) 86%, var(--ak-text-primary, #1b1d1f));
+
+    &.on {
+      background: var(--ak-signal-info, #0098dc);
+    }
+  }
+}
+
+.ak-module__mission {
+  color: var(--ak-text-secondary, #454647);
+  font-size: var(--ak-fs-xs);
+}
+
+// ── 语音 Voice ──────────────────────────────────────────────────────────
+// .ak-voice > .ak-voice__play / .ak-voice__download + <div>( title + body )
+.ak-voice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ak-border-subtle);
+
+  > .ak-voice__play,
+  > .ak-voice__download {
+    flex: 0 0 auto;
+  }
+
+  > div {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.ak-voice__play {
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--ak-surface-inverse, #fdfdfb);
+  color: var(--ak-text-inverse, #fff);
+  cursor: pointer;
+
+  &::before {
+    content: "";
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    border-style: solid;
+    border-width: 6px 0 6px 10px;
+    border-color: transparent transparent transparent currentcolor;
+  }
+
+  &.is-playing::before {
+    width: 10px;
+    height: 12px;
+    margin: 0;
+    border: 0;
+    border-right: 3px solid currentcolor;
+    border-left: 3px solid currentcolor;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--ak-signal-info, #0098dc);
+    color: var(--ak-text-inverse, #fff);
+  }
+
+  // 没有音频地址：压暗，悬停不反色
+  &:disabled {
+    background: var(--ak-surface-inverse, #fdfdfb);
+    color: var(--ak-text-inverse, #fff);
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.ak-voice__download {
+  all: unset;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--ak-surface-inverse, #fdfdfb);
+  color: var(--ak-text-inverse, #fff);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--ak-signal-info, #0098dc);
+    color: var(--ak-text-inverse, #fff);
+  }
+}
+
+.ak-voice__download-glyph {
+  width: 16px;
+  height: 16px;
+}
+
+// all: unset 把作用域的焦点环（:where，零特指度）也压掉了，这里补回来
+.ak-voice__play:focus-visible,
+.ak-voice__download:focus-visible {
+  outline: 2px solid var(--ak-focus-color, #ffd800);
+  outline-offset: 2px;
+}
+
+.ak-voice__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ak-voice__text {
+  font-size: var(--ak-fs-sm);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+// 解锁 / 显示条件：标题下面单独一行的灰标
+.ak-voice__cond {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-bottom: 4px;
+  padding: 3px 5px;
+  background: color-mix(in srgb, var(--ak-surface-sunken-2, #ebebeb) 86%, var(--ak-text-primary, #1b1d1f));
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-label);
+  font-size: max(10px, var(--ak-fs-cjk-min));
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.ak-voice__wave {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+
+  > i {
+    width: 2px;
+    height: 40%;
+    background: var(--ak-signal-info, #0098dc);
+  }
+}
+
+// 播放中：条拉满 14px、从底边起伏，五条错开相位才像声波
+.is-playing ~ * .ak-voice__wave > i {
+  height: 100%;
+  transform-origin: bottom;
+  animation: ak-bars 1s ease-in-out infinite;
+}
+
+.is-playing ~ * .ak-voice__wave > i:nth-child(2) {
+  animation-delay: -0.6s;
+}
+
+.is-playing ~ * .ak-voice__wave > i:nth-child(3) {
+  animation-delay: -0.2s;
+}
+
+.is-playing ~ * .ak-voice__wave > i:nth-child(4) {
+  animation-delay: -0.8s;
+}
+
+.is-playing ~ * .ak-voice__wave > i:nth-child(5) {
+  animation-delay: -0.4s;
+}
+
+@keyframes ak-bars {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scaleY(0.4);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-playing ~ * .ak-voice__wave > i {
+    animation: none;
+    transform: none;
+  }
+}
+
+.ak-voice-list {
+  margin: 0 0 var(--ak-space-4);
+  background: var(--ak-surface-sunken, #f5f5f5);
+  border: 1px solid var(--ak-border);
+
+  > .ak-voice:last-child {
+    border-bottom: 0;
+  }
+
+  > .ak-voice:hover {
+    background: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 6%, transparent);
+  }
+}
+
+// 切换条：文本（多选）与语种（单选，带 CV 名）
+.ak-voice-toolbar {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  column-gap: var(--ak-space-4);
+}
+
+.ak-voice-langs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 var(--ak-space-3);
+
+  > .ak-overline {
+    flex: none;
+    align-self: flex-start;
+    line-height: 28px;
+  }
+}
+
+.ak-voice-langs__opts {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ak-voice-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--ak-border-strong);
+  background: transparent;
+  color: var(--ak-text-secondary, #454647);
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+
+  small {
+    color: inherit;
+    font-family: var(--ak-font-label);
+    font-size: max(10px, var(--ak-fs-cjk-min));
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    border-color: var(--ak-text-secondary, #454647);
+    color: var(--ak-text-primary, #1b1d1f);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ak-focus-color, #ffd800);
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    border-color: var(--ak-signal-info, #0098dc);
+    background: color-mix(in srgb, var(--ak-signal-info, #0098dc) 12%, transparent);
+    color: var(--ak-text-primary, #1b1d1f);
+  }
+}
+
+// ── 档案 / 剧情文本块 Dossier ───────────────────────────────────────────
+.ak-dossier {
+  position: relative;
+  padding: 16px 20px;
+  background: var(--ak-surface-sunken, #f5f5f5);
+  border: 1px solid var(--ak-border);
+  font-size: var(--ak-fs-sm);
+  line-height: 1.85;
+
+  p {
+    margin: 0 0 0.8em;
+    white-space: pre-line;
+  }
+
+  p:last-child {
+    margin: 0;
+  }
+
+  &.is-locked {
+    > *:not(.ak-dossier__title) {
+      filter: blur(4px);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: "🔒 " attr(data-unlock);
+      position: absolute;
+      display: grid;
+      place-items: center;
+      font-family: var(--ak-font-sans, sans-serif);
+      font-size: var(--ak-fs-sm);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--ak-text-secondary, #454647);
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent 0 8px,
+        var(--ak-stripe-color, rgba(0, 0, 0, 0.08)) 8px 16px
+      );
+      inset: 44px 0 0;
+    }
+  }
+}
+
+.ak-dossier__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ak-border);
+  font-weight: 800;
+
+  .ak-en {
+    color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+    font-size: 0.8em;
+  }
+}
+
+.ak-dossier__unlock {
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-label);
+  font-size: max(10px, var(--ak-fs-cjk-min));
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// 涂黑文本：悬停 / 聚焦 / 点按都显出
+.ak-redacted {
+  background: var(--ak-text-primary, #1b1d1f);
+  color: transparent;
+  user-select: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible,
+  &.is-revealed {
+    color: var(--ak-surface-canvas, #f5f5f5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ak-focus-color, #ffd800);
+    outline-offset: 2px;
+  }
+}
+
+// ── 档案类卡片 Archive ──────────────────────────────────────────────────
+// .ak-archive > .ak-archive__head( kicker + title + req ) + .ak-archive__body + [.ak-archive__foot]
+.ak-archive {
+  margin: 0 0 var(--ak-space-3);
+  background: var(--ak-surface-sunken, #f5f5f5);
+  border: 1px solid var(--ak-border);
+}
+
+.ak-archive__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  min-height: 40px;
+  padding: 6px 14px 6px 12px;
+  background: var(--ak-surface-sunken-2, #ebebeb);
+  border: 0 solid var(--ak-border);
+  border-width: 0 0 1px var(--ak-bar-w, 4px);
+  border-image: linear-gradient(to right, var(--ak-signal-info, #0098dc) 4px, var(--ak-border) 4px) 0 0 1 4;
+}
+
+.ak-archive__kicker {
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-overline);
+  font-weight: 700;
+  letter-spacing: var(--ak-tracking-overline, 0.14em);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ak-archive__title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font-size: var(--ak-fs-body);
+  font-weight: 800;
+}
+
+.ak-archive__req {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--ak-text-secondary, #454647);
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 600;
+  line-height: 1;
+
+  > .ak-overline {
+    margin-right: 2px;
+  }
+}
+
+.ak-archive__body {
+  padding: 14px 16px;
+  font-size: var(--ak-fs-sm);
+  line-height: 1.85;
+
+  p {
+    margin: 0 0 0.8em;
+    white-space: pre-line;
+  }
+
+  p:last-child {
+    margin: 0;
+  }
+}
+
+.ak-archive__foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 10px 16px;
+  background: var(--ak-surface-sunken-2, #ebebeb);
+  border-top: 1px solid var(--ak-border-subtle);
+  font-size: var(--ak-fs-xs);
+
+  > .ak-overline {
+    margin-right: -10px;
+  }
+}
+
+.ak-archive__group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.ak-archive__play {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 12px;
+  background: var(--ak-surface-inverse, #fdfdfb);
+  color: var(--ak-text-inverse, #fff);
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--ak-signal-info, #0098dc);
+    color: var(--ak-text-inverse, #fff);
+  }
+
+  // 渲染成 <a> 时，宿主 / 正文的 a:visited、a:active (0,1,1) 压得过 all: unset 后的 (0,1,0) 颜色
+  &:is(:visited, :active) {
+    color: var(--ak-text-inverse, #fff);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ak-focus-color, #ffd800);
+    outline-offset: 2px;
+  }
+
+  > .ak-voice__play {
+    pointer-events: none;
+  }
+}
+
+.ak-archive__play:hover > .ak-voice__play {
+  background: transparent;
+  color: inherit;
+}
+
+// ── 剧情对话 Dialogue ───────────────────────────────────────────────────
+.ak-dialogue {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  font-size: var(--ak-fs-sm);
+
+  > dt {
+    margin: 0;
+    color: var(--ak-signal-info, #0098dc);
+    font-weight: 800;
+    text-align: right;
+  }
+
+  > dd {
+    margin: 0;
+  }
+
+  > dt.narrator,
+  > dd.narrator {
+    color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+    font-style: italic;
+  }
+}
+
+// ── 道具列表 Item list ──────────────────────────────────────────────────
+// ⚠️ 只移植列表容器：上游的 .ak-item（游戏道具图标 + 底框 + 角标）依赖游戏素材，
+// 库里的 AkItem 是「材料方块」，两者不是一回事，这里不动既有实现。
+.ak-item-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+// ── 窄屏 ────────────────────────────────────────────────────────────────
+@media (max-width: 639px) {
+  .ak-module {
+    grid-template-columns: 64px 1fr;
+    padding: 10px;
+
+    .ak-module__img {
+      width: 64px;
+      height: 64px;
+    }
+
+    .ak-module__stages .stats {
+      width: auto;
+    }
+
+    .ak-module__stages .lv,
+    .ak-module__unlock .lv {
+      width: auto;
+    }
+  }
+
+  // 标题和播放 / 下载钮排成一行，解锁条件 + 台词换到下一行占满整宽
+  .ak-voice {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 8px;
+
+    > div {
+      display: contents;
+    }
+
+    > div > .ak-voice__title {
+      flex: 1 1 0;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+
+    > div > :is(.ak-voice__body, .ak-voice__text) {
+      flex: 0 0 100%;
+      min-width: 0;
+    }
+  }
+}

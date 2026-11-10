@@ -22,6 +22,8 @@ export interface AkMenuItem {
   disabled?: boolean
   /** Applies the library's danger signal to destructive actions. */
   destructive?: boolean
+  /** Marks the entry as the current one (`.ak-menu__item.is-active`). */
+  active?: boolean
   /** Optional keyboard hint shown at the trailing edge. */
   shortcut?: ReactNode
 }
@@ -94,9 +96,10 @@ function MenuEntries({ items, close }: { items: readonly AkMenuItem[]; close: ()
           key={index}
           type="button"
           role="menuitem"
-          className="ak-menu__item"
+          className={cx('ak-menu__item', item.active && 'is-active')}
           disabled={item.disabled}
           data-destructive={item.destructive || undefined}
+          aria-current={item.active ? 'true' : undefined}
           onClick={() => {
             item.onSelect?.()
             close()
@@ -116,6 +119,10 @@ export interface AkDropdownMenuProps {
   label: ReactNode
   /** Menu entries, rendered in order. */
   items: readonly AkMenuItem[]
+  /**
+   * 浮层对齐方式：`start` 靠触发器左缘，`right` 靠右（`.ak-menu--right`）。
+   */
+  align?: 'start' | 'right'
   /** Extra class for the trigger-and-menu wrapper. */
   className?: string
   /** 尺寸档：一次同时缩触发器与每条菜单项，两者不会失同步。 */
@@ -129,7 +136,7 @@ export interface AkDropdownMenuProps {
  * dismissal close the menu and hand focus back to the trigger; top-layer
  * placement remains native browser behavior.
  */
-export function AkDropdownMenu({ label, items, className, size = 'md', tokens }: AkDropdownMenuProps) {
+export function AkDropdownMenu({ label, items, align = 'start', className, size = 'md', tokens }: AkDropdownMenuProps) {
   const [open, setOpen] = useState(false)
   const menuId = useId().replace(/:/g, '')
   const panelRef = useRef<HTMLDivElement>(null)
@@ -169,7 +176,7 @@ export function AkDropdownMenu({ label, items, className, size = 'md', tokens }:
   }
 
   return (
-    <span {...sizeAttrs(size)} className={cx('ak-menu-anchor', className)} style={tokenStyle(tokens)}>
+    <span {...sizeAttrs(size)} className={cx('ak-menu-anchor', 'ak-dropdown', className)} style={tokenStyle(tokens)}>
       <button
         id={`${menuId}-trigger`}
         ref={triggerRef}
@@ -187,7 +194,7 @@ export function AkDropdownMenu({ label, items, className, size = 'md', tokens }:
       >
         {label}<span aria-hidden="true">▾</span>
       </button>
-      <MenuSurface id={menuId} className="ak-menu--anchored" aria-labelledby={`${menuId}-trigger`} surfaceRef={panelRef} returnFocusRef={triggerRef} open={open} onOpenChange={onOpenChange} onKeyDown={moveFocus} {...sizeAttrs(size)}>
+      <MenuSurface id={menuId} className={cx('ak-menu--anchored', align === 'right' && 'ak-menu--right')} aria-labelledby={`${menuId}-trigger`} surfaceRef={panelRef} returnFocusRef={triggerRef} open={open} onOpenChange={onOpenChange} onKeyDown={moveFocus} {...sizeAttrs(size)}>
         <MenuEntries items={items} close={() => setOpen(false)} />
       </MenuSurface>
     </span>
@@ -423,7 +430,8 @@ export function AkCollapsible({ title, children, defaultOpen, open, onOpenChange
 
 /** A visual separator between menu groups. */
 export function AkMenuSeparator() {
-  return <hr className="ak-menu__separator" role="separator" />
+  // `.ak-menu__separator` 是本库的写法，`.ak-menu__sep` 是上游的写法；两者同义，都发。
+  return <hr className="ak-menu__separator ak-menu__sep" role="separator" />
 }
 
 /** Props for a labelled menu group. */
@@ -432,9 +440,23 @@ export interface AkMenuGroupProps {
   children: ReactNode
   /** Optional accessible name for this group. */
   label?: string
+  /**
+   * 分组小标题（`.ak-menu__label`）：一组条目上方的说明行。
+   */
+  title?: ReactNode
+  /**
+   * 抬头（`.ak-menu__head`）：组顶部的一行主体内容（用户菜单里的用户名那一行）。
+   */
+  head?: ReactNode
 }
 
 /** A semantic group for related menu entries. */
-export function AkMenuGroup({ children, label }: AkMenuGroupProps) {
-  return <div role="group" aria-label={label} className="ak-menu__group">{children}</div>
+export function AkMenuGroup({ children, label, title, head }: AkMenuGroupProps) {
+  return (
+    <div role="group" aria-label={label} className="ak-menu__group">
+      {head ? <div className="ak-menu__head">{head}</div> : null}
+      {title ? <div className="ak-menu__label">{title}</div> : null}
+      {children}
+    </div>
+  )
 }

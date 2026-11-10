@@ -1,0 +1,341 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 干员 / 敌人数据卡（arknights · operators）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/arknights/
+//    op-card.css · op-row.css · enemy.css
+//
+//  上游类名原样保留（.ak-op-card__portrait / .ak-op-row__name / .ak-enemy__level …），
+//  只把上游的 --ak-bg-surface / --ak-fg / --ak-accent / --ak-red-* 换成 ak-ui 的令牌。
+//  没有对应令牌的上游色值落成**组件作用域内**的局部自定义属性（见本文件末尾）。
+//  两套主题（terminal / archive）共用同一份规则：颜色一律走语义令牌，
+//  浅色主题的差异由令牌本身承担，partial 不再开第二个主题分支。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 干员卡 Op card ────────────────────────────────────────────────────
+.ak-op-card {
+  --_w: 128px;
+
+  display: block;
+  position: relative;
+  width: var(--_w);
+  overflow: hidden;
+  background: var(--ak-surface-sunken);
+  border: 1px solid var(--ak-border);
+  color: var(--ak-text-primary);
+  text-decoration: none;
+  transition:
+    transform var(--ak-motion-base) var(--ak-ease-standard),
+    border-color var(--ak-motion-base) var(--ak-ease-standard),
+    box-shadow var(--ak-motion-base) var(--ak-ease-standard);
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--ak-signal-info);
+    box-shadow: var(--ak-shadow-card);
+    color: var(--ak-text-primary);
+    text-decoration: none;
+  }
+
+  // 整块是链接：宿主的 a:visited / a:active（0,1,1）压得过 .ak-op-card 的前景色
+  &:is(:visited, :active) {
+    color: var(--ak-text-primary);
+  }
+
+  &:focus-visible {
+    outline: var(--ak-focus-width) solid var(--ak-focus-color);
+    outline-offset: var(--ak-focus-offset);
+  }
+
+  &--sm {
+    --_w: 88px;
+
+    .ak-op-card__name {
+      padding: 4px 6px;
+      font-size: var(--ak-fs-xs);
+    }
+  }
+
+  &--lg {
+    --_w: 180px;
+  }
+
+  // 稀有度色条与 1px 框直角拼接（border-image，斜接会切出一道小斜边）
+  &--rail {
+    border-left-width: 3px;
+    border-image: linear-gradient(to right, var(--ak-r, var(--ak-border)) 3px, var(--ak-border) 3px) 1 1 1 3;
+  }
+
+  &--rail:hover {
+    border-image-source: linear-gradient(
+      to right,
+      var(--ak-r, var(--ak-signal-info)) 3px,
+      var(--ak-signal-info) 3px
+    );
+  }
+
+  // 当前项：强调色描边
+  &.is-current {
+    border-color: var(--ak-signal-info);
+    box-shadow: inset 0 0 0 1px var(--ak-signal-info);
+  }
+}
+
+// 头像底 = 稀有度色 + 渐变（--ak-r / --ak-r-fade 由 [data-rarity] 给）
+.ak-op-card__portrait {
+  display: block;
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background:
+    var(
+      --ak-r-fade,
+      linear-gradient(180deg, color-mix(in srgb, var(--ak-text-primary) 14%, transparent), transparent)
+    )
+    var(--ak-r, var(--ak-surface-sunken-2));
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// 没有头像时的中性占位块：留一层斜纹底，稀有度底色仍从底下透出来
+.ak-op-card__portrait-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--ak-text-primary) 7%, transparent) 0 5px,
+      transparent 5px 10px
+    ),
+    color-mix(in srgb, var(--ak-surface-sunken) 76%, transparent);
+}
+
+// 四个角标都贴角、不内缩：角标垫半透明黑底，压在头像上才看得清
+.ak-op-card__rarity {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  box-sizing: content-box;
+  height: 12px;
+  padding: 1px;
+  background: rgb(0 0 0 / 60%);
+
+  img {
+    display: block;
+    width: auto;
+    height: 100%;
+  }
+
+  // 没有星级原图时的 CSS 星形：8px 字号（星 .9em）在 12px 高里居中
+  > .ak-rarity {
+    display: flex;
+    height: 100%;
+    font-size: 8px;
+  }
+}
+
+.ak-op-card__prof {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  background: rgb(0 0 0 / 60%);
+
+  img {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.ak-op-card__elite {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 3px;
+  box-sizing: border-box;
+  background: rgb(0 0 0 / 60%);
+
+  img {
+    width: auto;
+    height: 16px;
+  }
+}
+
+// 右上角空着的那一角：额外角标
+.ak-op-card__badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.ak-op-card__name {
+  display: block;
+  overflow: hidden;
+  padding: 6px 8px 7px;
+  font-size: var(--ak-fs-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ak-op-card__sub {
+  display: block;
+  margin-top: 3px;
+  color: var(--ak-text-secondary);
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-overline);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// ── 干员卡网格 Op grid ────────────────────────────────────────────────
+.ak-op-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--ak-space-3);
+
+  > .ak-op-card {
+    --_w: auto;
+
+    width: auto;
+  }
+}
+
+// ── 干员横向条目 Op row ───────────────────────────────────────────────
+.ak-op-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: var(--ak-focus-width) solid var(--ak-focus-color);
+    outline-offset: var(--ak-focus-offset);
+  }
+
+  // 头像底 = 稀有度色渐变（同 .ak-r-avatar），不再拉左边色条
+  .ak-avatar {
+    --ak-avatar-size: 36px;
+
+    background: var(--ak-r, var(--ak-surface-sunken-2)) var(--ak-r-fade, none);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ak-text-secondary);
+    font-size: var(--ak-fs-xs);
+  }
+}
+
+// ── 敌人卡 Enemy ──────────────────────────────────────────────────────
+.ak-enemy {
+  // 本组新增的组件作用域令牌（上游 --ak-red-700 / --ak-orange-500，本库无对应项）
+  --ak-enemy-boss: #a40000;
+  --ak-enemy-elite: #f49800;
+
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  padding: 10px;
+  background: var(--ak-surface-sunken);
+  border: 1px solid var(--ak-border);
+
+  &--boss,
+  &--elite {
+    border-left-width: 4px;
+    border-image: linear-gradient(to right, var(--_bar) 4px, var(--ak-border) 4px) 1 1 1 4;
+  }
+
+  &--boss {
+    --_bar: var(--ak-enemy-boss);
+  }
+
+  &--elite {
+    --_bar: var(--ak-enemy-elite);
+  }
+
+  &__img {
+    display: block;
+    width: 64px;
+    height: 64px;
+    overflow: hidden;
+    background: var(--ak-surface-sunken-2);
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__code {
+    color: var(--ak-text-secondary);
+    font-family: var(--ak-font-label);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  &__name {
+    font-weight: 800;
+  }
+
+  // 威胁度：菱形
+  &__level {
+    display: inline-flex;
+    gap: 2px;
+
+    > i {
+      display: block;
+      width: 12px;
+      height: 12px;
+      background: var(--ak-surface-sunken-2);
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+
+      &.on {
+        background: var(--ak-signal-danger);
+      }
+    }
+  }
+}
+
+// ── 动效降级 ──────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .ak-op-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

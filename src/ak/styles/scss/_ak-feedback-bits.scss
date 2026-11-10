@@ -1,0 +1,513 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 反馈小件族（feedback-bits）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/components/
+//
+//  覆盖：badge / chip / timeline / toast / tooltip / search / kbd / scope。
+//
+//  ⚠️ 一处刻意的改名：上游的提示气泡类名是 `.ak-tooltip`，但本库的
+//  `.ak-tooltip` 已经被 AkPopover（原生 popover API）占用（见 _ak-popover.scss）。
+//  两套外观（原生 popover 的方切角 + 本文件的纯 CSS 定位）不能共用一个类名，
+//  否则后加载的规则会盖掉前一个组件。因此本文件用上游同族的 `.ak-tip`，
+//  定位修饰符沿用 `.ak-tip--top` / `--bottom` / `--left` / `--right` /
+//  `--top-start` / `--top-end` / `--bottom-start` / `--bottom-end`。
+//  气泡挂在 `.ak-tip-anchor`（上游同名）上，定位不依赖任何 JS 定位库。
+//
+//  两主题（terminal 暗 / archive 亮）共用同一套规则，颜色全部由语义令牌派生。
+// ══════════════════════════════════════════════════════════════════════════
+
+@mixin ak-feedback-aliases {
+  --_fg: var(--ak-text-primary, #f8f8f5);
+  --_fg-muted: color-mix(in srgb, var(--ak-text-primary, #f8f8f5) 62%, transparent);
+  --_fg-subtle: color-mix(in srgb, var(--ak-text-primary, #f8f8f5) 38%, transparent);
+  --_surface: var(--ak-surface-sunken, #1a1b1c);
+  --_surface-2: var(--ak-surface-sunken-2, #232425);
+  --_surface-3: var(--ak-surface-raised, rgba(66, 66, 66, 0.92));
+  --_border: var(--ak-border, #2f3133);
+  --_border-strong: var(--ak-border-strong, #4a4c4f);
+  --_accent: var(--ak-signal-info, #18d1ff);
+  --_accent-fg: var(--ak-text-inverse, #1b1d1f);
+  // 强调色当**底色**用时掺一点当前主题文字色：暗主题下变浅（配深字），
+  // 亮主题下变深（配浅字）—— 两套底色上都够对比度。
+  --_accent-solid: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 80%, var(--ak-text-primary, #f8f8f5));
+  --_accent-subtle: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 12%, transparent);
+  --_info: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 82%, var(--ak-text-primary, #f8f8f5));
+  --_info-bg: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 12%, transparent);
+  --_success: color-mix(in srgb, var(--ak-signal-success, #46c47c) 62%, var(--ak-text-primary, #f8f8f5));
+  --_success-bg: color-mix(in srgb, var(--ak-signal-success, #46c47c) 14%, transparent);
+  --_warning: color-mix(in srgb, var(--ak-signal-action, #ffd800) 75%, var(--ak-text-primary, #f8f8f5));
+  --_warning-bg: color-mix(in srgb, var(--ak-signal-action, #ffd800) 14%, transparent);
+  --_danger: color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 80%, var(--ak-text-primary, #f8f8f5));
+  --_danger-bg: color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 14%, transparent);
+  // 次强调（上游 --ak-accent-2 = 黄）。黄底上的字必须是深的 —— 主题无关，
+  // 所以这一枚不走令牌，直接定值（两套主题的强调黄都很亮）。
+  --_accent-2: var(--ak-signal-action, #ffd800);
+  --_accent-2-fg: #1b1d1f;
+  --_radius-pill: 999px;
+  // 上游的层叠高度（--ak-z-tooltip / --ak-z-toast）
+  --_z-tooltip: 4000;
+  --_z-toast: 3000;
+}
+
+// ── 读屏专用文本（上游 utilities.css，本库此前没有） ────────────────────
+.ak-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ── Badge（计数徽标 / 未读点） ─────────────────────────────────────────
+// 默认黄（次强调「提示」）：未读数不是高危信息，红只留给危险与 NEW 角标。
+.ak-badge {
+  @include ak-feedback-aliases;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px 1px;
+  border-radius: var(--_radius-pill);
+  background: var(--_accent-2);
+  color: var(--_accent-2-fg);
+  font: 700 12px/1 var(--ak-font-sans, sans-serif);
+  font-variant-numeric: tabular-nums;
+
+  &--dot {
+    min-width: 8px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+  }
+
+  &--accent {
+    background: var(--_accent-solid);
+    color: var(--_accent-fg);
+  }
+
+  &--danger {
+    background: var(--_danger);
+    color: var(--ak-text-inverse, #1b1d1f);
+  }
+}
+
+// 徽标骑在别的元素右上角：外壳只负责定位，徽标本身的长相不变。
+.ak-badge-wrap {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+
+  > .ak-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    transform: translate(50%, -50%);
+    pointer-events: none;
+  }
+}
+
+// ── Chip（可交互的筛选芯片） ──────────────────────────────────────────
+.ak-chip {
+  @include ak-feedback-aliases;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--_border-strong);
+  background: var(--_surface);
+  color: var(--_fg-muted);
+  font: 500 var(--ak-fs-sm, 0.875rem) / 1 var(--ak-font-sans, sans-serif);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--ak-dur-fast, 150ms),
+    color var(--ak-dur-fast, 150ms),
+    background-color var(--ak-dur-fast, 150ms);
+
+  &:hover {
+    border-color: var(--_fg-muted);
+    color: var(--_fg);
+  }
+
+  &:focus-visible {
+    outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #ffd800);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    color: var(--ak-signal-disabled, #9c9c9c);
+    cursor: not-allowed;
+  }
+
+  &.is-active,
+  &[aria-pressed="true"] {
+    border-color: var(--_accent-solid);
+    background: var(--_accent-solid);
+    color: var(--_accent-fg);
+    font-weight: 600;
+
+    // 选中角标：绝对定位在左上角，不占据行内宽度
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-style: solid;
+      border-width: 5px 5px 0 0;
+      border-color: currentcolor transparent transparent;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  }
+}
+
+// ── Timeline（时间线） ────────────────────────────────────────────────
+.ak-timeline {
+  @include ak-feedback-aliases;
+
+  margin: 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--_border);
+  list-style: none;
+
+  > li {
+    position: relative;
+    margin: 0;
+    padding: 0 0 var(--ak-space-5, 1.5rem) var(--ak-space-4, 1rem);
+
+    // 菱形节点
+    &::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: -26px;
+      width: 10px;
+      height: 10px;
+      transform: rotate(45deg);
+      border: 2px solid var(--_fg-muted);
+      background: var(--_surface);
+    }
+  }
+
+  > li.is-active::before,
+  > li.is-done::before {
+    border-color: var(--_accent);
+    background: var(--_accent);
+  }
+
+  &__date {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--_fg-muted);
+    font: 600 var(--ak-fs-xs, 0.75rem) / 1 var(--ak-font-label, sans-serif);
+    letter-spacing: 0.04em;
+  }
+
+  &__title {
+    margin: 0 0 2px;
+    font-weight: 700;
+  }
+
+  &__desc {
+    color: var(--_fg-muted);
+    font-size: var(--ak-fs-sm, 0.875rem);
+  }
+}
+
+// ── Toast（轻提示） ───────────────────────────────────────────────────
+.ak-toasts {
+  @include ak-feedback-aliases;
+
+  position: fixed;
+  right: var(--ak-space-4, 1rem);
+  bottom: var(--ak-space-4, 1rem);
+  z-index: var(--_z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ak-space-2, 0.5rem);
+  max-width: min(92vw, 380px);
+}
+
+.ak-toast {
+  @include ak-feedback-aliases;
+
+  --_c: var(--_accent);
+
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ak-space-3, 0.75rem);
+  overflow: hidden;
+  padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
+  border: 1px solid var(--_border);
+  border-left-width: var(--ak-bar-w, 4px);
+  border-image: linear-gradient(to right, var(--_c) 4px, var(--_border) 4px) 1 1 1 4;
+  background: var(--_surface);
+  color: var(--_fg);
+  box-shadow: var(--ak-shadow-elevated, 0 10px 24px rgba(0, 0, 0, 0.38));
+  font-size: var(--ak-fs-sm, 0.875rem);
+  animation: ak-toast-slide-up var(--ak-motion-base, 200ms) var(--ak-ease-emphasized, cubic-bezier(0.2, 0.8, 0.2, 1));
+
+  &--success {
+    --_c: var(--_success);
+  }
+
+  &--warning {
+    --_c: var(--_warning);
+  }
+
+  &--danger {
+    --_c: var(--_danger);
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-weight: 700;
+  }
+
+  // 倒计时进度条：占满宽，时长跟本条的 --_dur
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    transform-origin: left;
+    background: var(--_c);
+    animation: ak-toast-shrink var(--_dur, 5s) linear forwards;
+  }
+
+  &.is-paused &__progress {
+    animation-play-state: paused;
+  }
+
+  // 关闭按钮（与面板族的 .ak-message__close 同款，不同类名）
+  &__close {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0 4px;
+    cursor: pointer;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ak-focus-color, #ffd800);
+      outline-offset: 2px;
+    }
+  }
+}
+
+@keyframes ak-toast-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ak-toast-shrink {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+// ── Tooltip（文字提示，纯 CSS 定位） ───────────────────────────────────
+// 载体给定位上下文，气泡按 placement 贴在触发元素的一边、间距 6px（同上游）。
+.ak-tip-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+
+  > .ak-tip {
+    width: max-content;
+    white-space: normal;
+    text-align: left;
+    font-weight: 400;
+  }
+}
+
+.ak-tip {
+  @include ak-feedback-aliases;
+
+  position: absolute;
+  z-index: var(--_z-tooltip);
+  width: max-content;
+  max-width: min(280px, calc(100vw - 36px));
+  padding: 6px 10px;
+  border-radius: 0;
+  background: var(--ak-surface-inverse, #fdfdfb);
+  box-shadow: var(--ak-shadow-card, 0 6px 18px rgba(0, 0, 0, 0.3));
+  color: var(--ak-text-inverse, #1b1d1f);
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs, 0.75rem);
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &--top {
+    bottom: calc(100% + 6px);
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  &--bottom {
+    top: calc(100% + 6px);
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  &--left {
+    top: 50%;
+    right: calc(100% + 6px);
+    translate: 0 -50%;
+  }
+
+  &--right {
+    top: 50%;
+    left: calc(100% + 6px);
+    translate: 0 -50%;
+  }
+
+  // 贴边对齐：-start 与触发元素左缘对齐，-end 右缘对齐
+  &--top-start {
+    bottom: calc(100% + 6px);
+    left: 0;
+  }
+
+  &--top-end {
+    bottom: calc(100% + 6px);
+    right: 0;
+  }
+
+  &--bottom-start {
+    top: calc(100% + 6px);
+    left: 0;
+  }
+
+  &--bottom-end {
+    top: calc(100% + 6px);
+    right: 0;
+  }
+
+  &--wide {
+    max-width: min(280px, calc(100vw - 36px));
+    line-height: 1.55;
+  }
+}
+
+// ── Kbd / Search ──────────────────────────────────────────────────────
+// 键帽：直角、1px 边、底边略重。
+.ak-kbd,
+.ak-search__kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--ak-border, #2f3133);
+  box-shadow: inset 0 -1px 0 var(--ak-border, #2f3133);
+  background: var(--ak-surface-sunken, #1a1b1c);
+  color: var(--ak-text-secondary, rgba(248, 248, 245, 0.68));
+  font: 600 10px/1 var(--ak-font-mono, monospace);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.ak-search {
+  @include ak-feedback-aliases;
+
+  position: relative;
+
+  > .ak-input,
+  > input {
+    padding-left: 34px;
+  }
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 16px;
+    height: 16px;
+    transform: translateY(-50%);
+    color: var(--_fg-muted);
+    pointer-events: none;
+  }
+
+  &__kbd {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+  }
+}
+
+// ── Scope（作用域根） ─────────────────────────────────────────────────
+// 局部主题：把本库的令牌挂到这一层（data-ak-theme="terminal" / "archive"），
+// 于是这一块子树换一套配色，而不用给每个组件单独改。
+.ak-scope {
+  @include ak-feedback-aliases;
+
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-body, 1rem);
+  line-height: 1.6;
+  color: var(--_fg);
+
+  // 局部主题的画布底色：否则暗色作用域里的浅色字落在宿主的白底上
+  &[data-ak-theme] {
+    background-color: var(--ak-surface-canvas, #111315);
+  }
+}
+
+// ── 减弱动效 ───────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .ak-chip {
+    transition: none;
+  }
+
+  .ak-toast {
+    animation: none;
+  }
+
+  .ak-toast__progress {
+    animation: none;
+  }
+}

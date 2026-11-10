@@ -43,6 +43,11 @@ export interface AkDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'tit
   closeOnBackdrop?: boolean
   /** 是否禁用 Esc 关闭。默认 false。 */
   disableEscape?: boolean
+  /**
+   * 是否使用上游的满屏档（`.ak-dialog--full`：96vw × 92vh，近乎铺满视口）。
+   * 满屏档会压过 `size` 给出的宽度档位。
+   */
+  full?: boolean
   /** 尺寸档：宽度上限、最大高度、内距与字号一起缩。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-dialog-w': '52rem' }`。 */
@@ -60,6 +65,7 @@ export function AkDialog({
   closable = true,
   closeOnBackdrop = true,
   disableEscape = false,
+  full = false,
   size = 'md',
   tokens,
   className,
@@ -120,9 +126,10 @@ export function AkDialog({
       {...(rest as HTMLAttributes<HTMLDialogElement>)}
       ref={ref}
       {...sizeAttrs(size)}
-      className={cx('ak-dialog', className)}
+      className={cx('ak-dialog', full && 'ak-dialog--full', className)}
       style={tokenStyle(tokens, style)}
       data-slot="ak-dialog"
+      data-full={full || undefined}
       onPointerDown={onPointerDown}
     >
       {(eyebrow || title || closable) ? (

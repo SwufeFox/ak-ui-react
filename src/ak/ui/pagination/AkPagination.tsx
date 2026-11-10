@@ -30,10 +30,39 @@ export interface AkPaginationProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   nextIcon?: ReactNode
   /** 循环：到首/末页时回卷。 */
   loop?: boolean
+  /**
+   * 页码形态：渲染一排页码按钮（`.ak-pagination__item`）而不是「上一 / 当前 / 下一」
+   * 三段式。当前页带 `.is-active`，被禁用的页码带 `.is-disabled`，中间跳过的页码
+   * 用 `.ak-pagination__ellipsis` 表示。缺省仍是三段式。
+   */
+  numbered?: boolean
+  /**
+   * 页码形态下不可点的页码（缺省时全部可点）。被禁用的页码会带 `.is-disabled`。
+   */
+  disabledPages?: readonly number[]
+  /**
+   * 页码形态下导航地标的无障碍名，默认 `Pagination`。
+   */
+  navLabel?: string
   /** 尺寸档：整体宽高、箭头区宽度、页码字号一起缩。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-pagination-w': '100%' }`。 */
   tokens?: AkTokens
+}
+
+/** 页码窗口：首尾 + 当前页附近，中间用省略号收口。 */
+function pageWindow(current: number, last: number): (number | 'ellipsis')[] {
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+  const pages = new Set<number>([1, last, current])
+  if (current - 1 > 1) pages.add(current - 1)
+  if (current + 1 < last) pages.add(current + 1)
+  const sorted = [...pages].sort((a, b) => a - b)
+  const out: (number | 'ellipsis')[] = []
+  sorted.forEach((page, index) => {
+    if (index > 0 && page - sorted[index - 1] > 1) out.push('ellipsis')
+    out.push(page)
+  })
+  return out
 }
 
 export function AkPagination({
@@ -46,6 +75,9 @@ export function AkPagination({
   previousIcon,
   nextIcon,
   loop = false,
+  numbered = false,
+  disabledPages,
+  navLabel = 'Pagination',
   size = 'md',
   tokens,
   className,
@@ -68,6 +100,72 @@ export function AkPagination({
 
   const disabled = (which: 'prev' | 'next') => (!loop && (which === 'prev' ? atFirst : atLast))
 
+  const prevButton = (
+    <button
+      type="button"
+      className="prev"
+      aria-label={previousLabel}
+      disabled={disabled('prev')}
+      onClick={() => go(current - 1)}
+    >
+      {previousIcon ?? <span aria-hidden="true">‹</span>}
+    </button>
+  )
+
+  const nextButton = (
+    <button
+      type="button"
+      className="next"
+      aria-label={nextLabel}
+      disabled={disabled('next')}
+      onClick={() => go(current + 1)}
+    >
+      {nextIcon ?? <span aria-hidden="true">›</span>}
+    </button>
+  )
+
+  if (numbered) {
+    const blocked = new Set(disabledPages ?? [])
+    return (
+      <div
+        {...rest}
+        {...sizeAttrs(size)}
+        className={cx('ak-pagination', className)}
+        // 页码形态下不需要三段式那块写死颜色的灰底，宽度也交给内容。
+        style={tokenStyle({ '--ak-pagination-bg': 'transparent', '--ak-pagination-w': 'auto' }, tokenStyle(tokens, style))}
+        data-slot="ak-pagination"
+        data-variant="numbers"
+        role="navigation"
+        aria-label={navLabel}
+      >
+        {prevButton}
+        {pageWindow(current, last).map((entry, index) =>
+          entry === 'ellipsis' ? (
+            <span key={`ellipsis-${index}`} className="ak-pagination__ellipsis" aria-hidden="true">
+              …
+            </span>
+          ) : (
+            <button
+              key={entry}
+              type="button"
+              className={cx(
+                'ak-pagination__item',
+                entry === current && 'is-active',
+                blocked.has(entry) && 'is-disabled',
+              )}
+              aria-current={entry === current ? 'page' : undefined}
+              disabled={blocked.has(entry)}
+              onClick={() => go(entry)}
+            >
+              {entry}
+            </button>
+          ),
+        )}
+        {nextButton}
+      </div>
+    )
+  }
+
   return (
     <div
       {...rest}
@@ -76,15 +174,7 @@ export function AkPagination({
       style={tokenStyle(tokens, style)}
       data-slot="ak-pagination"
     >
-      <button
-        type="button"
-        className="prev"
-        aria-label={previousLabel}
-        disabled={disabled('prev')}
-        onClick={() => go(current - 1)}
-      >
-        {previousIcon ?? <span aria-hidden="true">‹</span>}
-      </button>
+      {prevButton}
 
       <div className="cur">
         {title ? <span className="title">{title}</span> : null}
@@ -98,15 +188,7 @@ export function AkPagination({
         <span className="number" aria-hidden="true">{String(current).padStart(2, '0')}</span>
       </div>
 
-      <button
-        type="button"
-        className="next"
-        aria-label={nextLabel}
-        disabled={disabled('next')}
-        onClick={() => go(current + 1)}
-      >
-        {nextIcon ?? <span aria-hidden="true">›</span>}
-      </button>
+      {nextButton}
     </div>
   )
 }

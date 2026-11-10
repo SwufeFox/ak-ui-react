@@ -11,17 +11,38 @@ import { cx, variantClass } from '../../lib/utils'
 
 // ── 分隔线 ──────────────────────────────────────────────────────────
 
+/**
+ * 分隔线形态档位。
+ *
+ * `accent` 左段是信号色渐变，`stripes` 整条换成 45° 斜纹带，`text` 是带标签的
+ * 发丝分隔线，`vertical` 是一根竖线。缺省是本库原有的「两侧不等长横线 + 居中标签」。
+ */
+export type AkDividerVariant = 'default' | 'accent' | 'stripes' | 'text' | 'vertical'
+
 export interface AkDividerProps extends HTMLAttributes<HTMLDivElement> {
   /** 居中的标签或图标。不传则只有两条不同宽度的横线。 */
   children?: ReactNode
+  /**
+   * 形态档位：`default` / `accent` / `stripes` / `text` / `vertical`。
+   * 分别发出 `.ak-divider--accent` / `.ak-divider--stripes` / `.ak-divider--text` /
+   * `.ak-divider--vertical`。`vertical` 与 `stripes` 形态下标签没有位置，会被隐藏。
+   */
+  variant?: AkDividerVariant
 }
 
 /**
  * 分隔线：两侧横线宽度不等（15% / 50%），中间是标签位 —— 上游刻意的非对称比例。
  */
-export function AkDivider({ className, children, ...rest }: AkDividerProps) {
+export function AkDivider({ variant = 'default', className, children, ...rest }: AkDividerProps) {
   return (
-    <div {...rest} className={cx('ak-divider', className)} data-slot="ak-divider" role="separator">
+    <div
+      {...rest}
+      className={cx('ak-divider', variantClass('ak-divider', variant), className)}
+      data-slot="ak-divider"
+      data-variant={variant}
+      role="separator"
+      aria-orientation={variant === 'vertical' ? 'vertical' : undefined}
+    >
       {children ? <span>{children}</span> : null}
     </div>
   )

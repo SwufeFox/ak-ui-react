@@ -7,15 +7,16 @@ import { cx, variantClass } from '../../lib/utils'
  * ⚠️ **上游都没有这几样**（只有 `.ak-r-avatar`，那是稀有度色轨垫在头像下的那层，
  * 被 `AkAvatar` 复用了）。所以这一组是本库补的，几何全部取自既有语汇。
  *
- * ⚠️ `AkAvatar` **刻意不做圆形**：本库的几何语言是直角
+ * ⚠️ `AkAvatar` **默认不做圆形**：本库的几何语言是直角
  * （decor 层注释原文：「不做圆角，不做辉光，也没有切角/斜切/斜带」）。
- * 圆形头像是通用后台语汇，不属于这里。要圆就自己给 `border-radius`，
- * 但默认不该是。
+ * 圆形头像是通用后台语汇，不属于这里 —— 所以要圆得显式开 `round`
+ * （对应上游的 `.ak-avatar--round`，上游也是显式选用，不是默认）。
+ * 默认不该是圆。
  */
 
 // ── 头像 ────────────────────────────────────────────────────────────
 
-export type AkAvatarSize = 'sm' | 'default' | 'lg' | 'xl'
+export type AkAvatarSize = 'xs' | 'sm' | 'default' | 'lg' | 'xl'
 
 export interface AkAvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
   /** 图片地址。给了就渲染 `<img>`，否则用 `fallback`。 */
@@ -24,9 +25,14 @@ export interface AkAvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'ch
   alt?: string
   /** 无图时的回退内容（通常是一个拉丁首字母）。 */
   fallback?: ReactNode
+  /** 尺寸档：xs 24 · sm 28 · default 40 · lg 56 · xl 80（px）。 */
   size?: AkAvatarSize
   /** 右上角切角（复用全局 `--ak-cut`）。 */
   cut?: boolean
+  /** 圆形。默认仍是本库的直角几何，只有确需时才开（与 `--cut` 互斥）。 */
+  round?: boolean
+  /** 右下角状态点（在线 / 可用）。纯视觉，含义要在旁边的文字里说出来。 */
+  status?: boolean
   /** 信号色描边（在线/告警那种）。 */
   accent?: boolean
   /** 压淡（离线/失效）。 */
@@ -39,6 +45,8 @@ export function AkAvatar({
   fallback,
   size = 'default',
   cut = false,
+  round = false,
+  status = false,
   accent = false,
   muted = false,
   className,
@@ -51,6 +59,7 @@ export function AkAvatar({
         'ak-avatar',
         variantClass('ak-avatar', size),
         cut && 'ak-avatar--cut',
+        round && 'ak-avatar--round',
         accent && 'ak-avatar--accent',
         muted && 'ak-avatar--muted',
         className,
@@ -67,6 +76,7 @@ export function AkAvatar({
           {fallback}
         </span>
       )}
+      {status ? <span className="ak-avatar__status" aria-hidden="true" /> : null}
     </span>
   )
 }
@@ -171,37 +181,60 @@ export interface AkBreadcrumbItem {
   label: ReactNode
   /** 链接地址。最后一项（当前页）通常不给。 */
   href?: string
+  /**
+   * 显式标记为当前页（渲染成 `aria-current="page"`）。
+   * 一项都没标时，最后一项自动当当前页 —— 同上游的做法。
+   */
+  current?: boolean
 }
+
+export type AkBreadcrumbSeparator = 'arrow' | 'chevron'
 
 export interface AkBreadcrumbProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
   items: AkBreadcrumbItem[]
   /** 读屏名。 */
   ariaLabel?: string
+  /**
+   * 分隔符形态：`arrow` 是本库默认的拉丁双箭头 `»`，
+   * `chevron` 是上游那种 CSS 画的小折角。
+   */
+  separator?: AkBreadcrumbSeparator
 }
 
 /**
  * 层级路径。分隔符用拉丁双箭头 `»` —— 本库已经在用这个字符表示路径/动作
  * （见 `AkChevrons`），不用 `/` 或 `>`。
  *
- * 最后一项渲染成当前页（非链接、加粗）。
+ * 最后一项渲染成当前页（非链接、加粗）；哪一项标了 `current` 就以它为准。
  */
-export function AkBreadcrumb({ items, ariaLabel = 'Breadcrumb', className, ...rest }: AkBreadcrumbProps) {
+export function AkBreadcrumb({ items, ariaLabel = 'Breadcrumb', separator = 'arrow', className, ...rest }: AkBreadcrumbProps) {
+  // 上游的做法：一项都没标 current 时，最后一项自动是当前页。
+  const hasExplicitCurrent = items.some((item) => item.current === true)
+
   return (
     <nav {...rest} className={className} data-slot="ak-breadcrumb" aria-label={ariaLabel}>
       {/* 列表属性（list-style / padding / 布局）都在 ol 上，nav 只当语义外壳 */}
-      <ol className="ak-breadcrumb">
+      <ol className={cx('ak-breadcrumb', separator === 'chevron' && 'ak-breadcrumb--chevron')}>
         {items.map((item, i) => {
           const isLast = i === items.length - 1
+          const isCurrent = item.current ?? (!hasExplicitCurrent && isLast)
           return (
             <li key={i} className="ak-breadcrumb__item">
-              {isLast || !item.href ? (
-                <span className="ak-breadcrumb__current" aria-current={isLast ? 'page' : undefined}>
-                  {item.label}
-                </span>
-              ) : (
-                <a className="ak-breadcrumb__link" href={item.href}>
+              {item.href ? (
+                <a
+                  className="ak-breadcrumb__link"
+                  href={item.href}
+                  aria-current={isCurrent ? 'page' : undefined}
+                >
                   {item.label}
                 </a>
+              ) : (
+                <span
+                  className={isCurrent ? 'ak-breadcrumb__current' : undefined}
+                  aria-current={isCurrent ? 'page' : undefined}
+                >
+                  {item.label}
+                </span>
               )}
             </li>
           )

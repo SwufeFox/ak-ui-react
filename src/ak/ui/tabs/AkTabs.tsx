@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react'
-import { cx } from '../../lib/utils'
+import { cx, variantClass } from '../../lib/utils'
 import { useInstanceId } from '../../lib/useId'
 import { useControllableState } from '../../lib/useControllableState'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
@@ -28,6 +28,14 @@ export interface AkTabsItem {
 // Tabs 与 Segmented 的 props 以前是**封闭**的：不继承 HTML 属性，所以
 // className 之外连 `id`、`data-*`、`style` 都传不进去。这里补上继承，
 // 并把与组件语义冲突的键（`children` / `onChange`）显式摘掉。
+/**
+ * 形态档位。
+ *
+ * `pill` 是一组浮起的药丸，`block` 是底边一条粗线 + 选中黑白反转，
+ * `vertical` 是列表在左、面板在右。缺省是本库原有的下划线式标签页。
+ */
+export type AkTabsVariant = 'default' | 'pill' | 'block' | 'vertical'
+
 export interface AkTabsProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onChange'> {
   /**
    * 读屏标签，默认 `Tabs`。
@@ -54,6 +62,11 @@ export interface AkTabsProps extends Omit<HTMLAttributes<HTMLElement>, 'children
   renderPanel?: (item: AkTabsItem) => ReactNode
   /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /**
+   * 形态档位：`default` / `pill` / `block` / `vertical`。
+   * 分别发出 `.ak-tabs--pill` / `.ak-tabs--block` / `.ak-tabs--vertical`。
+   */
+  variant?: AkTabsVariant
   /** 尺寸档：标签高度、内边距、字号与面板内距一起缩。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-tabs-width': '100%' }`。 */
@@ -69,6 +82,7 @@ export function AkTabs({
   onValueChange,
   renderPanel,
   className,
+  variant = 'default',
   size = 'md',
   tokens,
   style,
@@ -131,9 +145,10 @@ export function AkTabs({
     <section
       {...rest}
       {...sizeAttrs(size)}
-      className={cx('ak-tabs', className)}
+      className={cx('ak-tabs', variantClass('ak-tabs', variant), className)}
       style={tokenStyle(tokens, style)}
       data-slot="ak-tabs"
+      data-variant={variant}
     >
       <div className="ak-tabs__list" role="tablist" aria-label={nativeAriaLabel ?? (ariaLabel || 'Tabs')}>
         {items.map((item, index) => (
@@ -219,6 +234,14 @@ export interface AkSegmentedProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   onValueChange?: (value: string) => void
   /** 附加类名，会拼到组件的 BEM 根类之后。 */
   className?: string
+  /**
+   * 是否使用上游的加大档（`.ak-segmented--lg`：36px 高 / 56px 起步 / 正文号）。
+   *
+   * ⚠️ 与 `size` 分开：`size` 走本库的 `data-ak-size` 尺寸系统（sm/md/lg），
+   *    这一枚是上游形态档的**显式选择**，两者正交 —— 写 `size="lg"` 不会自动
+   *    发出 `--lg`，因为那会改动现有调用方的渲染结果。
+   */
+  large?: boolean
   /** 尺寸档：每项的最小宽高、内边距与字号一起缩。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖，例如 `{ '--ak-segmented-inset': '0' }`。 */
@@ -233,6 +256,7 @@ export function AkSegmented({
   defaultValue,
   onValueChange,
   className,
+  large = false,
   size = 'md',
   tokens,
   style,
@@ -294,7 +318,7 @@ export function AkSegmented({
     <div
       {...rest}
       {...sizeAttrs(size)}
-      className={cx('ak-segmented', className)}
+      className={cx('ak-segmented', large && 'ak-segmented--lg', className)}
       style={tokenStyle(tokens, style)}
       data-slot="ak-segmented"
       role="group"

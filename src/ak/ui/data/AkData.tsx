@@ -1,5 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../../lib/utils'
+import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
 /**
  * 读数与状态小件。
@@ -72,18 +73,96 @@ export function AkLevel({ label, children, prefixIcon, className, ...rest }: AkL
 
 // ── 加载 ────────────────────────────────────────────────────────────
 
+/**
+ * 加载指示器的形态档位。
+ *
+ * `default` 是本库的方舟方框（`.ak-loading`），`ripple` 是上游的菱形涟漪
+ * （`.ak-spinner`），`bars` 是上游的三根跳条（`.ak-loader`）。
+ */
+export type AkSpinnerVariant = 'default' | 'ripple' | 'bars'
+
+/**
+ * 上游的单枚占位形状。
+ *
+ * `text` 一行文字、`rect` 长块、`square` 方块、`circle` 圆片，
+ * 分别发出 `.ak-skeleton--text` / `--rect` / `--square` / `--circle`。
+ */
+export type AkSkeletonShape = 'default' | 'text' | 'rect' | 'square' | 'circle'
+
 export interface AkSpinnerProps extends HTMLAttributes<HTMLSpanElement> {
   /** 颜色，喂给 `--ak-loading-color`。 */
   color?: string
   /** 无障碍名。默认 `Loading`。 */
   label?: string
+  /**
+   * 指示器形态：
+   * `default` 是本库的方舟方框（`.ak-loading`），`ripple` 是上游的菱形涟漪（`.ak-spinner`），
+   * `bars` 是上游的三根跳条（`.ak-loader`）。
+   */
+  variant?: AkSpinnerVariant
+  /**
+   * 指示器下方的说明文字。给了就把指示器与说明竖排包进 `.ak-spin`。
+   */
+  description?: ReactNode
 }
 
 /**
  * 加载指示器。**外观来自上游**：一个 45° 旋转的方框叠一个旋转的方框（`ak-radio` 动画），
  * 不是通用圆环。想换圆环是这个库没有的东西，别假设它有。
+ *
+ * `variant="ripple"` / `variant="bars"` 是上游并列的另两枚指示器（菱形涟漪 / 三根跳条）。
  */
-export function AkSpinner({ color, label = 'Loading', className, ...rest }: AkSpinnerProps) {
+export function AkSpinner({ color, label = 'Loading', variant = 'default', description, className, style, ...rest }: AkSpinnerProps) {
+  const indicatorStyle = tokenStyle(
+    color ? ({ '--ak-loading-color': color, '--ak-spinner-color': color } as AkTokens) : undefined,
+    style,
+  )
+
+  if (variant === 'ripple' || variant === 'bars') {
+    if (variant === 'ripple') {
+      return (
+        <span
+          {...rest}
+          className={cx('ak-spinner', className)}
+          data-slot="ak-spinner"
+          role="status"
+          aria-label={label}
+          style={indicatorStyle}
+        />
+      )
+    }
+    return (
+      <span
+        {...rest}
+        className={cx('ak-loader', className)}
+        data-slot="ak-loader"
+        role="status"
+        aria-label={label}
+        style={indicatorStyle}
+      >
+        <i />
+        <i />
+        <i />
+      </span>
+    )
+  }
+
+  if (description) {
+    return (
+      <span
+        {...rest}
+        className={cx('ak-spin', className)}
+        data-slot="ak-spin"
+        role="status"
+        aria-label={label}
+        style={indicatorStyle}
+      >
+        <span className="ak-loading" />
+        <span className="ak-spin__desc">{description}</span>
+      </span>
+    )
+  }
+
   return (
     <span
       {...rest}
@@ -91,7 +170,7 @@ export function AkSpinner({ color, label = 'Loading', className, ...rest }: AkSp
       data-slot="ak-spinner"
       role="status"
       aria-label={label}
-      style={color ? ({ '--ak-loading-color': color, ...rest.style } as React.CSSProperties) : rest.style}
+      style={indicatorStyle}
     />
   )
 }
@@ -99,6 +178,14 @@ export function AkSpinner({ color, label = 'Loading', className, ...rest }: AkSp
 export interface AkSkeletonProps extends HTMLAttributes<HTMLDivElement> {
   /** 占位形状。`text` 一行高，`block` 一个方块，`track` 用上游的进度轨占位。 */
   variant?: 'text' | 'block' | 'track'
+  /**
+   * 上游的单枚占位形状（`.ak-skeleton--text` / `--rect` / `--square` / `--circle`）。
+   *
+   * ⚠️ 与 `variant` 分开：`variant="text"` 是本库的**多行**占位容器，
+   *    `.ak-skeleton--text` 是上游的**单行**占位 —— 两个类名长得像但不是一回事。
+   *    给了 `shape` 时以 `shape` 为准。
+   */
+  shape?: AkSkeletonShape
   /** 行数（仅 `text`）。 */
   lines?: number
   width?: string
@@ -112,8 +199,22 @@ export interface AkSkeletonProps extends HTMLAttributes<HTMLDivElement> {
  * `track` 用的是上游真实存在的 `.ak-loading-track`；`text` / `block` 是本库补的，
  * 用的是已有令牌（`--ak-surface-sunken` / `--ak-loading-track-color`），不是新造概念。
  */
-export function AkSkeleton({ variant = 'text', lines = 1, width, height, className, style, ...rest }: AkSkeletonProps) {
+export function AkSkeleton({ variant = 'text', shape = 'default', lines = 1, width, height, className, style, ...rest }: AkSkeletonProps) {
   const base: React.CSSProperties = { width, height, ...style }
+
+  if (shape !== 'default') {
+    return (
+      <div
+        {...rest}
+        className={cx(`ak-skeleton--${shape}`, className)}
+        data-slot="ak-skeleton"
+        data-variant={shape}
+        data-shape={shape}
+        style={base}
+        role="presentation"
+      />
+    )
+  }
 
   if (variant === 'track') {
     return (

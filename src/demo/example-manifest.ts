@@ -13,10 +13,13 @@ import controls from './examples/controls.tsx?raw'
 import forms from './examples/forms.tsx?raw'
 import readouts from './examples/readouts.tsx?raw'
 import collections from './examples/collections.tsx?raw'
+import operators from './examples/operators.tsx?raw'
+import skills from './examples/skills.tsx?raw'
+import panels from './examples/panels.tsx?raw'
 import { buildStandalone } from './example-export'
 import type { Locale } from './i18n'
 import type { TuneOverrides } from './example-tune'
-const sources: Record<number, string> = { 1: actions, 2: menus, 3: surfaces, 4: feedback, 5: inputs, 6: navigation, 7: effects, 8: gallery, 11: decor, 12: gameData, 13: controls, 14: forms, 15: readouts, 16: collections }
+const sources: Record<number, string> = { 1: actions, 2: menus, 3: surfaces, 4: feedback, 5: inputs, 6: navigation, 7: effects, 8: gallery, 11: decor, 12: gameData, 13: controls, 14: forms, 15: readouts, 16: collections, 18: operators, 19: skills, 20: panels }
 
 // Categories 9 (site), 10 (shell) and 17 (command) compose several authored modules,
 // so they have dedicated exporters (example-site-export.ts, example-source.ts and
@@ -91,6 +94,17 @@ export function exportCategory(id: number, locale: Locale, overrides: TuneOverri
       additionalSource = `import { playTactileSound } from '../../ak'\n`
       setup = `const [selectedTableRow, setSelectedTableRow] = useState(${value('selectedTableRow')}); const [tableStriped, setTableStriped] = useState(${value('tableStriped')}); const [tableTactical, setTableTactical] = useState(${value('tableTactical')}); const [tableSticky, setTableSticky] = useState(${value('tableSticky')}); const [tableSortKey, setTableSortKey] = useState<'name' | 'atk' | 'def'>(${value('tableSortKey')}); const [tableSortDir, setTableSortDir] = useState<'ascending' | 'descending' | 'none'>(${value('tableSortDir')}); const tableData = sortTableRows(tableSortKey, tableSortDir); const handleTableSort = (key: 'name' | 'atk' | 'def') => { playTactileSound('dial', 0.15); setTableSortDir(nextTableSort(tableSortKey, tableSortDir, key)); setTableSortKey(key) }`
       render = `{renderCollections({ t, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData }, tune)}`
+      break
+    case 18:
+      setup = `const [operatorPhase, setOperatorPhase] = useState(${value('operatorPhase')})`
+      render = `{renderOperators({ t, phase: operatorPhase, setPhase: setOperatorPhase }, tune)}`
+      break
+    case 19:
+      render = `{renderSkills({ t }, tune)}`
+      break
+    case 20:
+      setup = `const [panelOpen, setPanelOpen] = useState(${value('panelOpen')})`
+      render = `{renderPanels({ t, panelOpen, setPanelOpen }, tune)}`
       break
     default: throw new Error(`No standalone example for category ${id} (categories 9, 10 and 17 use dedicated exporters)`)
   }

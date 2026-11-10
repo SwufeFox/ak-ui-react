@@ -1,0 +1,165 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 步骤与浮动作族（steps）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/components/
+//
+//  覆盖：stepper（步骤条）/ fab（回到顶部）。
+//
+//  步骤条的序号由 CSS 计数器画（.ak-stepper 的 counter-reset + .ak-step 的
+//  counter-increment），组件不写序号文本 —— 与上游同构。
+//
+//  两主题（terminal 暗 / archive 亮）共用同一套规则，颜色全部由语义令牌派生。
+// ══════════════════════════════════════════════════════════════════════════
+
+@mixin ak-steps-aliases {
+  --_fg: var(--ak-text-primary, #f8f8f5);
+  --_fg-muted: color-mix(in srgb, var(--ak-text-primary, #f8f8f5) 62%, transparent);
+  --_surface: var(--ak-surface-sunken, #1a1b1c);
+  --_surface-2: var(--ak-surface-sunken-2, #232425);
+  --_surface-3: var(--ak-surface-raised, rgba(66, 66, 66, 0.92));
+  --_border: var(--ak-border, #2f3133);
+  --_border-strong: var(--ak-border-strong, #4a4c4f);
+  --_accent: var(--ak-signal-info, #18d1ff);
+  --_accent-fg: var(--ak-text-inverse, #1b1d1f);
+  // 强调色当**底色**用时掺一点当前主题文字色（暗底变浅配深字 / 亮底变深配浅字）
+  --_accent-solid: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 80%, var(--ak-text-primary, #f8f8f5));
+  // 上游的层叠高度（--ak-z-sticky）
+  --_z-sticky: 200;
+}
+
+// ── Stepper（步骤条） ──────────────────────────────────────────────────
+// 序号由计数器画，组件只给标题与状态。
+.ak-stepper {
+  @include ak-steps-aliases;
+
+  display: flex;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+  list-style: none;
+}
+
+.ak-step {
+  @include ak-steps-aliases;
+
+  position: relative;
+  flex: 1;
+  padding-top: 28px;
+  color: var(--_fg-muted);
+  font-size: var(--ak-fs-xs, 0.75rem);
+  text-align: center;
+
+  // 序号圆点
+  &::before {
+    content: counter(step);
+    counter-increment: step;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    transform: translateX(-50%);
+    border: 1px solid var(--_border-strong);
+    background: var(--_surface-3);
+    color: var(--_fg-muted);
+    font: 700 11px/1 var(--ak-font-label, sans-serif);
+  }
+
+  // 连线
+  &::after {
+    content: "";
+    position: absolute;
+    top: 11px;
+    left: calc(50% + 12px);
+    right: calc(-50% + 12px);
+    height: 1px;
+    background: var(--_border-strong);
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+
+  &.is-done::before,
+  &.is-active::before {
+    border-color: var(--_accent-solid);
+    background: var(--_accent-solid);
+    color: var(--_accent-fg);
+  }
+
+  &.is-done::after {
+    background: var(--_accent);
+  }
+
+  &.is-active {
+    color: var(--_fg);
+    font-weight: 700;
+  }
+}
+
+// ── FAB（回到顶部） ───────────────────────────────────────────────────
+.ak-fab {
+  @include ak-steps-aliases;
+
+  position: fixed;
+  right: var(--ak-space-5, 1.5rem);
+  bottom: var(--ak-space-5, 1.5rem);
+  z-index: var(--_z-sticky);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: var(--ak-surface-inverse, #fdfdfb);
+  box-shadow: var(--ak-shadow-card, 0 6px 18px rgba(0, 0, 0, 0.3));
+  color: var(--ak-text-inverse, #1b1d1f);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--ak-motion-base, 200ms) var(--ak-ease-emphasized, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    transform var(--ak-motion-base, 200ms) var(--ak-ease-emphasized, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    background-color var(--ak-dur-fast, 150ms);
+
+  // 隐藏时不可点、不可 Tab、读屏也跳过（淡出结束后才切 visibility）
+  &:not(.is-visible) {
+    visibility: hidden;
+  }
+
+  &.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  &:hover {
+    background: var(--_accent-solid);
+    color: var(--_accent-fg);
+  }
+
+  &:focus-visible {
+    outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #ffd800);
+    outline-offset: 2px;
+  }
+
+  // 贴最近的定位祖先右下（页面里某个滚动区域自己的回到顶部）
+  &.ak-fab--absolute {
+    position: absolute;
+    display: grid;
+  }
+
+  > svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// ── 减弱动效 ───────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .ak-fab {
+    transition: none;
+  }
+}

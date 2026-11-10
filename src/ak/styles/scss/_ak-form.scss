@@ -438,3 +438,69 @@
     left: calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1));
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 form.css 的状态与说明（移植）
+//
+//  上游的表单层给出四样东西：
+//    · .ak-help / .ak-help--error   控件下方的说明文字（错误态变红）
+//    · .ak-label .req               必填标记
+//    · .ak-input.is-valid           校验通过（绿边）
+//    · .ak-input.is-invalid         校验失败（红边）
+//
+//  本库已有 .ak-field__hint（字段提示）与 [aria-invalid="true"]（红边 + 辉光），
+//  **不重命名**；这里补的是上游写法与「校验通过」那一档。
+//
+//  ⚠️ 本库的 AkField 把 invalid 落到 data-invalid 上（而不是 .is-invalid），
+//     所以字段级两个写法都认。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 说明文字 ─────────────────────────────────────────────────────────
+.ak-help {
+  color: var(--ak-text-secondary, rgba(248, 248, 245, 0.65));
+  font-family: var(--ak-font-mono, monospace);
+  font-size: var(--ak-fs-xs, 0.75rem);
+  line-height: 1.5;
+}
+
+.ak-help--error {
+  color: var(--ak-signal-danger, #e33b3b);
+}
+
+// ── 必填标记 ─────────────────────────────────────────────────────────
+// 上游写 <span class="req">*</span>；这里同时给出不写标记的写法（--required
+// 自己画一颗星），两种都用同一枚颜色。
+.ak-label .req {
+  margin-inline-start: 0.25rem;
+  color: var(--ak-signal-danger, #e33b3b);
+}
+
+.ak-label--required::after {
+  content: "*";
+  margin-inline-start: 0.25rem;
+  color: var(--ak-signal-danger, #e33b3b);
+}
+
+// ── 字段级：出错时整组的信号色换成危险色 ─────────────────────────────
+.ak-field[data-invalid="true"],
+.ak-field.is-invalid {
+  --ak-field-signal: var(--ak-signal-danger, #e33b3b);
+
+  .ak-field__hint {
+    color: var(--ak-signal-danger, #e33b3b);
+  }
+}
+
+// ── 控件级：校验通过 / 校验失败 ─────────────────────────────────────
+.ak-input.is-valid,
+.ak-select.is-valid,
+.ak-textarea.is-valid {
+  border-color: var(--ak-signal-success, #46c47c);
+}
+
+.ak-input.is-invalid,
+.ak-select.is-invalid,
+.ak-textarea.is-invalid {
+  border-color: var(--ak-signal-danger, #e33b3b);
+  border-left-color: var(--ak-signal-danger, #e33b3b);
+}

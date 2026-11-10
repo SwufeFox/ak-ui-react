@@ -56,18 +56,27 @@ function isInteractiveTarget(target: EventTarget | null, root: EventTarget | nul
   return hit !== null && hit !== root
 }
 
-export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place' | 'tactical' | 'glass' | 'chassis'
+/**
+ * 外观档位。
+ *
+ * `flat` 无框、换成下沉底，`inset` 是内凹面，`accent-top` 在顶边加一条信号色带；
+ * 其余是本库原有的档位。
+ */
+export type AkCardVariant = 'default' | 'outline' | 'stripe' | 'place' | 'tactical' | 'glass' | 'chassis' | 'flat' | 'inset' | 'accent-top'
 
 export interface AkCardProps extends HTMLAttributes<HTMLElement> {
   /** 渲染标签，例如 'div' | 'article' | 'section' | 'li'。省略时，可按压且无嵌套控件的卡片会升级为原生 `<button>`。 */
   as?: ElementType
-  /** 外观档位：default / outline / stripe / place / tactical / glass / chassis。 */
+  /** 外观档位：default / outline / stripe / place / tactical / glass / chassis / flat / inset / accent-top。 */
   variant?: AkCardVariant
   /** 尺寸档：控制内边距、子块间距与标题字号。 */
   size?: AkControlSize
   /** 是否开启右上角 45° 战术切角。 */
   chamfer?: boolean
-  /** 是否开启悬停提亮/浮起动效。 */
+  /**
+   * 是否开启悬停提亮/浮起动效。
+   * 同时发出本库的 `.ak-card--hoverable` 与上游同义的 `.ak-card--hover`。
+   */
   hoverable?: boolean
   /** 是否为可交互卡片（具备鼠标指针、点击沉浸与键盘焦点）。 */
   interactive?: boolean
@@ -158,6 +167,8 @@ export function AkCard({
         variantClass('ak-card', variant),
         chamfer && 'ak-card--chamfer',
         hoverable && 'ak-card--hoverable',
+        // 上游的悬停档类名；与 --hoverable 同义，两个都发。
+        hoverable && 'ak-card--hover',
         interactive && 'ak-card--interactive',
         selected && 'ak-card--selected',
         className,

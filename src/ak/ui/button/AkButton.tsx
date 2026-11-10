@@ -19,6 +19,24 @@ export interface AkButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: AkControlSize
   /** 是否开启方舟经典右上角斜切角。 */
   chamfer?: boolean
+  /**
+   * 药丸形按钮（`.ak-button--pill`：两端全圆角）。
+   */
+  pill?: boolean
+  /**
+   * 文字链形态（`.ak-button--link`：无底无框，悬停下划线）。
+   */
+  link?: boolean
+  /**
+   * 仅图标形态（`.ak-button--icon`：正方形，宽 = 高，无横向内距）。
+   * 按钮仍需自带可访问名（`children` 或 `aria-label`）。
+   */
+  iconOnly?: boolean
+  /**
+   * 加载态（`.ak-button--loading` / `.is-loading`）：置 `aria-busy`、禁用激活，
+   * 并显示一枚居中的转圈指示。文字仍在 DOM 里（视觉上被转圈盖住），无障碍名不变。
+   */
+  loading?: boolean
   /** 副标题 / 战术代号（大写等宽小字，常用于双语排版如「部署 // DEPLOY」）。 */
   subtitle?: ReactNode
   /** 逐实例令牌覆盖，例如 `{ '--ak-button-bg': '#ff5e19' }`。 */
@@ -32,6 +50,10 @@ export function AkButton({
   variant = 'default',
   size = 'md',
   chamfer = false,
+  pill = false,
+  link = false,
+  iconOnly = false,
+  loading = false,
   subtitle,
   icon,
   iconEnd,
@@ -43,24 +65,35 @@ export function AkButton({
   sound,
   ...rest
 }: AkButtonProps) {
+  const isDisabled = loading || Boolean(rest.disabled)
+
   return (
     <button
       {...rest}
       type={type}
+      disabled={isDisabled || undefined}
+      aria-busy={loading || undefined}
       {...sizeAttrs(size)}
       data-slot="ak-button"
       data-variant={variant}
+      data-loading={loading || undefined}
       className={cx(
         'ak-button',
         variantClass('ak-button', variant),
         block && 'ak-button--block',
         chamfer && 'ak-button--chamfer',
+        pill && 'ak-button--pill',
+        link && 'ak-button--link',
+        iconOnly && 'ak-button--icon',
+        loading && 'ak-button--loading',
+        // 上游的加载态写法（`.ak-button.is-loading`），与本库的修饰类同义。
+        loading && 'is-loading',
         Boolean(subtitle) && 'ak-button--with-subtitle',
         className,
       )}
       style={tokenStyle(tokens, style)}
       onClick={(e) => {
-        if (rest.disabled) {
+        if (isDisabled) {
           e.preventDefault()
           return
         }

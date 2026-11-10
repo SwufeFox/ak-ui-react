@@ -22,6 +22,9 @@ export const CATEGORIES = [
   { id: 'components-15', title: 'ref.data.title' },
   { id: 'components-16', title: 'ref.collection.title' },
   { id: 'components-17', title: 'ref.command.title' },
+  { id: 'components-18', title: 'ref.operators.title' },
+  { id: 'components-19', title: 'ref.skills.title' },
+  { id: 'components-20', title: 'ref.panels.title' },
 ] as const satisfies readonly { id: string; title: MessageKey }[]
 
 export const CATEGORY_KEYWORDS: Record<string, readonly string[]> = {
@@ -42,6 +45,9 @@ export const CATEGORY_KEYWORDS: Record<string, readonly string[]> = {
   'components-15': ['data', 'san', 'sanity', 'counter', 'level', 'skeleton', 'spinner', '理智', '计数器', '关卡', '骨架屏', '加载中'],
   'components-16': ['collection', 'table', 'avatar', 'thumbnail', 'scrollarea', 'newslist', '表格', '头像', '缩略图', '滚动区', '快讯'],
   'components-17': ['command', 'screen', 'item', 'slot', '大屏', '指令牌', '材料方块', '槽位'],
+  'components-18': ['opcard', 'oprow', 'enemy', 'stage', 'event', 'hero', 'camp', 'range', 'phasetabs', 'materials', 'news', '干员', '敌人', '关卡', '活动', '势力', '攻击范围', '精英阶段', '材料'],
+  'components-19': ['skill', 'skillmatrix', 'skillsheet', 'sp', 'talent', 'talenttable', 'module', 'dossier', 'archive', 'voice', 'dialogue', 'richtext', '技能', '天赋', '模组', '档案', '密录', '语音', '对话', '富文本'],
+  'components-20': ['panel', 'collapse', 'heading', 'cbox', 'message', 'empty', 'stat', 'pathnav', 'badge', 'chip', 'timeline', 'toast', 'tooltip', 'search', 'kbd', 'scope', 'steps', 'backtop', '面板', '折叠', '标题', '信息条', '空状态', '统计', '面包屑', '徽标', '标签', '时间线', '提示', '搜索', '步骤'],
 }
 
 // Component names are indexed by their primary example, so searches lead to useful results.
@@ -63,4 +69,7 @@ export const CATEGORY_COMPONENTS: Record<(typeof CATEGORIES)[number]['id'], read
   'components-15': ['AkCounter', 'AkLevel', 'AkSpinner', 'AkSan', 'AkSanContainer', 'AkSkeleton', 'AkLoadingScreen', 'AkDialog'],
   'components-16': ['AkBreadcrumb', 'AkTable', 'AkAvatar', 'AkAvatarGroup', 'AkThumbnail', 'AkScrollArea', 'AkNewsList'],
   'components-17': ['AkCommandGrid', 'AkCommand', 'AkCommandGroup', 'AkSlot', 'AkItem', 'AkScreen'],
+  'components-18': ['AkOpCard', 'AkOpGrid', 'AkOpRow', 'AkEnemy', 'AkStage', 'AkStageCode', 'AkSanity', 'AkEvent', 'AkCountdown', 'AkHero', 'AkCamp', 'AkRange', 'AkPhaseTabs', 'AkMaterials', 'AkMaterialsRow', 'AkMaterialsDivider', 'AkNews'],
+  'components-19': ['AkSkill', 'AkSkillSheet', 'AkSkillMatrix', 'AkSp', 'AkSpTrigger', 'AkSpValue', 'AkTalent', 'AkTalentTable', 'AkCalc', 'AkRichText', 'AkModule', 'AkModuleStage', 'AkModuleUnlock', 'AkDossier', 'AkRedacted', 'AkArchive', 'AkArchivePlay', 'AkVoice', 'AkVoiceList', 'AkDialogue', 'AkDialogueLine', 'AkItemList'],
+  'components-20': ['AkPanel', 'AkCollapse', 'AkCollapseItem', 'AkHeading', 'AkCbox', 'AkMessage', 'AkEmpty', 'AkStat', 'AkStatRow', 'AkPathNav', 'AkBadge', 'AkChip', 'AkTimeline', 'AkTimelineItem', 'AkToastProvider', 'AkTooltip', 'AkSearch', 'AkKbd', 'AkScope', 'AkSteps', 'AkStep', 'AkBackTop'],
 }

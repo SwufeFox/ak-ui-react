@@ -391,3 +391,89 @@
     animation: none;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 button.css 的修饰档（移植）
+//
+//  上游的 .ak-btn 有：primary / contrast / outline / ghost / danger / link
+//  六个色调档，xs / sm / lg / xl 四个尺寸档，--icon / --block / --pill
+//  三个形态档，外加一个加载态（.is-loading）。
+//
+//  本库已有：--outline / --action / --advanced / --light / --danger / --ghost
+//  六个色调档（**不重命名**；上游 primary ≡ 本库 --action，
+//  上游 contrast ≡ 本库 --light，两者都是「主色实底」与「黑白反转」的意思），
+//  尺寸走本库自己的 data-ak-size 系统，--block 已有。
+//
+//  这里补的是真的缺的那几枚：--pill / --link / --icon 与加载态。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── pill：全圆角 ─────────────────────────────────────────────────────
+// 上游用 --ak-radius-pill: 999px；本库没有这枚令牌（全局令牌由别人维护），
+// 所以在组件作用域里声明一枚 --ak-button-radius，用到时随时可被覆盖。
+.ak-button--pill {
+  --ak-button-radius: 999px;
+
+  border-radius: var(--ak-button-radius);
+}
+
+// ── icon：正方形图标按钮（宽 = 高） ──────────────────────────────────
+.ak-button--icon {
+  min-width: 0;
+  width: calc(var(--ak-button-height) * var(--ak-density-control, 1));
+  padding: 0;
+}
+
+// ── link：文字链（无底、无框，悬停下划线） ───────────────────────────
+.ak-button--link {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  color: var(--ak-signal-info, #4aabea);
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+
+  &:hover:not(:disabled) {
+    color: var(--ak-signal-info, #4aabea);
+    background-color: transparent;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+    text-decoration: underline;
+  }
+}
+
+// ── 加载态：文字隐去，居中一枚 14px 圆弧转圈 ─────────────────────────
+// 同时接受上游的 .is-loading 写法（本库的约定是 BEM 修饰类）。
+.ak-button--loading,
+.ak-button.is-loading {
+  color: transparent;
+  pointer-events: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ak-button-fg, #fff);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ak-button-spin 0.7s linear infinite;
+  }
+}
+
+@keyframes ak-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ak-button--loading::after,
+  .ak-button.is-loading::after {
+    animation: none;
+  }
+}

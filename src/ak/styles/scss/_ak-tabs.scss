@@ -295,3 +295,129 @@
     animation: none;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 tabs.css / seg.css 的形态档（移植）
+//
+//  上游的 Tabs 有三种形态：--pill（药丸）、--block（块状，选中黑白反转）、
+//  --vertical（竖排，选中项左缘描边）。本库的 Tabs 结构不同
+//  （.ak-tabs__list / .ak-tabs__tab / .ak-tabs__panel），所以这里按本库的
+//  BEM 结构重写形态规则，但语义与上游逐条对应：
+//
+//    · --pill      一枚凹槽里的药丸组，选中项是浮起的面
+//    · --block     底边一条正文色的粗线，选中项黑白反转（上游的块状标签）
+//    · --vertical  竖排：列表在左、面板在右，选中项左缘描信号色
+//
+//  形态只改这几个修饰类下的样子，基类外观不受影响。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── pill ────────────────────────────────────────────────────────────
+.ak-tabs--pill {
+  width: max-content;
+  max-width: 100%;
+  border: 0;
+  background: var(--ak-surface-sunken-2, #232425);
+  box-shadow: none;
+
+  .ak-tabs__list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.2rem;
+    border-bottom: 0;
+    background: transparent;
+    gap: 0.25rem;
+  }
+
+  .ak-tabs__tab {
+    padding-inline: 0.9rem;
+    border-left: 0;
+
+    &[aria-selected="true"] {
+      color: var(--ak-text-primary, #f3f4ef);
+      background: var(--ak-surface-raised, #171a1d);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+// ── block ───────────────────────────────────────────────────────────
+.ak-tabs--block {
+  border-bottom: 2px solid var(--ak-text-primary, #f3f4ef);
+
+  .ak-tabs__list {
+    border-bottom: 0;
+    background: transparent;
+  }
+
+  .ak-tabs__tab {
+    color: var(--ak-text-secondary, #9da5aa);
+    background: var(--ak-surface-sunken-2, #232425);
+
+    &[aria-selected="true"] {
+      color: var(--ak-surface-canvas, #111315);
+      background: var(--ak-text-primary, #f3f4ef);
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+// ── vertical ────────────────────────────────────────────────────────
+.ak-tabs--vertical {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ak-space-4, 1rem);
+  width: 100%;
+
+  .ak-tabs__list {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    max-width: 14rem;
+    border-bottom: 0;
+    border-inline-start: 1px solid var(--ak-border, #4a4c4f);
+    background: transparent;
+  }
+
+  .ak-tabs__tab {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+    border-top: 0;
+    border-left: 3px solid transparent;
+
+    &[aria-selected="true"] {
+      color: var(--ak-text-primary, #f3f4ef);
+      border-left-color: var(--ak-tabs-signal, #4aabea);
+      background: color-mix(in srgb, var(--ak-tabs-signal, #4aabea) 12%, transparent);
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+
+  .ak-tabs__panel {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// ── seg: lg 档（上游 .ak-seg--lg：36px 高 / 56px 起步 / 正文号） ──────
+// 用复合选择器（0,2,0）压过尺寸档的属性选择器（也是 0,2,0，靠源码顺序取胜），
+// 于是「显式写 --lg」与「data-ak-size=lg」不会互相打架。
+.ak-segmented.ak-segmented--lg {
+  --ak-segmented-item-h: 2.25rem;
+  --ak-segmented-item-w: 3.5rem;
+  --ak-segmented-item-pad: 0.45rem 1rem;
+
+  .ak-segmented__item {
+    font-size: var(--ak-fs-sm, 0.875rem);
+  }
+}

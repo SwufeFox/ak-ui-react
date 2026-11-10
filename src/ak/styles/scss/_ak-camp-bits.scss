@@ -1,0 +1,238 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 阵营 / 攻击范围 / 精英阶段 / 材料表 / 快讯（arknights · camp bits）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/arknights/
+//    camp.css · range.css · phase-tabs.css · materials.css · news.css
+//
+//  上游类名原样保留；上游的 --ak-bg-surface / --ak-fg / --ak-accent / --ak-red-*
+//  换成 ak-ui 的令牌。没有对应令牌的上游色值落成**组件作用域内**的局部自定义属性。
+//  两套主题（terminal / archive）共用同一份规则；只有一处必须分主题
+//  （.ak-phase-tabs 反色选中块上的线稿反相与否），走令牌 + 档案作用域覆盖。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 阵营 / 势力 Camp ──────────────────────────────────────────────────
+.ak-camp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  > img {
+    width: auto;
+    height: 28px;
+    filter: var(--ak-glyph-filter);
+  }
+
+  &--lg > img {
+    height: 48px;
+  }
+
+  // 深底方块、原色白线稿（两套主题下都一样）
+  &--box {
+    --ak-camp-box-bg: #1d1f20;
+    --ak-camp-box-fg: #fff;
+
+    padding: 6px 10px;
+    background: var(--ak-camp-box-bg);
+    color: var(--ak-camp-box-fg);
+
+    > img {
+      filter: none;
+    }
+  }
+
+  &__name {
+    font-weight: 700;
+  }
+}
+
+// ── 攻击范围 Range ────────────────────────────────────────────────────
+// 自身格 = 实心方块，攻击格 = 空心描边，范围外的格不画；
+// 只画范围的外接矩形（1-1 就是 1×2，不补空格撑成 3×3）。
+.ak-range {
+  --_cell: 22px;
+  --_gap: 4px;
+  --_bw: 2px;
+
+  display: inline-grid;
+  grid-template-columns: repeat(var(--cols, 5), var(--_cell));
+  gap: var(--_gap);
+  vertical-align: top;
+
+  > i {
+    display: block;
+    box-sizing: border-box;
+    width: var(--_cell);
+    height: var(--_cell);
+    background: transparent;
+    border: 0;
+
+    &.on {
+      border: var(--_bw) solid var(--ak-range-cell, var(--ak-text-secondary));
+    }
+
+    &.self {
+      background: var(--ak-range-self, var(--ak-signal-info));
+    }
+  }
+
+  &--lg {
+    --_cell: 28px;
+    --_gap: 5px;
+  }
+
+  &--sm {
+    --_cell: 14px;
+    --_gap: 2px;
+    --_bw: 1.5px;
+  }
+}
+
+// ── 精英阶段选择器 Phase tabs ────────────────────────────────────────
+.ak-phase-tabs {
+  // 反色选中块上的线稿图标：终端主题的反色块是浅底，线稿要反相。
+  --ak-glyph-filter-inverse: invert(1);
+
+  display: inline-flex;
+  border: 1px solid var(--ak-border-strong);
+
+  > button {
+    // ⚠️ `all: unset` 会清掉所有属性（含 transition 与焦点环），
+    // 所以它必须写在下面这些声明**之前**；焦点环在后面补回来。
+    all: unset;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    // 内边距比上游多 2px：保证这一排小按钮的点击区 ≥ 24px
+    padding: 6px 10px;
+    color: var(--ak-text-secondary);
+    cursor: pointer;
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-xs);
+    font-weight: 700;
+    line-height: 1;
+
+    + button {
+      border-left: 1px solid var(--ak-border-strong);
+    }
+
+    > img {
+      height: 14px;
+      opacity: 0.6;
+      filter: var(--ak-glyph-filter);
+    }
+
+    &.is-active {
+      background: var(--ak-surface-inverse);
+      color: var(--ak-text-inverse);
+
+      > img {
+        opacity: 1;
+        filter: var(--ak-glyph-filter-inverse);
+      }
+    }
+
+    // all: unset 把焦点环也清掉了，这里补回来（内缩 2px：按钮挨着，外扩会被邻格盖住）
+    &:focus-visible {
+      outline: 2px solid var(--ak-focus-color);
+      outline-offset: -2px;
+    }
+  }
+}
+
+// 档案主题：反色块是深底，线稿保持原样即可
+[data-ak-theme="archive"] .ak-phase-tabs {
+  --ak-glyph-filter-inverse: none;
+}
+
+// ── 材料表 Materials ──────────────────────────────────────────────────
+.ak-materials {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: center;
+  gap: 8px 16px;
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ak-text-secondary);
+    font-family: var(--ak-font-label);
+    font-size: var(--ak-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    text-transform: uppercase;
+
+    img {
+      width: 22px;
+      height: 16px;
+      object-fit: contain;
+      filter: var(--ak-glyph-filter);
+    }
+  }
+
+  // 横跨两列的分段说明
+  &__divider {
+    grid-column: 1 / -1;
+    padding: 6px 0 2px;
+    border-top: 1px dashed var(--ak-border-strong);
+    color: var(--ak-text-secondary);
+    font-size: var(--ak-fs-xs);
+    font-weight: 600;
+    line-height: 1;
+  }
+}
+
+// 材料表右列的材料格
+.ak-item-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+// ── 快讯横幅 News ─────────────────────────────────────────────────────
+.ak-news {
+  // 本组新增的组件作用域令牌（上游 --ak-red-700）
+  --ak-news-alert: #a40000;
+
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  background: var(--ak-surface-inverse);
+  color: var(--ak-text-inverse);
+  font-size: var(--ak-fs-sm);
+
+  &__label {
+    display: flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: var(--ak-news-alert);
+    color: #fff;
+    font-family: var(--ak-font-display);
+    font-size: var(--ak-fs-xs);
+    font-variant-numeric: lining-nums;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  // 正文是普通行内流（不是 flex）：否则文字节点 / <a> / <b> 各自成 item，
+  // 手机上 white-space: normal 时会被拆成一列列换行。
+  &__text {
+    align-self: center;
+    min-width: 0;
+    padding: 6px 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+}

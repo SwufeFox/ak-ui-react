@@ -243,3 +243,43 @@
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 tag.css 的修饰档（移植）
+//
+//  上游用三枚局部变量（--_bg / --_fg / --_bd）驱动十来个色调档；
+//  本库的结构完全不同（--ak-tag-signal / --ak-tag-text / --ak-tag-surface），
+//  所以「上游色调 → 本库变量」的映射写在下面，而不是照抄上游的三枚变量：
+//
+//    · --outline      透明底 + 强边框（文字仍是正文色）
+//    · --accent       信号色实底 + 深色字（深色字在两套主题下都读得清）
+//    · --accent-soft  信号色淡底 + 正文色字（淡底上用正文色，两套主题都不糊）
+//
+//  ⚠️ 尺寸档（上游 sm 18 / lg 28）本库已有自己的尺寸系统（data-ak-size），
+//     不再复制一套 BEM 修饰类 —— 两套尺寸并存只会打架。
+// ══════════════════════════════════════════════════════════════════════════
+
+// 实底强调标签的前景色。
+// 强调色（橙 #f6540e）在两套主题里是同一支中间亮度，所以前景固定取深色 ——
+// 本库的 --ak-text-inverse 在 archive 主题会翻成浅色，用它会在浅底上糊掉。
+.ak-tag--accent {
+  --ak-tag-on-accent: #1b1d1f;
+  --ak-tag-signal: var(--ak-signal-accent, var(--ak-color-accent, #f6540e));
+  --ak-tag-text: var(--ak-tag-on-accent);
+  --ak-tag-surface: var(--ak-tag-signal);
+
+  // 实底上信号条与底色同色会消失 —— 改成前景色的缺口条，保持「左缘标记」语汇
+  &::before {
+    background: var(--ak-tag-on-accent);
+  }
+}
+
+.ak-tag--accent-soft {
+  --ak-tag-signal: var(--ak-signal-accent, var(--ak-color-accent, #f6540e));
+  --ak-tag-surface: color-mix(in srgb, var(--ak-tag-signal) 14%, transparent);
+}
+
+.ak-tag--outline {
+  --ak-tag-surface: transparent;
+  border-color: var(--ak-border-strong, #4a4c4f);
+}
+

@@ -64,6 +64,72 @@ export {
   AkTrust,
 } from './arknights/AkArknights'
 
+// 2.0 补齐 prts-design 的干员 / 关卡 / 战场素材层（MIT，MooncellWiki）
+export { AkEnemy, AkOpCard, AkOpGrid, AkOpRow } from './arknights/AkOperators'
+export { AkCountdown, AkEvent, AkHero, AkSanity, AkStage, AkStageCode } from './arknights/AkStageCard'
+export {
+  AkCamp,
+  AkMaterials,
+  AkMaterialsDivider,
+  AkMaterialsRow,
+  AkNews,
+  AkPhaseTabs,
+  AkRange,
+} from './arknights/AkCampBits'
+export {
+  AkCalc,
+  AkSkill,
+  AkSkillMatrix,
+  AkSkillSheet,
+  AkSp,
+  AkSpTrigger,
+  AkSpValue,
+  AkTalent,
+  AkTalentTable,
+} from './arknights/AkSkills'
+export {
+  AkArchive,
+  AkArchivePlay,
+  AkDialogue,
+  AkDialogueLine,
+  AkDossier,
+  AkItemList,
+  AkModule,
+  AkModuleStage,
+  AkModuleUnlock,
+  AkRedacted,
+  AkRichText,
+  AkVoice,
+  AkVoiceList,
+} from './arknights/AkRecords'
+
+// 2.0 补齐 prts-design 的面板 / 反馈 / 步骤族（MIT，MooncellWiki）
+export {
+  AkCbox,
+  AkCollapse,
+  AkCollapseItem,
+  AkEmpty,
+  AkHeading,
+  AkMessage,
+  AkPanel,
+  AkPathNav,
+  AkStat,
+  AkStatRow,
+} from './panels/AkPanels'
+export {
+  AkBadge,
+  AkChip,
+  AkKbd,
+  AkScope,
+  AkSearch,
+  AkTimeline,
+  AkTimelineItem,
+  AkToastProvider,
+  AkTooltip,
+  useToast,
+} from './feedback/AkFeedbackBits'
+export { AkBackTop, AkStep, AkSteps } from './navigation/AkSteps'
+
 // 上游 SCSS 早已写好、但一直没有组件出口的那批（纯包装，无新样式）
 export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup } from './group/AkGroups'
 export { AkPopover } from './popover/AkPopover'

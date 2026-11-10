@@ -3,8 +3,17 @@ import { clampRange, cx, finite, toPercent, variantClass } from '../../lib/utils
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
-export type AkProgressVariant = 'default' | 'warning' | 'danger'
-export type AkGaugeVariant = 'default' | 'warning'
+/**
+ * 外观档位。
+ *
+ * `warning` / `danger` 是本库原有的两档；`yellow` 是上游的黄色档（本库的警告色
+ * 就是上游那支黄，故两档等价），`success` 是上游的成功绿档。
+ */
+export type AkProgressVariant = 'default' | 'warning' | 'danger' | 'yellow' | 'success'
+/**
+ * 外观档位。`warning` 与上游的 `yellow` 等价，`success` 是上游的成功绿档。
+ */
+export type AkGaugeVariant = 'default' | 'warning' | 'yellow' | 'success'
 
 export interface AkProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** 名称，同时用于 `aria-label`，默认 `Progress`。 */
@@ -17,7 +26,10 @@ export interface AkProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
   value?: number
   /** Custom text for the right-hand value readout. Defaults to the rounded percentage. */
   valueLabel?: ReactNode
-  /** 外观档位。 */
+  /**
+   * 外观档位：`default` / `warning` / `danger` / `yellow` / `success`。
+   * `yellow` 与 `success` 分别发出 `.ak-progress--yellow` / `.ak-progress--success`。
+   */
   variant?: AkProgressVariant
   /** 尺寸档：内距、轨道粗细与字号一起缩。 */
   size?: AkControlSize
@@ -69,7 +81,10 @@ export interface AkGaugeProps extends Omit<HTMLAttributes<HTMLDivElement>, 'chil
   unit?: ReactNode
   /** 当前值，会夹到区间内。 */
   value?: number
-  /** 外观档位。 */
+  /**
+   * 外观档位：`default` / `warning` / `yellow` / `success`。
+   * `yellow` 与 `success` 分别发出 `.ak-gauge--yellow` / `.ak-gauge--success`。
+   */
   variant?: AkGaugeVariant
   /** 尺寸档：直径、数值字号与内孔一起缩。 */
   size?: AkControlSize

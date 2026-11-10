@@ -33,6 +33,9 @@ import { renderEffects } from './examples/effects'
 import { renderGallery } from './examples/gallery'
 import { renderDecor } from './examples/decor'
 import { renderGameData } from './examples/game-data'
+import { renderOperators } from './examples/operators'
+import { renderSkills } from './examples/skills'
+import { renderPanels } from './examples/panels'
 import { renderControls } from './examples/controls'
 import { renderForms } from './examples/forms'
 import { renderReadouts } from './examples/readouts'
@@ -85,6 +88,8 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
   const [slider, setSlider] = useState(42)
   const [count, setCount] = useState(1280)
   const [skillLevel, setSkillLevel] = useState<AkSkillLevel>(3)
+  const [operatorPhase, setOperatorPhase] = useState(0)
+  const [panelOpen, setPanelOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedCommand, setSelectedCommand] = useState('deploy')
   const [selectedTableRow, setSelectedTableRow] = useState('r1')
@@ -304,6 +309,18 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
     example: (tune: Tune) => renderGameData({ t, skillLevel, setSkillLevel }, tune),
     exportCode: (overrides: Record<string, unknown>) => exportCategory(12, locale, overrides, { skillLevel }),
   }), [t, locale, skillLevel, setSkillLevel])
+  const operatorCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderOperators({ t, phase: operatorPhase, setPhase: setOperatorPhase }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(18, locale, overrides, { operatorPhase }),
+  }), [t, locale, operatorPhase, setOperatorPhase])
+  const skillCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderSkills({ t }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(19, locale, overrides, {}),
+  }), [t, locale])
+  const panelCallbacks = useMemo(() => ({
+    example: (tune: Tune) => renderPanels({ t, panelOpen, setPanelOpen }, tune),
+    exportCode: (overrides: Record<string, unknown>) => exportCategory(20, locale, overrides, { panelOpen }),
+  }), [t, locale, panelOpen, setPanelOpen])
   const controlCallbacks = useMemo(() => ({
     example: (tune: Tune) => renderControls({ t, groupPick, setGroupPick, pageIndex, setPageIndex }, tune),
     exportCode: (overrides: Record<string, unknown>) => exportCategory(13, locale, overrides, { groupPick, pageIndex }),
@@ -420,6 +437,9 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
             <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} api={DOC_REGISTRY['components-15']?.api} example={readoutCallbacks.example} exportCode={readoutCallbacks.exportCode} />
             <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} api={DOC_REGISTRY['components-16']?.api} example={collectionCallbacks.example} exportCode={collectionCallbacks.exportCode} />
             <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} api={DOC_REGISTRY['components-17']?.api} example={commandCallbacks.example} exportCode={commandCallbacks.exportCode} />
+            <Block id="components-18" eyebrow={t('ref.operators.eyebrow')} title={t('ref.operators.title')} note={t('ref.operators.note')} example={operatorCallbacks.example} exportCode={operatorCallbacks.exportCode} />
+            <Block id="components-19" eyebrow={t('ref.skills.eyebrow')} title={t('ref.skills.title')} note={t('ref.skills.note')} example={skillCallbacks.example} exportCode={skillCallbacks.exportCode} />
+            <Block id="components-20" eyebrow={t('ref.panels.eyebrow')} title={t('ref.panels.title')} note={t('ref.panels.note')} example={panelCallbacks.example} exportCode={panelCallbacks.exportCode} />
           </StageContext.Provider>
 
           <div className="demo-stage__foot">

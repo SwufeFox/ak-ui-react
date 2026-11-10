@@ -37,6 +37,15 @@
 // 移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
 @use "scss/ak-decor";
 @use "scss/ak-arknights";
+// 2.0 补齐 prts-design 的干员 / 关卡 / 战场素材层（MIT，MooncellWiki）
+@use "scss/ak-operators";
+@use "scss/ak-stage-card";
+@use "scss/ak-camp-bits";
+@use "scss/ak-skills";
+@use "scss/ak-records";
+@use "scss/ak-panels";
+@use "scss/ak-feedback-bits";
+@use "scss/ak-steps";
 // 景深：补上「控制器 ↔ CSS 消费」之间缺的那根线（两半上游都有，从没接上）
 @use "scss/ak-depth";
 // 骨架占位（上游无此层，本库补的形状）

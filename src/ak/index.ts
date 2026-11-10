@@ -18,7 +18,7 @@ export { AkNotice, AkNoticeStack, type AkNoticeProps, type AkNoticeVariant } fro
 export { AkGauge, AkProgress, AkProgressStack, type AkGaugeProps, type AkGaugeVariant, type AkProgressProps, type AkProgressVariant } from './ui/progress/AkProgress'
 export { AkSlider, type AkSliderProps } from './ui/slider/AkSlider'
 export { AkInputNumber, type AkInputNumberProps } from './ui/input-number/AkInputNumber'
-export { AkSegmented, AkTabs, type AkSegmentedOption, type AkSegmentedProps, type AkTabsItem, type AkTabsProps } from './ui/tabs/AkTabs'
+export { AkSegmented, AkTabs, type AkSegmentedOption, type AkSegmentedProps, type AkTabsItem, type AkTabsProps, type AkTabsVariant } from './ui/tabs/AkTabs'
 export { AkCountUp, type AkCountUpHandle, type AkCountUpProps } from './ui/effects/AkCountUp'
 export { AkEntrance, type AkEntranceHandle, type AkEntranceProps } from './ui/effects/AkEntrance'
 // 景深：上游 createDashboardDepth 控制器 + 它的 CSS 消费规则，此前两半没接上
@@ -164,8 +164,190 @@ export {
   type AkTrustProps,
 } from './ui/arknights/AkArknights'
 
+// 2.0 补齐 prts-design 的干员 / 关卡 / 战场素材层（MIT，MooncellWiki）
+export {
+  AkEnemy,
+  AkOpCard,
+  AkOpGrid,
+  AkOpRow,
+  type AkEnemyProps,
+  type AkEnemyRank,
+  type AkOpCardProps,
+  type AkOpCardSize,
+  type AkOpCardVariant,
+  type AkOpGridProps,
+  type AkOpRowProps,
+} from './ui/arknights/AkOperators'
+export {
+  AkCountdown,
+  AkEvent,
+  AkHero,
+  AkSanity,
+  AkStage,
+  AkStageCode,
+  type AkCountdownPrecision,
+  type AkCountdownProps,
+  type AkEventProps,
+  type AkEventStatus,
+  type AkHeroProps,
+  type AkSanityProps,
+  type AkStageCodeProps,
+  type AkStageCodeVariant,
+  type AkStageProps,
+  type AkStageVariant,
+} from './ui/arknights/AkStageCard'
+export {
+  AkCamp,
+  AkMaterials,
+  AkMaterialsDivider,
+  AkMaterialsRow,
+  AkNews,
+  AkPhaseTabs,
+  AkRange,
+  type AkCampProps,
+  type AkCampSize,
+  type AkCampVariant,
+  type AkMaterialsDividerProps,
+  type AkMaterialsProps,
+  type AkMaterialsRowProps,
+  type AkNewsProps,
+  type AkPhaseTabsProps,
+  type AkRangeGrid,
+  type AkRangeProps,
+  type AkRangeSize,
+} from './ui/arknights/AkCampBits'
+
+// 2.0 补齐 prts-design 的技能 / 档案素材层（MIT，MooncellWiki）
+export {
+  AkCalc,
+  AkSkill,
+  AkSkillMatrix,
+  AkSkillSheet,
+  AkSp,
+  AkSpTrigger,
+  AkSpValue,
+  AkTalent,
+  AkTalentTable,
+  type AkCalcKind,
+  type AkCalcProps,
+  type AkSkillAlias,
+  type AkSkillMatrixProps,
+  type AkSkillMatrixRenderContext,
+  type AkSkillMatrixRow,
+  type AkSkillProps,
+  type AkSkillSheetLevel,
+  type AkSkillSheetProps,
+  type AkSpProps,
+  type AkSpTriggerProps,
+  type AkSpTriggerType,
+  type AkSpType,
+  type AkSpValueKind,
+  type AkSpValueProps,
+  type AkTalentProps,
+  type AkTalentRequirement,
+  type AkTalentRow,
+  type AkTalentTableProps,
+} from './ui/arknights/AkSkills'
+export {
+  AkArchive,
+  AkArchivePlay,
+  AkDialogue,
+  AkDialogueLine,
+  AkDossier,
+  AkItemList,
+  AkModule,
+  AkModuleStage,
+  AkModuleUnlock,
+  AkRedacted,
+  AkRichText,
+  AkVoice,
+  AkVoiceList,
+  type AkModuleColor,
+  type AkModuleProps,
+  type AkModuleStageProps,
+  type AkModuleUnlockProps,
+  type AkRichTextNode,
+  type AkRichTextProps,
+  type AkRichTextTone,
+  type AkVoiceLanguage,
+  type AkVoiceListProps,
+  type AkVoiceProps,
+  type AkVoiceText,
+} from './ui/arknights/AkRecords'
+
+// 2.0 补齐 prts-design 的面板 / 反馈 / 步骤族（MIT，MooncellWiki）
+export {
+  AkCbox,
+  AkCollapse,
+  AkCollapseItem,
+  AkEmpty,
+  AkHeading,
+  AkMessage,
+  AkPanel,
+  AkPathNav,
+  AkStat,
+  AkStatRow,
+  type AkCboxLevel,
+  type AkCboxProps,
+  type AkCollapseItemProps,
+  type AkCollapseProps,
+  type AkEmptyProps,
+  type AkHeadingLevel,
+  type AkHeadingProps,
+  type AkHeadingSize,
+  type AkHeadingVariant,
+  type AkMessageProps,
+  type AkMessageVariant,
+  type AkPanelProps,
+  type AkPanelTitleTag,
+  type AkPathNavProps,
+  type AkStatProps,
+  type AkStatRowProps,
+  type AkStatTrend,
+} from './ui/panels/AkPanels'
+export {
+  AkBadge,
+  AkChip,
+  AkKbd,
+  AkScope,
+  AkSearch,
+  AkTimeline,
+  AkTimelineItem,
+  AkToastProvider,
+  AkTooltip,
+  useToast,
+  type AkBadgeProps,
+  type AkBadgeVariant,
+  type AkChipProps,
+  type AkKbdProps,
+  type AkScopeProps,
+  type AkScopeTheme,
+  type AkSearchProps,
+  type AkTimelineItemProps,
+  type AkTimelineProps,
+  type AkTimelineStatus,
+  type AkToastApi,
+  type AkToastHandle,
+  type AkToastOptions,
+  type AkToastProviderProps,
+  type AkToastVariant,
+  type AkTooltipPlacement,
+  type AkTooltipProps,
+  type AkTooltipTrigger,
+} from './ui/feedback/AkFeedbackBits'
+export {
+  AkBackTop,
+  AkStep,
+  AkSteps,
+  type AkBackTopPosition,
+  type AkBackTopProps,
+  type AkStepProps,
+  type AkStepStatus,
+  type AkStepsProps,
+} from './ui/navigation/AkSteps'
+
 // 上游 SCSS 早已写好、但一直没有组件出口的那批（纯包装，无新样式）
-export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup } from './ui/group/AkGroups'
+export { AkButtonGroup, AkDivider, AkStatusGroup, AkTagGroup, type AkDividerProps, type AkDividerVariant } from './ui/group/AkGroups'
 export { AkPopover } from './ui/popover/AkPopover'
 export { AkDropdownMenu, AkContextMenu, AkMenubar, AkToolbar, AkCollapsible, AkMenuSeparator, AkMenuGroup, type AkMenuItem, type AkDropdownMenuProps, type AkContextMenuProps, type AkMenubarProps, type AkToolbarProps, type AkCollapsibleProps, type AkMenuGroupProps } from './ui/menu/AkMenu'
 export { AkPagination } from './ui/pagination/AkPagination'
@@ -196,7 +378,9 @@ export {
   type AkCounterProps,
   type AkLevelProps,
   type AkSkeletonProps,
+  type AkSkeletonShape,
   type AkSpinnerProps,
+  type AkSpinnerVariant,
 } from './ui/data/AkData'
 
 // 拍立得相册：_ak-media.scss 134 行两代结构，此前无出口

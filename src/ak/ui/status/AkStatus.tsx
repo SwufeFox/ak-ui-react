@@ -3,7 +3,14 @@ import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
 
-export type AkTagVariant = 'default' | 'advanced' | 'danger' | 'neutral'
+/**
+ * 标签档位。
+ *
+ * - `default` / `advanced` / `danger` / `neutral` 是本库原有的语义档；
+ * - `outline` / `accent` / `accent-soft` 是上游 tag.css 的三个色调档
+ *   （透明底+强边框 / 信号色实底 / 信号色淡底）。
+ */
+export type AkTagVariant = 'default' | 'advanced' | 'danger' | 'neutral' | 'outline' | 'accent' | 'accent-soft'
 export type AkStatusVariant = 'default' | 'warning' | 'critical' | 'offline'
 
 export interface AkTagProps extends HTMLAttributes<HTMLSpanElement> {

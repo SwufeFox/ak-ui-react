@@ -68,3 +68,35 @@
   color: var(--ak-text-primary);
   font-weight: 700;
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 breadcrumb.css 的写法（移植）
+//
+//  上游有两条本库还没有的：
+//    · 分隔符是 CSS 画的小折角（li + li::before），不是字符
+//    · 当前项认 [aria-current]（谁标了 aria-current="page" 谁就是当前页）
+//
+//  本库默认用拉丁双箭头 `»`（见本文件顶部注释），所以折角做成一个可选的
+// 形态档；aria-current 则直接认，不另起一套类名 ——
+//  上游写 <li aria-current="page"> 时也能得到同样的「你在这」的处理。
+// ══════════════════════════════════════════════════════════════════════════
+
+// 折角分隔符（上游的画法）：替掉默认的 `»`
+.ak-breadcrumb--chevron {
+  .ak-breadcrumb__item + .ak-breadcrumb__item::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    margin: 0 0.375rem 0.125rem;
+    border-top: 1px solid var(--ak-text-secondary, #9da5aa);
+    border-right: 1px solid var(--ak-text-secondary, #9da5aa);
+    background: none;
+    transform: rotate(45deg);
+  }
+}
+
+// 当前项：认 aria-current（上游写法），与 .ak-breadcrumb__current 同一处理
+.ak-breadcrumb [aria-current="page"] {
+  color: var(--ak-text-primary, #f3f4ef);
+  font-weight: 700;
+}

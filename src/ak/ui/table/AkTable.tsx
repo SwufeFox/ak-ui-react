@@ -23,7 +23,7 @@ export interface AkTableColumn {
   key: string
   /** 表头文字。 */
   header: ReactNode
-  /** 数字列：等宽数位 + 右对齐。 */
+  /** 数字列：等宽数位 + 右对齐（`.ak-table__cell--num` 与上游的 `.num` 同义）。 */
   numeric?: boolean
   /** 该列当前排序方向；给了就把表头变成可点的排序表头。 */
   sort?: AkTableSortDirection
@@ -63,6 +63,11 @@ export interface AkTableProps extends Omit<HTMLAttributes<HTMLTableElement>, 'ch
   tactical?: boolean
   /** 是否开启表头粘性吸顶，默认为 false。 */
   stickyHeader?: boolean
+  /**
+   * 是否使用上游的紧凑档（`.ak-table--compact`：更小的单元格内距）。
+   * 与 `size` 正交：`size` 走本库的 `data-ak-size` 尺寸系统，这一枚是上游形态档。
+   */
+  compact?: boolean
   /** 外层是否套一层横滑容器（列多时建议开）。 */
   scrollable?: boolean
   /** 尺寸档：控制单元格内边距与整表字号。 */
@@ -88,6 +93,7 @@ export function AkTable({
   striped = false,
   tactical = false,
   stickyHeader = false,
+  compact = false,
   scrollable = false,
   size = 'md',
   tokens,
@@ -105,6 +111,7 @@ export function AkTable({
         striped && 'ak-table--striped',
         tactical && 'ak-table--tactical',
         stickyHeader && 'ak-table--sticky-header',
+        compact && 'ak-table--compact',
         className,
       )}
       style={tokenStyle(tokens, style)}
@@ -116,7 +123,7 @@ export function AkTable({
             const sortable = col.sort !== undefined
             const thProps: ThHTMLAttributes<HTMLTableCellElement> & { 'aria-sort'?: AkTableSortDirection } = {
               scope: 'col',
-              className: col.numeric ? 'ak-table__cell--num' : undefined,
+              className: col.numeric ? cx('ak-table__cell--num', 'num') : undefined,
               style: col.width ? { width: col.width } : undefined,
             }
             if (sortable) {
@@ -157,6 +164,8 @@ export function AkTable({
                 key={row.id}
                 className={cx(
                   row.selected && 'ak-table__row--selected',
+                  // 上游的写法是 `tr.is-selected`；两个类名同时发出，两套样式都命中。
+                  row.selected && 'is-selected',
                   row.muted && 'ak-table__row--muted',
                   clickable && 'ak-table__row--clickable',
                 )}
@@ -185,7 +194,7 @@ export function AkTable({
                 }
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={col.numeric ? 'ak-table__cell--num' : undefined}>
+                  <td key={col.key} className={col.numeric ? cx('ak-table__cell--num', 'num') : undefined}>
                     {row.cells[col.key]}
                   </td>
                 ))}
@@ -199,7 +208,7 @@ export function AkTable({
         <tfoot className="ak-table__foot">
           <tr>
             {columns.map((col) => (
-              <td key={col.key} className={col.numeric ? 'ak-table__cell--num' : undefined}>
+              <td key={col.key} className={col.numeric ? cx('ak-table__cell--num', 'num') : undefined}>
                 {footer[col.key]}
               </td>
             ))}

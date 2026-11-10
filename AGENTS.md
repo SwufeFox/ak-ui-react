@@ -102,6 +102,8 @@ site / shell / command exporters. Code generation is lazy and cached against
 | Path | Purpose |
 |---|---|
 | `src/ak/ui/<feature>/Ak*.tsx` | React components, one folder per feature — e.g. `src/ak/ui/button/AkButton.tsx` |
+| `src/ak/ui/arknights/` | prts-design ports: `AkArknights` (rarity/profession/talent data), `AkOperators` (op card, op row, enemy), `AkStageCard` (stage, event, hero), `AkCampBits` (camp, range, phase tabs, materials), `AkSkills` (skill, sheet, matrix, talent), `AkRecords` (module, dossier, archive, voice, dialogue) |
+| `src/ak/ui/panels/`, `feedback/`, `navigation/` | prts-design ports: panels/accordion/message/stat, badge/chip/toast/tooltip/search, steps/back-top |
 | `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useControllableState.ts`, `useId.ts`, `audio.ts` |
 | `src/ak/core/` | Vendored `.mjs` controllers + `.d.mts`; published as `…/core`, `…/core/effects`, `…/core/depth` |
 | `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`) |
@@ -147,6 +149,11 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
 - **CSS**: every `var(--ak-…)` keeps a fallback; consumer overrides are expected. Do **not** move
   demo-only rules into the library stylesheet. In demo CSS, derive `--demo-*` from `--ak-*` — never
   hardcode a second palette.
+- **Upstream ports (prts-design, MIT)**: keep the upstream class names (`ak-op-card__portrait`, …)
+  so the vendored CSS stays recognisable, but adapt the values: map upstream variables onto
+  `--ak-*` tokens, keep every rule working in both themes, and never ship game artwork — images
+  are host-supplied props with a neutral themed placeholder. New ports go in their own
+  `_ak-<family>.scss` partial and their own `src/ak/ui/<family>/Ak*.tsx` file.
 - **Animation**: only `transform` / `opacity` / `clip-path`; M3-derived curves in
   `--demo-motion-*`; honour `prefers-reduced-motion` for every non-essential motion.
 - **Accessibility is part of the contract**: roving `tabIndex` + arrow/Home/End on tablists/menus,

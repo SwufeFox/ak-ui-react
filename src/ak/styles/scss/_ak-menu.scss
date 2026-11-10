@@ -275,3 +275,87 @@
     transition: none;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 dropdown.css 的浮层锚点与菜单项状态（移植）
+//
+//  上游的浮层有三种锚法：.ak-dropdown（相对定位的壳）、
+//  .ak-menu--right（右对齐的浮层）、.ak-menu__sep / __label / __head
+//  （分隔线 / 分组小标题 / 抬头）。
+//
+//  本库的浮层用 popover + CSS anchor positioning，**不是** absolute 定位，
+//  所以这里只做两件事：
+//    · 补上上游的类名，让上游的 HTML 能直接贴进来（非 popover 的浮层才走
+//      经典 absolute 定位；popover 浮层仍由浏览器锚定）
+//    · 补上本库还缺的菜单项状态（当前项 is-active）与分组小标题 / 抬头
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 上游的浮层壳（非 popover 的老式浮层） ───────────────────────────
+.ak-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.ak-dropdown > .ak-menu:not([popover]) {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+}
+
+.ak-dropdown > .ak-menu:not([popover]).ak-menu--right {
+  left: auto;
+  right: 0;
+}
+
+// ── 右对齐的浮层 ─────────────────────────────────────────────────────
+// 经典定位（absolute）：靠右。popover 锚定（--anchored）：换成 anchor 的
+// 另一侧；--anchored 自己把 inset 归零，所以这里要显式复位，
+// 否则「靠右」这条会把它钉到视口右缘。
+.ak-menu--right {
+  left: auto;
+  right: 0;
+}
+
+.ak-menu--anchored.ak-menu--right {
+  right: auto;
+  left: auto;
+  position-area: block-end span-inline-end;
+}
+
+// ── 菜单项状态：当前项 ───────────────────────────────────────────────
+.ak-menu__item.is-active {
+  color: var(--ak-signal-action, #ffd800);
+  background: color-mix(in srgb, var(--ak-signal-action, #ffd800) 12%, transparent);
+  background-image: none;
+}
+
+// ── 分组小标题 ───────────────────────────────────────────────────────
+.ak-menu__label {
+  padding: 0.4rem 0.55rem 0.2rem;
+  color: var(--ak-text-secondary, #9da5aa);
+  font-family: var(--ak-font-label, sans-serif);
+  font-size: var(--ak-fs-overline, 0.6875rem);
+  font-weight: 700;
+  letter-spacing: var(--ak-tracking-overline, 0.14em);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// ── 抬头（用户菜单里的用户名那一行） ─────────────────────────────────
+.ak-menu__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.55rem;
+  border-bottom: 1px solid var(--ak-border-subtle, #ffffff25);
+  color: var(--ak-text-primary, #f3f4ef);
+  font-weight: 700;
+}
+
+// ── 分隔线（上游的类名；本库另有 .ak-menu__separator） ────────────────
+.ak-menu__sep {
+  height: 1px;
+  margin: 0.25rem 0.55rem;
+  border: 0;
+  background: var(--ak-border-subtle, #ffffff25);
+}

@@ -1,0 +1,889 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 方舟技能 / 天赋层（skills）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/arknights/
+//  （skill.css · skill-matrix.css · skill-sheet.css · sp.css · talent.css · talent-table.css）
+//
+//  类名与上游逐字一致（.ak-skill__icon / .ak-sp-cost / .ak-talent-table …），
+//  上游的 --ak-bg-surface / --ak-fg-* / --ak-accent … 一律换成 ak-ui 的语义令牌：
+//    --ak-bg-surface   → --ak-surface-sunken      --ak-fg          → --ak-text-primary
+//    --ak-bg-surface-2 → --ak-surface-sunken-2    --ak-fg-secondary→ --ak-text-secondary
+//    --ak-accent       → --ak-signal-info         --ak-link        → --ak-signal-info
+//    --ak-focus        → --ak-focus-color         --ak-font-body   → --ak-font-sans
+//  本库没有对应令牌的上游色值（游戏内的 SP 类型色 / 富文本语义色）落成**组件作用域内**
+//  的局部自定义属性，见下方「局部令牌」。
+//  两套主题（terminal / archive）共用同一份规则：颜色一律走语义令牌，
+//  浅色主题的差异由令牌本身承担，partial 不开第二个主题分支。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 局部令牌 ────────────────────────────────────────────────────────────
+// 上游有、本库没有对应项的值：游戏内的 SP 类型色 / 数值芯片底色 / 富文本语义色。
+// 都落成组件作用域内的自定义属性（不动全局令牌表），两主题共用同一份。
+.ak-skill,
+.ak-skill-sheet,
+.ak-skill-matrix,
+.ak-skill-table,
+.ak-sp,
+.ak-sp-trigger,
+.ak-sp-cost,
+.ak-sp-init,
+.ak-sp-dur,
+.ak-var,
+.ak-talent,
+.ak-talent-table,
+.ak-calc {
+  // 游戏内的 SP 类型色（玩家认这套颜色，本库没有等价令牌）
+  --ak-sp-auto: #8ec31f;
+  --ak-sp-attack: #fc793e;
+  --ak-sp-hit: #f4af09;
+  --ak-sp-passive-recovery: #c289e3;
+  --ak-sp-passive: #808080;
+  --ak-sp-cost-bg: #caec46;
+  --ak-sp-init-bg: #313131;
+
+  // 富文本语义色（上游 --ak-rt-*）：按本库的语义令牌混出两主题都可读的一档
+  --ak-rt-vup: color-mix(in srgb, var(--ak-signal-info, #0098dc) 72%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-vdown: color-mix(in srgb, var(--ak-signal-danger, #d0421c) 76%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-rem: color-mix(in srgb, var(--ak-signal-action, #b86f00) 72%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-kw: color-mix(in srgb, var(--ak-signal-info, #0098dc) 60%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-imp: color-mix(in srgb, var(--ak-signal-danger, #d40000) 78%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-drop: color-mix(in srgb, var(--ak-signal-info, #0098dc) 48%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-enemy: color-mix(in srgb, var(--ak-signal-danger, #c22f2f) 78%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-gild: color-mix(in srgb, var(--ak-signal-success, #1f8f5f) 60%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-acrem: var(--ak-text-secondary, #727272);
+  --ak-rt-level: color-mix(in srgb, var(--ak-signal-action, #9a7b00) 72%, var(--ak-text-primary, #1b1d1f));
+  --ak-rt-talpu: var(--ak-rt-vup);
+
+  // 中文小字的字号下限（上游 --ak-fs-cjk-min）
+  --ak-fs-cjk-min: 10px;
+}
+
+// 只给读屏：技能等级 / SP 芯片的名字是 CSS mask 画的，读不出来
+.ak-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+// ── SP 类型 / 触发 / 数值芯片 ───────────────────────────────────────────
+// 上游用白字；这些底色在两主题下都偏亮，白字对比度不足 4.5:1，
+// 改成深字（与本库 .ak-r-chip 同一套「深字压色块」约定）。
+.ak-sp {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  background: var(--ak-sp-auto);
+  color: #1d1f20;
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+
+  &--attack {
+    background: var(--ak-sp-attack);
+  }
+
+  &--hit {
+    background: var(--ak-sp-hit);
+  }
+
+  &--passive-recovery {
+    background: var(--ak-sp-passive-recovery);
+  }
+
+  &--passive {
+    background: var(--ak-sp-passive);
+  }
+}
+
+// 触发方式：手动 / 自动同一种灰底（靠文字区分）
+.ak-sp-trigger {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  background: var(--ak-sp-passive);
+  color: #1d1f20;
+  font-family: var(--ak-font-sans, sans-serif);
+  font-size: var(--ak-fs-xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+// 数值芯片：图形用单色 SVG mask（不用 emoji——彩色字形基线不稳，两枚芯片会错半像素）
+.ak-sp-cost,
+.ak-sp-init,
+.ak-sp-dur {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px 0 6px;
+  font-family: var(--ak-font-label);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+  white-space: nowrap;
+
+  &::before {
+    content: "";
+    flex: none;
+    width: 11px;
+    height: 11px;
+    background: currentcolor;
+    -webkit-mask: var(--_g) center / var(--_s, 10px 11px) no-repeat;
+    mask: var(--_g) center / var(--_s, 10px 11px) no-repeat;
+  }
+}
+
+.ak-sp-cost {
+  --_g: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 16'%3E%3Cpolygon points='8,0 1,9.5 5.5,9.5 4,16 11,6.5 6.5,6.5'/%3E%3C/svg%3E");
+
+  background: var(--ak-sp-cost-bg);
+  color: #1d1f20;
+}
+
+.ak-sp-init {
+  --_g: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpolygon points='0,0 10,6 0,12'/%3E%3C/svg%3E");
+
+  background: var(--ak-sp-init-bg);
+  color: #fdfdfb;
+
+  &::before {
+    --_s: 8px 10px;
+    -webkit-mask-position: 2px center;
+    mask-position: 2px center;
+  }
+}
+
+.ak-sp-dur {
+  --_g: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Ccircle cx='7' cy='7' r='5.5' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M7 3.5v3.8l2.6 1.6' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  background: color-mix(in srgb, var(--ak-surface-sunken-2, #ebebeb) 86%, var(--ak-text-primary, #1b1d1f));
+  color: var(--ak-text-primary, #1b1d1f);
+
+  &::before {
+    --_s: 11px 11px;
+  }
+}
+
+// ── 技能卡 Skill ────────────────────────────────────────────────────────
+// 结构：.ak-skill > .ak-skill__icon + <div>( .ak-skill__head + .ak-skill__stats )
+//        + [.ak-skill__aside] + .ak-skill__desc
+.ak-skill {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px 14px;
+  padding: 12px;
+  position: relative;
+  background: var(--ak-surface-sunken, #f5f5f5);
+  border: 1px solid var(--ak-border);
+
+  > .ak-skill__icon + :not(.ak-skill__desc) {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+    min-height: 68px;
+  }
+
+  &.is-selected {
+    border-color: var(--ak-signal-info, #0098dc);
+    box-shadow: inset 0 0 0 2px var(--ak-signal-info, #0098dc);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-style: solid;
+      border-width: 12px 12px 0 0;
+      border-color: var(--ak-signal-info, #0098dc) transparent transparent;
+    }
+  }
+
+  &--wide {
+    grid-template-columns: 64px 1fr auto;
+  }
+}
+
+.ak-skill__icon {
+  --_sp: var(--ak-sp-auto);
+
+  position: relative;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  background: #1d1f20;
+  border: 2px solid var(--_sp);
+
+  > img,
+  > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 5px;
+    background: var(--_sp);
+  }
+
+  &--auto {
+    --_sp: var(--ak-sp-auto);
+  }
+
+  &--attack {
+    --_sp: var(--ak-sp-attack);
+  }
+
+  &--hit {
+    --_sp: var(--ak-sp-hit);
+  }
+
+  &--passive-recovery {
+    --_sp: var(--ak-sp-passive-recovery);
+  }
+
+  &--passive {
+    --_sp: var(--ak-sp-passive);
+  }
+
+  &.is-locked {
+    &::before {
+      content: "🔒";
+      position: absolute;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      inset: 0;
+    }
+
+    > img,
+    > svg {
+      filter: grayscale(1) brightness(0.4);
+    }
+  }
+}
+
+.ak-skill__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ak-skill__name,
+:is(h1, h2, h3, h4, h5, h6).ak-skill__name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+// 技能名后的别名：英文名（Bender 大写，再小一号）+ 日文名，灰色小字
+.ak-skill__alias {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-size: var(--ak-fs-xs);
+
+  .ak-en {
+    font-size: 10px;
+  }
+}
+
+.ak-skill__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--ak-fs-xs);
+}
+
+.ak-skill__desc {
+  grid-column: 1 / -1;
+  color: var(--ak-text-secondary, #454647);
+  font-size: var(--ak-fs-sm);
+  line-height: 1.7;
+}
+
+.ak-skill__stats {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  font-size: var(--ak-fs-sm);
+  font-variant-numeric: tabular-nums;
+
+  b {
+    font-weight: 800;
+  }
+}
+
+// 技能卡右侧槽：攻击范围 / 开放条件（需要 .ak-skill--wide 的三栏网格）
+.ak-skill__aside {
+  display: flex;
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.ak-skill__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-label);
+  font-size: var(--ak-fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+
+  img,
+  svg {
+    height: 12px;
+    filter: var(--ak-glyph-filter);
+  }
+}
+
+// ── 技能全等级表 Skill sheet ────────────────────────────────────────────
+// 结构：.ak-skill-sheet > [.ak-skill 表头] + table.ak-skill-table + .ak-skill-sheet__note
+.ak-skill-sheet {
+  margin: 0 0 var(--ak-space-4);
+  background: var(--ak-surface-sunken, #f5f5f5);
+  border: 1px solid var(--ak-border);
+
+  > .ak-skill {
+    border: 0;
+    border-bottom: 1px solid var(--ak-border);
+
+    .ak-skill__desc {
+      grid-column: 1 / -1;
+    }
+  }
+
+  // 表头里没有 SP 芯片行（数值在表格列里），名称行居中对齐图标
+  > .ak-skill > .ak-skill__icon + :not(.ak-skill__desc) {
+    justify-content: center;
+  }
+
+  // 技力回复类型 / 触发类型两枚标签上下叠在技能名右边
+  > .ak-skill .ak-skill__head {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    align-items: center;
+    gap: 4px 12px;
+
+    > .ak-skill__name {
+      grid-column: 1;
+      grid-row: span 2;
+    }
+
+    // 下面有别名、或只有一枚标签时不跨两行
+    > .ak-skill__name:is(:has(+ .ak-skill__alias), :nth-last-child(2)) {
+      grid-row: auto;
+    }
+
+    > .ak-skill__alias {
+      grid-column: 1;
+    }
+
+    > :is(.ak-sp, .ak-sp-trigger) {
+      grid-column: 2;
+      justify-content: center;
+    }
+  }
+}
+
+.ak-skill-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ak-fs-sm);
+  line-height: 1.6;
+
+  th,
+  td {
+    padding: 6px 10px;
+    border-top: 1px solid var(--ak-border-subtle);
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: var(--ak-surface-sunken-2, #ebebeb);
+    border-top: 0;
+    border-bottom: 1px solid var(--ak-border-strong);
+    color: var(--ak-text-secondary, #454647);
+    font-family: var(--ak-font-sans, sans-serif);
+    font-size: var(--ak-fs-xs);
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+
+    .ak-sp-cost,
+    .ak-sp-init,
+    .ak-sp-dur {
+      font-weight: 700;
+    }
+  }
+
+  tbody tr:first-child > * {
+    border-top: 0;
+  }
+
+  .lv {
+    width: 56px;
+    font-family: var(--ak-font-sans, sans-serif);
+    font-size: var(--ak-fs-sm);
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+
+    img {
+      height: 14px;
+      width: auto;
+      margin-right: 3px;
+      vertical-align: -3px;
+      filter: var(--ak-glyph-filter);
+    }
+  }
+
+  .desc {
+    text-align: left;
+  }
+
+  .num {
+    width: 52px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+
+    &:empty::before {
+      content: "—";
+      color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 40%, transparent);
+      font-weight: 400;
+    }
+  }
+
+  tr.is-mastery .lv {
+    color: var(--ak-rt-vup);
+  }
+
+  // 7 级与专精之间一道略深的分隔
+  tr:not(.is-mastery) + tr.is-mastery > * {
+    border-top-color: var(--ak-border-strong);
+  }
+
+  tr.is-hl > * {
+    background: color-mix(in srgb, var(--ak-signal-info, #0098dc) 12%, transparent);
+  }
+}
+
+.ak-skill-sheet__note {
+  padding: 8px 12px;
+  border-top: 1px solid var(--ak-border-subtle);
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-size: var(--ak-fs-xs);
+  line-height: 1.7;
+
+  p {
+    margin: 0;
+  }
+}
+
+// ── 技能参数矩阵 Skill matrix ──────────────────────────────────────────
+.ak-skill-sheet__tpl {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ak-border-subtle);
+  font-size: var(--ak-fs-sm);
+  line-height: 1.7;
+}
+
+.ak-var {
+  border-bottom: 1px dotted currentcolor;
+  color: var(--ak-rt-vup);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ak-skill-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--ak-fs-sm);
+
+  th,
+  td {
+    padding: 5px 4px;
+    border-top: 1px solid var(--ak-border-subtle);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: var(--ak-surface-sunken-2, #ebebeb);
+    border-top: 0;
+    border-bottom: 1px solid var(--ak-border-strong);
+    color: var(--ak-text-secondary, #454647);
+    font-family: var(--ak-font-sans, sans-serif);
+    font-size: var(--ak-fs-xs);
+    font-weight: 800;
+    line-height: 1.3;
+
+    img {
+      height: 13px;
+      width: auto;
+      margin-right: 2px;
+      vertical-align: -2px;
+      filter: var(--ak-glyph-filter);
+    }
+
+    &.is-mastery {
+      color: var(--ak-rt-vup);
+    }
+
+    // 列头按钮：键盘也能逐列预览 / 钉住
+    > button {
+      all: unset;
+      cursor: pointer;
+
+      &:focus-visible {
+        outline: 2px solid var(--ak-focus-color, #ffd800);
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  tbody th {
+    padding-left: 12px;
+    color: var(--ak-text-secondary, #454647);
+    font-weight: 600;
+    text-align: left;
+    white-space: normal;
+
+    .ak-sp-init,
+    .ak-sp-cost,
+    .ak-sp-dur {
+      font-weight: 700;
+    }
+  }
+
+  col.label {
+    width: 120px;
+  }
+
+  td {
+    color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 40%, transparent);
+    font-weight: 700;
+
+    // 较上一级有变化（第 1 级也算）
+    &.is-up {
+      color: var(--ak-text-primary, #1b1d1f);
+    }
+  }
+
+  // 7 与专精 Ⅰ 之间一道分隔
+  .m-start {
+    border-left: 1px solid var(--ak-border-strong);
+  }
+
+  .is-hl {
+    background: color-mix(in srgb, var(--ak-signal-info, #0098dc) 12%, transparent);
+  }
+
+  thead th.is-hl {
+    color: var(--ak-signal-info, #0098dc);
+  }
+}
+
+// ── 天赋 Talent ─────────────────────────────────────────────────────────
+.ak-talent {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-left: var(--ak-bar-w, 4px) solid var(--ak-signal-info, #0098dc);
+  background: var(--ak-surface-sunken-2, #ebebeb);
+}
+
+.ak-talent__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-weight: 800;
+}
+
+.ak-talent__req {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+  font-family: var(--ak-font-label);
+  font-size: max(10px, var(--ak-fs-cjk-min));
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+
+  img,
+  svg {
+    height: 12px;
+    filter: var(--ak-glyph-filter);
+  }
+}
+
+.ak-talent__desc {
+  color: var(--ak-text-secondary, #454647);
+  font-size: var(--ak-fs-sm);
+}
+
+// ── 天赋条件表 Talent table ─────────────────────────────────────────────
+// 结构：table.ak-talent-table > thead( th.name th.cond th.desc( label.ak-talent-table__toggle ) )
+//        + tbody > tr( td.name[rowspan] td.cond td.desc( .ak-talent-table__base + .ak-talent-table__pot ) )
+.ak-talent-table {
+  width: 100%;
+  margin: 0 0 var(--ak-space-3);
+  border: 1px solid var(--ak-border);
+  border-collapse: collapse;
+  background: var(--ak-surface-sunken, #f5f5f5);
+  font-size: var(--ak-fs-sm);
+  line-height: 1.6;
+
+  th,
+  td {
+    padding: 6px 10px;
+    border-top: 1px solid var(--ak-border-subtle);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: var(--ak-surface-sunken-2, #ebebeb);
+    border-top: 0;
+    border-bottom: 1px solid var(--ak-border-strong);
+    color: var(--ak-text-secondary, #454647);
+    font-family: var(--ak-font-sans, sans-serif);
+    font-size: var(--ak-fs-xs);
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  tbody tr:first-child > * {
+    border-top: 0;
+  }
+
+  .name {
+    width: 112px;
+    font-weight: 800;
+  }
+
+  td.name {
+    padding-top: 8px;
+    border-right: 1px solid var(--ak-border-subtle);
+    vertical-align: top;
+  }
+
+  .cond {
+    width: 168px;
+    color: var(--ak-text-secondary, #454647);
+    white-space: nowrap;
+
+    .ak-elite {
+      font-size: var(--ak-fs-sm);
+      vertical-align: middle;
+    }
+  }
+}
+
+.ak-talent-table__toggle {
+  float: right;
+  margin-left: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+
+  > input {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ak-potential > img,
+  .ak-potential > svg {
+    height: 14px;
+  }
+}
+
+.ak-talent-table__pot {
+  display: none;
+}
+
+.ak-talent-table.is-pot {
+  .ak-talent-table__base {
+    display: none;
+  }
+
+  .ak-talent-table__pot {
+    display: inline;
+  }
+}
+
+// ── 算法标记 Calc ───────────────────────────────────────────────────────
+// 绿 + 直接加算 · 蓝 + 直接乘算 · 橙 + 最终加算 · 橙 × 最终乘算
+.ak-calc {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 0 2px 0 1px;
+  color: #1d1f20;
+  font-family: var(--ak-font-label);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 14px;
+  text-align: center;
+  vertical-align: -2px;
+
+  &--add {
+    background: var(--ak-signal-success, #2fac78);
+  }
+
+  &--mul {
+    background: var(--ak-signal-info, #0098dc);
+  }
+
+  &--fadd,
+  &--fmul {
+    background: var(--ak-signal-action, #f49800);
+  }
+
+  &--add::before,
+  &--mul::before,
+  &--fadd::before {
+    content: "+";
+  }
+
+  &--fmul::before {
+    content: "×";
+  }
+}
+
+// 天赋表里默认收起算法标记（开了「算法」开关才露出）；表外单用的 AkCalc 一直可见
+.ak-talent-table:not(.is-calc) .ak-calc {
+  display: none;
+}
+
+.ak-talent-table.is-calc .ak-calc,
+.ak-talent-table__legend .ak-calc {
+  display: inline-block;
+}
+
+.ak-talent-table__legend {
+  display: none;
+
+  > td {
+    background: var(--ak-surface-sunken-2, #ebebeb);
+    color: color-mix(in srgb, var(--ak-text-primary, #1b1d1f) 58%, transparent);
+    font-size: var(--ak-fs-xs);
+
+    > span {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 14px;
+      white-space: nowrap;
+    }
+  }
+}
+
+.ak-talent-table.is-calc .ak-talent-table__legend {
+  display: table-row;
+}
+
+// ── 窄屏 ────────────────────────────────────────────────────────────────
+@media (max-width: 639px) {
+  .ak-skill-matrix {
+    col.label {
+      width: 72px;
+    }
+
+    tbody th {
+      padding-left: 8px;
+      font-size: var(--ak-fs-xs);
+    }
+
+    th,
+    td {
+      padding: 5px 2px;
+      font-size: var(--ak-fs-xs);
+    }
+  }
+
+  .ak-skill-table {
+    th,
+    td {
+      padding: 6px 5px;
+    }
+
+    .lv {
+      width: 40px;
+    }
+
+    .num {
+      width: 38px;
+    }
+
+    thead th .ak-sp-cost,
+    thead th .ak-sp-init,
+    thead th .ak-sp-dur {
+      padding: 0 7px;
+      gap: 0;
+      font-size: 0;
+    }
+  }
+
+  .ak-skill-sheet {
+    > .ak-skill--wide {
+      column-gap: 12px;
+    }
+
+    .ak-skill__aside {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+  }
+
+  .ak-talent-table {
+    .name {
+      width: 72px;
+    }
+
+    .cond {
+      width: auto;
+      white-space: normal;
+    }
+
+    .ak-talent-table__toggle {
+      float: none;
+      display: inline-flex;
+      margin: 4px 12px 0 0;
+    }
+  }
+}

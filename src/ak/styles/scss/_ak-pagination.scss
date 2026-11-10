@@ -107,3 +107,70 @@
     line-height: 1;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 pagination.css 的页码项（移植）
+//
+//  上游的 .ak-pagination 是一排**页码**（.ak-pagination__item / __ellipsis），
+//  本库的 .ak-pagination 是「上一 / 当前 / 下一」的三段式 —— 两种形态不同，
+//  但页码项本身可以复用，所以这里把上游的页码项与省略号接进本库的主题：
+//
+//    · .ak-pagination__item        一枚页码（当前页 / 禁用态）
+//    · .ak-pagination__ellipsis     省略号
+//
+//  ⚠️ 颜色全走令牌：本库的翻页控件以前把颜色写死（#999 / #333 / #222），
+//     亮色主题下是一块灰砖 —— 新加的页码项不要重复这个错误。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-pagination__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--ak-border, #4a4c4f);
+  color: var(--ak-text-secondary, #9da5aa);
+  background: transparent;
+  font-family: var(--ak-font-mono, monospace);
+  font-size: var(--ak-fs-sm, 0.875rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--ak-motion-fast, 120ms) ease,
+    border-color var(--ak-motion-fast, 120ms) ease,
+    background-color var(--ak-motion-fast, 120ms) ease;
+
+  &:hover:not(.is-active):not(:disabled) {
+    border-color: var(--ak-signal-info, #4aabea);
+    color: var(--ak-signal-info, #4aabea);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ak-signal-info, #4aabea);
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    border-color: var(--ak-signal-info, #4aabea);
+    color: var(--ak-text-primary, #f3f4ef);
+    background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 18%, transparent);
+    cursor: default;
+  }
+
+  &.is-disabled,
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.ak-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.375rem;
+  color: var(--ak-text-secondary, #9da5aa);
+}

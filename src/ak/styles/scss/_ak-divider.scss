@@ -34,3 +34,91 @@
     background-color: rgba(white, 0.8);
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 divider.css 的修饰档（移植）
+//
+//  上游的基类是一根 1px 的横线，四个修饰档改的是**线的形态**：
+//    · --accent    左段是信号色渐变，右段仍是发丝线
+//    · --stripes   整条换成 45° 斜纹带
+//    · --text      文字居中，两侧是发丝线（上游的「带标签分隔线」）
+//    · --vertical  竖排的一根 1px 线
+//
+//  本库的基类已经就是「文字居中 + 两侧不等长的横线」，所以：
+//    · --text    = 把基类那两根线换成发丝线、把标签排成上游的小标字
+//    · --vertical = 换成一根竖线（无标签，标签在这种形态下无意义）
+//
+//  ⚠️ 颜色一律走令牌：基类里那两根写死 rgba(white,.8) 的线在亮色主题下
+//     几乎看不见，各修饰档都改回 --ak-border / --ak-signal-* 系列。
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── accent：左段信号色 ───────────────────────────────────────────────
+.ak-divider--accent {
+  &::before {
+    width: 20%;
+    background: linear-gradient(
+      90deg,
+      var(--ak-signal-info, #4aabea),
+      color-mix(in srgb, var(--ak-signal-info, #4aabea) 35%, transparent)
+    );
+  }
+
+  &::after {
+    background-color: var(--ak-border, #4a4c4f);
+  }
+}
+
+// ── stripes：斜纹带 ──────────────────────────────────────────────────
+.ak-divider--stripes {
+  height: 0.375rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ak-stripe-color, rgba(255, 255, 255, 0.07)) 0 var(--ak-stripe-size, 8px),
+    transparent var(--ak-stripe-size, 8px) calc(var(--ak-stripe-size, 8px) * 2)
+  );
+
+  &::before,
+  &::after {
+    display: none;
+  }
+}
+
+// ── text：带标签的发丝分隔线 ─────────────────────────────────────────
+.ak-divider--text {
+  &::before,
+  &::after {
+    height: 1px;
+    background-color: var(--ak-border, #4a4c4f);
+  }
+
+  span {
+    color: var(--ak-text-secondary, #9da5aa);
+    font-family: var(--ak-font-label, sans-serif);
+    font-size: var(--ak-fs-overline, 0.6875rem);
+    font-weight: 700;
+    letter-spacing: var(--ak-tracking-overline, 0.14em);
+    line-height: 1;
+    text-transform: uppercase;
+    filter: none;
+  }
+}
+
+// ── vertical：竖排的一根线 ───────────────────────────────────────────
+.ak-divider--vertical {
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin: 0 var(--ak-space-2, 0.5rem);
+  vertical-align: middle;
+  background-color: var(--ak-border, #4a4c4f);
+
+  &::before,
+  &::after {
+    display: none;
+  }
+
+  // 竖线形态没有标签的位置（上游的竖分隔线也是纯装饰）
+  span {
+    display: none;
+  }
+}

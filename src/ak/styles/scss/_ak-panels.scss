@@ -1,0 +1,775 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 面板族（panels）
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  https://github.com/MooncellWiki/prts-design —— packages/css/src/components/
+//
+//  覆盖：accordion（手风琴 .ak-details）/ panel / heading / cbox / message /
+//  empty / stat / pathnav。上游类名逐字保留，上游 CSS 变量映射到本库 --ak-* 令牌。
+//
+//  两主题（data-ak-theme="terminal" 暗 / "archive" 亮）共用同一套规则：
+//  颜色全部由语义令牌派生，**没有任何一条按主题分支**。信号色（信息 / 成功 /
+//  警告 / 危险）用 color-mix 掺一点当前主题的文字色 —— 暗主题下自动提亮、
+//  亮主题下自动压深，同一枚令牌在两套底色上都够对比度。
+// ══════════════════════════════════════════════════════════════════════════
+
+// 本文件内共用的语义别名。三个 partial 各写一份（同名 mixin 会撞车，
+// 所以每份用不同的名字）。属性值全部带兜底，脱离本库令牌也能站住。
+@mixin ak-panels-aliases {
+  // 文字
+  --_fg: var(--ak-text-primary, #f8f8f5);
+  --_fg-muted: color-mix(in srgb, var(--ak-text-primary, #f8f8f5) 62%, transparent);
+  --_fg-subtle: color-mix(in srgb, var(--ak-text-primary, #f8f8f5) 38%, transparent);
+  // 表面
+  --_surface: var(--ak-surface-sunken, #1a1b1c);
+  --_surface-2: var(--ak-surface-sunken-2, #232425);
+  --_surface-3: var(--ak-surface-raised, rgba(66, 66, 66, 0.92));
+  --_border: var(--ak-border, #2f3133);
+  --_border-strong: var(--ak-border-strong, #4a4c4f);
+  // 强调色 = 本库的「信息」信号色（上游 --ak-accent 同义）
+  --_accent: var(--ak-signal-info, #18d1ff);
+  --_accent-fg: var(--ak-text-inverse, #1b1d1f);
+  --_accent-subtle: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 12%, transparent);
+  // 四档信号色（掺当前主题文字色：暗底提亮 / 亮底压深）
+  --_info: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 82%, var(--ak-text-primary, #f8f8f5));
+  --_info-bg: color-mix(in srgb, var(--ak-signal-info, #18d1ff) 12%, transparent);
+  --_success: color-mix(in srgb, var(--ak-signal-success, #46c47c) 62%, var(--ak-text-primary, #f8f8f5));
+  --_success-bg: color-mix(in srgb, var(--ak-signal-success, #46c47c) 14%, transparent);
+  --_warning: color-mix(in srgb, var(--ak-signal-action, #ffd800) 75%, var(--ak-text-primary, #f8f8f5));
+  --_warning-bg: color-mix(in srgb, var(--ak-signal-action, #ffd800) 14%, transparent);
+  --_danger: color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 80%, var(--ak-text-primary, #f8f8f5));
+  --_danger-bg: color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 14%, transparent);
+  // 上游有、本库没有的尺度（就近取值，写死在本文件里）
+  --_fs-h2: 1.5rem;
+  --_fs-body-lg: 1.125rem;
+  --_space-12: 3rem;
+  --_space-section: 2rem;
+  --_radius-pill: 999px;
+}
+
+// ── Accordion / Details（手风琴） ────────────────────────────────────────
+// 上游 .ak-details 就是原生 <details>：开合交给浏览器，摘要自带按钮语义。
+.ak-details {
+  @include ak-panels-aliases;
+
+  margin: 0 0 var(--ak-space-2, 0.5rem);
+  border: 1px solid var(--_border);
+  background: var(--_surface);
+
+  > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ak-space-3, 0.75rem);
+    padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    // 开合记号：收起 ＋ / 展开 −
+    &::before {
+      content: "+";
+      width: 16px;
+      color: var(--_accent);
+      font-family: var(--ak-font-label, sans-serif);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    &:focus-visible {
+      outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #ffd800);
+      outline-offset: calc(-1 * var(--ak-focus-width, 3px));
+    }
+  }
+
+  &[open] > summary {
+    border-bottom: 1px solid var(--_border);
+    background: var(--_surface-2);
+
+    &::before {
+      content: "\2212";
+    }
+  }
+
+  &__body {
+    padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// ── Panel（带标题栏的面板） ────────────────────────────────────────────
+.ak-panel {
+  @include ak-panels-aliases;
+
+  margin: 0 0 var(--ak-space-4, 1rem);
+  border: 1px solid var(--_border);
+  background: var(--_surface);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: var(--ak-space-3, 0.75rem);
+    min-height: 40px;
+    padding: 0 var(--ak-space-4, 1rem) 0 var(--ak-space-3, 0.75rem);
+    border: 0 solid var(--_border);
+    border-width: 0 0 1px var(--ak-bar-w, 4px);
+    border-image: linear-gradient(to right, var(--_accent) 4px, var(--_border) 4px) 0 0 1 4;
+    background: var(--_surface-2);
+
+    &--inverse {
+      color: var(--ak-text-inverse, #1b1d1f);
+      background: var(--ak-surface-inverse, #fdfdfb);
+    }
+  }
+
+  &__title {
+    flex: 1;
+    margin: 0;
+    font-size: var(--ak-fs-sm, 0.875rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+
+    // 标题后的拉丁小标（复用装饰层的 .ak-en）
+    .ak-en {
+      margin-left: 8px;
+      font-size: var(--ak-fs-xs, 0.75rem);
+      color: var(--_fg-muted);
+    }
+  }
+
+  &__head--inverse &__title .ak-en {
+    color: inherit;
+    opacity: 0.55;
+  }
+
+  &__toggle {
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #ffd800);
+      outline-offset: 2px;
+    }
+  }
+
+  &__body {
+    padding: var(--ak-space-4, 1rem);
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &--collapsible > &__head {
+    cursor: pointer;
+
+    // 开合记号：两条渐变拼成（收起 ＋ / 展开 −）
+    &::after {
+      content: "";
+      flex: none;
+      width: 10px;
+      height: 10px;
+      margin-left: auto;
+      background:
+        linear-gradient(currentcolor, currentcolor) center / 100% 2px no-repeat,
+        linear-gradient(currentcolor, currentcolor) center / 2px 0 no-repeat;
+      opacity: 0.6;
+      transition: background-size var(--ak-dur-fast, 150ms);
+    }
+  }
+
+  &--collapsible.is-collapsed > &__head::after {
+    background-size: 100% 2px, 2px 100%;
+  }
+
+  &--collapsible.is-collapsed > &__body {
+    display: none;
+  }
+}
+
+// ── Heading（区块标题） ─────────────────────────────────────────────────
+.ak-heading {
+  @include ak-panels-aliases;
+
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ak-space-4, 1rem);
+  margin: var(--_space-section) 0 var(--ak-space-4, 1rem);
+  padding-left: var(--ak-space-4, 1rem);
+  border-left: var(--ak-bar-w-lg, 8px) solid var(--_accent);
+  line-height: 1.1;
+
+  &__title {
+    margin: 0;
+    font-size: var(--_fs-h2);
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+
+  &__en {
+    color: var(--_fg-muted);
+    font-family: var(--ak-font-display, sans-serif);
+    font-size: var(--ak-fs-sm, 0.875rem);
+    font-weight: 700;
+    letter-spacing: var(--ak-tracking-caps, 0.08em);
+    text-transform: uppercase;
+  }
+
+  &__aside {
+    margin-left: auto;
+    font-size: var(--ak-fs-sm, 0.875rem);
+  }
+
+  &--stack {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+
+    .ak-heading__en {
+      color: var(--_fg-muted);
+      font-size: var(--ak-fs-overline, 0.6875rem);
+      letter-spacing: var(--ak-tracking-overline, 0.14em);
+    }
+  }
+
+  &--lg .ak-heading__title {
+    font-size: var(--ak-fs-display, 2.5rem);
+  }
+
+  &--underline {
+    position: relative;
+    padding-left: 0;
+    padding-bottom: var(--ak-space-2, 0.5rem);
+    border-left: 0;
+    border-bottom: 1px solid var(--_border);
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 120px;
+      height: 3px;
+      background: var(--_accent);
+    }
+  }
+}
+
+// 手机：「中文 + 英文 + 附加」一行排不下时，英文副题叠到标题下面。
+@media (max-width: 639px) {
+  .ak-heading:not(.ak-heading--stack):has(.ak-heading__aside) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--ak-space-3, 0.75rem);
+    row-gap: 0;
+    align-items: end;
+
+    :is(.ak-heading__title, .ak-heading__en) {
+      grid-column: 1;
+    }
+
+    .ak-heading__en {
+      margin-top: 4px;
+      font-size: var(--ak-fs-overline, 0.6875rem);
+      letter-spacing: var(--ak-tracking-overline, 0.14em);
+    }
+
+    .ak-heading__aside {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      margin-left: 0;
+      white-space: nowrap;
+    }
+  }
+}
+
+// 标题也可以直接是 h1–h6：同一份字号规则对元素标签同样成立。
+:is(h1, h2, h3, h4, h5, h6).ak-heading__title {
+  margin: 0;
+  font-size: var(--_fs-h2, 1.5rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+// ── Cbox（正文提示框） ─────────────────────────────────────────────────
+// 与 .ak-message 的分工：message 是界面反馈（横幅 / 可关闭），cbox 是写在
+// 正文里的提示（另见 xx 页面 / 本节仅作存档）。
+.ak-cbox {
+  @include ak-panels-aliases;
+
+  --_c: var(--_info);
+  --_bg: var(--_info-bg);
+
+  display: flex;
+  align-items: stretch;
+  margin: 0 0 var(--ak-space-4, 1rem);
+  border: 1px solid var(--_border);
+  background: var(--_bg);
+  color: var(--_fg);
+  font-size: var(--ak-fs-sm, 0.875rem);
+  line-height: 1.6;
+
+  &--tip {
+    --_c: var(--_success);
+    --_bg: var(--_success-bg);
+  }
+
+  &--warning {
+    --_c: var(--_warning);
+    --_bg: var(--_warning-bg);
+  }
+
+  &--danger {
+    --_c: var(--_danger);
+    --_bg: var(--_danger-bg);
+  }
+
+  &--neutral {
+    --_c: var(--_fg-muted);
+    --_bg: var(--_surface-2);
+  }
+
+  &--narrow {
+    max-width: 640px;
+  }
+
+  &__icon {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex: none;
+    justify-content: center;
+    width: 40px;
+    padding-top: 10px;
+    color: var(--_c);
+
+    // 等级色 24% 淡底：实色 + opacity（不依赖 color-mix 的浏览器支持）
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: currentcolor;
+      opacity: 0.24;
+    }
+
+    > svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+
+    > :is(p, ul, ol, dl) {
+      margin-bottom: var(--ak-space-2, 0.5rem);
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    > :is(ul, ol, dl):last-child > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__title {
+    margin: 0 0 2px;
+    color: var(--_c);
+    font-weight: 700;
+  }
+}
+
+// ── Message（界面反馈条） ──────────────────────────────────────────────
+.ak-message {
+  @include ak-panels-aliases;
+
+  --_c: var(--_info);
+  --_bg: var(--_info-bg);
+
+  display: flex;
+  gap: var(--ak-space-3, 0.75rem);
+  margin: 0 0 var(--ak-space-4, 1rem);
+  padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
+  border: 1px solid var(--_border);
+  border-left-width: var(--ak-bar-w, 4px);
+  border-image: linear-gradient(to right, var(--_c) 4px, var(--_border) 4px) 1 1 1 4;
+  background: var(--_bg);
+  color: var(--_fg);
+  font-size: var(--ak-fs-sm, 0.875rem);
+
+  &--success {
+    --_c: var(--_success);
+    --_bg: var(--_success-bg);
+  }
+
+  &--warning {
+    --_c: var(--_warning);
+    --_bg: var(--_warning-bg);
+  }
+
+  &--danger {
+    --_c: var(--_danger);
+    --_bg: var(--_danger-bg);
+  }
+
+  &--neutral {
+    --_c: var(--_fg-muted);
+    --_bg: var(--_surface-2);
+  }
+
+  &--accent {
+    --_c: var(--_accent);
+    --_bg: var(--_accent-subtle);
+  }
+
+  &__icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--_c);
+
+    > svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__title {
+    margin: 0 0 2px;
+    color: var(--_c);
+    font-weight: 700;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // 关闭按钮：all: unset 会把焦点环也清掉，这里补回来
+  &__close {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0 4px;
+    cursor: pointer;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ak-focus-color, #ffd800);
+      outline-offset: 2px;
+    }
+  }
+
+  &--banner {
+    justify-content: center;
+    border-width: 3px 1px 1px;
+    border-image: linear-gradient(var(--_c) 3px, var(--_border) 3px) 3 1 1 1;
+    text-align: center;
+  }
+
+  &--stripes {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 var(--ak-stripe-size, 8px),
+      var(--ak-stripe-color, rgba(255, 255, 255, 0.07)) var(--ak-stripe-size, 8px)
+        calc(var(--ak-stripe-size, 8px) * 2)
+    );
+  }
+}
+
+// ── Empty（空状态） ────────────────────────────────────────────────────
+.ak-empty {
+  @include ak-panels-aliases;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ak-space-2, 0.5rem);
+  padding: var(--_space-12) var(--ak-space-4, 1rem);
+  border: 1px dashed var(--_border-strong);
+  background: var(--_surface-2);
+  color: var(--_fg-muted);
+  text-align: center;
+
+  &__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+
+    > svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    color: var(--_fg-muted);
+    font-size: var(--ak-fs-body, 1rem);
+    font-weight: 700;
+  }
+
+  &__desc {
+    font-size: var(--ak-fs-xs, 0.75rem);
+  }
+
+  &__extra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ak-space-2, 0.5rem);
+    margin-top: var(--ak-space-2, 0.5rem);
+  }
+
+  &__code {
+    color: var(--_border-strong);
+    font-family: var(--ak-font-display, sans-serif);
+    font-size: var(--ak-fs-display-xl, 3.5rem);
+    font-weight: 800;
+    font-variant-numeric: lining-nums;
+    letter-spacing: var(--ak-tracking-display, -0.02em);
+    line-height: 1;
+  }
+}
+
+// ── Stat（统计数字） ───────────────────────────────────────────────────
+.ak-stat {
+  @include ak-panels-aliases;
+
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  padding: var(--ak-space-3, 0.75rem) var(--ak-space-4, 1rem);
+  border: 1px solid var(--_border);
+  border-top-width: 2px;
+  border-image: linear-gradient(var(--_accent) 2px, var(--_border) 2px) 2 1 1 1;
+  background: var(--_surface);
+
+  &__label {
+    color: var(--_fg-muted);
+    font: 600 var(--ak-fs-overline, 0.6875rem) / 1 var(--ak-font-label, sans-serif);
+    letter-spacing: var(--ak-tracking-overline, 0.14em);
+    text-transform: uppercase;
+  }
+
+  &__value {
+    color: var(--_fg);
+    font: 700 var(--_fs-h2) / 1.1 var(--ak-font-label, sans-serif);
+    font-variant-numeric: tabular-nums;
+
+    small {
+      margin-left: 2px;
+      color: var(--_fg-muted);
+      font-size: 0.5em;
+    }
+  }
+
+  &__delta {
+    font-size: var(--ak-fs-xs, 0.75rem);
+    font-variant-numeric: tabular-nums;
+
+    &--up {
+      color: var(--_success);
+    }
+
+    &--down {
+      color: var(--_danger);
+    }
+  }
+
+  &--inline {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--ak-space-2, 0.5rem);
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+
+    .ak-stat__value {
+      font-size: var(--_fs-body-lg);
+    }
+  }
+}
+
+.ak-stat-row {
+  @include ak-panels-aliases;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--ak-space-3, 0.75rem);
+
+  > .ak-stat {
+    min-width: 0;
+  }
+}
+
+// ── Pathnav（正文首行的路径条） ───────────────────────────────────────
+// 与 .ak-breadcrumb 分工：面包屑是页面头里的小灰字（层级），这一条在正文里、
+// 是按钮（回首页 / 回所属一览 / 本页）。两块板在亮 / 暗主题下都是深色（同游戏）。
+.ak-pathnav {
+  --_h: 32px;
+  --_tip: 10px;
+  --_band: 3px;
+  // 上游的 --ak-gray-800 / --ak-gray-0：两块深色板，亮暗主题同值
+  --_slab: #313131;
+  --_slab-fg: #fdfdfb;
+  --_seam: #000;
+  --_hot: var(--ak-signal-info, #18d1ff);
+
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  height: var(--_h);
+  margin: 0 0 var(--ak-space-4, 1rem);
+  font: 600 var(--ak-fs-sm, 0.875rem) / var(--_h) var(--ak-font-sans, sans-serif);
+  white-space: nowrap;
+
+  // 板尾的箭头：尖上压一道主色
+  --_arrow: polygon(
+    0 -1px,
+    calc(100% - var(--_tip)) -1px,
+    100% 50%,
+    calc(100% - var(--_tip)) calc(100% + 1px),
+    0 calc(100% + 1px)
+  );
+
+  a {
+    display: block;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    transition:
+      color var(--ak-dur-fast, 150ms),
+      background-color var(--ak-dur-fast, 150ms);
+
+    &:is(:hover, :visited, :active) {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    &:hover {
+      color: var(--_hot);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--_hot);
+      outline-offset: -2px;
+      color: var(--_hot);
+    }
+  }
+
+  // 首页板：方块，线稿房子由 CSS 画（不依赖图标字体 / sprite）
+  &__home {
+    flex: none;
+    color: var(--_slab-fg);
+    background: var(--_slab);
+
+    > a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(var(--_h) + 6px);
+      font-size: 0;
+      line-height: 0;
+    }
+
+    > a::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      background: currentcolor;
+      -webkit-mask: var(--_home) center / contain no-repeat;
+      mask: var(--_home) center / contain no-repeat;
+      --_home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.5 11.2 12 3l9.5 8.2-1.7 2L12 6.5 4.2 13.2z'/%3E%3Cpath d='M6 13.6 12 8.5l6 5.1V21h-4.2v-4.6h-3.6V21H6z'/%3E%3C/svg%3E");
+    }
+  }
+
+  // 一览板：左边一道黑缝接首页板，右端收成箭头
+  &__up {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    max-width: 60%;
+    margin-right: calc(var(--_tip) * -1);
+    padding-right: var(--_band);
+    border-left: 1px solid var(--_seam);
+    color: var(--_slab-fg);
+    background: linear-gradient(
+      to left,
+      var(--_hot) calc(var(--_tip) + var(--_band) + 1px),
+      var(--_slab) 0
+    );
+    clip-path: var(--_arrow);
+
+    > a {
+      padding: 0 calc(var(--ak-space-3, 0.75rem) + var(--_tip)) 0 var(--ak-space-3, 0.75rem);
+      overflow: hidden;
+      background: var(--_slab);
+      text-overflow: ellipsis;
+      clip-path: var(--_arrow);
+    }
+  }
+
+  // 本页：浅底 + 一圈细线（左边被箭头盖着，不画）
+  &__here {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: 0 var(--ak-space-3, 0.75rem) 0 calc(var(--_tip) + var(--_band) + var(--ak-space-3, 0.75rem));
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px var(--_border, #2f3133),
+      inset 0 -1px var(--_border, #2f3133),
+      inset -1px 0 var(--_border, #2f3133);
+    color: var(--ak-text-primary, #f8f8f5);
+    background: var(--ak-surface-sunken-2, #232425);
+    font-weight: 400;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 639px) {
+  .ak-pathnav {
+    --_h: 36px;
+    --_tip: 11px;
+  }
+}
+
+// ── 减弱动效 ───────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .ak-pathnav a {
+    transition: none;
+  }
+
+  .ak-panel--collapsible > .ak-panel__head::after {
+    transition: none;
+  }
+}

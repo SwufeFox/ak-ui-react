@@ -526,6 +526,86 @@ import {
 </AkScreen>
 ```
 
+### 3.12 Operator Dossiers & Stages
+
+Operator/stage/battle primitives ported from MooncellWiki/prts-design. Portraits are host-supplied —
+the package ships no game art.
+
+```tsx
+import { AkOpCard, AkOpGrid, AkOpRow, AkEnemy, AkStage, AkStageCode, AkSanity, AkEvent, AkCountdown, AkHero, AkCamp, AkRange, AkPhaseTabs, AkMaterials, AkMaterialsRow, AkMaterialsDivider, AkNews } from '@swufefox/ak-ui-react'
+
+// Operator card: rarity rail, elite stage, optional portrait (placeholder block without one):
+<AkOpCard name="EXIUS" sub="EXIUS // Medic" rarity={6} elite={2} />
+<AkOpCard name="AMIYA" rarity={5} variant="rail" current />
+
+// Operator row + enemy entry:
+<AkOpRow name="EXIUS" rarity={6} stars meta="Medic // E2" />
+<AkEnemy name="Leader" code="B003" variant="boss" level={5} levelMax={5} />
+
+// Stage cards:
+<AkStage code="H6-4" name="Heart of the Storm" caption="Hard · Chapter 6" variant="hard" sanity={18} />
+<AkStageCode variant="hard">H6-4</AkStageCode>
+<AkSanity value={18} />
+
+// Event + countdown (remaining is caller-driven; `until` ticks client-side only):
+<AkEvent title="Side Story" kind="Side Story · Live" status="live" />
+<AkCountdown remaining={90000} />
+
+// Faction mark, attack range, elite stage tabs, material list:
+<AkCamp src={mark} name="RHODES ISLAND" />
+<AkRange grids={[{ row: 0, col: 1 }, { row: 1, col: 1 }]} />
+<AkPhaseTabs value={phase} onValueChange={setPhase} max={2} />
+<AkMaterials><AkMaterialsRow label="E0 → E1"><AkItem tier={3} name="D32" /></AkMaterialsRow></AkMaterials>
+```
+
+### 3.13 Skills, Talents & Records
+
+```tsx
+import { AkSkill, AkSkillSheet, AkSkillMatrix, AkSp, AkSpTrigger, AkSpValue, AkTalent, AkTalentTable, AkCalc, AkRichText, AkModule, AkModuleStage, AkModuleUnlock, AkDossier, AkRedacted, AkArchive, AkArchivePlay, AkVoice, AkVoiceList, AkDialogue, AkDialogueLine, AkItemList } from '@swufefox/ak-ui-react'
+
+// Skill card: SP type, trigger, cost/init/duration, unlock condition:
+<AkSkill name="Sheer Strike" alias={{ en: 'Sheer Strike' }} spType="auto" trigger="auto" cost={25} init={0} duration="25s" unlock="Skill 2 · E1">
+  <AkSp spType="auto" />
+</AkSkill>
+
+// Level table and parameter matrix:
+<AkSkillSheet levels={levels} highlight={3} label="Sheer Strike" />
+<AkSkillMatrix rows={rows} label="Sheer Strike" description={(ctx) => <>ATK <b>{ctx.Var('atk')}</b></>} />
+
+// Talents and sealed records:
+<AkTalent name="Emergency Deployment" requirements={[{ text: 'E2 · Lv.1' }]}>Deploy cost -3.</AkTalent>
+<AkDossier title="Objective Record" locked unlock="Complete 1-7">
+  <p>Operator 002_EXIUS.</p>
+</AkDossier>
+<AkArchive title="Archive 1" kicker="Archive" footer={<AkArchivePlay href="#records">Read</AkArchivePlay>}>
+  <p>Sealed until unlocked.</p>
+</AkArchive>
+```
+
+### 3.14 Panels, Feedback & Steps
+
+```tsx
+import { AkPanel, AkCollapse, AkCollapseItem, AkHeading, AkCbox, AkMessage, AkEmpty, AkStat, AkStatRow, AkPathNav, AkBadge, AkChip, AkTimeline, AkTimelineItem, AkToastProvider, useToast, AkTooltip, AkSearch, AkKbd, AkScope, AkSteps, AkStep, AkBackTop } from '@swufefox/ak-ui-react'
+
+// Panel + accordion:
+<AkPanel title="Operation Record" en="Operation Record" titleTag="h3">…</AkPanel>
+<AkCollapse accordion>
+  <AkCollapseItem title="Stage 1">…</AkCollapseItem>
+</AkCollapse>
+
+// Messages and stats:
+<AkMessage variant="danger" title="Link lost">…</AkMessage>
+<AkStatRow><AkStat label="Operators" value="128" delta="+6" trend="up" /></AkStatRow>
+
+// Toast + tooltip + search:
+<AkToastProvider><Trigger /></AkToastProvider>   // inside: const toast = useToast(); toast.success('Done')
+<AkTooltip content="Needs full SP" placement="top"><button>…</button></AkTooltip>
+<AkSearch placeholder="Search" shortcut="/" onSearch={search} />
+
+// Steps:
+<AkSteps current={1}><AkStep title="Link" status="done" /><AkStep title="Deploy" status="active" /></AkSteps>
+```
+
 ---
 
 ## 4. Tuning Reference — Which Token to Set

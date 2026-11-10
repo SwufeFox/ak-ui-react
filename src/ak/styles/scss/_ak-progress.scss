@@ -174,3 +174,34 @@
     transition: none;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 progress.css 的色调档（移植）
+//
+//  上游有 yellow / success / danger 三档（--_c 换色），本库原有的是
+//  warning / danger 两档。**不重命名**已有的 --warning（调用方已经在用），
+//  只补上游缺的那一档，并把上游的 --yellow 作为同义档挂上：
+//
+//    · --yellow   ≡ --warning（本库的警告色就是上游那支黄）
+//    · --success  新增：成功绿
+//    · --danger   已有，不动
+//
+//  尺寸档（上游 sm 4 / lg 14）本库已有自己的尺寸系统（data-ak-size）。
+//  环形进度（上游 .ak-ring）在本库是 .ak-gauge，色调档一一对应。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-progress--yellow {
+  --ak-progress-signal: var(--ak-signal-action, var(--ak-color-advanced, #f1c644));
+}
+
+.ak-progress--success {
+  --ak-progress-signal: var(--ak-signal-success, #46c47c);
+}
+
+.ak-gauge--yellow {
+  --ak-gauge-signal: var(--ak-signal-action, var(--ak-color-advanced, #f1c644));
+}
+
+.ak-gauge--success {
+  --ak-gauge-signal: var(--ak-signal-success, #46c47c);
+}

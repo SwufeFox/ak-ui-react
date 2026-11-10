@@ -105,6 +105,17 @@ const en = {
   'ref.arknights.title': 'Game data',
   'ref.arknights.note':
     'Ported from prts-design (MIT). Icons are supplied by the host — none of these components ship game art.',
+  'ref.operators.title': 'Operators & stages',
+  'ref.operators.note':
+    'Operator dossiers, stage cards and battle readouts ported from prts-design (MIT). Portraits stay with the host.',
+  'ref.operators.countdown': 'Event remaining',
+  'ref.operators.phaseLabel': 'Elite stage',
+  'ref.skills.title': 'Skills & records',
+  'ref.skills.note':
+    'Skill sheets, talent tables, modules and sealed records ported from prts-design (MIT).',
+  'ref.panels.title': 'Panels & feedback',
+  'ref.panels.note':
+    'Accordions, panels, messages, toasts and steppers ported from prts-design (MIT).',
 
   // ── 共享部件文案 ──────────────────────────────────────────────────
   'common.demoViews': 'Example views',
@@ -288,6 +299,9 @@ const en = {
   'ref.shell.eyebrow': 'SECTION NAVIGATOR',
   'ref.decor.eyebrow': 'DECOR',
   'ref.arknights.eyebrow': 'ARKNIGHTS DATA',
+  'ref.operators.eyebrow': 'OPERATOR DOSSIER',
+  'ref.skills.eyebrow': 'SKILLS & RECORDS',
+  'ref.panels.eyebrow': 'PANELS & FEEDBACK',
 
   'card.stripe.title': 'Stripe card',
   'card.stripe.desc': 'Accent band variant.',
@@ -512,6 +526,14 @@ const zhCN: Record<MessageKey, string> = {
   'ref.arknights.title': '游戏数据',
   'ref.arknights.note':
     '移植自 prts-design（MIT）。图标一律由宿主提供——这些组件不自带任何游戏素材。',
+  'ref.operators.title': '干员与关卡',
+  'ref.operators.note': '干员档案、关卡卡面与战场读数，移植自 prts-design（MIT）。头像仍由宿主提供。',
+  'ref.operators.countdown': '活动剩余时间',
+  'ref.operators.phaseLabel': '精英阶段',
+  'ref.skills.title': '技能与档案',
+  'ref.skills.note': '技能表、天赋表、模组与封存档案，移植自 prts-design（MIT）。',
+  'ref.panels.title': '面板与反馈',
+  'ref.panels.note': '折叠面板、信息条、消息与步骤条，移植自 prts-design（MIT）。',
 
   'common.demoViews': '示例视图',
   'common.preview': '预览',
@@ -692,6 +714,9 @@ const zhCN: Record<MessageKey, string> = {
   'ref.shell.eyebrow': '区块导航',
   'ref.decor.eyebrow': '装饰',
   'ref.arknights.eyebrow': '方舟数据',
+  'ref.operators.eyebrow': '干员档案',
+  'ref.skills.eyebrow': '技能与档案',
+  'ref.panels.eyebrow': '面板与反馈',
 
   'card.stripe.title': '斜纹卡片',
   'card.stripe.desc': '强调带变体。',

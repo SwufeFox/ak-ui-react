@@ -73,3 +73,210 @@
     border: 1px solid CanvasText;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 skeleton.css 的形状档（移植）
+//
+//  上游是一枚基类 .ak-skeleton + 四个形状修饰（--text / --rect / --square /
+//  --circle）。本库的占位基座是 .ak-skeleton-block / .ak-skeleton-text__line，
+//  所以这里把上游的形状档接在**同一个占位基座**上：同一条扫描动画、
+// 同一枚底色令牌，不新造第二套语汇。
+//
+//  ⚠️ `.ak-skeleton--text`（上游的单行占位）与 `.ak-skeleton-text`（本库的
+//     多行容器）是两个不同的类，不要混。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-skeleton--text,
+.ak-skeleton--rect,
+.ak-skeleton--square,
+.ak-skeleton--circle {
+  @extend %ak-skeleton-scan;
+
+  display: block;
+}
+
+.ak-skeleton--text {
+  height: 0.9em;
+  margin: 0.35em 0;
+}
+
+.ak-skeleton--rect {
+  height: 7.5rem;
+}
+
+.ak-skeleton--square {
+  width: 7.5rem;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.ak-skeleton--circle {
+  width: 7.5rem;
+  height: auto;
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+@media (forced-colors: active) {
+  .ak-skeleton--text,
+  .ak-skeleton--rect,
+  .ak-skeleton--square,
+  .ak-skeleton--circle {
+    border: 1px solid CanvasText;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 spinner.css 的加载指示器（移植）
+//
+//  上游有两种指示器：
+//    · .ak-spinner  菱形涟漪（中央一枚常驻的空心菱形 + 一圈从它身上冒出来的环）
+//    · .ak-loader   三根跳动的竖条
+//  外加 .ak-spin（图形 + 说明文字竖排）与 .ak-spin-container
+//  （把正在加载的内容压淡，图形叠在它正中，状态走 aria-busy）。
+//
+//  ⚠️ 本库已有 .ak-loading（45° 旋转方框 + 扩散方框，见 _ak-loading.scss），
+//     那是本库的默认指示器；这里补的是**上游那两枚**，属于并列的形态。
+//  ⚠️ 涟漪环用 transform: scale 长大（上游用 width/height，每帧触发布局）；
+//     线宽因此恒定 2px，形状与上游一致但不动布局。
+// ══════════════════════════════════════════════════════════════════════════
+
+.ak-spinner {
+  --ak-spinner-color: var(--ak-signal-info, #4aabea);
+  --ak-spinner-ld: var(--ak-spinner-color);
+
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 2.4em;
+  height: 2.4em;
+  font-size: 12px;
+  vertical-align: middle;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    box-sizing: border-box;
+    width: 0.75em;
+    height: 0.75em;
+    border: 2px solid var(--ak-spinner-ld);
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    opacity: 0;
+    animation:
+      ak-spinner-ripple 1.2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite,
+      ak-spinner-ripple-fade 1.2s cubic-bezier(0.4, 0, 0.8, 0.6) infinite;
+  }
+}
+
+@keyframes ak-spinner-ripple {
+  from {
+    transform: rotate(45deg) scale(1);
+  }
+
+  to {
+    transform: rotate(45deg) scale(2.2);
+  }
+}
+
+@keyframes ak-spinner-ripple-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.ak-loader {
+  --ak-spinner-color: var(--ak-signal-info, #4aabea);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  > i {
+    width: 6px;
+    height: 14px;
+    background: var(--ak-spinner-color);
+    animation: ak-loader-bars 1s ease-in-out infinite;
+  }
+
+  > i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  > i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes ak-loader-bars {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scaleY(0.4);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+// 图形 + 说明文字竖排
+.ak-spin {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ak-space-2, 0.5rem);
+}
+
+.ak-spin__desc {
+  color: var(--ak-text-secondary, #9da5aa);
+  font-size: var(--ak-fs-sm, 0.875rem);
+}
+
+// 正在加载的内容：内容压淡、不可点，图形叠在它正中
+.ak-spin-container {
+  position: relative;
+}
+
+.ak-spin-container > .ak-spin {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  justify-content: center;
+}
+
+.ak-spin-container__content {
+  transition: opacity var(--ak-motion-fast, 120ms) ease;
+}
+
+.ak-spin-container[aria-busy="true"] > .ak-spin-container__content {
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+
+// 减少动效：环不出、只留中央静止的菱形（上游同款处理）
+@media (prefers-reduced-motion: reduce) {
+  .ak-spinner::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .ak-loader > i {
+    animation: none;
+  }
+
+  .ak-spin-container__content {
+    transition: none;
+  }
+}

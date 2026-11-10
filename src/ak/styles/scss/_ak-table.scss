@@ -221,3 +221,34 @@
     outline: 1px solid Highlight;
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  上游 table.css 的修饰档（移植）
+//
+//  上游的表：--striped（斑马纹）、--compact（紧凑内距）、
+//  tbody tr.is-selected（选中行）、.num（数字列）。
+//  本库已有 --striped / --hoverable / --tactical / --sticky-header 与
+//  .ak-table__row--selected / .ak-table__cell--num，**不重命名**；
+//  这里补的是缺的那几枚，并给上游的两个写法留兼容别名：
+//
+//    · --compact      紧凑内距（上游 4px 8px）
+//    · .num          上游的数字列写法（与 .ak-table__cell--num 同义）
+//    · tr.is-selected 上游的选中行写法（同 .ak-table__row--selected）
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── compact：紧凑内距 ────────────────────────────────────────────────
+.ak-table--compact {
+  --ak-table-pad-y: 0.25rem;
+  --ak-table-pad-x: 0.5rem;
+}
+
+// ── .num：上游的数字列写法 ───────────────────────────────────────────
+.ak-table .num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+// ── tr.is-selected：上游的选中行写法 ────────────────────────────────
+.ak-table tbody tr.is-selected td {
+  background: color-mix(in srgb, var(--ak-signal-info, #4aabea) 7%, transparent);
+}

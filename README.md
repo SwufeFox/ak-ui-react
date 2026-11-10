@@ -1,27 +1,23 @@
 # ak-ui-react
 
-**An Arknights-inspired design system for React** — PRTS terminal aesthetics, shipped as typed
-components, design tokens, and framework-agnostic motion controllers.
+**An Arknights-inspired design system for React.**
 
-The design layer comes from [ak-ui](https://github.com/YunYouJun/ak-ui); this package is its React
-port. The SCSS primitives and DOM controllers are shared, so the React components drive the same
-behaviour the Vue originals did.
+The React port of [ak-ui](https://github.com/YunYouJun/ak-ui) — PRTS terminal aesthetics shipped as
+typed components, design tokens, and motion controllers.
 
 - **Showcase** — https://ak-ui-react.pages.dev
 - **Package** — `@swufefox/ak-ui-react`
-- **AI reference** — [`llms.txt`](./llms.txt)
-- **Upstream** — [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui)
+- **Upstream** — [YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (Vue)
 
-## Why use it
+## Why
 
-- **A real visual language, not a theme.** Cut corners, scanlines, HUD brackets, signal colors, and
-  bilingual display type are part of the component set.
-- **Two themes out of the box.** `terminal` (dark) and `archive` (light), switched from an ancestor
-  attribute — no second stylesheet.
-- **React-native API.** Typed props, controlled inputs, slot props, and imperative handles where the
+- **A visual language, not a theme.** Cut corners, scanlines, HUD brackets, signal colors and
+  bilingual display type are part of the component set, not decoration you bolt on later.
+- **Two themes, one stylesheet.** `terminal` (dark) and `archive` (light) switch from a single
+  attribute on any ancestor.
+- **React-native.** Typed props, controlled or uncontrolled inputs, imperative handles where the
   original exposed methods.
-- **No bundled game art.** Icons are supplied by the host, so the package ships no copyrighted
-  assets.
+- **No bundled game art.** Icons come from your app, so nothing copyrighted ships in the package.
 
 ## Install
 
@@ -37,18 +33,11 @@ import '@swufefox/ak-ui-react/style.css'
 
 Requires React 18 or 19.
 
-## Quick start
+## Use it
 
 ```tsx
 import { useState } from 'react'
-import {
-  AkButton,
-  AkCard,
-  AkCardHeader,
-  AkCardTitle,
-  AkCardContent,
-  AkTabs,
-} from '@swufefox/ak-ui-react'
+import { AkButton, AkCard, AkCardHeader, AkCardTitle, AkCardContent, AkTabs } from '@swufefox/ak-ui-react'
 
 export function Panel() {
   const [tab, setTab] = useState('overview')
@@ -74,45 +63,16 @@ export function Panel() {
 }
 ```
 
-## What's inside
-
-A curated tour rather than an exhaustive inventory — the package exports more components than the
-showcase has dedicated blocks for.
-
-**Interface** — `AkButton` · `AkCard` · `AkTag` · `AkStatus` · `AkNotice` · `AkProgress` ·
-`AkGauge` · `AkSlider` · `AkInputNumber` · `AkTabs` · `AkSegmented` · `AkTable` · `AkDialog` ·
-`AkPopover` · `AkDropdownMenu` · `AkCollapsible` · `AkCommand` · `AkBreadcrumb` · `AkScreen` ·
-`AkSlot` · `AkItem`
-
-**Motion & media** — `AkCountUp` · `AkEntrance` · `AkAssetLoader` · `AkMediaGallery` ·
-`AkMobileMenu` · `AkParticleField` · `AkSectionNavigator` · `AkGlow` · `AkOutline` · `AkSkew`
-
-**Decoration** — hazard stripes, halftone, blueprint grids, corner brackets, glyphs, cut corners,
-chevrons, bilingual headings (`AkStripes`, `AkHalftone`, `AkGridBackdrop`, `AkCorner`,
-`AkBrackets`, `AkCut`, `AkGlyph`, `AkBilingual`, …)
-
-**Arknights game data** — rarity rails, professions, elite/potential/specialization marks, skill
-levels, attribute panels, trust (`AkRarity`, `AkProfession`, `AkElite`, `AkPotential`, `AkSpec`,
-`AkSkillLevels`, `AkAttrs`, `AkTrust`, …)
-
-Components are exported from the package root with typed props. `AkButton` variants are
-`default`, `outline`, `action`, `advanced`, `light`, `danger`, and `ghost`.
-
-The showcase presents a curated set of blocks with live previews, code, and API notes; it does not
-have a dedicated block for every export.
-
 ## Theming
 
-Themes and density cascade from ancestor attributes:
+Themes and density cascade from ancestor attributes, and every surface reads from `--ak-*` custom
+properties, so a host app can retune a whole subtree:
 
 ```tsx
 <main data-ak-theme="archive" data-ak-density="cozy">
   …
 </main>
 ```
-
-Retune individual surfaces through the `--ak-*` custom properties, or scope a component size with
-`data-ak-size`:
 
 ```css
 .app-shell {
@@ -121,36 +81,27 @@ Retune individual surfaces through the `--ak-*` custom properties, or scope a co
 }
 ```
 
-## Controllers
+## What's inside
 
-Motion and interactive behaviour are available without React, through sub-path exports:
+Interface components (buttons, cards, tables, tabs, menus, dialogs, forms), motion and media
+(count-ups, entrances, galleries, full-screen navigation), the geometric decoration language
+(stripes, halftone, brackets, cut corners), Arknights game-data pieces (rarity, profession, elite
+and potential marks, skill levels, trust), operator dossiers and stage cards, skill sheets and
+sealed records, and panels with feedback primitives (accordions, messages, toasts, steppers) —
+the last three layers ported from [prts-design](https://github.com/MooncellWiki/prts-design).
 
-```ts
-import { createSectionNavigation, createMediaGallery } from '@swufefox/ak-ui-react/core'
-import { createCountUp, createEntrance } from '@swufefox/ak-ui-react/core/effects'
-import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
-```
-
-Each controller attaches to a DOM node and returns a `destroy()` (or equivalent) cleanup handle.
-
-## Documentation
-
-| Resource | Contents |
-| --- | --- |
-| [Showcase](https://ak-ui-react.pages.dev) | Live previews, prop tuning, copyable examples |
-| [`llms.txt`](./llms.txt) | Component index and API definitions for AI assistants |
-| [`docs/api.md`](./docs/api.md) | Generated API reference from source JSDoc |
-| [`AGENTS.md`](./AGENTS.md) | Architecture, build, and contribution guidelines |
+Browse the [showcase](https://ak-ui-react.pages.dev) for live previews and copyable examples, or
+read [`llms.txt`](./llms.txt) for a machine-readable component index and
+[`docs/api.md`](./docs/api.md) for the full API reference.
 
 ## Credits
 
-Design tokens, SCSS, and DOM controllers originate from
-[YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (MIT, © 2019 云游君).
-
-The `decor` and `arknights` layers are derived from
+Design tokens, SCSS and DOM controllers originate from
+[YunYouJun/ak-ui](https://github.com/YunYouJun/ak-ui) (MIT, © 2019 云游君). The decoration and
+game-data layers are derived from
 [MooncellWiki/prts-design](https://github.com/MooncellWiki/prts-design) (MIT,
 © 2026-present MooncellWiki). No game image assets were ported.
 
 ## License
 
-MIT.
+MIT. Contributors: see [AGENTS.md](./AGENTS.md).
