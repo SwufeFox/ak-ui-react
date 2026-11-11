@@ -1,0 +1,173 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 强制色模式（Windows 高对比度等）
+//
+//  强制色下浏览器把颜色换成系统色（Canvas / CanvasText / Highlight /
+//  HighlightText / GrayText），并抹掉 background-color 与 box-shadow。
+//  只靠底色或阴影表达的状态会整个消失——这里把它们改用系统色表达，
+//  平时一条都不生效。
+//
+//  移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki）
+//  —— packages/css/src/forced-colors.css，按本库真实类名重写。
+//
+//  ⚠️ 本文件必须最后加载：它覆盖前面所有分区的颜色写法。
+// ══════════════════════════════════════════════════════════════════════════
+
+@media (forced-colors: active) {
+  // ── 选中 / 当前项 ──────────────────────────────────────────────────────
+  // 底色被抹掉后只剩边框，所以这里要显式给系统色并关掉强制色调整，
+  // 否则底色照样会被浏览器接管。
+  .ak-tabs__tab[aria-selected='true'],
+  .ak-segmented__item[aria-pressed='true'],
+  .ak-pagination__item.is-active,
+  .ak-menu__item.is-active,
+  .ak-chip.is-active,
+  .ak-chip[aria-pressed='true'],
+  .ak-phase-tabs > button.is-active,
+  .ak-skill-levels > button.is-active,
+  .ak-item[aria-selected='true'],
+  .ak-tag[aria-pressed='true'],
+  .ak-site-control[aria-pressed='true'] {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  // 选中项里的图标 / 星级保持原色会跟 Highlight 糊在一起，去掉反相。
+  .ak-phase-tabs > button.is-active img,
+  .ak-skill-levels > button.is-active img,
+  .ak-rarity > i {
+    filter: none;
+  }
+
+  // 只靠竖条 / 下划线区分当前项的（页签、阶段条），改成 Highlight 边框。
+  .ak-tabs__tab[aria-selected='true'],
+  .ak-phase-tabs > button.is-active,
+  .ak-skill-levels > button.is-active {
+    border-color: Highlight;
+    color: Highlight;
+  }
+
+  // 选中态是用 box-shadow 画的外框（等级条、槽位）：阴影被抹掉就没了，
+  // 换成系统色描边。
+  .ak-level[aria-pressed='true'],
+  .ak-slot[aria-pressed='true'] {
+    forced-color-adjust: none;
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+    box-shadow: none;
+  }
+
+  // ── 自绘控件：勾选 / 单选 / 开关 ───────────────────────────────────────
+  .ak-choice__input {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .ak-choice__input:checked,
+  .ak-choice__input:indeterminate {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  .ak-choice__input:checked::after {
+    border-color: HighlightText;
+  }
+
+  .ak-choice__input:disabled {
+    border-color: GrayText;
+    background: Canvas;
+  }
+
+  .ak-choice__input:disabled:checked {
+    border-color: GrayText;
+    background: GrayText;
+  }
+
+  // 开关的滑块是伪元素上的底色，强制色下要自己给系统色。
+  .ak-choice--switch .ak-choice__input::after {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .ak-choice--switch .ak-choice__input:checked::after {
+    background: HighlightText;
+  }
+
+  // ── 滑块 ──────────────────────────────────────────────────────────────
+  .ak-slider {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  .ak-slider::-webkit-slider-runnable-track {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .ak-slider::-webkit-slider-thumb {
+    forced-color-adjust: none;
+    border-color: Canvas;
+    background: Highlight;
+    box-shadow: none;
+  }
+
+  // ── 进度条 / 仪表 ─────────────────────────────────────────────────────
+  .ak-progress__fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+
+  .ak-progress__track {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+  }
+
+  // ── 骨架屏 / 载入中 ──────────────────────────────────────────────────
+  .ak-skeleton,
+  .ak-skeleton-block,
+  .ak-skeleton--text,
+  .ak-skeleton--rect,
+  .ak-skeleton--square,
+  .ak-skeleton--circle {
+    forced-color-adjust: none;
+    border: 1px solid GrayText;
+    background: Canvas;
+  }
+
+  .ak-spinner,
+  .ak-loader {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+    border-top-color: Highlight;
+  }
+
+  // ── 剪出来的实心图形：稀有度星、信赖图标 ──────────────────────────────
+  // 形状靠 clip-path / mask，底色被抹掉就整块消失；给系统色把它画回来。
+  .ak-rarity > i {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .ak-r-chip,
+  .ak-r-text {
+    forced-color-adjust: none;
+    color: CanvasText;
+  }
+
+  .ak-trust {
+    forced-color-adjust: none;
+    color: CanvasText;
+  }
+
+  // ── 焦点：不要因为阴影被抹而丢掉焦点提示 ─────────────────────────────
+  .ak-choice__input:focus-visible,
+  .ak-slider:focus-visible,
+  .ak-button:focus-visible,
+  .ak-tabs__tab:focus-visible,
+  .ak-segmented__item:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+}

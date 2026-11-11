@@ -63,3 +63,6 @@
 @use "scss/ak-item";
 @use "scss/ak-slot";
 @use "scss/ak-screen";
+
+// 强制色模式（Windows 高对比度）必须最后加载：它覆盖前面所有分区的颜色写法。
+@use "scss/ak-forced-colors";

@@ -86,6 +86,34 @@ export function exampleMessages(locale: Locale, source: string, extraKeys: reado
   return Object.fromEntries([...keys].map((key) => [key, dictionary[key as keyof typeof dictionary] ?? key]))
 }
 
+/**
+ * 去掉源文件里的 import 语句。
+ *
+ * 只按行删第一行是不够的：多行 import 块（`import {` 换行写一串名字）会被
+ * 删掉开头、留下悬空的 `A, B } from '../../ak'`，生成的独立示例直接语法错误。
+ */
+function stripImports(source: string): string {
+  const lines = source.split('\n')
+  const kept: string[] = []
+  for (let index = 0; index < lines.length; index++) {
+    let line = lines[index]!
+    if (!/^import\b/.test(line)) {
+      kept.push(line)
+      continue
+    }
+    // 一条 import 语句要么自己写完（`import x from 'y'`），要么跨行到收尾。
+    while (
+      index + 1 < lines.length &&
+      !/from\s+['"][^'"]+['"];?\s*$/.test(line) &&
+      !/^import\s+['"][^'"]+['"];?\s*$/.test(line)
+    ) {
+      index += 1
+      line = lines[index]!
+    }
+  }
+  return kept.join('\n')
+}
+
 /** Assemble the authored example, real state setup, and the same override adapter. */
 export function buildStandalone({ source, locale, overrides, setup, render, extraKeys = [], additionalSource = '' }: {
   source: string
@@ -109,8 +137,8 @@ export function buildStandalone({ source, locale, overrides, setup, render, extr
       if (!previous || (previous.startsWith('type ') && !typeOnly)) imports.set(binding, `${typeOnly ? 'type ' : ''}${name}`)
     }
   }
-  const body = allSource.replace(/^import .*\n/gm, '')
-  const core = tuneSource.replace(/^import .*\n/, '')
+  const body = stripImports(allSource)
+  const core = stripImports(tuneSource)
   const used = `${body}\n${setup}\n${render}\n${core}`
   const values = ['cloneElement', 'useState', 'useRef', 'useEffect', 'useLayoutEffect', 'useMemo', 'useCallback'].filter((name) => new RegExp(`\\b${name}\\b`).test(used))
   const types = ['ReactElement', 'ReactNode', 'Dispatch', 'SetStateAction', 'RefObject', 'CSSProperties', 'MouseEvent'].filter((name) => new RegExp(`\\b${name}\\b`).test(used))
