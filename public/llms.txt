@@ -8,6 +8,8 @@ Package: `@swufefox/ak-ui-react`
 - Showcase: https://ak-ui-react.pages.dev
 - Generated API Reference: `docs/api.md`
 - Stylesheet: `@swufefox/ak-ui-react/style.css`
+- **Client boundary**: the package entry is marked `'use client'`, so every component renders on the client. Importing it from a Next.js server component is safe; the DOM controllers under `@swufefox/ak-ui-react/core` have no React dependency and stay server-usable.
+- **Fonts**: Chakra Petch and Oswald (OFL-1.1) ship with the package and cover the label and display roles. The game's own Bender / Novecento Sans Wide are not redistributed but stay first in the font stacks.
 
 ---
 

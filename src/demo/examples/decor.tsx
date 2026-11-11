@@ -13,21 +13,23 @@ export function renderDecor({ t }: DecorModel, tune: Tune) {
           </div>
           {tune("stripes-4", <AkStripes variant="strong" style={{ height: '2.5rem' }} />)}
           <div className="demo-row">
+            {/* 网格 / 网点是「底纹级」的对比度（终端 5% 白），放在深色宿主上几乎读不出来。
+               给它们一块中间调的底板，纹理才有存在感。 */}
             {tune("grid-backdrop-1", <AkGridBackdrop
               variant="grid"
-              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }}
+              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-raised)', border: '1px solid var(--demo-hairline)' }}
             />)}
             {tune("grid-backdrop-2", <AkGridBackdrop
               variant="dots"
-              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }}
+              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-raised)', border: '1px solid var(--demo-hairline)' }}
             />)}
             {tune("grid-backdrop-3", <AkGridBackdrop
               variant="diag"
-              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }}
+              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-raised)', border: '1px solid var(--demo-hairline)' }}
             />)}
             {tune("grid-backdrop-4", <AkGridBackdrop
               variant="scanlines"
-              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-sunken)' }}
+              style={{ width: '10rem', height: '5rem', backgroundColor: 'var(--ak-surface-raised)', border: '1px solid var(--demo-hairline)' }}
             />)}
           </div>
           <div className="demo-row">
@@ -52,11 +54,11 @@ export function renderDecor({ t }: DecorModel, tune: Tune) {
             {tune("reticle-3", <AkReticle tone="action" style={{ width: '7rem', height: '3.5rem', backgroundColor: 'var(--ak-surface-sunken-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '0.68rem', fontFamily: 'var(--ak-font-mono)' }}>RETICLE</span>
             </AkReticle>)}
-            {tune("halftone-1", <AkHalftone variant="full" style={{ padding: 'var(--ak-space-3)' }}>
+            {tune("halftone-1", <AkHalftone variant="full" style={{ padding: 'var(--ak-space-3)', backgroundColor: 'var(--ak-surface-raised)', border: '1px solid var(--demo-hairline)' }}>
               {tune("glyph-box-1", <AkGlyphBox style={{ padding: '0.25rem' }}>G</AkGlyphBox>)}
             </AkHalftone>)}
             {/* fade 是正交的另一条类：不画网点，而是让内容朝右渐隐 */}
-            {tune("halftone-2", <AkHalftone fade style={{ padding: 'var(--ak-space-3)' }}>
+            {tune("halftone-2", <AkHalftone fade style={{ padding: 'var(--ak-space-3)', backgroundColor: 'var(--ak-surface-raised)', border: '1px solid var(--demo-hairline)' }}>
               {tune("glyph-box-2", <AkGlyphBox style={{ padding: '0.25rem' }}>FADE</AkGlyphBox>)}
             </AkHalftone>)}
             <div className="demo-row" style={{ alignItems: 'center', gap: '0.5rem' }}>

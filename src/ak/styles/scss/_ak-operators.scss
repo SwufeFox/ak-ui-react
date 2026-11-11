@@ -102,15 +102,17 @@
 }
 
 // 没有头像时的占位：底下的稀有度渐变照常透上来（上游本来就是这样），
-// 居中放一个稀有度数字，像终端里的缺图位，而不是「图片加载失败」的斜纹。
+// 但压一层画布色，避免大块稀有度色变成一张糖果色卡；正中放一个稀有度数字，
+// 像终端里的缺图位。
 .ak-op-card__portrait-placeholder {
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
-  color: color-mix(in srgb, var(--ak-text-inverse) 45%, transparent);
+  background: color-mix(in srgb, var(--ak-surface-canvas) 76%, transparent);
+  color: color-mix(in srgb, var(--ak-text-primary) 46%, transparent);
   font-family: var(--ak-font-display);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }

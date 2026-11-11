@@ -765,6 +765,18 @@
   border-bottom: 1px solid var(--demo-hairline);
 }
 
+/* 标题组可以收缩：标题过长时把标签页与 INSPECT 挤到下一行，
+   而不是把按钮甩到版心外面。 */
+.demo-block__header > div:first-child {
+  min-width: 0;
+  flex: 1 1 18rem;
+}
+
+.demo-block__tabs,
+.demo-block__inspect {
+  flex: none;
+}
+
 .demo-block__header h2 {
   position: relative;
   font-family: var(--ak-font-display);

@@ -437,9 +437,9 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
             <Block id="components-15" eyebrow={t('ref.data.eyebrow')} title={t('ref.data.title')} note={t('ref.data.note')} api={DOC_REGISTRY['components-15']?.api} example={readoutCallbacks.example} exportCode={readoutCallbacks.exportCode} />
             <Block id="components-16" eyebrow={t('ref.collection.eyebrow')} title={t('ref.collection.title')} note={t('ref.collection.note')} api={DOC_REGISTRY['components-16']?.api} example={collectionCallbacks.example} exportCode={collectionCallbacks.exportCode} />
             <Block id="components-17" eyebrow={t('ref.command.eyebrow')} title={t('ref.command.title')} note={t('ref.command.note')} api={DOC_REGISTRY['components-17']?.api} example={commandCallbacks.example} exportCode={commandCallbacks.exportCode} />
-            <Block id="components-18" eyebrow={t('ref.operators.eyebrow')} title={t('ref.operators.title')} note={t('ref.operators.note')} example={operatorCallbacks.example} exportCode={operatorCallbacks.exportCode} />
-            <Block id="components-19" eyebrow={t('ref.skills.eyebrow')} title={t('ref.skills.title')} note={t('ref.skills.note')} example={skillCallbacks.example} exportCode={skillCallbacks.exportCode} />
-            <Block id="components-20" eyebrow={t('ref.panels.eyebrow')} title={t('ref.panels.title')} note={t('ref.panels.note')} example={panelCallbacks.example} exportCode={panelCallbacks.exportCode} />
+            <Block id="components-18" eyebrow={t('ref.operators.eyebrow')} title={t('ref.operators.title')} note={t('ref.operators.note')} api={DOC_REGISTRY['components-18']?.api} example={operatorCallbacks.example} exportCode={operatorCallbacks.exportCode} />
+            <Block id="components-19" eyebrow={t('ref.skills.eyebrow')} title={t('ref.skills.title')} note={t('ref.skills.note')} api={DOC_REGISTRY['components-19']?.api} example={skillCallbacks.example} exportCode={skillCallbacks.exportCode} />
+            <Block id="components-20" eyebrow={t('ref.panels.eyebrow')} title={t('ref.panels.title')} note={t('ref.panels.note')} api={DOC_REGISTRY['components-20']?.api} example={panelCallbacks.example} exportCode={panelCallbacks.exportCode} />
           </StageContext.Provider>
 
           <div className="demo-stage__foot">

@@ -21,8 +21,11 @@ export interface GuideSnippet {
   tsx?: boolean
 }
 
+/** 指南小节的 id：两份语言必须逐节对应，多写一个少写一个都会在这里露出来。 */
+export type GuideSectionId = 'start' | 'theme' | 'tune' | 'interaction' | 'a11y' | 'v2' | 'resources'
+
 export interface GuideSection {
-  id: string
+  id: GuideSectionId
   title: string
   paragraphs?: string[]
   items?: GuideItem[]
@@ -145,12 +148,28 @@ import '@swufefox/ak-ui-react/style.css'` },
       ],
     },
     {
+      id: 'v2',
+      title: 'What 2.0 changed',
+      paragraphs: [
+        'Version 2.0 finished the port of prts-design: the operator, stage, skill and record families now ship with the package, together with the panel, feedback and stepper primitives.',
+        'Two contracts moved with it. The package entry is a client boundary, so a Next.js server component can import any component without tripping over React context. And theming is a single attribute — data-ak-theme="terminal" or "archive"; the old data-theme="light" alias is gone.',
+      ],
+      items: [
+        { term: 'PORTED FAMILIES', desc: 'Operator dossiers (AkOpCard, AkOpRow, AkEnemy), stage and event cards (AkStage, AkEvent, AkCountdown, AkHero), skills and records (AkSkill, AkSkillSheet, AkSkillMatrix, AkModule, AkDossier, AkVoice), and panels with feedback (AkPanel, AkCollapse, AkMessage, AkToastProvider, AkSteps).' },
+        { term: 'CLIENT BOUNDARY', desc: 'The published bundle starts with "use client": components render on the client, while the DOM controllers under /core carry no React dependency and stay usable from server code.' },
+        { term: 'FONTS', desc: 'Chakra Petch and Oswald (both OFL-1.1) ship with the package. The original game fonts are not redistributed — they stay first in the stacks, so a machine that has them installed keeps the original look.' },
+        { term: 'FORCED COLORS', desc: 'Windows high-contrast mode is supported: selected states, self-drawn controls and clipped shapes switch to system colours instead of vanishing.' },
+        { term: 'DUAL-MODE STATE', desc: 'Every value control works controlled (value + onValueChange) or uncontrolled (defaultValue); a defined value always wins.' },
+      ],
+    },
+    {
       id: 'resources',
       title: 'Resources',
       paragraphs: ['The package, the generated reference and the source.'],
       items: [
         { term: 'llms.txt', desc: 'A structured component index for AI coding assistants. Open it from the top bar, or fetch /llms.txt.' },
         { term: 'docs/api.md', desc: 'Generated from the emitted declarations — every prop, variant and method with its JSDoc.' },
+        { term: 'AGENTS.md', desc: 'The contributor guide: architecture, build stages, and the conventions a change has to follow.' },
         { term: 'GitHub', desc: 'The full source, including the port notes that document every local deviation from upstream.' },
         { term: 'npm', desc: 'Published from the master branch through trusted publishing; the tag must match the package version.' },
       ],
@@ -259,12 +278,28 @@ import '@swufefox/ak-ui-react/style.css'` },
       ],
     },
     {
+      id: 'v2',
+      title: '2.0 改了什么',
+      paragraphs: [
+        '2.0 把 prts-design 的移植补完：干员、关卡、技能、档案四族连同面板、反馈、步骤族一起随包发布。',
+        '随之改了两条契约。包的入口是客户端边界——Next.js 的服务端组件可以直接 import 任何组件，不会被 React context 绊倒。主题也只剩一个入口：`data-ak-theme="terminal"` 或 `"archive"`，旧的 `data-theme="light"` 别名已经移除。',
+      ],
+      items: [
+        { term: '移植进来的族', desc: '干员档案（AkOpCard、AkOpRow、AkEnemy）、关卡与活动卡（AkStage、AkEvent、AkCountdown、AkHero）、技能与档案（AkSkill、AkSkillSheet、AkSkillMatrix、AkModule、AkDossier、AkVoice），以及面板与反馈（AkPanel、AkCollapse、AkMessage、AkToastProvider、AkSteps）。' },
+        { term: '客户端边界', desc: '发布产物开头就是 "use client"：组件在客户端渲染；/core 下的 DOM 控制器不依赖 React，服务端照常可用。' },
+        { term: '字体', desc: 'Chakra Petch 与 Oswald（均为 OFL-1.1）随包分发。游戏原字体不再二次分发，但仍排在字体栈最前——装过的机器保留原版观感。' },
+        { term: '强制色', desc: '支持 Windows 高对比度：选中态、自绘控件与剪裁图形改用系统色，而不是直接消失。' },
+        { term: '双模状态', desc: '所有取值控件都支持受控（value + onValueChange）与非受控（defaultValue）；只要给了 value 就以它为准。' },
+      ],
+    },
+    {
       id: 'resources',
       title: '资源',
       paragraphs: ['包体、生成的参考与源码。'],
       items: [
         { term: 'llms.txt', desc: '给 AI 编程助手用的结构化组件索引。顶栏可以直接打开，也可以取 /llms.txt。' },
         { term: 'docs/api.md', desc: '由产物声明生成——每个参数、变体与方法都带 JSDoc。' },
+        { term: 'AGENTS.md', desc: '贡献者指南：架构、构建阶段，以及一次改动必须遵守的约定。' },
         { term: 'GitHub', desc: '完整源码，含记录每一处本地偏离的移植说明。' },
         { term: 'npm', desc: '从 master 经可信发布上线；tag 必须与包版本一致。' },
       ],
@@ -273,3 +308,11 @@ import '@swufefox/ak-ui-react/style.css'` },
 }
 
 export const GUIDE_CONTENT: Record<'en' | 'zh-CN', GuideContent> = { en, 'zh-CN': zh }
+
+// 两份指南的小节必须一一对应：类型只保证形状，这里再保证 id 集合相同，
+// 免得某天只给一种语言加了小节，另一种语言安静地少一段。
+const enIds = en.sections.map((section) => section.id).join('|')
+const zhIds = zh.sections.map((section) => section.id).join('|')
+if (enIds !== zhIds) {
+  throw new Error(`guide sections drifted between locales: ${enIds} vs ${zhIds}`)
+}
