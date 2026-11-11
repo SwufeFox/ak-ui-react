@@ -64,6 +64,7 @@ export const Block = memo(function Block({
   const { t, locale } = useI18n()
   // 视图清单决定这一块有哪些标签页；地址栏里的 ?view= 只在清单里才算数。
   const views = ['preview', 'tune', 'code', ...(api ? ['api' as const] : [])] as const
+  const hasComponentColumn = api?.some((item) => item.component !== undefined) ?? false
   const [tab, setTab] = useState<DemoView>(() => {
     const wanted = readViewParam()
     const known = wanted && (views as readonly string[]).includes(wanted)
@@ -361,6 +362,7 @@ export const Block = memo(function Block({
           <table className="ak-table ak-table--tactical ak-table--hoverable">
             <thead className="ak-table__head">
               <tr>
+                {hasComponentColumn ? <th>{t('common.propComponent')}</th> : null}
                 <th>{t('common.propName')}</th>
                 <th>{t('common.propType')}</th>
                 <th>{t('common.propDefault')}</th>
@@ -368,8 +370,9 @@ export const Block = memo(function Block({
               </tr>
             </thead>
             <tbody className="ak-table__body">
-              {api.map((item) => (
-                <tr key={item.name}>
+              {api.map((item, index) => (
+                <tr key={`${item.component ?? ''}:${item.name}:${index}`}>
+                  {hasComponentColumn ? <td><code>{item.component}</code></td> : null}
                   <td><code className="demo-api-prop">{item.name}</code></td>
                   <td><code className="demo-api-type">{item.type}</code></td>
                   <td><code className="demo-api-default" data-empty={item.default ? undefined : ''}>{item.default ?? '—'}</code></td>

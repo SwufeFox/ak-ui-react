@@ -2,6 +2,7 @@ import type { Locale } from './i18n'
 
 export interface BlockPropDoc {
   name: string
+  component?: string
   type: string
   default?: string
   desc: Record<Locale, string>
@@ -185,42 +186,54 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
 
   'components-18': {
     api: [
-      { name: 'name', type: 'ReactNode', desc: localizedDescription('干员 / 敌人 / 关卡名', 'Operator, enemy, or stage name.') },
-      { name: 'rarity', type: '1 | 2 | 3 | 4 | 5 | 6', desc: localizedDescription('干员稀有度：决定头像底色、星级角标与 rail 边条', 'Operator rarity: drives the portrait wash, the star badge, and the rail edge.') },
-      { name: 'avatar', type: 'string', desc: localizedDescription('立绘地址；不传时留主题化的缺图位（不带游戏素材）', 'Portrait URL. Without one, a themed placeholder is drawn — the package ships no game art.') },
-      { name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", desc: localizedDescription('尺寸档：88 / 128 / 180 px 宽', 'Size step: 88 / 128 / 180 px wide.') },
-      { name: 'variant', type: "'default' | 'rail' | 'hard' | 'ex' | 'boss' | 'elite' | 'box'", desc: localizedDescription('外观：干员卡默认 / 稀有度色条，关卡 hard / ex，敌人 boss / elite，势力徽标 box', 'Treatment: plain or rarity-railed operator card, hard/ex stage, boss/elite enemy, boxed faction mark.') },
-      { name: 'code', type: 'string', desc: localizedDescription('敌人编号或关卡号（B003 / H6-4）', 'Enemy or stage code, for example B003 or H6-4.') },
-      { name: 'remaining', type: 'number', desc: localizedDescription('倒计时剩余秒数（由调用方驱动）', 'Seconds left on the countdown; the caller owns the clock.') },
-      { name: 'grids', type: 'readonly AkRangeGrid[]', desc: localizedDescription('攻击范围格子（相对自身的行列）', 'Attack range cells, relative to the unit itself.') },
+      { component: 'AkOpCard', name: 'name', type: 'ReactNode', desc: localizedDescription('干员名（必填）。', 'Operator name (required).') },
+      { component: 'AkOpCard', name: 'rarity', type: '1 | 2 | 3 | 4 | 5 | 6', desc: localizedDescription('干员稀有度（必填）：决定头像底色与星级。', 'Operator rarity (required); drives the portrait wash and star badge.') },
+      { component: 'AkOpCard', name: 'avatar', type: 'string', desc: localizedDescription('头像图片地址；不传时显示主题化占位。', 'Portrait URL; omit it to show the themed placeholder.') },
+      { component: 'AkOpCard', name: 'size', type: "'sm' | 'md' | 'lg'", default: "'md'", desc: localizedDescription('尺寸档：88 / 128 / 180 px 宽。', 'Size step: 88 / 128 / 180 px wide.') },
+      { component: 'AkOpCard', name: 'variant', type: "'default' | 'rail'", default: "'default'", desc: localizedDescription('外观：默认样式或增加稀有度色条。', 'Default treatment or a rarity-coloured rail.') },
+      { component: 'AkEnemy', name: 'name', type: 'ReactNode', desc: localizedDescription('敌人名（必填）。', 'Enemy name (required).') },
+      { component: 'AkEnemy', name: 'code', type: 'ReactNode', desc: localizedDescription('敌人编号，如 B003。', 'Enemy code, for example B003.') },
+      { component: 'AkEnemy', name: 'variant', type: "'normal' | 'elite' | 'boss'", default: "'normal'", desc: localizedDescription('敌人级别。', 'Enemy rank.') },
+      { component: 'AkEnemy', name: 'level', type: 'number', desc: localizedDescription('威胁度：点亮的菱形数。', 'Threat level, shown as lit diamonds.') },
+      { component: 'AkStage', name: 'code', type: 'ReactNode', desc: localizedDescription('关卡编号（必填），如 H6-4。', 'Stage code (required), for example H6-4.') },
+      { component: 'AkStage', name: 'name', type: 'ReactNode', desc: localizedDescription('关卡名。', 'Stage name.') },
+      { component: 'AkStage', name: 'variant', type: "'default' | 'hard' | 'ex' | 'story'", default: "'default'", desc: localizedDescription('关卡外观档位。', 'Stage treatment.') },
+      { component: 'AkEvent', name: 'title', type: 'ReactNode', desc: localizedDescription('活动名（必填）。', 'Event title (required).') },
+      { component: 'AkEvent', name: 'status', type: "'default' | 'live' | 'ended'", default: "'default'", desc: localizedDescription('活动状态。', 'Event status.') },
+      { component: 'AkCountdown', name: 'remaining', type: 'number', desc: localizedDescription('剩余秒数；由调用方驱动。', 'Seconds remaining; the caller owns the clock.') },
+      { component: 'AkHero', name: 'title', type: 'ReactNode', desc: localizedDescription('大标题（必填）。', 'Hero title (required).') },
+      { component: 'AkCamp', name: 'variant', type: "'default' | 'box'", default: "'default'", desc: localizedDescription('势力徽标外观。', 'Faction mark treatment.') },
+      { component: 'AkRange', name: 'grids', type: 'readonly AkRangeGrid[]', desc: localizedDescription('攻击范围格子（必填），相对自身的行列。', 'Attack range cells (required), relative to the unit.') },
     ],
   },
 
   'components-19': {
     api: [
-      { name: 'name', type: 'string', desc: localizedDescription('技能 / 天赋名', 'Skill or talent name.') },
-      { name: 'spType', type: "'auto' | 'attack' | 'hit' | 'passive-recovery' | 'passive'", desc: localizedDescription('技力回复方式：决定芯片底色与描边', 'How the skill recovers SP; decides the chip colour and outline.') },
-      { name: 'trigger', type: "'manual' | 'auto'", desc: localizedDescription('触发方式；不写表示被动技能', 'Trigger mode; omit for passive skills.') },
-      { name: 'levels', type: 'readonly AkSkillSheetLevel[]', desc: localizedDescription('技能各等级数据（描述 / 初始 / 消耗 / 持续）', 'Per-level skill data: description, initial SP, cost, and duration.') },
-      { name: 'rows', type: 'readonly AkSkillMatrixRow[]', desc: localizedDescription('技能参数表行（名称 / 各等级数值）', 'Skill matrix rows: a label and one value per level.') },
-      { name: 'unlock', type: 'string', desc: localizedDescription('开放条件（显示在右侧槽）', 'Unlock condition shown in the right-hand slot.') },
-      { name: 'locked', type: 'boolean', default: 'false', desc: localizedDescription('未解锁：图标灰化并加锁', 'Locked state: the icon greys out and a lock appears.') },
-      { name: 'tone', type: "'buff' | 'debuff' | 'keyword' | 'important' | 'enemy' | 'gild' | 'level' | 'potential'", desc: localizedDescription('富文本节点的语义色', 'Semantic colour for a rich-text node.') },
-      { name: 'locked', type: 'boolean', default: 'false', desc: localizedDescription('档案未解锁：正文遮罩但仍可检索', 'Dossier locked: content is masked yet stays searchable.') },
+      { component: 'AkSkill', name: 'name', type: 'string', desc: localizedDescription('技能名（必填）。', 'Skill name (required).') },
+      { component: 'AkSkill', name: 'spType', type: "'auto' | 'attack' | 'hit' | 'passive-recovery' | 'passive'", default: "'auto'", desc: localizedDescription('技力回复方式。', 'How the skill recovers SP.') },
+      { component: 'AkSkill', name: 'trigger', type: "'manual' | 'auto'", desc: localizedDescription('触发方式；不写时不显示。', 'Trigger mode; omitted for passive skills.') },
+      { component: 'AkSkill', name: 'unlock', type: 'string', desc: localizedDescription('技能开放条件。', 'Skill unlock condition.') },
+      { component: 'AkSkill', name: 'locked', type: 'boolean', default: 'false', desc: localizedDescription('未解锁时灰化技能图标并显示锁。', 'Greys out the skill icon and shows a lock.') },
+      { component: 'AkSkillSheet', name: 'levels', type: 'AkSkillSheetLevel[]', desc: localizedDescription('技能各等级数据（必填）。', 'Per-level skill data (required).') },
+      { component: 'AkSkillMatrix', name: 'rows', type: 'AkSkillMatrixRow[]', desc: localizedDescription('技能参数行（必填）。', 'Skill parameter rows (required).') },
+      { component: 'AkRichText', name: 'tone', type: 'AkRichTextTone', desc: localizedDescription('整段富文本的语义色。', 'Semantic tone for the rich-text block.') },
+      { component: 'AkDossier', name: 'title', type: 'string', desc: localizedDescription('档案标题（必填）。', 'Dossier title (required).') },
+      { component: 'AkDossier', name: 'unlock', type: 'string', desc: localizedDescription('解锁条件；锁定时显示在遮罩上。', 'Unlock condition; shown on the mask while locked.') },
+      { component: 'AkDossier', name: 'locked', type: 'boolean', default: 'false', desc: localizedDescription('锁定档案正文并显示解锁条件。', 'Masks the dossier body and shows its unlock condition.') },
     ],
   },
 
   'components-20': {
     api: [
-      { name: 'title', type: 'ReactNode', desc: localizedDescription('面板 / 消息 / 标题组件的主标题', 'Main title of a panel, message, or heading.') },
-      { name: 'en', type: 'string', desc: localizedDescription('标题旁的英文小标', 'Small English label beside the title.') },
-      { name: 'variant', type: "'info' | 'success' | 'warning' | 'danger' | 'neutral' | 'accent'", desc: localizedDescription('消息 / 徽标信号色档位', 'Signal colour for the message or badge.') },
-      { name: 'level', type: '1 | 2 | 3 | 4 | 5 | 6', desc: localizedDescription('折叠面板的标题层级', 'Heading level for the collapsible panel.') },
-      { name: 'open', type: 'boolean', desc: localizedDescription('受控展开状态；省略时进入非受控模式', 'Controlled open state; omit for uncontrolled mode.') },
-      { name: 'defaultOpen', type: 'boolean', default: 'false', desc: localizedDescription('非受控模式的初始展开状态', 'Initial open state in uncontrolled mode.') },
-      { name: 'placement', type: "'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'", default: "'top'", desc: localizedDescription('提示气泡的弹出方向', 'Placement of the tooltip bubble.') },
-      { name: 'current', type: 'number', desc: localizedDescription('步骤条当前步序', 'Current step index of the stepper.') },
-      { name: 'theme', type: "'terminal' | 'archive'", desc: localizedDescription('AkScope 强制套用的主题', 'Theme forced onto the scoped subtree.') },
+      { component: 'AkPanel', name: 'title', type: 'ReactNode', desc: localizedDescription('面板标题。', 'Panel title.') },
+      { component: 'AkPanel', name: 'en', type: 'ReactNode', desc: localizedDescription('标题后的拉丁小标。', 'Small Latin label after the title.') },
+      { component: 'AkMessage', name: 'variant', type: "'info' | 'success' | 'warning' | 'danger' | 'neutral' | 'accent'", default: "'info'", desc: localizedDescription('消息提示的外观档位。', 'Message treatment.') },
+      { component: 'AkHeading', name: 'level', type: '1 | 2 | 3 | 4 | 5 | 6', default: '2', desc: localizedDescription('标题元素层级（h1–h6）。', 'Heading element level (h1–h6).') },
+      { component: 'AkCollapseItem', name: 'open', type: 'boolean', desc: localizedDescription('单独使用时的受控展开状态。', 'Controlled open state when used on its own.') },
+      { component: 'AkCollapseItem', name: 'defaultOpen', type: 'boolean', default: 'false', desc: localizedDescription('单独使用时的初始展开状态。', 'Initial open state when used on its own.') },
+      { component: 'AkTooltip', name: 'placement', type: "'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'", default: "'top'", desc: localizedDescription('提示气泡的弹出方向。', 'Tooltip placement.') },
+      { component: 'AkSteps', name: 'current', type: 'number', desc: localizedDescription('当前步骤，从 1 开始。', 'Current step, starting at 1.') },
+      { component: 'AkScope', name: 'theme', type: "'terminal' | 'archive'", desc: localizedDescription('局部强制套用的主题。', 'Theme forced onto this scope.') },
     ],
   },
 }
