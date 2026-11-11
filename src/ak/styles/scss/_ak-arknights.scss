@@ -76,6 +76,12 @@
 }
 
 // 稀有度色轨：给容器挂 data-rarity，后代用 .ak-r-* 取色
+// --ak-r-fade 是叠在 --ak-r 上的那层渐变（同上游）：顶部留稀有度本色，
+// 往下褪成奶油色——头像底往下褪，星级角标才压得住。
+[data-rarity] {
+  --ak-r-fade: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ak-text-primary) 26%, transparent));
+}
+
 [data-rarity="1"] {
   --ak-r: var(--ak-rarity-1);
   --ak-r-text: var(--ak-rarity-1-text);
@@ -104,6 +110,8 @@
 [data-rarity="6"] {
   --ak-r: var(--ak-rarity-6);
   --ak-r-text: var(--ak-rarity-6-text);
+  // 6★ 另有一道金色斜光（同上游）
+  --ak-r-fade: linear-gradient(32deg, color-mix(in srgb, #eee2b8 22%, transparent) 22%, transparent);
 }
 
 .ak-r-text {

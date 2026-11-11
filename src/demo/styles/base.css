@@ -85,10 +85,17 @@ html {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   min-height: 100vh;
-  /* 噪点铺在画布这一层（内容之下），面板与文字都保持干净。 */
+  /* 噪点铺在画布这一层（内容之下），面板与文字都保持干净；
+     再叠一层极淡的蓝图网格——方舟终端大屏就是这个底子。 */
   background-color: var(--demo-canvas);
-  background-image: var(--demo-substrate);
-  background-size: 128px 128px;
+  background-image:
+    var(--demo-substrate),
+    linear-gradient(var(--ak-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ak-grid-color) 1px, transparent 1px);
+  background-size:
+    128px 128px,
+    var(--ak-grid-size, 32px) var(--ak-grid-size, 32px),
+    var(--ak-grid-size, 32px) var(--ak-grid-size, 32px);
 }
 
 .demo-topbar {

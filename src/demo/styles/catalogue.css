@@ -754,8 +754,20 @@
 }
 
 .demo-block__header h2 {
+  position: relative;
   font-family: var(--ak-font-display);
   text-wrap: balance;
+}
+
+/* 上游小节标题的标志：标题左下角一截青色短横条（.ak-hero__title 之外的同款语言）。 */
+.demo-block__header h2::after {
+  position: absolute;
+  bottom: -0.55rem;
+  left: 0;
+  width: 6rem;
+  height: 2px;
+  background: var(--ak-signal-info);
+  content: "";
 }
 
 /* 分类切换会把焦点移到这里，方便读屏与键盘用户直接落到新分类正文。

@@ -115,7 +115,9 @@ export function AkOpCard({
         {avatar ? (
           <img src={avatar} alt={avatarOnly ? avatarAlt || nameText : ''} />
         ) : (
-          <span className="ak-op-card__portrait-placeholder" aria-hidden="true" />
+          <span className="ak-op-card__portrait-placeholder" aria-hidden="true">
+            {rarity}
+          </span>
         )}
 
         <span className="ak-op-card__rarity">
