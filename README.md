@@ -91,6 +91,22 @@ properties, so a host app can retune a whole subtree:
   display roles. The original game's Bender / Novecento Sans Wide are *not* redistributed here; they
   stay first in the font stacks, so a machine that has them installed keeps the original look.
 
+## Migrating from 1.x
+
+The component set only grew — no export was removed in 2.0 — but five contracts behave
+differently now:
+
+| 1.x | 2.0 |
+| :--- | :--- |
+| `data-theme="light"` | `data-ak-theme="archive"`. The old alias is gone, so `data-theme` no longer switches anything; `data-ak-theme="terminal"` stays the default. |
+| `<AkBackdrop blur />` | `<AkBackdrop strength="light" />` — the overlay is matte and no longer blurs the page behind it. |
+| `open` was required | `open` is optional; `defaultOpen` seeds the uncontrolled mode (`AkDialog`, `AkPopover`, menus, panels). |
+| `value` was required | `value` is optional; `defaultValue` seeds the uncontrolled mode (`AkSlider`, `AkInputNumber`, `AkTabs`, `AkSegmented`). A defined `value` still wins. |
+| `AkCard` / `AkItem` had no `disabled` | both accept `disabled`, and a pressable card renders a real `<button>` when it has no nested controls. |
+
+The stylesheet import is unchanged (`import '@swufefox/ak-ui-react/style.css'`), and the package
+entry stays a client boundary, so a Next.js server component can import any component.
+
 ## What's inside
 
 Interface components (buttons, cards, tables, tabs, menus, dialogs, forms), motion and media

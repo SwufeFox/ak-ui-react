@@ -34,6 +34,9 @@ mkdirSync(dist, { recursive: true })
 const css = result.css.charCodeAt(0) === 0xfeff ? result.css.slice(1) : result.css
 writeFileSync(resolve(dist, 'style.css'), css, 'utf8')
 cpSync(resolve(root, 'src/ak/styles/scss'), resolve(dist, 'scss'), { recursive: true })
+// 重新编译 SCSS 的宿主需要入口文件：只有分片没有入口，@use 列表就无从下手。
+// 入口里的 @use 路径是 "scss/…"，所以它必须与 scss/ 同级——放在 dist/ 根下。
+cpSync(resolve(root, 'src/ak/styles/ak-ui.scss'), resolve(dist, 'ak-ui.scss'))
 // 自托管字体随包发布：编译产物在 dist/style.css，字体放 dist/fonts/；
 // 重新编译 SCSS 的宿主在 dist/scss/ 旁边也放一份，url("fonts/…") 两条路都通。
 cpSync(resolve(root, 'src/ak/styles/scss/fonts'), resolve(dist, 'fonts'), { recursive: true })
