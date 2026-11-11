@@ -3,8 +3,11 @@
 > **Generated file — do not edit by hand.** Run `npm run build:api` (or `npm run build`,
 > which calls it) to regenerate from the JSDoc in `dist/ui/**/*.d.ts`.
 
-Every component and its props. `?` marks an optional prop. Props inherited from
-React's `HTMLAttributes` are not repeated here — they pass through unchanged.
+Every public component, hook and shared type. `?` marks an optional prop. Props inherited
+from React's `HTMLAttributes` are not repeated here — they pass through unchanged.
+
+The public surface is the package root: nothing that the root barrel does not export is
+listed here.
 
 ## Index
 
@@ -52,6 +55,11 @@ React's `HTMLAttributes` are not repeated here — they pass through unchanged.
 - [`AkTimelineItem`](#aktimelineitem) · [`AkToastProvider`](#aktoastprovider) · [`AkToolbar`](#aktoolbar) · [`AkTooltip`](#aktooltip)
 - [`AkTrust`](#aktrust) · [`AkVignette`](#akvignette) · [`AkVoice`](#akvoice) · [`AkVoiceList`](#akvoicelist)
 - [`AkWatermark`](#akwatermark)
+
+- [Public hooks and utilities](#public-hooks-and-utilities)
+- [Shared types](#shared-types)
+- [Public data types](#public-data-types)
+- [Additional prop types](#additional-prop-types)
 
 ## AkArchive
 
@@ -2047,6 +2055,351 @@ Extends `SlotProps<HTMLSpanElement>`.
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
 | `as` | `ElementType` | yes | 渲染成什么标签，例如 `div` / `span` / `section`。默认见组件签名。 |
+
+## Public hooks and utilities
+
+Exported from the package root next to the components.
+
+### isTactileSoundEnabled
+
+检查当前触觉音效是否已开启。
+
+```ts
+function isTactileSoundEnabled(): boolean
+```
+
+### playTactileSound
+
+合成并播放罗德岛战术风格纯前端 Web Audio 触觉微反馈音。 @param type 音效种类： - `'open'` / `'screen_in'`: 全息快门展开与液压下沉音（终端全屏入场） - `'close'` / `'screen_out'`: 气阀光圈闭锁音（终端全屏退场） - `'confirm'` / `'action'`: 罗德岛战术确认（高频撞击 + 双和弦 + 次低音） - `'elite'` / `'rarity_six'`: 6星黄金干员共鸣晶响（水晶层叠琶音） - `'select'` / `'equip'`: 战术锁定/装备短促微鸣（1200Hz -> 2400Hz 变频锁定） - `'tab'` / `'sweep'`: 伺服切页 / 分类扫频 - `'tick'` / `'dial'` / `'step'`: 微步棘轮点触（数字步进器、滑块滑动） - `'warn'` / `'denied'`: 工业告警 / 操作拒绝不协和颤音 - `'click'`: 机械轻脆快门卡扣音（用于标准按钮、卡片） - `'tap'`: 柔和指尖轻触音（用于轻交互、选项） - `'pip'`: 终端遥测脉冲提示音（用于槽位、状态选择） - `'toggle'`: 战术模式二段升调切换音（用于开关、段选器） @param volume 音量缩放比例（0 到 1，默认 0.15）
+
+```ts
+function playTactileSound(type: TactileSoundType, volume?: number): void
+```
+
+### setTactileSoundEnabled
+
+开启或关闭全局触觉音效，并持久化到本地存储，同时通知所有已订阅的 Hook 实例。
+
+```ts
+function setTactileSoundEnabled(enabled: boolean): void
+```
+
+### useTactileSound
+
+触觉音效便捷 Hook，提供当前开启状态、切换及播放函数，并在全局状态变更或多实例间保持自动同步。
+
+```ts
+function useTactileSound(): { enabled: boolean; toggle: () => void; setEnabled: (value: boolean) => void; play: (type: TactileSoundType, volume?: number) => void; }
+```
+
+### useToast
+
+拿轻提示的接口。 必须在 `AkToastProvider` 里面用；不在里面时返回一个空实现（不抛错）。
+
+```ts
+function useToast(): AkToastApi
+```
+
+Returns `AkToastApi`:
+
+| Member | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `create` | `(content: ReactNode, options?: AkToastOptions) => AkToastHandle` | no | 弹一条提示。 |
+| `info` | `(content: ReactNode, options?: AkToastOptions) => AkToastHandle` | no | 信息档提示。 |
+| `success` | `(content: ReactNode, options?: AkToastOptions) => AkToastHandle` | no | 成功档提示。 |
+| `warning` | `(content: ReactNode, options?: AkToastOptions) => AkToastHandle` | no | 警告档提示。 |
+| `error` | `(content: ReactNode, options?: AkToastOptions) => AkToastHandle` | no | 错误档提示。 |
+| `destroyAll` | `() => void` | no | 关掉全部提示。 |
+
+### AkToastHandle
+
+一条提示的句柄。
+
+| Member | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `destroy` | `() => void` | no | 立刻关掉这条提示。 |
+
+### AkToastOptions
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | yes | 标题。 |
+| `variant` | `AkToastVariant` | yes | 外观档位。 |
+| `duration` | `number` | yes | 停留时长（ms），0 = 不自动消失；不给则用 provider 的默认值。 |
+| `closable` | `boolean` | yes | 是否显示 ✕ 关闭按钮；不给则用 provider 的默认值。 |
+| `onClose` | `() => void` | yes | 这条提示消失时回调。 |
+
+## Shared types
+
+Types shared by many components.
+
+| Type | Definition | Description |
+| --- | --- | --- |
+| `AkAvatarSize` | `'xs' \| 'sm' \| 'default' \| 'lg' \| 'xl'` | 头像 / 缩略图 / 横滑区，以及面包屑。 ⚠️ **上游都没有这几样**（只有 `.ak-r-avatar`，那是稀有度色轨垫在头像下的那层， 被 `AkAvatar` 复用了）。所以这一组是本库补的，几何全部取自既有语汇。 ⚠️ `AkAvatar` **默认不做圆形**：本库的几何语言是直角 （decor 层注释原文：「不做圆角，不做辉光，也没有切角/斜切/斜带」）。 圆形头像是通用后台语汇，不属于这里 —— 所以要圆得显式开 `round` （对应上游的 `.ak-avatar--round`，上游也是显式选用，不是默认）。 默认不该是圆。 |
+| `AkBackdropStrength` | `'light' \| 'heavy'` | 焦距与底图处理（文章原则二 / 三 / 五）。 这一组与 decor 其余部分的来源不同，**必须交代清楚**： `_ak-decor.scss` / `_ak-arknights.scss` 移植自 prts-design； 而这里是按《明日方舟 UI 拆解》那篇文章补的 —— 三个关键词 （vignette / noise / mosaic）在**上游 SCSS 里零命中**，毛玻璃全库也只有 1 处 （dialog 遮罩）。所以它是本库自己的增补，不是移植。 出处逐条对应文章： vignette —— 原则三「一圈内投影布于页面周围…突出页面中心的信息」（章节选择页） grain —— 原则五「噪点与漫画网点纸风格的底图处理方法…用在基础组件上可以使留白不显得单薄」 mosaic —— 原则五「局部不稳定马赛克化，营造出带梗的信息暗示」/「失去同步」 backdrop —— 原则二「背景模糊…色彩结合更加柔和」「覆盖特性…让玩家窥见之前的页面」 |
+| `AkBackdropVariant` | `'grid' \| 'dots' \| 'diag' \| 'scanlines'` | — |
+| `AkBackTopPosition` | `'fixed' \| 'absolute'` | — |
+| `AkBadgeVariant` | `'default' \| 'accent' \| 'danger'` | — |
+| `AkBracketsProps` | `DivProps` | — |
+| `AkButtonVariant` | `'default' \| 'outline' \| 'action' \| 'advanced' \| 'light' \| 'danger' \| 'ghost'` | — |
+| `AkCalcKind` | `'add' \| 'mul' \| 'fadd' \| 'fmul'` | 进公式的方式：直接加算 · 直接乘算 · 最终加算 · 最终乘算。 |
+| `AkCampSize` | `'md' \| 'lg'` | — |
+| `AkCampVariant` | `'default' \| 'box'` | — |
+| `AkCardVariant` | `'default' \| 'outline' \| 'stripe' \| 'place' \| 'tactical' \| 'glass' \| 'chassis' \| 'flat' \| 'inset' \| 'accent-top'` | 外观档位。 `flat` 无框、换成下沉底，`inset` 是内凹面，`accent-top` 在顶边加一条信号色带； 其余是本库原有的档位。 |
+| `AkCboxLevel` | `'tip' \| 'info' \| 'warning' \| 'danger' \| 'neutral'` | — |
+| `AkCommandLayout` | `'default' \| 'wide' \| 'wide-mobile' \| 'vertical' \| 'operation' \| 'split'` | 布局。`operation` 是那张大字排版的操作卡（透明底、40cqh 大字、无边框底条）。 |
+| `AkCommandTone` | `'default' \| 'paper' \| 'primary' \| 'muted' \| 'dark' \| 'cyan' \| 'accent'` | 色调。`default` 不加修饰符类（走 `.ak-command` 自己的默认值）。 |
+| `AkControlSize` | `'sm' \| 'md' \| 'lg'` | 控件尺寸档。 三档刻意只映射到**控制高度令牌**，不映射字号/字距 —— 排版归 `tokens` 管， 档位只负责"占多大的位"。这样 `size` 与 `tokens` 互不打架： `size="sm"` 缩矮，`tokens={{ '--ak-fs-sm': '0.7rem' }}` 缩字，两者可以同时用。 |
+| `AkCornerPosition` | `'tl' \| 'tr'` | — |
+| `AkCornerTone` | `'info' \| 'yellow' \| 'red'` | — |
+| `AkCountdownPrecision` | `'min' \| 'sec'` | — |
+| `AkCutCorner` | `'tr' \| 'tl' \| 'br' \| 'bl' \| 'all'` | — |
+| `AkCutSize` | `'sm' \| 'md' \| 'lg'` | — |
+| `AkDepthVariant` | `'flat' \| 'stage' \| 'tilt'` | 景深（指针驱动的视差）。 **这不是新发明——是把上游已有的两半接起来：** · `core/dashboard-depth.mjs` 的 `createDashboardDepth` 给每个带 `[data-depth]` 的元素 写 `--ak-layer-x` / `--ak-layer-y`（指针偏移 × maxX/maxY × 该元素 depth 值） · `_ak-dashboard.scss:60` 早就有消费规则 `translate3d(var(--ak-layer-x), var(--ak-layer-y), 0)` 上游缺的只是「把它们接起来的东西」，以及一个可复用的类。本组件补的是这一根线。 所以这个控制器在下游此前是**孤儿**（零消费者），现在有宿主了。 ```tsx <AkDepth stage> <AkDepthLayer depth={2}>背景层，动得最多</AkDepthLayer> <AkDepthLayer depth={1}>中景</AkDepthLayer> <AkDepthLayer depth={0.4}>前景，几乎不动</AkDepthLayer> </AkDepth> ``` `depth` 越大位移越多。上游默认 `maxX: 130` / `maxY: 70`（px），对应 `depth = 1` 的满偏量。 |
+| `AkDividerVariant` | `'default' \| 'accent' \| 'stripes' \| 'text' \| 'vertical'` | 分隔线形态档位。 `accent` 左段是信号色渐变，`stripes` 整条换成 45° 斜纹带，`text` 是带标签的 发丝分隔线，`vertical` 是一根竖线。缺省是本库原有的「两侧不等长横线 + 居中标签」。 |
+| `AkEnemyRank` | `'normal' \| 'elite' \| 'boss'` | — |
+| `AkEventStatus` | `'default' \| 'live' \| 'ended'` | — |
+| `AkGaugeVariant` | `'default' \| 'warning' \| 'yellow' \| 'success'` | 外观档位。`warning` 与上游的 `yellow` 等价，`success` 是上游的成功绿档。 |
+| `AkGlowTone` | `'default' \| 'action' \| 'info' \| 'danger'` | 上游特效层（`.ak-fx-*`）的 React 外壳。 这三样是 ak-ui 真正的动效语言，此前只有 CSS、**没有任何组件暴露它们**： .ak-fx--glow 1.5s ease-out infinite alternate 的 box-shadow 呼吸 .ak-fx--outline 0.7s ease-out infinite 的轮廓向外扩散淡出 .ak-fx--skew 静态倾斜 ±10°（不是动画，是形状语言） 它们跑的是 CSS animation（`infinite`），不是 transition——这是与通用网页过渡最本质的 区别，也是「方舟感」的来源：持续呼吸的辉光、周期性扩散的轮廓环。 相对定位要求：`--outline` 用 `outline-offset` 向外扩，元素本身不必是 relative； 但 `--glow` 的阴影要可见，元素不能是 `overflow: hidden` 的子级。 |
+| `AkHalftoneVariant` | `'default' \| 'left' \| 'full'` | — |
+| `AkHeadingLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | — |
+| `AkHeadingSize` | `'md' \| 'lg'` | — |
+| `AkHeadingVariant` | `'bar' \| 'underline'` | — |
+| `AkItemTier` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | — |
+| `AkKvVariant` | `'default' \| 'boxed' \| 'inline'` | — |
+| `AkLoadingScreenState` | `'loading' \| 'ready'` | 外观状态：`loading` 显示，`ready` 淡出（透明度 + 可见性 + 指针事件一起关）。 |
+| `AkMessageVariant` | `'info' \| 'success' \| 'warning' \| 'danger' \| 'neutral' \| 'accent'` | — |
+| `AkModuleColor` | `'red' \| 'blue' \| 'green' \| 'yellow' \| 'purple'` | 模组型号色（游戏模组类型底色）。 |
+| `AkMotionEffect` | `'fade' \| 'rise' \| 'color'` | — |
+| `AkMotionPace` | `'quick' \| 'base' \| 'slow'` | — |
+| `AkNoticeVariant` | `'info' \| 'warning' \| 'danger' \| 'success'` | — |
+| `AkOpCardSize` | `'sm' \| 'md' \| 'lg'` | — |
+| `AkOpCardVariant` | `'default' \| 'rail'` | — |
+| `AkPanelTitleTag` | `'div' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6'` | — |
+| `AkProfessionName` | `'pioneer' \| 'warrior' \| 'tank' \| 'sniper' \| 'caster' \| 'medic' \| 'support' \| 'special'` | — |
+| `AkProfessionSize` | `'sm' \| 'default' \| 'lg' \| 'xl'` | — |
+| `AkProgressVariant` | `'default' \| 'warning' \| 'danger' \| 'yellow' \| 'success'` | 外观档位。 `warning` / `danger` 是本库原有的两档；`yellow` 是上游的黄色档（本库的警告色 就是上游那支黄，故两档等价），`success` 是上游的成功绿档。 |
+| `AkRangeGrid` | `{ row: number` | 一格：相对自身的行 / 列（= 游戏 range_table 的 grids 项），或写成 `[row, col]`。 |
+| `AkRangeSize` | `'sm' \| 'md' \| 'lg'` | — |
+| `AkRarityLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | — |
+| `AkRaritySize` | `'sm' \| 'default' \| 'lg'` | — |
+| `AkRichTextNode` | `{ type: 'text'` | 富文本节点：呈现型，不解析任何标记。 |
+| `AkRichTextTone` | `'buff' \| 'debuff' \| 'reminder' \| 'keyword' \| 'important' \| 'enemy' \| 'gild' \| 'level' \| 'potential' \| 'term'` | 富文本节点的语义色。 |
+| `AkSanVariant` | `'compact' \| 'terminal'` | 容器外观：`compact` 是仪表盘用的浅色卡片，`terminal` 是自适应容器尺寸的大面板。 |
+| `AkScopeTheme` | `'terminal' \| 'archive'` | — |
+| `AkScreenTone` | `'dark' \| 'paper' \| 'muted' \| 'cyan'` | — |
+| `AkScrollAxis` | `'y' \| 'x' \| 'both'` | — |
+| `AkSkeletonShape` | `'default' \| 'text' \| 'rect' \| 'square' \| 'circle'` | 上游的单枚占位形状。 `text` 一行文字、`rect` 长块、`square` 方块、`circle` 圆片， 分别发出 `.ak-skeleton--text` / `--rect` / `--square` / `--circle`。 |
+| `AkSkewDirection` | `'left' \| 'right'` | — |
+| `AkSkillLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6 \| 7 \| 'M1' \| 'M2' \| 'M3'` | — |
+| `AkSlotRarity` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | — |
+| `AkSlotRole` | `'vanguard' \| 'guard' \| 'defender' \| 'sniper' \| 'caster' \| 'medic' \| 'supporter' \| 'specialist'` | — |
+| `AkSpinnerVariant` | `'default' \| 'ripple' \| 'bars'` | 加载指示器的形态档位。 `default` 是本库的方舟方框（`.ak-loading`），`ripple` 是上游的菱形涟漪 （`.ak-spinner`），`bars` 是上游的三根跳条（`.ak-loader`）。 |
+| `AkSpTriggerType` | `'manual' \| 'auto'` | 触发方式：手动触发 / 自动触发。 |
+| `AkSpType` | `'auto' \| 'attack' \| 'hit' \| 'passive-recovery' \| 'passive'` | 技力回复方式：自动回复 · 攻击回复 · 受击回复 · 被动回复 · 被动。 |
+| `AkSpValueKind` | `'cost' \| 'init' \| 'duration'` | SP 数值芯片的种类：消耗 / 初始 / 持续。 |
+| `AkStageCodeVariant` | `'default' \| 'hard'` | — |
+| `AkStageVariant` | `'default' \| 'hard' \| 'ex' \| 'story'` | — |
+| `AkStatTrend` | `'up' \| 'down'` | — |
+| `AkStatusVariant` | `'default' \| 'warning' \| 'critical' \| 'offline'` | — |
+| `AkStepStatus` | `'wait' \| 'active' \| 'done'` | 步骤与浮动作族组件 移植自 prts-design（MIT License, Copyright (c) 2026-present MooncellWiki） https://github.com/MooncellWiki/prts-design 覆盖：步骤条（AkSteps / AkStep）与回到顶部（AkBackTop）。 |
+| `AkStripesVariant` | `'default' \| 'strong' \| 'warning' \| 'danger' \| 'hazard'` | — |
+| `AkTableSortDirection` | `'ascending' \| 'descending' \| 'none'` | 数据表。 ⚠️ **上游没有表格样式**（全库零 table 类），所以这一组是本库补的。 补的是排布而不是新语汇 —— 每条几何都取自既有规则，见 `_ak-table.scss` 顶部注释。 颜色全走令牌，所以亮/暗两套主题自动跟随。 ⚠️ 刻意**不做虚拟滚动、不做排序逻辑**：这个组件只管结构与样式， 排序/分页/筛选由宿主决定（`sort` 只用于把 `aria-sort` 反映到表头上）。 appica 的 DataTable 是「把组件接到 TanStack Table」的配方，不是组件本身 —— 同理。 |
+| `AkTabsVariant` | `'default' \| 'pill' \| 'block' \| 'vertical'` | 形态档位。 `pill` 是一组浮起的药丸，`block` 是底边一条粗线 + 选中黑白反转， `vertical` 是列表在左、面板在右。缺省是本库原有的下划线式标签页。 |
+| `AkTagVariant` | `'default' \| 'advanced' \| 'danger' \| 'neutral' \| 'outline' \| 'accent' \| 'accent-soft'` | 标签档位。 - `default` / `advanced` / `danger` / `neutral` 是本库原有的语义档； - `outline` / `accent` / `accent-soft` 是上游 tag.css 的三个色调档 （透明底+强边框 / 信号色实底 / 信号色淡底）。 |
+| `AkTimelineStatus` | `'wait' \| 'active' \| 'done'` | — |
+| `AkToastVariant` | `'info' \| 'success' \| 'warning' \| 'danger'` | — |
+| `AkTokens` | `Record<`--${string}`, string \| number>` | 逐实例令牌覆盖。 键必须是组件样式里真实消费的 CSS 变量（`--ak-*`）。值原样写进 inline style， 所以既可以是任意合法 CSS 值，也可以引用别的令牌（`var(--ak-signal-danger)`）。 这枚 prop 是整套主题系统的**逃生口**：不改 SCSS、不写新 class，就能把任何一个 组件调成宿主需要的形状。组件自己的 `variant` / `size` 仍然优先于它 —— 后者是 语义档位，前者是具体数值。 ```tsx <AkButton tokens={{ '--ak-button-bg': '#ff5e19', '--ak-button-cut': '14px' }} /> ``` |
+| `AkTooltipPlacement` | `'top' \| 'bottom' \| 'left' \| 'right' \| 'top-start' \| 'top-end' \| 'bottom-start' \| 'bottom-end'` | — |
+| `AkTooltipTrigger` | `'hover' \| 'focus' \| 'click' \| 'manual'` | — |
+| `TactileSoundType` | `'click' \| 'tap' \| 'pip' \| 'toggle' \| 'warn' \| 'denied' \| 'step' \| 'open' \| 'screen_in' \| 'close' \| 'screen_out' \| 'confirm' \| 'action' \| 'elite' \| 'rarity_six' \| 'select' \| 'equip' \| 'tab' \| 'sweep' \| 'tick' \| 'dial'` | — |
+
+## Public data types
+
+Structured values passed to components — item shapes, row shapes, option records.
+
+### AkBreadcrumbItem
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | no | 显示文字。 |
+| `href` | `string` | yes | 链接地址。最后一项（当前页）通常不给。 |
+| `current` | `boolean` | yes | 显式标记为当前页（渲染成 `aria-current="page"`）。 一项都没标时，最后一项自动当当前页 —— 同上游的做法。 |
+
+### AkCountUpHandle
+
+| Member | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `replay` | `() => void` | no | — |
+
+### AkEntranceHandle
+
+| Member | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `replay` | `() => void` | no | — |
+
+### AkMenuItem
+
+A selectable entry for `AkDropdownMenu` or `AkContextMenu`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | no | Visible menu label. |
+| `onSelect` | `() => void` | yes | Called after selection; the menu closes afterwards. |
+| `disabled` | `boolean` | yes | Prevents selection and removes the entry from arrow-key navigation. |
+| `destructive` | `boolean` | yes | Applies the library's danger signal to destructive actions. |
+| `active` | `boolean` | yes | Marks the entry as the current one (`.ak-menu__item.is-active`). |
+| `shortcut` | `ReactNode` | yes | Optional keyboard hint shown at the trailing edge. |
+
+### AkMobileMenuHandle
+
+| Member | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `open` | `() => void` | no | — |
+| `close` | `() => void` | no | — |
+
+### AkNewsListItem
+
+公告 / 新闻列表。 `_ak-news-list.scss` 是这库少数几套**规格完整**的样式表之一（列表容器 + 行链接 + 分类/标题/时间三个字段 + 空态 + 容器查询降级 + reduced-motion），却一直没有组件出口。 这里按样式表的结构原样接出来，几何全部沿用现有令牌，没有新样式。 ⚠️ 几个照样式表来的约束： · 行是三列网格，**列数由 `@container ak-news-list (min-width: 34rem)` 控制**， 容器窄时自动降为单列。所以这个组件自带 `container: ak-news-list / inline-size` （样式表写在根类上），把它放进任何宽度都能自适应。 · `__empty` 是**行级**样式（有 padding）。HTML 规则不允许 `<ul>` 直接放 `<p>`， 所以空态渲染成 `<li class="ak-news-list__empty">` —— 类名照样生效，且文档结构合法。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `category` | `ReactNode` | yes | 分类标签（如「公告」「活动」），走 `__category`。 |
+| `title` | `ReactNode` | no | 标题，走 `__title`。 |
+| `time` | `ReactNode` | yes | 时间显示文本，走 `__time`。 |
+| `dateTime` | `string` | yes | 机器可读的时间（`<time datetime>`）。给了就按 `<time>` 渲染， 方便读屏与抓取；只给 `time` 而无 `dateTime` 时退化为普通文本。 |
+| `href` | `string` | yes | 链接地址。给了就渲染 `<a>`。 |
+| `onSelect` | `() => void` | yes | 点击回调。**不给 href 时**行仍可点（渲染为 `role="button"` 的 div），不会变成死的假链接。 |
+| `external` | `boolean` | yes | `href` 是否新窗口打开；会自动补 `rel="noreferrer noopener"`。 |
+
+### AkSectionNavigatorHandle
+
+| Member | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `navigate` | `(id: string) => void` | no | — |
+
+### AkSegmentedOption
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | no | 显示内容。 |
+| `value` | `string` | no | 选项值。 |
+| `icon` | `ReactNode` | yes | 前置图标。 |
+| `badge` | `ReactNode` | yes | 后置角标。 |
+| `disabled` | `boolean` | yes | 是否禁用。 |
+
+### AkSkillAlias
+
+技能名后的别名：英文名（Bender 大写）+ 日文名。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `en` | `string` | yes | 英文名。 |
+| `ja` | `string` | yes | 日文名。 |
+
+### AkSkillMatrixRenderContext
+
+描述渲染函数拿到的上下文。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `level` | `number` | yes | 当前预览 / 钉住的等级（1–10）；没有时 `undefined`。 |
+| `value` | `(key: string) => string` | no | 取某一行的区间 / 当级取值。 |
+| `Var` | `(key: string) => ReactNode` | no | 画一个变量位（`.ak-var`）：给 `key` 就能拿到此刻该显示的字。 |
+
+### AkSkillMatrixRow
+
+矩阵的一行：一个参数在各级的值。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `key` | `string` | yes | 描述模板里的占位符名（`{key}`）；写了这一行就对应描述里的一个变量位。 |
+| `label` | `string` | no | 参数名（「伤害倍率」「晕眩（秒）」）。 |
+| `sp` | `AkSpValueKind` | yes | 用 SP 芯片当参数名：初始 · 消耗 · 持续。 |
+| `values` | `(number \| string)[]` | no | 各级的值（「200%」）：第 i 项 = 等级 i+1，第 8–10 项 = 专精 Ⅰ–Ⅲ。 |
+
+### AkSkillSheetLevel
+
+一个技能等级（第 i 项 = 等级 i+1，第 8–10 项 = 专精 Ⅰ–Ⅲ）。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `description` | `ReactNode` | no | 描述（宿主自己渲染的 React 节点）。 |
+| `init` | `number \| string` | yes | 初始技力。 |
+| `cost` | `number \| string` | yes | 技力消耗。 |
+| `duration` | `number \| string` | yes | 持续时间（秒）；没有就空着（表里显示「—」）。 |
+
+### AkTableColumn
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `key` | `string` | no | 列键，与行数据的 key 对应。 |
+| `header` | `ReactNode` | no | 表头文字。 |
+| `numeric` | `boolean` | yes | 数字列：等宽数位 + 右对齐（`.ak-table__cell--num` 与上游的 `.num` 同义）。 |
+| `sort` | `AkTableSortDirection` | yes | 该列当前排序方向；给了就把表头变成可点的排序表头。 |
+| `onSortChange` | `(key: string) => void` | yes | 点表头排序时回调（配合 `sort` 使用）。 |
+| `width` | `string` | yes | 列宽。 |
+
+### AkTableRow
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | no | 行标识，作为 React key。 |
+| `cells` | `Record<string, ReactNode>` | no | 每列内容，按 column.key 取。 |
+| `selected` | `boolean` | yes | 选中态：左缘信号色 + 淡底。 |
+| `muted` | `boolean` | yes | 失效/不可用：整行压淡。 |
+
+### AkTabsItem
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `description` | `ReactNode` | yes | 描述文字。 |
+| `eyebrow` | `ReactNode` | yes | 小标文字。 |
+| `label` | `string` | no | 标签文本。 |
+| `title` | `ReactNode` | no | 标题节点。 |
+| `value` | `string` | no | 唯一值标识。 |
+| `icon` | `ReactNode` | yes | 标签前置图标。 |
+| `badge` | `ReactNode` | yes | 标签后置角标。 |
+| `disabled` | `boolean` | yes | 是否禁用。 |
+
+### AkTalentRequirement
+
+一条解锁条件：图标 + 字。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | yes | 图标（宿主自己的 `<img src=… />`）。 |
+| `text` | `string` | no | 「精英二 · 1级」「潜能5」。 |
+
+### AkTalentRow
+
+天赋表的一行：一个条件下的效果。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | no | 天赋名；相邻几行同名时合并成一格。 |
+| `condition` | `ReactNode` | yes | 条件（「精英二 · Y模组 2级」）。 |
+| `description` | `ReactNode` | no | 描述。 |
+| `potential` | `ReactNode` | yes | 潜能加成后的描述；不写就没有潜能版。 |
+
+### AkVoiceLanguage
+
+语种选项（音频差分，单选，带 CV 名）。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | no | 语种键。 |
+| `label` | `string` | no | 语种名。 |
+| `cv` | `string` | yes | CV 名。 |
+
+### AkVoiceText
+
+文本语言选项（台词的语言，多选）。
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | no | 文本键。 |
+| `label` | `string` | no | 文本名。 |
 
 ## Additional prop types
 

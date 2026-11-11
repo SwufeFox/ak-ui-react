@@ -57,8 +57,8 @@ const en: GuideContent = {
       id: 'start',
       title: 'Quick start',
       paragraphs: [
-        'The package ships ESM only, with React as the single peer dependency. Import the stylesheet once, at your app entry — every component is styled from the same tokens.',
-        'There is no runtime dependency beyond React: the motion language is CSS, the DOM controllers are plain `.mjs` modules, and the only file you need is one stylesheet.',
+        'The package ships ESM only, with React and React DOM as its only peer dependencies. Import the stylesheet once, at your app entry — every component is styled from the same tokens.',
+        'There is no runtime dependency beyond React and React DOM: the motion language is CSS, the DOM controllers are plain `.mjs` modules, and the only file you need is one stylesheet.',
       ],
       snippets: [
         { label: 'INSTALL', code: INSTALL },
@@ -99,7 +99,7 @@ export function Deploy() {
       ],
       items: [
         { term: '--ak-*', desc: 'Every tunable is a custom property in the token layer. Override any of them on an ancestor to re-theme a subtree.' },
-        { term: '--ak-cut-md', desc: 'The cut-corner radius shared by dialogs, notices, popovers and this site’s masthead.' },
+        { term: '--ak-cut-md', desc: 'The cut-corner size used by AkCut (sm / md / lg). Dialogs, notices and popovers read their own radius from --ak-cut.' },
       ],
     },
     {
@@ -167,8 +167,8 @@ import '@swufefox/ak-ui-react/style.css'` },
       title: 'Resources',
       paragraphs: ['The package, the generated reference and the source.'],
       items: [
-        { term: 'llms.txt', desc: 'A structured component index for AI coding assistants. Open it from the top bar, or fetch /llms.txt.' },
-        { term: 'docs/api.md', desc: 'Generated from the emitted declarations — every prop, variant and method with its JSDoc.' },
+        { term: 'llms.txt', desc: 'The machine-readable index: the ak-ui design contract (style intensity, principles, token and motion rules) plus the component catalogue. It points at docs/api.md for the prop tables. Open it from the top bar, or fetch /llms.txt.' },
+        { term: 'docs/api.md', desc: 'The authoritative API reference, generated from the emitted declarations — every component, hook and shared type, with each prop, variant and method documented.' },
         { term: 'AGENTS.md', desc: 'The contributor guide: architecture, build stages, and the conventions a change has to follow.' },
         { term: 'GitHub', desc: 'The full source, including the port notes that document every local deviation from upstream.' },
         { term: 'npm', desc: 'Published from the master branch through trusted publishing; the tag must match the package version.' },
@@ -189,8 +189,8 @@ const zh: GuideContent = {
       id: 'start',
       title: '快速开始',
       paragraphs: [
-        '包体只有 ESM，唯一的 peer 依赖是 React。样式表在应用入口引入一次即可——所有组件都从同一套令牌取样式。',
-        '除 React 外没有任何运行时依赖：动效语言是 CSS，DOM 控制器是纯 `.mjs` 模块，你需要拿到的只有一份样式表。',
+        '包体只有 ESM，peer 依赖只有 React 与 React DOM 两项。样式表在应用入口引入一次即可——所有组件都从同一套令牌取样式。',
+        '除 React 与 React DOM 外没有任何运行时依赖：动效语言是 CSS，DOM 控制器是纯 `.mjs` 模块，你需要拿到的只有一份样式表。',
       ],
       snippets: [
         { label: '安装', code: INSTALL },
@@ -231,7 +231,7 @@ export function Deploy() {
       ],
       items: [
         { term: '--ak-*', desc: '所有可调项都是令牌层里的自定义属性。在任意祖先上覆盖，就能给一棵子树换主题。' },
-        { term: '--ak-cut-md', desc: '弹窗、公告、浮层与本站报头共用的切角半径。' },
+        { term: '--ak-cut-md', desc: 'AkCut 用的切角尺寸（sm / md / lg）。弹窗、公告与浮层各有自己的半径，读的是 --ak-cut。' },
       ],
     },
     {
@@ -297,8 +297,8 @@ import '@swufefox/ak-ui-react/style.css'` },
       title: '资源',
       paragraphs: ['包体、生成的参考与源码。'],
       items: [
-        { term: 'llms.txt', desc: '给 AI 编程助手用的结构化组件索引。顶栏可以直接打开，也可以取 /llms.txt。' },
-        { term: 'docs/api.md', desc: '由产物声明生成——每个参数、变体与方法都带 JSDoc。' },
+        { term: 'llms.txt', desc: '给机器读的索引：ak-ui 设计契约（风格强度、设计原则、令牌与动效规则）加组件目录；它指向 docs/api.md 查参数表。顶栏可以直接打开，也可以取 /llms.txt。' },
+        { term: 'docs/api.md', desc: '权威的 API 参考，由产物声明生成——每个组件、Hook 与共享类型都带参数、变体与方法说明。' },
         { term: 'AGENTS.md', desc: '贡献者指南：架构、构建阶段，以及一次改动必须遵守的约定。' },
         { term: 'GitHub', desc: '完整源码，含记录每一处本地偏离的移植说明。' },
         { term: 'npm', desc: '从 master 经可信发布上线；tag 必须与包版本一致。' },

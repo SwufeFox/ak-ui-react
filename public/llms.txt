@@ -6,10 +6,24 @@
 Package: `@swufefox/ak-ui-react`
 - Repository: https://github.com/SwufeFox/ak-ui-react
 - Showcase: https://ak-ui-react.pages.dev
-- Generated API Reference: `docs/api.md`
-- Stylesheet: `@swufefox/ak-ui-react/style.css`
+- **API reference — authoritative prop tables**: [`docs/api.md`](./docs/api.md) · https://github.com/SwufeFox/ak-ui-react/blob/master/docs/api.md
+- **Stylesheet**: `@swufefox/ak-ui-react/style.css`
+- **Peer dependencies**: `react >= 18` and `react-dom >= 18`. There is no runtime dependency beyond these two.
 - **Client boundary**: the package entry is marked `'use client'`, so every component renders on the client. Importing it from a Next.js server component is safe; the DOM controllers under `@swufefox/ak-ui-react/core` have no React dependency and stay server-usable.
 - **Fonts**: Chakra Petch and Oswald (OFL-1.1) ship with the package and cover the label and display roles. The game's own Bender / Novecento Sans Wide are not redistributed but stay first in the font stacks.
+
+---
+
+## 0. What to read, and where
+
+| File | Contains |
+| :--- | :--- |
+| `llms.txt` (this file) | The design contract, the component index, usage patterns, token and motion rules |
+| [`docs/api.md`](./docs/api.md) | Every public component and hook, with each prop, variant and method documented — generated from the emitted `.d.ts` JSDoc, so it is never out of date |
+| `AGENTS.md` | The contributor guide: architecture, build stages and the conventions a change must follow |
+
+Read `docs/api.md` for exact prop names, types and defaults; read this file for the rules that
+decide *how* to use them.
 
 ---
 
@@ -35,48 +49,203 @@ import '@swufefox/ak-ui-react/style.css'
 
 ---
 
-## 2. Core Design Rules & Principles
+## 2. The ak-ui design contract
 
-1. **Terminal Root is Dark by Default**:
-   Unlike generic design systems, the canonical Arknights PRTS aesthetic is a high-contrast dark industrial tactical terminal (`#0b0d0f` canvas, `#171a1d` raised panels, `#f8f8f5` text). The library supports light archive mode via `[data-ak-theme="archive"]`; the default (or explicit `[data-ak-theme="terminal"]`) is dark.
-2. **Sharp Geometries & Cut Corners, No Pill Shapes**:
-   Never use generic iOS/macOS 16px/24px rounded corners or bubble buttons. Everything in Arknights is rectangular, chamfered (`AkCut`, `clip-path`), bracketed (`AkBrackets`), or tagged with corner markers (`AkCorner`).
-3. **Typography Disciplines**:
-   - Technical numbers and readouts use monospace/tabular numerals: `--ak-font-mono`, `AkNum`, `.tabular-nums`.
-   - Headers and Latin tactical display words use geometric sans: `AkDisplay`, Novecento style.
-   - Bilingual pairs (CJK + English subtext): `AkBilingual`.
-4. **Signal Colors & Semantic Tokens**:
-   - Info / Rhodes Island Cyan: `--ak-signal-info` (`#18d1ff` dark / `#0098dc` light)
-   - Action / Hazard Yellow: `--ak-signal-action` (`#ffd800` dark / `#c99d00` light)
-   - Danger / Crimson: `--ak-signal-danger` (`#e33b3b`)
-   - Accent / Orange: `--ak-color-accent` (`#f6540e`)
-   - Surfaces: `--ak-surface-canvas`, `--ak-surface-panel`, `--ak-surface-sunken`, `--ak-surface-raised`
-   - Role Palette: `--ak-role-vanguard`, `--ak-role-guard`, `--ak-role-defender`, `--ak-role-sniper`, `--ak-role-caster`, `--ak-role-medic`, `--ak-role-supporter`, `--ak-role-specialist`
-   - Terminal Command Tone Palette: `--ak-terminal-paper`, `--ak-terminal-muted`, `--ak-terminal-dark`, `--ak-terminal-cyan`, `--ak-terminal-accent`
-5. **Components Never Ship Game Art**:
-   Every icon-bearing component receives its icon from caller props (`icon`, `prefixIcon`, or `children`). No hidden bundled image dependencies.
-6. **Everything Is Tunable — Two Orthogonal Knobs**:
-   Geometry is never welded into a rule. Every interactive component reads its size from a CSS custom property, so you get three ways to adjust it without writing CSS:
+ak-ui is an original design language inspired by the information hierarchy, industrial geometry and
+tactical-terminal atmosphere of Arknights interfaces. It ships reusable constraints for independent
+products; it does not aim to reproduce a specific game screen, composition, brand or asset. Judge a
+result by conformance to this contract, not by similarity to a screenshot.
 
-   **a. `size` prop — per-instance tier** (`'sm' | 'md' | 'lg'`, default `'md'` = the pre-tuning look):
-   ```tsx
-   <AkButton size="sm">Compact</AkButton>
-   <AkTable size="lg" columns={cols} rows={rows} />
-   ```
-   Supported on: `AkButton`, `AkCard`, `AkStatus`, `AkTag`, `AkInput`, `AkTextarea`, `AkSelect`, `AkField`, `AkProgress`, `AkGauge`, `AkTable`, `AkDialog`, `AkTabs`, `AkSegmented`, `AkPagination`, `AkDropdownMenu`, `AkContextMenu`, `AkPopover`.
+This section is the React port of the upstream ak-ui skill (`skills/ak-ui/SKILL.md` and its
+`references/`) together with the prts-design porting rules. The authoritative prop tables live in
+[`docs/api.md`](./docs/api.md).
 
-   **b. `tokens` prop — per-instance CSS-variable override** (any `--ak-*` the component actually reads):
-   ```tsx
-   <AkButton tokens={{ '--ak-button-bg': '#ff5e19', '--ak-button-height': '2rem' }} />
-   <AkDialog tokens={{ '--ak-dialog-w': '52rem' }} open={open} onOpenChange={setOpen} />
-   ```
-   Keys that are *functional state* (e.g. `--ak-progress-value`) are owned by the component and are not overridable.
+### 2.1 Style intensity
 
-   **c. `data-ak-density` — subtree density scale** (`'compact' | 'cozy' | 'spacious'`, default 1.0):
-   ```tsx
-   <div data-ak-density="compact">{/* controls, tables and fields inside all shrink 12.5% */}</div>
-   ```
-   Density multiplies control heights and spacing via `--ak-density-scale` / `--ak-density-control`; it never changes colour or layout direction.
+| Mode | Use when | What it changes |
+| :--- | :--- | :--- |
+| `accent` | The host already has a brand and a layout | Keep the layout; add ak-ui typography, signal colours, visible focus and compact metadata. At most one restrained cut or line treatment per component. |
+| `system` | Backends, tooling, web apps (the default) | The full component language: layered neutral surfaces, asymmetric emphasis, clipped geometry, dense but legible metadata, functional signals, decisive feedback. |
+| `terminal` | Immersive landing pages and showcases | Adds command planes, telemetry, perspective, parallax and staged motion — only where the content benefits. Recompose for mobile instead of shrinking a desktop control room. |
+
+Intensity is not a light/dark switch. This package ships the terminal-forward styling and lets a
+host dial it back by not using the immersive pieces (`AkDepth`, `AkParticleField`,
+`AkLoadingScreen`, `AkScreen`, the `/core` site controllers).
+
+### 2.2 Principles
+
+1. **Build hierarchy before decoration.** Every surface needs one dominant command or value, supporting context and quiet metadata. Vary size, weight, contrast, alignment and whitespace before adding borders or glow. Short labels, identifiers, counts, timestamps, progress and state text must carry real information — never add meaningless serial numbers for atmosphere.
+2. **Use asymmetric, purposeful geometry.** Prefer rectangular modules, clipped corners, offset rules, stepped edges or one slanted axis. Rounded cards, uniform pill shapes, soft floating shadows and evenly spaced dashboard tiles must not dominate. The hit area stays rectangular and large enough even when the visible shape is clipped (`AkCut`, `AkBrackets`, `AkCorner`).
+3. **Treat colour as a signal.** Build most surfaces from paper, graphite, black, white and muted grey. Reserve cyan/blue for information, yellow for action or warning, orange for concentrated emphasis, green for success and red for danger. Pair every colour change with a label, icon, pattern or geometry change — colour is never the only indicator. Glow is local feedback, not a permanent background effect.
+4. **Make typography carry structure.** `--ak-font-command` (serif) for major Chinese command labels, `--ak-font-sans` for prose and controls, `--ak-font-mono` for identifiers, telemetry and aligned values. Metadata may be letter-spaced (`--ak-type-wide`); do not uppercase, italicise and monospace every line. Bilingual pairs use `AkBilingual`, Latin display words use `AkDisplay`, aligned numbers use `AkNum`.
+5. **Layer surfaces, not clutter.** Combine paper-like light surfaces and graphite dark surfaces when hierarchy requires contrast. Explain elevation with strong rules, small offsets and controlled shadows — never stack borders, gradients, noise, glow and bevels on one element.
+6. **Keep interaction decisive.** Hover, press, selection, loading and focus must change at least two of signal, position, fill, line or label. Transitions stay quick and mechanical. The keyboard focus indicator must stay visible and must not be clipped away.
+
+### 2.3 Composition rules
+
+- Align related data to a stable grid, then break the grid only for the primary command or focal object.
+- Interactive targets stay at least 24×24 CSS px in the package (primary navigation links are 44px). The upstream skill asks for 44×44 wherever the control can afford it — use 44px for primary actions in a host app.
+- Preserve readable line lengths and real whitespace around primary actions.
+- Recompose multi-plane terminal layouts for narrow viewports; never rely on horizontal scrolling.
+- Keep overlays above transformed ancestors, and verify portalled content (Popover API, native `<dialog>`) in its real DOM position.
+- Let content decide density. Consumer pages must not inherit showcase-level telemetry by default.
+
+### 2.4 Brand adaptation
+
+Preserve the host's intentional brand colours, typography and voice. Map them onto the semantic roles first, then apply the ak-ui geometry, hierarchy, density and feedback.
+
+```css
+.brand-console {
+  --ak-font-command: var(--brand-display-font);
+  --ak-signal-info: var(--brand-primary);
+  --ak-signal-accent: var(--brand-accent);
+  --ak-surface-canvas: var(--brand-canvas);
+}
+```
+
+Do not force the default cyan/yellow palette onto a recognisable brand, and do not remap the danger,
+warning, success, disabled or focus roles so aggressively that their meaning or contrast is lost.
+
+### 2.5 Originality boundary
+
+Use original, licensed or host-supplied imagery. The package ships no game logo, character art, UI
+texture, icon, screenshot, audio or extracted asset — every icon-bearing component takes its icon
+from props (`icon`, `prefixIcon`, `children`), and portraits are host-supplied with a neutral themed
+placeholder. Removing the ak-ui styling must leave a recognisable host product.
+
+### 2.6 Common failure modes
+
+- A black background with cyan borders and indiscriminate glow.
+- Every element clipped, skewed, numbered, uppercase or monospace.
+- Decorative telemetry competing with real content.
+- Tiny labels and controls justified as "game-like density".
+- A desktop terminal scaled down until it is unusable on mobile.
+- Brand colours overwritten instead of mapped to semantic roles.
+- Headless behaviour replaced by hand-written interaction code for styling convenience.
+- Similarity achieved by copying game assets instead of applying the contract.
+
+### 2.7 Token contract
+
+Semantic tokens are the only sanctioned way to express a repeated visual decision. Every one is a
+`--ak-*` custom property on `:root` / `[data-ak-theme]`.
+
+| Role | Token | Terminal | Archive |
+| :--- | :--- | :--- | :--- |
+| Page canvas | `--ak-surface-canvas` | `#111315` | `#eef0f1` |
+| Light paper panel | `--ak-surface-panel` | `rgba(253,253,251,.9)` | `rgba(253,253,251,.96)` |
+| Quiet panel | `--ak-surface-muted` | `rgba(235,236,235,.9)` | `rgba(228,230,232,.92)` |
+| Raised / dark panel | `--ak-surface-raised` | `rgba(66,66,66,.92)` | `#ffffff` |
+| Sunken surface | `--ak-surface-sunken` / `--ak-surface-sunken-2` | `#1a1b1c` / `#232425` | `#fdfdfb` / `#f2f3f4` |
+| Inverse surface | `--ak-surface-inverse` | `#fdfdfb` | `#1b1d1f` |
+| Primary text | `--ak-text-primary` | `#f8f8f5` | `#1b1d1f` |
+| Secondary text | `--ak-text-secondary` | `rgba(248,248,245,.68)` | `rgba(27,29,31,.68)` |
+| Text on light surfaces | `--ak-text-inverse` | `#1b1d1f` | `#f8f8f5` |
+| Information | `--ak-signal-info` | `#18d1ff` | `#0098dc` |
+| Action / warning | `--ak-signal-action` | `#ffd800` | `#c99d00` |
+| Concentrated accent | `--ak-signal-accent` | `--ak-color-accent` (`#f6540e`) | same |
+| Success | `--ak-signal-success` | `#46c47c` | same |
+| Danger | `--ak-signal-danger` | `#e33b3b` | same |
+| Disabled | `--ak-signal-disabled` | `--ak-color-low` | same |
+
+Raw palette values are exposed as `--ak-color-*` (`white`, `black`, `blue`, `yellow`, `dark-blue`,
+`light-blue`, `gray`, `dark`, `low`, `basic`, `primary`, `secondary`, `advanced`, `accent`) — use
+them to define or inspect raw values, never in component rules.
+
+Other token families:
+
+- **Typography** — `--ak-font-sans`, `--ak-font-serif`, `--ak-font-mono`, `--ak-font-command`; `--ak-type-display-size`, `--ak-type-title-size`, `--ak-type-label-size`, `--ak-type-data-size`, `--ak-type-tight`, `--ak-type-wide`.
+- **Spacing & density** — `--ak-space-1` … `--ak-space-6`, `--ak-density-control-height`, `--ak-density-panel-padding`; runtime knobs `--ak-density-scale` / `--ak-density-control`.
+- **Geometry & depth** — `--ak-line-hairline`, `--ak-line-strong`, `--ak-cut-sm` / `--ak-cut-md` / `--ak-cut-lg`, `--ak-radius-subtle`, `--ak-shadow-panel` / `-card` / `-subtle` / `-elevated` / `-signal` / `-neon`, `--ak-depth-perspective`.
+- **Motion & focus** — `--ak-motion-fast` (120ms), `--ak-motion-base` (200ms), `--ak-motion-slow` (420ms), `--ak-ease-standard`, `--ak-ease-emphasized`, `--ak-ease-tactical`, `--ak-ease-snap`, `--ak-focus-color`, `--ak-focus-width`, `--ak-focus-offset`.
+- **Arknights data palettes** — `--ak-rarity-1` … `--ak-rarity-6` (with `-text` variants), `--ak-prof-*` (eight professions), `--ak-role-*` (eight combat roles), `--ak-terminal-paper` / `-muted` / `-dark` / `-cyan` / `-accent`.
+
+Rules: do not hard-code a repeated decision that a public token covers; do not redefine a public
+`--ak-*` token to mean a different role; prefer scoped overrides over changing `:root` for one
+feature; keep a fallback on every `var(--ak-…)` so consumer overrides keep working.
+
+### 2.8 Three orthogonal knobs
+
+Geometry is never welded into a rule. Every interactive component reads its size from a CSS custom property, so there are three ways to adjust it without writing CSS:
+
+**a. `size` prop — per-instance tier** (`'sm' | 'md' | 'lg'`, default `'md'` = the pre-tuning look):
+```tsx
+<AkButton size="sm">Compact</AkButton>
+<AkTable size="lg" columns={columns} rows={rows} />
+```
+Supported on: `AkButton`, `AkCard`, `AkStatus`, `AkTag`, `AkNotice`, `AkField`, `AkInput`, `AkTextarea`, `AkSelect`, `AkChoice`, `AkInputNumber`, `AkProgress`, `AkGauge`, `AkSlider`, `AkTable`, `AkDialog`, `AkTabs`, `AkSegmented`, `AkPagination`, `AkItem`, `AkSlot`, `AkSearch`, `AkDropdownMenu`, `AkContextMenu`, `AkPopover`.
+
+**b. `tokens` prop — per-instance CSS-variable override** (any `--ak-*` the component actually reads):
+```tsx
+<AkButton tokens={{ '--ak-button-bg': '#ff5e19', '--ak-button-height': '2rem' }} />
+<AkDialog tokens={{ '--ak-dialog-w': '52rem' }} open={open} onOpenChange={setOpen} />
+```
+Keys that are *functional state* (e.g. `--ak-progress-value`) are owned by the component and are not overridable. `tokens` is written into the inline `style`, so an explicit `style` prop still wins.
+
+**c. `data-ak-density` — subtree density scale** (`'compact' | 'cozy' | 'spacious'`, default `cozy`):
+```tsx
+<div data-ak-density="compact">{/* controls, tables and fields inside all shrink 12.5% */}</div>
+```
+Density multiplies control heights and spacing via `--ak-density-scale` / `--ak-density-control`; it never changes colour or layout direction.
+
+### 2.9 Motion & lifecycle
+
+The defaults below are implementation choices of this library, not measurements of the game's animation timeline.
+
+| Effect | API | Defaults |
+| :--- | :--- | :--- |
+| Entrance | `createEntrance` (`…/core/effects`), `AkEntrance` | 650ms, delay 0, distance 24px, direction `up`, easing `cubic-bezier(.16,1,.3,1)`; animates opacity + CSS `translate`, never overwrites `transform` |
+| Count-up | `createCountUp`, `AkCountUp` | 1000ms, delay 0, from 0, cubic ease-out; the callback owns the formatting |
+| Pointer depth | `createDashboardDepth` (`…/core/depth`), `AkDepth` | `[data-depth]` layers, maxX 130, maxY 70, writes `--ak-layer-x` / `--ak-layer-y` |
+| Section navigation | `createSectionNavigation`, `AkSectionNavigator` | 650ms transition, 420ms section entrance, 20px displacement |
+| Media gallery | `createMediaGallery`, `AkMediaGallery` | 420ms slide, loops by default |
+| Mobile menu | `createMobileMenu`, `AkMobileMenu` | 200ms entrance, 70ms stagger, 24px displacement |
+| Asset loader | `createAssetLoader`, `AkAssetLoader` | real task completion, error/retry, cancellation; progress counts settled tasks, not bytes |
+| Particle field | `createParticleField`, `AkParticleField` | 360 particles, `grid` / `orbit` / `wave`, WebGL → 2D → static fallback |
+
+Lifecycle rules: creating a controller does not start it — call `play()` on the intended event.
+`play()` cancels the previous animation, `cancel()` restores the visible state, and `destroy()`
+removes the preference listener — always destroy on unmount. Never drive the same element's
+`translate` from two controllers; nest wrappers instead. Do not put a per-frame value in an
+`aria-live` region: mark the interpolation `aria-hidden` and render separate static target text.
+Under `prefers-reduced-motion: reduce` the entrance controller skips playback, the count-up renders
+its target immediately, and CSS entrances lose their animation while staying fully visible.
+
+### 2.10 Who owns what
+
+| Concern | Owner |
+| :--- | :--- |
+| Semantics, ARIA, focus management, keyboard input | the native element or headless primitive |
+| Controlled state and emitted events | your component API |
+| Geometry, surfaces, typography, motion | ak-ui CSS and tokens |
+| Copy, brand, information priority | the host application |
+
+Do not replace behaviour to make styling easier — style the rendered parts and the public state
+attributes (`aria-selected`, `aria-expanded`, `aria-pressed`, `aria-invalid`, `data-state`). This
+package already leans on platform primitives: native `<dialog>` with `showModal()`, the Popover API
+for menus and popovers, roving `tabIndex` with arrow/Home/End on tablists, `aria-current="location"`
+on in-page anchors.
+
+### 2.11 Quality checklist
+
+- The chosen intensity is evident and not exceeded; existing ak-ui primitives are reused before new lookalikes are written.
+- Repeated visual decisions use public `--ak-*` tokens; brand values are mapped, not overwritten.
+- The primary command or value is immediately identifiable; metadata supports real content.
+- Rest, hover, active, focus-visible, open/closed, selected, disabled, invalid, loading, empty and error states are exercised — never signalled by colour alone.
+- Keyboard focus is visible and unclipped; overlays close on Escape and return focus.
+- Touch targets stay large enough; the layout is inspected at one desktop and one narrow viewport.
+- Motion respects `prefers-reduced-motion`; content stays usable without JavaScript.
+- Type-check, build and a real browser pass; the console stays clean.
+
+### 2.12 The prts-design layer
+
+The Arknights data layers (rarity, profession, elite, potential, mastery, skill sheets, talents, modules, dossiers, voices, operator cards, stage cards, panels, feedback) are ports of [prts-design](https://github.com/MooncellWiki/prts-design) (MIT). The porting rules are part of the contract:
+
+- Upstream class names are kept verbatim (`.ak-op-card__portrait`, `.ak-skill__icon`, `.ak-talent-table`, `.ak-voice__play`, …) so the vendored CSS stays recognisable.
+- Upstream CSS variables are mapped onto `--ak-*` semantic tokens (`--ak-bg-surface` → `--ak-surface-sunken`, `--ak-fg` → `--ak-text-primary`, `--ak-accent` → `--ak-signal-info`); upstream values with no token become component-scoped custom properties.
+- One rule set serves both themes — colour differences live in the tokens, never in a second theme branch.
+- No game artwork ships: icons and portraits are host-supplied props with a neutral themed placeholder.
+- A newly ported family lives in its own `_ak-<family>.scss` partial and its own `src/ak/ui/<family>/Ak*.tsx` file.
+
 
 ---
 
@@ -452,15 +621,14 @@ import {
 // Tactical table with hairline dividers, overline headers, and selection rails:
 <AkTable
   columns={[
-    { key: 'id', title: 'OPERATOR ID' },
-    { key: 'name', title: 'NAME' },
-    { key: 'level', title: 'LEVEL', align: 'end' },
+    { key: 'id', header: 'OPERATOR ID' },
+    { key: 'name', header: 'NAME' },
+    { key: 'level', header: 'LEVEL', numeric: true },
   ]}
-  data={[
-    { id: 'R001', name: 'Amiya', level: 80 },
-    { id: 'R002', name: 'Kal\'tsit', level: 90 },
+  rows={[
+    { id: 'R001', cells: { id: 'R001', name: 'Amiya', level: 80 } },
+    { id: 'R002', cells: { id: 'R002', name: 'Kal\'tsit', level: 90 }, selected: true },
   ]}
-  selectedKey="R001"
   onRowClick={row => handleSelect(row)}
 />
 
@@ -612,7 +780,12 @@ import { AkPanel, AkCollapse, AkCollapseItem, AkHeading, AkCbox, AkMessage, AkEm
 
 ## 4. Tuning Reference — Which Token to Set
 
-Every tuning token below is a real CSS custom property read by the component's stylesheet. Set it via the `tokens` prop, or globally on `:root` / any scoped selector.
+Every tuning token below is a real CSS custom property read by the component's stylesheet. Set it
+per instance with the `tokens` prop, or globally on `:root` / any scoped selector.
+
+Two entries in the table are CSS-only: `AkFormStack` and `AkProgressStack` do not accept a
+`tokens` prop, so override their token through a scoped rule instead. Exact prop names, types and
+defaults for every component are in [`docs/api.md`](./docs/api.md).
 
 | Component | Tunable tokens |
 | :--- | :--- |
@@ -630,8 +803,8 @@ Every tuning token below is a real CSS custom property read by the component's s
 | `AkPagination` | `--ak-pagination-h`, `--ak-pagination-w`, `--ak-pagination-arrow-w`, `--ak-pagination-number-fs`, `--ak-pagination-title-fs`, `--ak-pagination-bg`, `--ak-pagination-fg`, `--ak-pagination-arrow-bg`, `--ak-pagination-arrow-bg-hover`, `--ak-pagination-arrow-bg-disabled`, `--ak-pagination-cur-border` |
 | `AkDropdownMenu` / `AkContextMenu` | `--ak-menu-trigger-h`, `--ak-menu-trigger-pad`, `--ak-menu-trigger-fs`, `--ak-menu-item-h`, `--ak-menu-item-pad`, `--ak-menu-item-fs`, `--ak-menu-min-w`, `--ak-menu-max-w` |
 | `AkPopover` / tooltip | `--ak-popover-w`, `--ak-popover-pad`, `--ak-popover-title-fs`, `--ak-popover-body-fs`, `--ak-popover-eyebrow-fs`, `--ak-popover-bg`, `--ak-popover-fg`, `--ak-popover-title-fg`, `--ak-popover-body-fg`, `--ak-popover-border`, `--ak-popover-shadow`, `--ak-tooltip-max-w`, `--ak-tooltip-pad`, `--ak-tooltip-fs` |
-| any form group | `--ak-form-w` (form stack max width) |
-| any progress group | `--ak-progress-stack-w` |
+| any form group | `--ak-form-w` (form stack max width — CSS only, `AkFormStack` has no `tokens` prop) |
+| any progress group | `--ak-progress-stack-w` (CSS only, `AkProgressStack` has no `tokens` prop) |
 
 Global: `--ak-density-scale` (spacing), `--ak-density-control` (control heights). Prefer `data-ak-density` over setting these by hand.
 
@@ -639,13 +812,30 @@ Global: `--ak-density-scale` (spacing), `--ak-density-control` (control heights)
 
 ## 5. Subpath Exports & Controllers
 
-Framework-agnostic controllers are accessible via subpaths without React dependencies:
+Framework-agnostic controllers are accessible via subpaths without React dependencies. Each one has
+a React wrapper in the main entry — prefer the wrapper unless you are driving a non-React surface.
 
 ```ts
-import { createSectionNavigation, createMediaGallery } from '@swufefox/ak-ui-react/core'
+import { createSectionNavigation, createMobileMenu, createMediaGallery, createAssetLoader, createParticleField } from '@swufefox/ak-ui-react/core'
 import { createCountUp, createEntrance } from '@swufefox/ak-ui-react/core/effects'
 import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
 ```
+
+| Controller | React wrapper | Returns |
+| :--- | :--- | :--- |
+| `createSectionNavigation(root, options)` | `AkSectionNavigator` | `navigate(id, { history, focus, immediate })`, `currentId`, `destroy()` — native wheel/touch scrolling, hash/history sync, interruptible |
+| `createMobileMenu(dialog, { trigger })` | `AkMobileMenu` | `open()`, `close()`, `isOpen`, `destroy()` — native `<dialog>` owns focus trapping and Escape; the controller owns the 200ms / 70ms stagger |
+| `createMediaGallery(root, options)` | `AkMediaGallery` | `select(index, { focus, animate })`, `refresh()`, `open()`, `close()`, `index`, `destroy()` |
+| `createAssetLoader(onChange)` | `AkAssetLoader` | `load(tasks)`, `cancel()`, `destroy()` — tasks receive an `AbortSignal`; progress counts settled tasks, not bytes |
+| `createParticleField(canvas, options)` | `AkParticleField` | `setPattern()`, `pause()`, `resume()`, `renderer`, `destroy()` — WebGL → 2D → static fallback |
+| `createEntrance(element, options)` | `AkEntrance` | `play()`, `cancel()`, `destroy()` |
+| `createCountUp(render, options)` | `AkCountUp` | `play()`, `update(value)`, `finish()`, `destroy()` |
+| `createDashboardDepth(root, options)` | `AkDepth` | `destroy()` — writes `--ak-layer-x` / `--ak-layer-y` on `[data-depth]` layers |
+
+Controller contract: create it after the element is attached to the document, keep the instance in
+a ref, and call `destroy()` on unmount. Creating a controller never starts an animation — call
+`play()` on the intended event. Never create one during render. Full signatures and option types
+are in [`docs/api.md`](./docs/api.md).
 
 ---
 
@@ -660,3 +850,11 @@ import { createDashboardDepth } from '@swufefox/ak-ui-react/core/depth'
 | Hand-rolled CSS diagonal stripes | `<AkStripes variant="hazard" />` or `<AkGridBackdrop />` | Reuses canonical vector-math SVG/CSS tokens across the system |
 | Generic spinner icons | `<AkSpinner />` | Retains Arknights 45-degree rotating diamond radio-wave indicator |
 | Unstyled tooltips/popovers sticking out on mobile | `<AkPopover />` | Built-in `min(calc(100vw - 32px), ...)` prevents mobile viewport blowout |
+
+---
+
+## 7. Sources
+
+- **ak-ui** — https://github.com/YunYouJun/ak-ui (Vue + CSS core). The design contract in section 2 is the React port of the upstream `skills/ak-ui` package: `SKILL.md` plus the `design-language`, `tokens`, `motion`, `headless-components`, `site` and `quality-checklist` references. The stylesheet, tokens and DOM controllers in this package are vendored from it.
+- **prts-design** — https://github.com/MooncellWiki/prts-design (MIT). Source of the Arknights data layers, the decor language, the panel/feedback families and the border, sunken-surface and rarity tokens; see section 2.12 for the porting rules.
+- **This package** — [`docs/api.md`](./docs/api.md) for every prop, variant and method; `AGENTS.md` for architecture and contribution rules; https://ak-ui-react.pages.dev for live previews and copyable examples.

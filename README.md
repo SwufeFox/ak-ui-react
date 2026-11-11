@@ -101,8 +101,23 @@ sealed records, and panels with feedback primitives (accordions, messages, toast
 the last three layers ported from [prts-design](https://github.com/MooncellWiki/prts-design).
 
 Browse the [showcase](https://ak-ui-react.pages.dev) for live previews and copyable examples, or
-read [`llms.txt`](./llms.txt) for a machine-readable component index and
-[`docs/api.md`](./docs/api.md) for the full API reference.
+read [`llms.txt`](./llms.txt) for the machine-readable design contract and component index — it
+points at [`docs/api.md`](./docs/api.md), the generated reference with every prop, variant and method.
+
+## Port notes
+
+### Local fixes to vendored CSS
+
+The vendored upstream CSS is kept recognisable, but a few rules are deliberately different:
+
+- **Breadcrumb hit area** — upstream ships no breadcrumb layer at all, so this one is added; its links get 24px-tall hit areas through padding plus an equal negative margin, which leaves the row rhythm untouched.
+- **Choice hit area** — the `sm` checkbox is only 20px tall, so the label row keeps a 24px minimum height.
+- **Standalone `AkSan` add button** — the container variants size the button themselves; the baseline gives it a size so a standalone meter does not fall back to the browser default button (29×21px).
+- **Loading track label** — upstream hangs it 5.3rem outside the right edge of the track, where narrow screens cut it in half; here it is attached to the track end instead.
+- **Tooltip class name** — upstream calls it `.ak-tooltip`, but that name belongs to `AkPopover` here (native Popover API), so the CSS-positioned bubble uses the sibling name `.ak-tip`.
+- **Avatar shape** — square by default, matching this library's geometry; upstream's round avatar stays available as an explicit opt-in.
+
+Do not "restore" these to upstream values.
 
 ## Credits
 
