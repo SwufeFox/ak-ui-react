@@ -1,0 +1,60 @@
+// ══════════════════════════════════════════════════════════════════════════
+//  ak-ui · 自托管 Web 字体
+//
+//  只带 OFL-1.1 授权的两族（上游 prts-design 同样用的是 Fontsource 切片）：
+//    · Chakra Petch 400/500/600/700  —— HUD 标签与数值（--ak-font-label 兜底）
+//    · Oswald 200–700 可变             —— 压缩展示字（--ak-font-display 兜底）
+//
+//  ⚠️ 不带 Bender / Novecento Sans Wide：那是明日方舟官网自有的字体资产，
+//     不是开放授权的字体，本库不重新分发。字体栈里仍然保留它们的名字，
+//     访客机器上装过就能用——装了就是原版观感，没装就落到我们自带的
+//     Chakra Petch / Oswald。
+//
+//  url() 相对本文件：编译产物在 dist/style.css，字体随包放在 dist/fonts/；
+//  重新编译 SCSS 的宿主把 fonts/ 目录放在同一层即可。
+// ══════════════════════════════════════════════════════════════════════════
+
+@font-face {
+  font-family: 'Chakra Petch';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/chakra-petch-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/chakra-petch-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/chakra-petch-latin-600-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Chakra Petch';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/chakra-petch-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url('fonts/oswald-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

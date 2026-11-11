@@ -81,6 +81,16 @@ properties, so a host app can retune a whole subtree:
 }
 ```
 
+## Compatibility
+
+- **React 18 or 19**, ESM only.
+- **Next.js App Router**: the package entry is a client boundary (`'use client'`), so importing any
+  component from a server component works — the components render on the client. The DOM controllers
+  under `@swufefox/ak-ui-react/core` have no React dependency and stay usable from server code.
+- **Fonts**: Chakra Petch and Oswald (both OFL-1.1) ship with the package and cover the label and
+  display roles. The original game's Bender / Novecento Sans Wide are *not* redistributed here; they
+  stay first in the font stacks, so a machine that has them installed keeps the original look.
+
 ## What's inside
 
 Interface components (buttons, cards, tables, tabs, menus, dialogs, forms), motion and media

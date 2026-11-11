@@ -1,5 +1,5 @@
 ﻿import { execFileSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 
@@ -34,6 +34,10 @@ mkdirSync(dist, { recursive: true })
 const css = result.css.charCodeAt(0) === 0xfeff ? result.css.slice(1) : result.css
 writeFileSync(resolve(dist, 'style.css'), css, 'utf8')
 cpSync(resolve(root, 'src/ak/styles/scss'), resolve(dist, 'scss'), { recursive: true })
+// 自托管字体随包发布：编译产物在 dist/style.css，字体放 dist/fonts/；
+// 重新编译 SCSS 的宿主在 dist/scss/ 旁边也放一份，url("fonts/…") 两条路都通。
+cpSync(resolve(root, 'src/ak/styles/scss/fonts'), resolve(dist, 'fonts'), { recursive: true })
+cpSync(resolve(root, 'src/ak/styles/scss/fonts'), resolve(dist, 'scss/fonts'), { recursive: true })
 
 // Ship the framework-agnostic controllers next to the declarations that describe them,
 // so `@swufefox/ak-ui-react/core/*` resolves in the published package.
@@ -48,5 +52,15 @@ cpSync(resolve(coreSrc, 'site'), resolve(coreDest, 'site'), { recursive: true })
 
 // Sync llms.txt to public/llms.txt for web access
 cpSync(resolve(root, 'llms.txt'), resolve(root, 'public/llms.txt'))
+
+// The package entry must stay a client boundary: the components use React
+// state/effects and five modules create contexts at module scope. If a bundler
+// ever drops the entry directive, a Next.js server component importing this
+// package evaluates it on the server and the build dies on createContext.
+// Assert it here rather than finding out from a consumer's build log.
+const entry = readFileSync(resolve(dist, 'index.js'), 'utf8')
+if (!/^\s*(["'])use client\1;?/.test(entry)) {
+  throw new Error('dist/index.js lost its "use client" directive — the package would crash RSC consumers')
+}
 
 console.log('\n✅ build complete → dist/')

@@ -1,3 +1,5 @@
+'use client'
+
 export { AkButton } from './button/AkButton'
 export { AkCard, AkCardContent, AkCardDescription, AkCardFooter, AkCardHeader, AkCardTitle } from './card/AkCard'
 export { AkStatus, AkTag } from './status/AkStatus'

@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useContext, useId, useMemo, type InputHTMLAttributes, type LabelHTMLAttributes, type HTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'

@@ -2,6 +2,8 @@
 @use "scss/variables";
 @use "scss/helpers";
 @use "scss/mixins";
+// 自托管字体（OFL-1.1）：Chakra Petch / Oswald。
+@use "scss/ak-fonts";
 
 // components
 @use "scss/ak-button";

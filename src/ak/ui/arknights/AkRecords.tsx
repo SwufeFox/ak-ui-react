@@ -1,3 +1,5 @@
+'use client'
+
 import type { ElementType, HTMLAttributes, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { cx } from '../../lib/utils'

@@ -1,3 +1,5 @@
+'use client'
+
 import type { CSSProperties, ElementType, HTMLAttributes, ReactNode } from 'react'
 import { createContext, useContext } from 'react'
 import { cx, variantClass } from '../../lib/utils'

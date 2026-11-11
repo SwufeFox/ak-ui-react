@@ -111,35 +111,47 @@
   pointer-events: none;
 }
 
+/* 切角面板：clip-path 会把 1px 边框的斜边一起削掉，只剩几条横线。
+   这里改成双层：外层切角形状填描边色，内层同形状缩进 1px 填面板色，
+   于是四条斜边也有实打实的边线。 */
 .demo-hero__array-plate {
+  --_stroke: color-mix(in srgb, var(--ak-signal-info) 44%, var(--demo-hairline));
+  --_shape: polygon(7% 0, 93% 0, 100% 12%, 100% 88%, 93% 100%, 7% 100%, 0 88%, 0 12%);
+
   position: absolute;
   display: block;
-  border: 1px solid color-mix(in srgb, var(--ak-signal-info) 44%, var(--demo-hairline));
-  background: color-mix(in srgb, var(--ak-surface-sunken) 58%, transparent);
-  clip-path: polygon(7% 0, 93% 0, 100% 12%, 100% 88%, 93% 100%, 7% 100%, 0 88%, 0 12%);
+  padding: 1px;
+  background: var(--_stroke);
+  clip-path: var(--_shape);
+}
+
+.demo-hero__array-plate::before {
+  position: absolute;
+  inset: 1px;
+  background: color-mix(in srgb, var(--ak-surface-canvas) 88%, var(--ak-surface-sunken));
+  clip-path: var(--_shape);
+  content: "";
 }
 
 .demo-hero__array-plate--far {
-  inset: 27% 33% 33% 27%;
-  border-color: color-mix(in srgb, var(--ak-text-primary) 30%, transparent);
-  background: transparent;
-  transform: translate(-9%, 9%);
+  inset: 8% 11% 14% 8%;
+  --_stroke: color-mix(in srgb, var(--ak-text-primary) 26%, transparent);
+  transform: translate(-11%, 11%);
 }
 
 .demo-hero__array-plate--mid {
-  inset: 19% 24% 25% 19%;
-  background: transparent;
-  transform: translate(-4%, 4%);
+  inset: 13% 17% 21% 13%;
+  --_stroke: color-mix(in srgb, var(--ak-signal-info) 52%, var(--demo-hairline));
+  transform: translate(-5%, 5%);
 }
 
 .demo-hero__array-plate--near {
-  inset: 11% 15% 17% 11%;
-  border-color: color-mix(in srgb, var(--ak-signal-info) 66%, var(--demo-hairline));
-  background: color-mix(in srgb, var(--ak-surface-canvas) 30%, transparent);
+  inset: 18% 23% 28% 18%;
+  --_stroke: color-mix(in srgb, var(--ak-signal-info) 78%, var(--demo-hairline));
 }
 
 /* 每层标注自己的层号：读起来像图纸，而不是三个叠起来的框。 */
-.demo-hero__array-plate::before {
+.demo-hero__array-plate::after {
   position: absolute;
   top: 12%;
   left: 10%;
@@ -149,9 +161,9 @@
   letter-spacing: 0.14em;
 }
 
-.demo-hero__array-plate--far::before { content: "L3"; }
-.demo-hero__array-plate--mid::before { content: "L2"; }
-.demo-hero__array-plate--near::before { content: "L1"; }
+.demo-hero__array-plate--far::after { content: "L3"; }
+.demo-hero__array-plate--mid::after { content: "L2"; }
+.demo-hero__array-plate--near::after { content: "L1"; }
 
 .demo-hero__array-core {
   position: absolute;

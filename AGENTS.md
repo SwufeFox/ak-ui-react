@@ -106,7 +106,7 @@ site / shell / command exporters. Code generation is lazy and cached against
 | `src/ak/ui/panels/`, `feedback/`, `navigation/` | prts-design ports: panels/accordion/message/stat, badge/chip/toast/tooltip/search, steps/back-top |
 | `src/ak/lib/` | `utils.ts` (`cx`, `variantClass`), `useController.ts`, `useControllableState.ts`, `useId.ts`, `audio.ts` |
 | `src/ak/core/` | Vendored `.mjs` controllers + `.d.mts`; published as `…/core`, `…/core/effects`, `…/core/depth` |
-| `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`) |
+| `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`), self-hosted fonts (`scss/fonts/*.woff2`, `_ak-fonts.scss`) |
 | `src/demo/` | Showcase: `App.tsx` (routing/state/chrome), `block.tsx`, `catalogue-rail.tsx`, `catalogue-data.ts`, `view-param.ts`, `examples/*.tsx`, `styles/*.css`, `i18n.tsx`, `doc-data.ts` |
 | `scripts/` | `build.mjs` (4-stage library build), `gen-api.mjs` (`.d.ts` → `docs/api.md`) |
 | `docs/`, `public/llms.txt` | **Generated**. Authored: root `llms.txt`, `README.md` |
@@ -146,6 +146,10 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
 - **IDs**: `lib/useId.ts` exports `useInstanceId` — a counter-based prefixed id. `React.useId()`
   emits colons which break `getElementById`-based ARIA wiring; a few components call
   `useId().replace(/:/g, '')` instead — follow the local component's convention.
+- **Client boundary**: every library module that uses React state/effects or creates a context starts
+  with `'use client'`; `src/ak/index.ts` carries it too. Bundlers drop module-level directives when
+  they bundle, so `scripts/build.mjs` asserts the published `dist/index.js` still starts with the
+  directive — otherwise a Next.js server component would evaluate `createContext` at build time.
 - **CSS**: every `var(--ak-…)` keeps a fallback; consumer overrides are expected. Do **not** move
   demo-only rules into the library stylesheet. In demo CSS, derive `--demo-*` from `--ak-*` — never
   hardcode a second palette.
