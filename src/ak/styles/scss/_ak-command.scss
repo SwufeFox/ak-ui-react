@@ -285,7 +285,7 @@
     top: 0;
     right: 0;
     left: 0;
-    height: 1.75cqw;
+    height: clamp(1.1rem, 1.75cqw, 1.85rem);
     content: "";
     border-top: 0.18cqw solid var(--ak-dashboard-info, #05a7dc);
     border-bottom: 1px solid rgba(255, 255, 255, 0.34);
@@ -295,8 +295,13 @@
   .ak-command-group__label {
     position: absolute;
     z-index: 2;
-    top: 0.28cqw;
+    // 与 ::before 的色带同高并垂直居中：色带高度按容器缩放，
+    // 标签字号却有最小值，写死 top 会让文字在窄容器里落到青色底上。
+    top: 0;
     left: 1.1cqw;
+    display: flex;
+    height: clamp(1.1rem, 1.75cqw, 1.85rem);
+    align-items: center;
     font-family: $font-serif;
     font-size: clamp(0.85rem, 1.35cqw, 1.45rem);
     font-weight: 900;

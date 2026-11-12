@@ -187,7 +187,12 @@
   }
 
   &--box {
-    background: #1d1f20;
+    // 图标槽是「亮暗同值」的深色板（同上游）：字色必须跟着板走，
+    // 否则 archive 主题下继承到的深色文字会落在深底上（实测对比度 1.02）。
+    --_box-bg: #1d1f20;
+    --_box-fg: #fdfdfb;
+    color: var(--_box-fg);
+    background: var(--_box-bg);
 
     > img {
       filter: none;
@@ -303,7 +308,11 @@
   display: inline-grid;
   place-items: center;
   padding: 2px;
-  background: #1d1f20;
+  // 同 .ak-prof--box：深色小方块两套主题同值，字色不能继承页面文字色。
+  --_chip-bg: #1d1f20;
+  --_chip-fg: #fdfdfb;
+  color: var(--_chip-fg);
+  background: var(--_chip-bg);
   vertical-align: middle;
 
   > img {
@@ -314,6 +323,7 @@
 
   &--bare {
     padding: 0;
+    color: inherit;
     background: none;
   }
 }
