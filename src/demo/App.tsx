@@ -15,30 +15,35 @@ import type { CommandSnapshot } from './examples/command-export'
 import type { exportCategory as GenerateCategory } from './example-manifest'
 import type { exportShell as GenerateShell } from './example-source'
 import type { exportSite as GenerateSite } from './example-site-export'
-import { renderActions } from './examples/actions'
 import { BootSequence } from './boot'
 import { HudReticle } from './hud'
 import { StageProgress, SystemStatus } from './status'
 import { pushReceipt, Receipts, formatBytes } from './receipt'
-import { renderShell } from './examples/shell'
-import { renderSite } from './examples/site'
-import { renderMenus } from './examples/menus'
-import { renderSurfaces } from './examples/surfaces'
-import { renderFeedback } from './examples/feedback'
-import { renderInputs } from './examples/inputs'
-import { renderNavigation } from './examples/navigation'
-import { renderEffects } from './examples/effects'
-import { renderGallery } from './examples/gallery'
-import { renderDecor } from './examples/decor'
-import { renderGameData } from './examples/game-data'
-import { renderOperators } from './examples/operators'
-import { renderSkills } from './examples/skills'
-import { renderPanels } from './examples/panels'
-import { renderControls } from './examples/controls'
-import { renderForms } from './examples/forms'
-import { renderReadouts } from './examples/readouts'
-import { renderCollections, sortTableRows, nextTableSort } from './examples/collections'
-import { DEPOT_ITEMS, filterDepotItems, renderCommand, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command'
+// 渲染器按分类懒加载：首屏只取当前分类那一块，其余在切换时补上。
+import {
+  renderActions,
+  renderCollections,
+  renderCommand,
+  renderControls,
+  renderDecor,
+  renderEffects,
+  renderFeedback,
+  renderForms,
+  renderGallery,
+  renderGameData,
+  renderInputs,
+  renderMenus,
+  renderNavigation,
+  renderOperators,
+  renderPanels,
+  renderReadouts,
+  renderShell,
+  renderSite,
+  renderSkills,
+  renderSurfaces,
+} from './example-lazy'
+import { sortTableRows, nextTableSort } from './examples/collections'
+import { DEPOT_ITEMS, filterDepotItems, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command'
 
 // 指南是纯文档，只有按需打开时才需要它的正文，所以单独成块。
 const GuideView = lazy(() => import('./guide').then((module) => ({ default: module.GuideView })))

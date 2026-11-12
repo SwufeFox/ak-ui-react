@@ -1,9 +1,10 @@
-import { memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import { AkButton, AkChoice, AkFieldLabel, AkInput, AkSelect, playTactileSound } from '../ak'
 import type { BlockPropDoc } from './doc-data'
 import { useI18n, type Locale } from './i18n'
 import { createTuneSession, type ExampleFactory } from './example-tune'
+import { examplesRevision as examplesRevisionSnapshot, subscribeExamples } from './example-lazy'
 import { pushReceipt, formatBytes } from './receipt'
 import { tokenizeTsx } from './highlight'
 import { CATEGORIES } from './catalogue-data'
@@ -169,12 +170,14 @@ export const Block = memo(function Block({
     overrideRegistry.current[id] = overrides
     return () => { delete overrideRegistry.current[id] }
   }, [id, overrideRegistry, overrides])
+  // 示例渲染器按分类懒加载：加载完成时 revision 自增，会话随之重算。
+  const examplesRevision = useSyncExternalStore(subscribeExamples, examplesRevisionSnapshot, () => 0)
   // Keep the inspector's DOM and scroll range intact while other views are visible.
   const session = useMemo(() => {
     if (!active) return null
     const result = createTuneSession(overrides)
     return { tree: example(result.tune), targets: result.targets }
-  }, [active, example, overrides])
+  }, [active, example, overrides, examplesRevision])
   const tunables = session?.targets ?? []
   const target = tunables.find((item) => item.id === selected) ?? tunables[0]
   useLayoutEffect(() => {
