@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { version as packageVersion, peerDependencies } from '../../package.json'
 import { AkDisplay, AkSegmented, useTactileSound, playTactileSound } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
@@ -9,7 +9,6 @@ import { Block } from './block'
 import { CATEGORIES } from './catalogue-data'
 import { CatalogueRail } from './catalogue-rail'
 import { StageContext } from './stage-context'
-import llmsRawText from '../../llms.txt?raw'
 import type { AkMobileMenuHandle } from '../ak/ui/site/AkMobileMenu'
 import type { ExampleFactory, Tune, TuneOverrides } from './example-tune'
 import type { CommandSnapshot } from './examples/command-export'
@@ -21,7 +20,6 @@ import { BootSequence } from './boot'
 import { HudReticle } from './hud'
 import { StageProgress, SystemStatus } from './status'
 import { pushReceipt, Receipts, formatBytes } from './receipt'
-import { GuideView } from './guide'
 import { renderShell } from './examples/shell'
 import { renderSite } from './examples/site'
 import { renderMenus } from './examples/menus'
@@ -41,6 +39,9 @@ import { renderForms } from './examples/forms'
 import { renderReadouts } from './examples/readouts'
 import { renderCollections, sortTableRows, nextTableSort } from './examples/collections'
 import { DEPOT_ITEMS, filterDepotItems, renderCommand, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command'
+
+// 指南是纯文档，只有按需打开时才需要它的正文，所以单独成块。
+const GuideView = lazy(() => import('./guide').then((module) => ({ default: module.GuideView })))
 import './demo.css'
 
 const loadCategory = () => import('./example-manifest')
@@ -490,6 +491,9 @@ export function App() {
   const [theme, setTheme] = useState<Theme>('terminal')
   const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
   const [llmModalOpen, setLlmModalOpen] = useState(false)
+  // 规范正文不进主包：打开弹窗时才取同目录的 llms.txt。
+  const [llmText, setLlmText] = useState<string | null>(null)
+  const [llmLoadFailed, setLlmLoadFailed] = useState(false)
   const [booting, setBooting] = useState(true)
   // 指南是叠在目录之上的文档层：目录保持挂载，示例状态与调参结果都不会丢。
   const [guideOpen, setGuideOpen] = useState(() => typeof window !== 'undefined' && window.location.hash === '#guide')
@@ -612,14 +616,34 @@ export function App() {
     setLlmModalOpen(false)
   }
 
+  // 打开弹窗时取部署出去的那份 /llms.txt：既省掉约 40KB 的初始 JS，
+  // 也保证弹窗里显示的和「打开原始文件」看到的是同一份内容。
+  useEffect(() => {
+    if (!llmModalOpen || llmText !== null) return
+    let cancelled = false
+    fetch(`${import.meta.env.BASE_URL}llms.txt`)
+      .then((response) => {
+        if (!response.ok) throw new Error(String(response.status))
+        return response.text()
+      })
+      .then((text) => {
+        if (!cancelled) setLlmText(text)
+      })
+      .catch(() => {
+        if (!cancelled) setLlmLoadFailed(true)
+      })
+    return () => { cancelled = true }
+  }, [llmModalOpen, llmText])
+
   const copyLlmText = async () => {
+    if (llmText === null) return
     const generation = ++llmCopyGeneration.current
     if (llmCopyTimer.current !== null) window.clearTimeout(llmCopyTimer.current)
     try {
-      await navigator.clipboard.writeText(llmsRawText)
+      await navigator.clipboard.writeText(llmText)
       if (generation !== llmCopyGeneration.current) return
       setLlmCopyState('copied')
-      pushReceipt({ label: t('app.llm.copied'), detail: formatBytes(llmsRawText.length) })
+      pushReceipt({ label: t('app.llm.copied'), detail: formatBytes(llmText.length) })
       llmCopyTimer.current = window.setTimeout(() => setLlmCopyState('idle'), 2000)
     } catch {
       if (generation === llmCopyGeneration.current) setLlmCopyState('error')
@@ -721,7 +745,9 @@ export function App() {
         >
           <div className="demo-guide-overlay" onClick={closeGuide}>
             <div className="demo-guide-panel" onClick={(event) => event.stopPropagation()}>
-              <GuideView onBack={closeGuide} />
+              <Suspense fallback={null}>
+                <GuideView onBack={closeGuide} />
+              </Suspense>
             </div>
           </div>
         </dialog>
@@ -741,6 +767,7 @@ export function App() {
                   type="button"
                   className="demo-copy-btn"
                   onClick={copyLlmText}
+                  disabled={llmText === null}
                 >
                   {t(llmCopyState === 'copied' ? 'app.llm.copied' : 'app.llm.copy')}
                 </button>
@@ -763,7 +790,7 @@ export function App() {
             </div>
             <div className="demo-llm-modal__feedback" aria-live="polite">{llmCopyState === 'error' ? t('app.llm.error') : llmCopyState === 'copied' ? t('app.llm.copied') : ''}</div>
             <pre className="demo-llm-modal__body">
-              <code>{llmsRawText}</code>
+              <code>{llmText ?? (llmLoadFailed ? t('app.llm.loadError') : t('app.llm.loading'))}</code>
             </pre>
           </div>
         </div>

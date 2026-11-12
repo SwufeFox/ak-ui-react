@@ -594,7 +594,7 @@ export function AkSkillMatrix({
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={row.key ?? rowIndex} data-var={row.key}>
+            <tr key={rowIndex} data-var={row.key}>
               <th scope="row">
                 {row.sp ? <AkSpValue kind={row.sp}>{row.label}</AkSpValue> : row.label}
               </th>

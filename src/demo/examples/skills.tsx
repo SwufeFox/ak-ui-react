@@ -38,8 +38,8 @@ const LEVELS: AkSkillSheetLevel[] = [
 
 const MATRIX_ROWS: AkSkillMatrixRow[] = [
   { key: 'atk', label: '攻击力', values: ['100%', '120%', '140%', '160%', '180%', '200%', '220%', '240%', '260%', '280%'] },
-  { key: 'atk', label: '攻击间隔', values: ['1.0s', '1.0s', '1.0s', '0.9s', '0.9s', '0.9s', '0.8s', '0.8s', '0.8s', '0.7s'] },
-  { key: 'atk', label: '技力消耗', sp: 'init', values: ['—', '—', '—', '—', '—', '—', '—', '—', '—', '—'] },
+  { key: 'interval', label: '攻击间隔', values: ['1.0s', '1.0s', '1.0s', '0.9s', '0.9s', '0.9s', '0.8s', '0.8s', '0.8s', '0.7s'] },
+  { key: 'sp', label: '技力消耗', sp: 'init', values: ['—', '—', '—', '—', '—', '—', '—', '—', '—', '—'] },
 ]
 
 const TALENT_ROWS: AkTalentRow[] = [
@@ -102,7 +102,7 @@ export function renderSkills({ t }: SkillsModel, tune: Tune) {
               label="鞘击 · 各等级参数"
               description={(context) => (
                 <span>
-                  攻击力提升至 <b>{context.Var('atk')}</b>，攻击间隔缩短至 <b>{context.Var('atk')}</b>。
+                  攻击力提升至 <b>{context.Var('atk')}</b>，攻击间隔缩短至 <b>{context.Var('interval')}</b>。
                 </span>
               )}
             />)}
