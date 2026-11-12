@@ -35,11 +35,14 @@ const walk = (d) => {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) {
     const p = path.join(d, e.name)
     if (e.isDirectory()) walk(p)
-    else if (e.name.endsWith('.d.ts')) files.push(p)
+    else if (e.name.endsWith('.d.ts') || e.name.endsWith('.d.mts')) files.push(p)
   }
 }
 walk(distUi)
 walk(distLib)
+// core 里的选项类型（EntranceOptions / ParticleOptions …）是组件的基接口，
+// 不扫它们，文档里就只剩一句「Extends X」。
+walk(path.join(distRoot, 'core'))
 
 // ── 公开面：包根 barrel 导出了哪些名字 ───────────────────────────────
 const publicNames = new Set()
@@ -158,7 +161,7 @@ const scanFunction = (src, index) => {
   return { name, params: params.replace(/\s+/g, ' ').trim(), returns }
 }
 
-const interfaces = [] // { name, extends, doc, props, file }
+const allInterfaces = [] // 所有接口（含未导出与 core 里的基类型），用于摊平 extends
 const functions = [] // { name, params, returns, doc, file }
 const typeAliases = [] // { name, type, doc, file }
 
@@ -166,14 +169,36 @@ for (const f of files) {
   const src = fs.readFileSync(f, 'utf8')
   const rel = path.relative(distRoot, f)
 
-  // 每个 export interface Ak* { ... }（extends 可选）
-  const re = /(?:^|\n)[ \t]*export interface (Ak\w+)(?:\s+extends\s+([^{]+?))?\s*\{([\s\S]*?)\n\}/g
+  // 接口：导出的 Ak* 进文档，其余（CommonProps / EntranceOptions …）只用于摊平继承。
+  // 单行声明（core 里的 ParticleOptions 就是）与多行声明分两趟扫，互不重叠。
+  for (const one of src.matchAll(/(?:^|\n)[ \t]*(export )?interface (\w+)(?:\s+extends\s+([^{\n]+?))?\s*\{([^\n{}]*)\}/g)) {
+    const [, exported, name, ext, body] = one
+    const declStart = one.index + one[0].indexOf(exported ? 'export' : 'interface')
+    allInterfaces.push({
+      name,
+      exported: Boolean(exported),
+      extends: (ext || '').trim(),
+      doc: leadDoc(src, declStart),
+      props: parseInterfaceBody(body.replace(/;/g, ';\n')),
+      file: rel,
+    })
+  }
+  // 空接口（`{\n}`）要让「空 body」这一支匹配，否则它会被非贪婪规则吞到下一个接口的收尾；
+  // 同时容忍 CRLF —— core 下手工维护的 .d.mts 是 CRLF，ui 下的 tsc 产物是 LF。
+  const re = /(?:^|\n)[ \t]*(export )?interface (\w+)(?:\s+extends\s+([^{]+?))?\s*\{\r?\n(?:([\s\S]*?)\r?\n)??\}/g
   let m
   while ((m = re.exec(src))) {
-    const [, name, ext, body] = m
-    const exportStart = m.index + m[0].indexOf('export interface')
-    const doc = leadDoc(src, exportStart)
-    interfaces.push({ name, extends: (ext || '').trim(), doc, props: parseInterfaceBody(body), file: rel })
+    const [, exported, name, ext, body] = m
+    const declStart = m.index + m[0].indexOf(exported ? 'export' : 'interface')
+    const doc = leadDoc(src, declStart)
+    allInterfaces.push({
+      name,
+      exported: Boolean(exported),
+      extends: (ext || '').trim(),
+      doc,
+      props: parseInterfaceBody(body || ''),
+      file: rel,
+    })
   }
 
   // export declare function …
@@ -198,6 +223,29 @@ for (const f of files) {
     typeAliases.push({ name, type: type.replace(/\s+/g, ' ').trim(), doc: leadDoc(src, tm.index), file: rel })
   }
 }
+
+// 公开接口：导出的、名字以 Ak 开头的那些。
+const interfaces = allInterfaces.filter((i) => i.exported && /^Ak/.test(i.name))
+
+/**
+ * 把 `extends` 指向本地接口的部分摊平。
+ *
+ * 文档里只写「Extends `CommonProps`」等于没写 —— 读者查不到 CommonProps 里有什么。
+ * 纯名字才摊平（`Omit<…>` 这类工具类型保持原样，目标是明确写的「这些原生属性不重复列出」）。
+ * 子接口的同名 prop 覆盖父接口。
+ */
+const interfaceByName = new Map(allInterfaces.map((i) => [i.name, i]))
+const expandProps = (iface, seen = new Set()) => {
+  if (!iface.extends || seen.has(iface.name)) return iface.props
+  seen.add(iface.name)
+  const base = /^([A-Za-z_]\w*)$/.exec(iface.extends)
+  const parent = base ? interfaceByName.get(base[1]) : undefined
+  if (!parent) return iface.props
+  const merged = [...expandProps(parent, seen), ...iface.props]
+  const byName = new Map(merged.map((p) => [p.name, p]))
+  return [...byName.values()]
+}
+for (const iface of interfaces) iface.props = expandProps(iface)
 
 // ── 组织成文档 ────────────────────────────────────────────────────────
 // 组件名 → 它的 *Props 接口。函数名与接口名去掉 Props/字段后对上即可。

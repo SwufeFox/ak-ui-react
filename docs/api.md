@@ -668,6 +668,11 @@ Extends `EntranceOptions`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
+| `direction` | `'up' \| 'down' \| 'left' \| 'right' \| 'fade'` | yes | — |
+| `duration` | `number` | yes | — |
+| `delay` | `number` | yes | — |
+| `distance` | `number` | yes | — |
+| `disabled` | `boolean` | yes | — |
 | `autoplay` | `boolean` | yes | 挂载后自动播放。 |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
 | `style` | `CSSProperties` | yes | 根节点行内样式。 |
@@ -1268,6 +1273,11 @@ Extends `ParticleOptions`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
+| `count` | `number` | yes | — |
+| `color` | `string` | yes | — |
+| `pattern` | `ParticlePattern` | yes | — |
+| `paused` | `boolean` | yes | — |
+| `renderer` | `'auto' \| '2d'` | yes | — |
 | `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
 
 ## AkPathNav
@@ -1302,6 +1312,16 @@ Extends `CommonProps`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
+| `trigger` | `ReactNode` | no | 触发器内容。 |
+| `eyebrow` | `ReactNode` | yes | 顶部小标（`.ak-popover__eyebrow`）。 |
+| `title` | `ReactNode` | yes | 标题（`.ak-popover__title`）。 |
+| `content` | `ReactNode` | yes | 正文。 |
+| `open` | `boolean` | yes | 受控开合。不传则内部自管。 |
+| `defaultOpen` | `boolean` | yes | 默认是否展开（非受控）。 |
+| `onOpenChange` | `(open: boolean) => void` | yes | 开合变化回调。 |
+| `triggerClassName` | `string` | yes | 触发器上的附加类名。 |
+| `size` | `AkControlSize` | yes | 尺寸档：浮层宽度、内距与字号（tooltip 下是最大宽度与字号）。 |
+| `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。浮层在顶层，外部选择器改不动它，走这里最省事。 |
 | `kind` | `'popover' \| 'tooltip'` | yes | 外观：`popover` 是带标题的浮层，`tooltip` 是窄的气泡提示。 |
 
 ## AkPot
