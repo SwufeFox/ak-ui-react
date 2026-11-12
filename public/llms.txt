@@ -310,6 +310,50 @@ colour, never colour alone.
 **Reading order beats symmetry**: primary value → action → context → metadata. If a layout needs a
 second focal point, it is probably two screens.
 
+### 2.14 Where the language comes from
+
+Four sources shape this package. Each is worth reading in full; the points below are the ones that
+change design decisions.
+
+| Source | What it establishes |
+| :--- | :--- |
+| [PRTS Design](https://github.com/MooncellWiki/prts-design) (MIT) | This port's own vocabulary and shape grammar |
+| [「从6个角度拆解」](https://www.gcores.com/articles/112810) — 腾讯互娱 AJ, 2019 | The six observed characteristics of the game interface |
+| [「UI/UX 设计复盘」](https://www.gcores.com/articles/123154) — 蓝湿父, 2020 | What the game got wrong after shipping |
+| [「舟味从何而来」](https://janniewang.net/wp-content/uploads/2023/09/UIUX-analysis-for-Arknights.pdf) — 杰尼龟, 2023 | Consistency as the actual mechanism, with concrete type and icon rules |
+
+**The source vocabulary** — prts-design's own summary, and the wording this port uses:
+
+- **黑白为体、青为用** — large areas of black, white and grey; cyan only for selection, links and the primary action; yellow is secondary emphasis; red means danger only.
+- **方舟的形状语言** — right angles, colour bars, diagonal stripes, halftone dots, corner triangles, black/white inversion, uppercase Latin; no rounded corners, no glow.
+- **终端 / 档案双主题** — one structure, two surfaces.
+
+**Six characteristics** (2019; the translated names are kept because the vocabulary is useful):
+
+1. **Diegetic interface** — the main dashboard is an in-world projection rather than a HUD pasted on top; the phone's battery, signal and time live in the same floating windows.
+2. **Fluent-like materiality** — light / depth / motion / material / scale; frosted glass became acrylic; the interface's 层级对比度 is high because blur separates the layer in use from the layer underneath.
+3. **Depth after flattening** — cards and shadows create distance; a vignette（一圈内投影布于页面周围）pushes attention to the centre; parallax separates foreground from background. The source's warning is exact: flat means removing detail unrelated to interaction, not making everything look flat.
+4. **Decorative type** — Chinese serif for the warning/industrial register, Latin serif for classical weight, a pseudo-monospace (Bender) for infrastructure, bilingual pairs as decoration. Serif is a *role*, never a universal heading rule.
+5. **Focus and substrate** — vignette, out-of-focus foreground framing, and grain/halftone substrates so empty areas are not thin; local mosaic as a narrative "lost signal".
+6. **Transitions and scene-structured systems** — dark fade between unrelated systems, zoom between related levels, illustration during long loads; blurred overlays for secondary panels; local displacement keeps the user on one canvas; a global item chain (any item icon → where it drops) and a main menu organised by in-world regions.
+
+**Concrete rules observed in the game** — facts about the game, not measurements of this package:
+
+- Operator code names: Source Han Sans Heavy, letter-spacing −100; profile copy: Normal, −100; skill descriptions: Normal, 0.
+- Skill icons: five colour classes for the effect family; a border separates active from passive; the background pattern separates enhancement / debuff / burst / survival.
+
+**What the 2020 retrospective says went wrong** — the most useful part for a product that is not a game:
+
+- **Icon-only states failed.** Replacing labels with similar icons made two different buffs indistinguishable and hid that one was α-tier and the other β-tier. Users cannot rank icons they have not learned; keep a label or a structural cue (the fix was differentiated icons plus a ring).
+- **"Back" must go back.** A drawer that closed *and* left the page on the same press cost users an extra click and a wrong exit.
+- **An overlay must not cover the thing it describes** — the auto-battle banner hid the battlefield it reported on.
+- **Show the quantity where the action happens** — the shop omitted owned stock, so users left to check and came back.
+
+**Boundary.** These are dated observations of a game interface, and several are opinions. They
+explain *why* a rule exists here; they are not measurements, not a specification, and never
+permission to copy artwork, logos, audio or extracted assets — prts-design's licence draws the same
+line (code MIT, game assets excluded).
+
 
 ---
 
@@ -929,4 +973,5 @@ are in [`docs/api.md`](./docs/api.md).
 
 - **ak-ui** — https://github.com/YunYouJun/ak-ui (Vue + CSS core). The design contract in section 2 is the React port of the upstream `skills/ak-ui` package: `SKILL.md` plus the `design-language`, `tokens`, `motion`, `headless-components`, `site` and `quality-checklist` references. The stylesheet, tokens and DOM controllers in this package are vendored from it.
 - **prts-design** — https://github.com/MooncellWiki/prts-design (MIT). Source of the Arknights data layers, the decor language, the panel/feedback families and the border, sunken-surface and rarity tokens; see section 2.12 for the porting rules.
+- **Design analyses** — the 2019 six-angle breakdown (https://www.gcores.com/articles/112810), the 2020 UI/UX retrospective (https://www.gcores.com/articles/123154) and the 2023 「舟味」 study (https://janniewang.net/wp-content/uploads/2023/09/UIUX-analysis-for-Arknights.pdf). Section 2.14 condenses what each one contributes, including the mistakes.
 - **This package** — [`docs/api.md`](./docs/api.md) for every prop, variant and method; `AGENTS.md` for architecture and contribution rules; https://ak-ui-react.pages.dev for live previews and copyable examples.
