@@ -350,14 +350,21 @@ Horizontal cluster wrapper with unified borders and segment flow.
 
 #### `AkTag` / `AkTagGroup`
 Tactical status tags with cut chamfer corners and coloured signal indicators. `AkTag` renders a
-static `<span>` — it is a label, not a control.
+static `<span>` by default — it is a label, not a control.
 
 ```tsx
 import { AkChip, AkTag, AkTagGroup } from '@swufefox/ak-ui-react'
 
 <AkTag variant="advanced">MELEE</AkTag>
 <AkTag variant="danger">CROWD CONTROL</AkTag>
-// A tag that must toggle is a different component: AkChip is a real <button> with aria-pressed.
+
+// A tag that must toggle renders a real <button>: `as="button"` + aria-pressed.
+// Hover, press, disabled and focus-visible come from the stylesheet; selection is aria-pressed.
+<AkTag as="button" variant="outline" aria-pressed={filter === 'MELEE'} onClick={() => setFilter('MELEE')}>
+  MELEE
+</AkTag>
+
+// A grouped checkable filter with an icon slot is AkChip instead.
 <AkChip checked={isSelected} onCheckedChange={setSelected}>SURVIVAL</AkChip>
 ```
 

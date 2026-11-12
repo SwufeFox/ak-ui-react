@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react'
+import type { ElementType, HTMLAttributes, ReactNode } from 'react'
 import { cx, variantClass } from '../../lib/utils'
 import { sizeAttrs, type AkControlSize } from '../../lib/size'
 import { tokenStyle, type AkTokens } from '../../lib/tokens'
@@ -13,7 +13,19 @@ import { tokenStyle, type AkTokens } from '../../lib/tokens'
 export type AkTagVariant = 'default' | 'advanced' | 'danger' | 'neutral' | 'outline' | 'accent' | 'accent-soft'
 export type AkStatusVariant = 'default' | 'warning' | 'critical' | 'offline'
 
-export interface AkTagProps extends HTMLAttributes<HTMLSpanElement> {
+export interface AkTagProps extends HTMLAttributes<HTMLElement> {
+  /**
+   * 渲染成什么标签。默认 `span` —— 纯标签不是控件。
+   *
+   * 需要「可点选的筛选标签」时传 `button`：样式表里的 `button.ak-tag`
+   * 已经有悬停 / 按压 / 禁用 / `:focus-visible`，选中态由 `aria-pressed` 驱动。
+   * 更上层的选择器（带分组语义、勾选图标）用 `AkChip`。
+   */
+  as?: ElementType
+  /** `as="button"` 时的原生按钮类型，默认 `button`（避免在表单里意外提交）。 */
+  type?: 'button' | 'submit' | 'reset'
+  /** `as="button"` 时的禁用态；其他标签下忽略。 */
+  disabled?: boolean
   /** 语义档位。 */
   variant?: AkTagVariant
   /** 尺寸档。 */
@@ -22,10 +34,23 @@ export interface AkTagProps extends HTMLAttributes<HTMLSpanElement> {
   tokens?: AkTokens
 }
 
-export function AkTag({ variant = 'default', size = 'md', tokens, className, style, children, ...rest }: AkTagProps) {
+export function AkTag({
+  as: Tag = 'span',
+  variant = 'default',
+  size = 'md',
+  type,
+  disabled,
+  tokens,
+  className,
+  style,
+  children,
+  ...rest
+}: AkTagProps) {
+  const isButton = Tag === 'button'
   return (
-    <span
+    <Tag
       {...rest}
+      {...(isButton ? { type: type ?? 'button', disabled } : {})}
       {...sizeAttrs(size)}
       data-slot="ak-tag"
       data-variant={variant}
@@ -33,7 +58,7 @@ export function AkTag({ variant = 'default', size = 'md', tokens, className, sty
       style={tokenStyle(tokens, style)}
     >
       {children}
-    </span>
+    </Tag>
   )
 }
 

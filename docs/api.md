@@ -1906,10 +1906,13 @@ Extends `Omit<HTMLAttributes<HTMLElement>, 'children' | 'onChange'>`.
 
 ## AkTag
 
-Extends `HTMLAttributes<HTMLSpanElement>`.
+Extends `HTMLAttributes<HTMLElement>`.
 
 | Prop | Type | Optional | Description |
 | --- | --- | --- | --- |
+| `as` | `ElementType` | yes | 渲染成什么标签。默认 `span` —— 纯标签不是控件。 需要「可点选的筛选标签」时传 `button`：样式表里的 `button.ak-tag` 已经有悬停 / 按压 / 禁用 / `:focus-visible`，选中态由 `aria-pressed` 驱动。 更上层的选择器（带分组语义、勾选图标）用 `AkChip`。 |
+| `type` | `'button' \| 'submit' \| 'reset'` | yes | `as="button"` 时的原生按钮类型，默认 `button`（避免在表单里意外提交）。 |
+| `disabled` | `boolean` | yes | `as="button"` 时的禁用态；其他标签下忽略。 |
 | `variant` | `AkTagVariant` | yes | 语义档位。 |
 | `size` | `AkControlSize` | yes | 尺寸档。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖。 |

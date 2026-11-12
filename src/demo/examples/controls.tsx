@@ -41,6 +41,13 @@ export function renderControls({ t, groupPick, setGroupPick, pageIndex, setPageI
               {tune("tag-4", <AkTag variant="neutral">DELTA</AkTag>)}
             </AkTagGroup>)}
 
+            {/* 可点选的标签是真 <button>：选中态走 aria-pressed，键盘与禁用态由原生按钮负责。 */}
+            {tune("tag-select-1", <AkTagGroup>
+              {tune("tag-select-1-a", <AkTag as="button" variant="outline" aria-pressed={groupPick === 'A'} onClick={() => setGroupPick('A')}>FILTER A</AkTag>)}
+              {tune("tag-select-1-b", <AkTag as="button" variant="outline" aria-pressed={groupPick === 'B'} onClick={() => setGroupPick('B')}>FILTER B</AkTag>)}
+              {tune("tag-select-1-c", <AkTag as="button" variant="outline" aria-pressed={groupPick === 'C'} onClick={() => setGroupPick('C')}>FILTER C</AkTag>)}
+            </AkTagGroup>)}
+
             {tune("status-group-1", <AkStatusGroup>
               {tune("status-1", <AkStatus label="NETWORK" detail="Stable" />)}
               {tune("status-2", <AkStatus variant="warning" label="REACTOR" detail="48%" />)}
