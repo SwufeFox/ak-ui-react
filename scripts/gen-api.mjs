@@ -183,6 +183,15 @@ for (const f of files) {
     functions.push({ ...fn, doc: leadDoc(src, fm.index), file: rel })
   }
 
+  // forwardRef 组件：tsc 发成 `const` 声明而不是 function。漏掉这一类，
+  // AkEntrance / AkCountUp / AkMobileMenu / AkSectionNavigator 就没有组件小节，
+  // 它们的 props 只会掉进「附加 prop 类型」里。
+  for (const cm of src.matchAll(/export declare const (\w+): ([\s\S]*?);\n/g)) {
+    const [, name, type] = cm
+    if (!/ForwardRefExoticComponent|NamedExoticComponent/.test(type)) continue
+    functions.push({ name, params: '', returns: '', doc: leadDoc(src, cm.index), file: rel })
+  }
+
   // export type X = …（变体枚举、共享类型）
   for (const tm of src.matchAll(/export type (\w+) = ([^;]+);/g)) {
     const [, name, type] = tm

@@ -20,30 +20,31 @@ listed here.
 - [`AkCardTitle`](#akcardtitle) · [`AkCbox`](#akcbox) · [`AkChevrons`](#akchevrons) · [`AkChip`](#akchip)
 - [`AkChoice`](#akchoice) · [`AkCodeId`](#akcodeid) · [`AkCollapse`](#akcollapse) · [`AkCollapseItem`](#akcollapseitem)
 - [`AkCollapsible`](#akcollapsible) · [`AkCommand`](#akcommand) · [`AkCommandGrid`](#akcommandgrid) · [`AkCommandGroup`](#akcommandgroup)
-- [`AkContextMenu`](#akcontextmenu) · [`AkCorner`](#akcorner) · [`AkCountdown`](#akcountdown) · [`AkCounter`](#akcounter)
-- [`AkCut`](#akcut) · [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer) · [`AkDialog`](#akdialog)
-- [`AkDialogue`](#akdialogue) · [`AkDialogueLine`](#akdialogueline) · [`AkDisplay`](#akdisplay) · [`AkDivider`](#akdivider)
-- [`AkDossier`](#akdossier) · [`AkDropdownMenu`](#akdropdownmenu) · [`AkElite`](#akelite) · [`AkEmpty`](#akempty)
-- [`AkEn`](#aken) · [`AkEnemy`](#akenemy) · [`AkEvent`](#akevent) · [`AkField`](#akfield)
-- [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack) · [`AkGauge`](#akgauge) · [`AkGlow`](#akglow)
-- [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox) · [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop)
-- [`AkHalftone`](#akhalftone) · [`AkHeading`](#akheading) · [`AkHero`](#akhero) · [`AkInput`](#akinput)
-- [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse) · [`AkItem`](#akitem) · [`AkItemList`](#akitemlist)
-- [`AkKbd`](#akkbd) · [`AkKv`](#akkv) · [`AkKvItem`](#akkvitem) · [`AkLaser`](#aklaser)
-- [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen) · [`AkMaterials`](#akmaterials) · [`AkMaterialsDivider`](#akmaterialsdivider)
-- [`AkMaterialsRow`](#akmaterialsrow) · [`AkMediaAlbum`](#akmediaalbum) · [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup)
-- [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar) · [`AkMessage`](#akmessage) · [`AkModule`](#akmodule)
-- [`AkModuleStage`](#akmodulestage) · [`AkModuleUnlock`](#akmoduleunlock) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion)
-- [`AkNews`](#aknews) · [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice) · [`AkNoticeStack`](#aknoticestack)
-- [`AkNum`](#aknum) · [`AkOpCard`](#akopcard) · [`AkOpGrid`](#akopgrid) · [`AkOpRow`](#akoprow)
-- [`AkOutline`](#akoutline) · [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination) · [`AkPanel`](#akpanel)
-- [`AkParticleField`](#akparticlefield) · [`AkPathNav`](#akpathnav) · [`AkPhaseTabs`](#akphasetabs) · [`AkPopover`](#akpopover)
-- [`AkPot`](#akpot) · [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession)
-- [`AkProfessionLabel`](#akprofessionlabel) · [`AkProgress`](#akprogress) · [`AkProgressStack`](#akprogressstack) · [`AkRange`](#akrange)
-- [`AkRarity`](#akrarity) · [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope)
-- [`AkRedacted`](#akredacted) · [`AkReticle`](#akreticle) · [`AkRichText`](#akrichtext) · [`AkSan`](#aksan)
-- [`AkSanContainer`](#aksancontainer) · [`AkSanity`](#aksanity) · [`AkScope`](#akscope) · [`AkScreen`](#akscreen)
-- [`AkScrollArea`](#akscrollarea) · [`AkSearch`](#aksearch) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect)
+- [`AkContextMenu`](#akcontextmenu) · [`AkCorner`](#akcorner) · [`AkCountUp`](#akcountup) · [`AkCountdown`](#akcountdown)
+- [`AkCounter`](#akcounter) · [`AkCut`](#akcut) · [`AkDepth`](#akdepth) · [`AkDepthLayer`](#akdepthlayer)
+- [`AkDialog`](#akdialog) · [`AkDialogue`](#akdialogue) · [`AkDialogueLine`](#akdialogueline) · [`AkDisplay`](#akdisplay)
+- [`AkDivider`](#akdivider) · [`AkDossier`](#akdossier) · [`AkDropdownMenu`](#akdropdownmenu) · [`AkElite`](#akelite)
+- [`AkEmpty`](#akempty) · [`AkEn`](#aken) · [`AkEnemy`](#akenemy) · [`AkEntrance`](#akentrance)
+- [`AkEvent`](#akevent) · [`AkField`](#akfield) · [`AkFieldLabel`](#akfieldlabel) · [`AkFormStack`](#akformstack)
+- [`AkGauge`](#akgauge) · [`AkGlow`](#akglow) · [`AkGlyph`](#akglyph) · [`AkGlyphBox`](#akglyphbox)
+- [`AkGrain`](#akgrain) · [`AkGridBackdrop`](#akgridbackdrop) · [`AkHalftone`](#akhalftone) · [`AkHeading`](#akheading)
+- [`AkHero`](#akhero) · [`AkInput`](#akinput) · [`AkInputNumber`](#akinputnumber) · [`AkInverse`](#akinverse)
+- [`AkItem`](#akitem) · [`AkItemList`](#akitemlist) · [`AkKbd`](#akkbd) · [`AkKv`](#akkv)
+- [`AkKvItem`](#akkvitem) · [`AkLaser`](#aklaser) · [`AkLevel`](#aklevel) · [`AkLoadingScreen`](#akloadingscreen)
+- [`AkMaterials`](#akmaterials) · [`AkMaterialsDivider`](#akmaterialsdivider) · [`AkMaterialsRow`](#akmaterialsrow) · [`AkMediaAlbum`](#akmediaalbum)
+- [`AkMediaGallery`](#akmediagallery) · [`AkMenuGroup`](#akmenugroup) · [`AkMenuSeparator`](#akmenuseparator) · [`AkMenubar`](#akmenubar)
+- [`AkMessage`](#akmessage) · [`AkMobileMenu`](#akmobilemenu) · [`AkModule`](#akmodule) · [`AkModuleStage`](#akmodulestage)
+- [`AkModuleUnlock`](#akmoduleunlock) · [`AkMosaic`](#akmosaic) · [`AkMotion`](#akmotion) · [`AkNews`](#aknews)
+- [`AkNewsList`](#aknewslist) · [`AkNotice`](#aknotice) · [`AkNoticeStack`](#aknoticestack) · [`AkNum`](#aknum)
+- [`AkOpCard`](#akopcard) · [`AkOpGrid`](#akopgrid) · [`AkOpRow`](#akoprow) · [`AkOutline`](#akoutline)
+- [`AkOverline`](#akoverline) · [`AkPagination`](#akpagination) · [`AkPanel`](#akpanel) · [`AkParticleField`](#akparticlefield)
+- [`AkPathNav`](#akpathnav) · [`AkPhaseTabs`](#akphasetabs) · [`AkPopover`](#akpopover) · [`AkPot`](#akpot)
+- [`AkPotList`](#akpotlist) · [`AkPotential`](#akpotential) · [`AkProfession`](#akprofession) · [`AkProfessionLabel`](#akprofessionlabel)
+- [`AkProgress`](#akprogress) · [`AkProgressStack`](#akprogressstack) · [`AkRange`](#akrange) · [`AkRarity`](#akrarity)
+- [`AkRarityBar`](#akraritybar) · [`AkRarityChip`](#akraritychip) · [`AkRarityScope`](#akrarityscope) · [`AkRedacted`](#akredacted)
+- [`AkReticle`](#akreticle) · [`AkRichText`](#akrichtext) · [`AkSan`](#aksan) · [`AkSanContainer`](#aksancontainer)
+- [`AkSanity`](#aksanity) · [`AkScope`](#akscope) · [`AkScreen`](#akscreen) · [`AkScrollArea`](#akscrollarea)
+- [`AkSearch`](#aksearch) · [`AkSectionNavigator`](#aksectionnavigator) · [`AkSegmented`](#aksegmented) · [`AkSelect`](#akselect)
 - [`AkSkeleton`](#akskeleton) · [`AkSkew`](#akskew) · [`AkSkill`](#akskill) · [`AkSkillLevels`](#akskilllevels)
 - [`AkSkillMatrix`](#akskillmatrix) · [`AkSkillSheet`](#akskillsheet) · [`AkSlider`](#akslider) · [`AkSlot`](#akslot)
 - [`AkSp`](#aksp) · [`AkSpTrigger`](#aksptrigger) · [`AkSpValue`](#akspvalue) · [`AkSpec`](#akspec)
@@ -59,7 +60,6 @@ listed here.
 - [Public hooks and utilities](#public-hooks-and-utilities)
 - [Shared types](#shared-types)
 - [Public data types](#public-data-types)
-- [Additional prop types](#additional-prop-types)
 
 ## AkArchive
 
@@ -463,6 +463,19 @@ Extends `DivProps`.
 | `position` | `AkCornerPosition` | yes | 角标在哪个角：`tl`（默认）或 `tr`。 |
 | `tone` | `AkCornerTone` | yes | 角标色调：`info`（默认）/ `yellow` / `red`。 |
 
+## AkCountUp
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | no | 目标数值。 |
+| `from` | `number` | yes | 起始数值。 |
+| `duration` | `number` | yes | 滚动时长（毫秒）。 |
+| `delay` | `number` | yes | 开始前延迟（毫秒）。 |
+| `decimals` | `number` | yes | Clamp of decimal places rendered. |
+| `disabled` | `boolean` | yes | 为真时直接跳到目标值。 |
+| `autoplay` | `boolean` | yes | 挂载后自动播放。 |
+| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+
 ## AkCountdown
 
 Extends `Omit<SpanProps, 'children'>`.
@@ -648,6 +661,17 @@ Extends `DivProps`.
 | `src` | `string` | yes | 头像图片地址（方图，裁成 64px 圆）；不传时是深色空圆。 |
 | `level` | `number` | yes | 威胁度：点亮几枚菱形。 |
 | `levelMax` | `number` | yes | 菱形总数。 |
+
+## AkEntrance
+
+Extends `EntranceOptions`.
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `autoplay` | `boolean` | yes | 挂载后自动播放。 |
+| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+| `style` | `CSSProperties` | yes | 根节点行内样式。 |
+| `children` | `ReactNode` | yes | 子内容。 |
 
 ## AkEvent
 
@@ -1023,6 +1047,14 @@ Extends `Omit<DivProps, 'children' | 'title'>`.
 | `onOpenChange` | `(open: boolean) => void` | yes | 显示状态变化时回调。 |
 | `onClose` | `() => void` | yes | 点了关闭按钮时回调（在 `onOpenChange` 之后触发）。 |
 | `children` | `ReactNode` | yes | 提示正文。 |
+
+## AkMobileMenu
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | yes | 触发按钮与对话框的读屏名，默认 `Menu`。 |
+| `closeLabel` | `string` | yes | 关闭按钮文字，默认 `Close menu`。 |
+| `children` | `React.ReactNode` | yes | 子内容。 |
 
 ## AkModule
 
@@ -1514,6 +1546,16 @@ Extends `Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'>`.
 | `defaultValue` | `string` | yes | 非受控模式下的初始搜索词。 |
 | `onValueChange` | `(value: string) => void` | yes | 搜索词变化时回调。 |
 | `onSearch` | `(query: string) => void` | yes | 在输入框里按了回车。 |
+
+## AkSectionNavigator
+
+| Prop | Type | Optional | Description |
+| --- | --- | --- | --- |
+| `syncHash` | `boolean` | yes | 是否把当前区块写进地址栏 hash。 |
+| `duration` | `number` | yes | 切换动画时长（毫秒）。 |
+| `onChange` | `(id: string, index: number) => void` | yes | 切换时回调，给出区块 id 与序号。 |
+| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
+| `children` | `React.ReactNode` | yes | 视口内容；必须含 `[data-ak-section-viewport]` 与带唯一 id 的区块。 |
 
 ## AkSegmented
 
@@ -2400,50 +2442,4 @@ A selectable entry for `AkDropdownMenu` or `AkContextMenu`.
 | --- | --- | --- | --- |
 | `value` | `string` | no | 文本键。 |
 | `label` | `string` | no | 文本名。 |
-
-## Additional prop types
-
-Interfaces not bound to a single exported function (slot components, variants).
-
-## AkCountUpProps
-
-| Prop | Type | Optional | Description |
-| --- | --- | --- | --- |
-| `value` | `number` | no | 目标数值。 |
-| `from` | `number` | yes | 起始数值。 |
-| `duration` | `number` | yes | 滚动时长（毫秒）。 |
-| `delay` | `number` | yes | 开始前延迟（毫秒）。 |
-| `decimals` | `number` | yes | Clamp of decimal places rendered. |
-| `disabled` | `boolean` | yes | 为真时直接跳到目标值。 |
-| `autoplay` | `boolean` | yes | 挂载后自动播放。 |
-| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
-
-## AkEntranceProps
-
-Extends `EntranceOptions`.
-
-| Prop | Type | Optional | Description |
-| --- | --- | --- | --- |
-| `autoplay` | `boolean` | yes | 挂载后自动播放。 |
-| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
-| `style` | `CSSProperties` | yes | 根节点行内样式。 |
-| `children` | `ReactNode` | yes | 子内容。 |
-
-## AkMobileMenuProps
-
-| Prop | Type | Optional | Description |
-| --- | --- | --- | --- |
-| `label` | `string` | yes | 触发按钮与对话框的读屏名，默认 `Menu`。 |
-| `closeLabel` | `string` | yes | 关闭按钮文字，默认 `Close menu`。 |
-| `children` | `React.ReactNode` | yes | 子内容。 |
-
-## AkSectionNavigatorProps
-
-| Prop | Type | Optional | Description |
-| --- | --- | --- | --- |
-| `syncHash` | `boolean` | yes | 是否把当前区块写进地址栏 hash。 |
-| `duration` | `number` | yes | 切换动画时长（毫秒）。 |
-| `onChange` | `(id: string, index: number) => void` | yes | 切换时回调，给出区块 id 与序号。 |
-| `className` | `string` | yes | 附加类名，会拼到组件的 BEM 根类之后。 |
-| `children` | `React.ReactNode` | yes | 视口内容；必须含 `[data-ak-section-viewport]` 与带唯一 id 的区块。 |
 

@@ -246,6 +246,70 @@ The Arknights data layers (rarity, profession, elite, potential, mastery, skill 
 - No game artwork ships: icons and portraits are host-supplied props with a neutral themed placeholder.
 - A newly ported family lives in its own `_ak-<family>.scss` partial and its own `src/ak/ui/<family>/Ak*.tsx` file.
 
+### 2.13 Composition recipes
+
+Three starting points. Only verified props appear below; adapt the copy, keep the ratios.
+
+**A. Command deck — `terminal` intensity.** One dominant readout; everything else is context, and
+every number must be real. `tone` on `AkCommand` picks a surface tint (`default` / `paper` /
+`primary` / `muted` / `dark` / `cyan` / `accent`) — it is not a danger/warning semantic.
+
+```tsx
+<AkScreen tone="dark" title="DEPOT" eyebrow="MANAGEMENT // 01" backLabel="RETURN" onBack={close}>
+  <AkStatRow>
+    <AkStat label="LMD" value="42,000" delta="+1,200" trend="up" />
+    <AkStat label="ORUNDUM" value="1,800" />
+  </AkStatRow>
+  <AkCommandGrid>
+    <AkCommand label="OPERATIONS" meta="COMBAT // 01-07" tone="accent" onClick={openCombat} />
+    <AkCommand label="SQUAD" meta="FORMATION" tone="primary" onClick={openSquad} />
+    <AkCommand label="DEPOT" meta="SUPPLY" tone="cyan" onClick={openDepot} />
+  </AkCommandGrid>
+  <AkProgress label="SUPPLY LINE" value={72} />
+</AkScreen>
+```
+
+**B. Editorial update page — `system` intensity, works in `archive`.** Let the rows and the media
+carry the page; decoration stays underneath them. One signal colour per view is enough.
+
+```tsx
+<AkBreadcrumb items={[{ label: 'HOME', href: '/' }, { label: 'UPDATES' }]} />
+<AkHeading level={1}>Operation update</AkHeading>
+<AkBilingual cn="作战记录" en="OPERATIONS" row />
+<AkNewsList
+  label="Site notices"
+  empty="No notices yet"
+  items={[{ category: 'NOTICE', title: 'Maintenance complete', time: '10-20', dateTime: '2026-10-20', href: '/news/1' }]}
+/>
+<AkMediaGallery label="Archive" items={items} onValueChange={setIndex} />
+```
+
+**C. Settings form — `accent` → `system`.** `AkField` has no `label` prop: the visible label is
+`AkFieldLabel` (or `AkInput label`, which sets the accessible name). Errors are text plus signal
+colour, never colour alone.
+
+```tsx
+<AkFormStack>
+  <AkField hint="Shown in the roster" required>
+    <AkFieldLabel htmlFor="callsign">CALLSIGN</AkFieldLabel>
+    <AkInput id="callsign" defaultValue="Amiya" />
+  </AkField>
+  <AkField help="Changes the badge colour, not permissions.">
+    <AkFieldLabel htmlFor="role">ROLE</AkFieldLabel>
+    <AkSelect id="role" defaultValue="caster">
+      <option value="caster">Caster</option>
+    </AkSelect>
+  </AkField>
+  <AkChoice checked={notify} onChange={(event) => setNotify(event.target.checked)}>
+    Notify on deployment
+  </AkChoice>
+  <AkButton variant="action" type="submit">Save</AkButton>
+</AkFormStack>
+```
+
+**Reading order beats symmetry**: primary value → action → context → metadata. If a layout needs a
+second focal point, it is probably two screens.
+
 
 ---
 
@@ -285,15 +349,16 @@ Horizontal cluster wrapper with unified borders and segment flow.
 ```
 
 #### `AkTag` / `AkTagGroup`
-Tactical status tags with cut chamfer corners and colored signal indicators. Supports button selection state (`aria-pressed`).
+Tactical status tags with cut chamfer corners and coloured signal indicators. `AkTag` renders a
+static `<span>` — it is a label, not a control.
 
 ```tsx
-import { AkTag, AkTagGroup } from '@swufefox/ak-ui-react'
+import { AkChip, AkTag, AkTagGroup } from '@swufefox/ak-ui-react'
 
 <AkTag variant="advanced">MELEE</AkTag>
 <AkTag variant="danger">CROWD CONTROL</AkTag>
-// As selectable filter button:
-<AkTag as="button" aria-pressed={isSelected} onClick={() => toggle()}>SURVIVAL</AkTag>
+// A tag that must toggle is a different component: AkChip is a real <button> with aria-pressed.
+<AkChip checked={isSelected} onCheckedChange={setSelected}>SURVIVAL</AkChip>
 ```
 
 ---
@@ -391,7 +456,7 @@ import { AkNotice, AkStatus, AkProgress, AkGauge } from '@swufefox/ak-ui-react'
 </AkNotice>
 
 // Pulse indicator status readout:
-<AkStatus label="SYSTEM" detail="Online" variant="info" />
+<AkStatus label="SYSTEM" detail="Online" />
 <AkStatus label="COMMS" detail="Degraded" variant="warning" />
 
 // Progress bars and segmented gauges:
@@ -656,9 +721,9 @@ import {
 
 // Terminal Command Grid:
 <AkCommandGrid>
-  <AkCommand label="OPERATIONS" meta="COMBAT // 01-07" tone="danger" onClick={() => openScreen('combat')} />
-  <AkCommand label="SQUAD" meta="FORMATION" tone="action" onClick={() => openScreen('squad')} />
-  <AkCommand label="DEPOT" meta="SUPPLY" tone="info" onClick={() => openScreen('depot')} />
+  <AkCommand label="OPERATIONS" meta="COMBAT // 01-07" tone="accent" onClick={() => openScreen('combat')} />
+  <AkCommand label="SQUAD" meta="FORMATION" tone="primary" onClick={() => openScreen('squad')} />
+  <AkCommand label="DEPOT" meta="SUPPLY" tone="cyan" onClick={() => openScreen('depot')} />
 </AkCommandGrid>
 
 // Operator Card Slot:
