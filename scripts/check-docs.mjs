@@ -99,6 +99,42 @@ for (const rel of sources) {
   }
 }
 
+// ── 展示页 API 页的手写行：prop 必须真实存在 ──────────────────────────
+// doc-data.ts 是手写的双语说明，无法从 .d.ts 生成；但它至少不能写不存在的 prop。
+const docDataPath = path.join(root, 'src/demo/doc-data.ts')
+const cataloguePath = path.join(root, 'src/demo/catalogue-data.ts')
+if (fs.existsSync(docDataPath) && fs.existsSync(cataloguePath)) {
+  const docData = fs.readFileSync(docDataPath, 'utf8')
+  const catalogue = fs.readFileSync(cataloguePath, 'utf8')
+  const categoryComponents = new Map()
+  for (const m of catalogue.matchAll(/'(components-\d+)':\s*\[([^\]]*)\]/g)) {
+    categoryComponents.set(
+      m[1],
+      [...m[2].matchAll(/'(\w+)'/g)].map((x) => x[1]),
+    )
+  }
+  const blocks = docData.split(/\n  '(components-\d+)':\s*\{/)
+  for (let i = 1; i < blocks.length; i += 2) {
+    const id = blocks[i]
+    const body = blocks[i + 1] ?? ''
+    for (const row of body.matchAll(/\{\s*(?:component: '(\w+)',\s*)?name: '(\w+)'/g)) {
+      const [, explicit, prop] = row
+      if (NATIVE.has(prop) || prop.startsWith('aria') || prop.startsWith('data')) continue
+      if (explicit) {
+        const known = props.get(explicit)
+        if (!known) failures.push(`doc-data.ts ${id}  ${explicit} 不在公开面里`)
+        else if (!known.has(prop)) failures.push(`doc-data.ts ${id}  ${explicit}.${prop} 不是该组件的 prop`)
+        continue
+      }
+      const candidates = categoryComponents.get(id) ?? []
+      if (!candidates.length) continue
+      if (!candidates.some((component) => props.get(component)?.has(prop))) {
+        failures.push(`doc-data.ts ${id}  ${prop} 不属于该分类的任何组件（${candidates.join(', ')}）`)
+      }
+    }
+  }
+}
+
 // ── 报告 ──────────────────────────────────────────────────────────────
 const unique = [...new Set(failures)]
 if (unique.length) {

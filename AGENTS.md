@@ -232,7 +232,9 @@ npm run check:css    # verify token reads, the llms tuning table, and the remove
    gates.
    - `check-docs.mjs` parses every `<Ak…>` in `llms.txt`, the showcase guide and `README.md` and
      fails on an unknown component, a prop the component does not declare, or a variant outside the
-     documented union. This is what catches the hand-written-doc drift the generator cannot.
+     documented union. It also checks the curated rows in `src/demo/doc-data.ts`, so the showcase's
+     API tab cannot advertise a prop that no longer exists. This is what catches the hand-written-doc
+     drift the generator cannot.
    - `check-css.mjs` fails on a `var(--ak-…)` without a fallback that is never defined, on a token
      listed in `llms.txt`'s Tuning Reference that the stylesheet does not consume, and on a revived
      `data-theme` selector.
