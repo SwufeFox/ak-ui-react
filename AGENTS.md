@@ -108,7 +108,7 @@ site / shell / command exporters. Code generation is lazy and cached against
 | `src/ak/core/` | Vendored `.mjs` controllers + `.d.mts`; published as `…/core`, `…/core/effects`, `…/core/depth` |
 | `src/ak/styles/` | Authored SCSS (`ak-ui.scss` + `scss/_ak-*.scss`, `_tokens.scss`, `_ak-tuning.scss`), self-hosted fonts (`scss/fonts/*.woff2`, `_ak-fonts.scss`) |
 | `src/demo/` | Showcase: `App.tsx` (routing/state/chrome), `block.tsx`, `catalogue-rail.tsx`, `catalogue-data.ts`, `view-param.ts`, `examples/*.tsx`, `styles/*.css`, `i18n.tsx`, `doc-data.ts` |
-| `scripts/` | `build.mjs` (4-stage library build), `gen-api.mjs` (`.d.ts` → `docs/api.md`) |
+| `scripts/` | `build.mjs` (4-stage library build), `gen-api.mjs` (`.d.ts` → `docs/api.md`), `check-docs.mjs` / `check-css.mjs` (the build gates) |
 | `docs/`, `public/llms.txt` | **Generated**. Authored: root `llms.txt`, `README.md` |
 
 ## Development Commands
@@ -116,16 +116,20 @@ site / shell / command exporters. Code generation is lazy and cached against
 ```bash
 npm run dev          # showcase dev server, http://0.0.0.0:5273
 npm run typecheck    # tsc --noEmit (strict + noUnused*)
-npm run build        # library: typecheck → vite lib → d.ts → sass → docs/api.md
+npm run build        # library: typecheck → vite lib → d.ts → sass → docs/api.md → gates
 npm run build:demo   # showcase build → dist-demo/
 npm run preview:demo # serve dist-demo
 npm run pack:check   # npm pack --dry-run, inspect the published file list
 npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prior build)
+npm run check:docs   # verify every JSX example in llms.txt / the guide / README against the API
+npm run check:css    # verify token reads, the llms tuning table, and the removed theme alias
 ```
 
 - `npm run build` deploys the **package**; `npm run build:demo` produces the **site**. Cloudflare
   Pages must use the latter.
 - `gen-api.mjs` reads `dist/ui/**/*.d.ts` and exits non-zero if it is missing — build first.
+- `check-docs.mjs` needs `docs/api.md`; `check-css.mjs` needs `dist/style.css`. `npm run build` runs
+  both after generating them, so a doc/API mismatch or a dead token fails the release build.
 - Only `scripts/build.mjs` populates `dist/scss` and `dist/core`.
 
 ## Code Conventions & Common Patterns
@@ -150,9 +154,12 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
   with `'use client'`; `src/ak/index.ts` carries it too. Bundlers drop module-level directives when
   they bundle, so `scripts/build.mjs` asserts the published `dist/index.js` still starts with the
   directive — otherwise a Next.js server component would evaluate `createContext` at build time.
-- **CSS**: every `var(--ak-…)` keeps a fallback; consumer overrides are expected. Do **not** move
-  demo-only rules into the library stylesheet. In demo CSS, derive `--demo-*` from `--ak-*` — never
-  hardcode a second palette.
+- **CSS**: a `var(--ak-…)` **without** a fallback must be defined in the stylesheet; tokens that
+  exist purely as per-component override points (`--ak-card-w`, `--ak-dialog-bg`, `--ak-form-w`, …)
+  are read *with* a fallback so an unset value still renders. `npm run check:css` enforces both
+  directions, including that every token listed in `llms.txt`'s Tuning Reference is really consumed.
+  Consumer overrides are expected. Do **not** move demo-only rules into the library stylesheet. In
+  demo CSS, derive `--demo-*` from `--ak-*` — never hardcode a second palette.
 - **Upstream ports (prts-design, MIT)**: keep the upstream class names (`ak-op-card__portrait`, …)
   so the vendored CSS stays recognisable, but adapt the values: map upstream variables onto
   `--ak-*` tokens, keep every rule working in both themes, and never ship game artwork — images
@@ -221,7 +228,14 @@ npm run build:api    # regenerate docs/api.md only (requires dist/ui from a prio
 `__tests__`, no Playwright/Vitest config. Verification is structural plus manual:
 
 1. `npm run typecheck` — strict; also proves showcase locale completeness and no dead symbols.
-2. `npm run build` — typecheck, bundle, declarations, CSS, `docs/api.md` regeneration.
+2. `npm run build` — typecheck, bundle, declarations, CSS, `docs/api.md` regeneration, then the two
+   gates.
+   - `check-docs.mjs` parses every `<Ak…>` in `llms.txt`, the showcase guide and `README.md` and
+     fails on an unknown component, a prop the component does not declare, or a variant outside the
+     documented union. This is what catches the hand-written-doc drift the generator cannot.
+   - `check-css.mjs` fails on a `var(--ak-…)` without a fallback that is never defined, on a token
+     listed in `llms.txt`'s Tuning Reference that the stylesheet does not consume, and on a revived
+     `data-theme` selector.
 3. `npm run build:demo` — catches showcase-only breakage (does not check behaviour).
 4. `npm run pack:check` — confirms the published tarball contents.
 5. Browser check of `npm run dev`:
@@ -241,4 +255,5 @@ to vendored CSS* (breadcrumb/choice hit areas, standalone `AkSan` add button, lo
 Do not "restore" them to upstream values.
 
 When changing a public component, update the JSDoc that `gen-api.mjs` reads, then rebuild so
-`docs/api.md` and `llms.txt` stay truthful.
+`docs/api.md` and `llms.txt` stay truthful — and update the example in `llms.txt` if the prop
+surface changed; `check-docs.mjs` fails the build otherwise.
