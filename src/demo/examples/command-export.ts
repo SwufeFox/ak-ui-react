@@ -1,6 +1,7 @@
 import commandSource from './command.tsx?raw'
+import commandModelSource from './command-model.ts?raw'
 import tuneSource from '../example-tune.ts?raw'
-import type { DepotCategory } from './command'
+import type { DepotCategory } from './command-model'
 import type { TuneOverrides } from '../example-tune'
 
 export type CommandSnapshot = {
@@ -26,7 +27,7 @@ export function exportCommand(
   css: string,
 ): string {
   const core = tuneSource.replace(/^import[^\r\n]*\r?\n/, '')
-  const example = commandSource.replace(/^import[^\r\n]*\r?\n/gm, '')
+  const example = [commandModelSource, commandSource].map((source) => source.replace(/^import[^\r\n]*\r?\n/gm, '')).join('\n')
   const initialSnapshot = JSON.stringify(snapshot, null, 2)
   const copiedMessages = JSON.stringify(messages, null, 2)
   const copiedOverrides = JSON.stringify(overrides, null, 2)

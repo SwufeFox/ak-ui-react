@@ -93,10 +93,11 @@ main.tsx → App (locale, theme, density, boot, settings, llms dialog)
 
 - **Examples are lazy.** `example-lazy.ts` wraps each `render*` function in a proxy that imports the
   module on first call and bumps a revision that `Block` subscribes to (`useSyncExternalStore`).
-  The entry chunk is ≈380 kB (≈120 kB gzip); each category is a 2–42 kB chunk. Do not re-import the
-  20 renderers statically into `App.tsx` — that puts all of them back in the first load.
-- Inactive Blocks return `null`, but any state change in `App`/`ReferenceView` re-renders every
-  mounted Block. High-frequency chrome therefore writes the DOM directly: topbar retract + rail
+  Do not import renderers statically into `App.tsx`. Shared table/depot data and hooks belong in
+  `examples/collections-model.ts` and `examples/command-model.ts`; importing them from a renderer
+  also pulls that renderer into the initial load.
+- Inactive Blocks return `null`, and memoized props let unchanged Blocks skip parent renders.
+  High-frequency chrome still writes the DOM directly: topbar retract + rail
   offset (`rAF`, 4px threshold), reading-progress `scaleX()`, clock/viewport readout (`status.tsx`),
   tab underline, rail marker, `--demo-stage-dir`.
 
@@ -105,6 +106,9 @@ expression → `example-export.ts` assembles standalone TSX (scoped demo CSS, lo
 import rewriting). Categories 9, 10 and 17 use dedicated site / shell / command exporters.
 Generation is lazy and cached against `(tree, exporter, overrides, locale)`; never show or copy
 stale output.
+Standalone exports embed the shared `*-model.ts` sources alongside their renderers. CSS extraction
+uses `demo.css?inline` so Vite expands the ordered `@import`s before CSSOM filtering; `?raw` on the
+imports-only entry drops the layout rules from copied examples.
 
 **Documentation flow**: `.d.ts` JSDoc → `scripts/gen-api.mjs` → `docs/api.md` (component props,
 public hooks, shared types, public data types). Root `llms.txt` is authored and carries the design

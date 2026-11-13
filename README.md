@@ -128,6 +128,10 @@ Rebuild declarations after changing source APIs before regenerating the referenc
 
 The showcase reuses syntax-highlighted React nodes while the generated source is unchanged.
 Each tuning session enumerates overrides once and only clones instances whose props actually change.
+Shared collection and command models live in `src/demo/examples/*-model.ts`; the app imports those
+without pulling their renderers into the initial load. Standalone exports embed the shared model
+sources and use Vite-processed CSS (`?inline`) so the ordered stylesheet imports are expanded
+before matching and scoping the example's rules.
 
 ## Port notes
 

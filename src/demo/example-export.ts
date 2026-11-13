@@ -1,5 +1,6 @@
 import tuneSource from './example-tune.ts?raw'
-import demoStyles from './demo.css?raw'
+// Process the entry's ordered @imports before selecting rules from its CSSOM.
+import demoStyles from './demo.css?inline'
 import { getLocaleMessages, type Locale } from './i18n'
 import type { TuneOverrides } from './example-tune'
 
@@ -44,7 +45,7 @@ function getShowcaseRules(): CSSRule[] {
   return showcaseRules
 }
 
-/** Copy only matching loaded showcase rules, scoped to the standalone root. */
+/** Copy matching compiled showcase rules, scoped to the standalone root. */
 export function standaloneCss(source: string): string {
   const classes = new Set(source.match(/\bdemo-[\w-]+/g) ?? [])
   const key = [...classes].sort().join('|')

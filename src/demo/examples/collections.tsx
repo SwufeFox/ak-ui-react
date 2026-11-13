@@ -3,27 +3,6 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { I18nValue } from '../i18n'
 import type { Tune } from '../example-tune'
 
-export const TABLE_ROWS = [
-  { id: 'r1', name: 'Amiya', atk: 512, def: 128, role: 'CASTER' },
-  { id: 'r2', name: 'Kaltsit', atk: 480, def: 210, role: 'MEDIC' },
-  { id: 'r3', name: 'Ifrit', atk: 620, def: 90, role: 'CASTER' },
-  { id: 'r4', name: 'Saria', atk: 485, def: 590, role: 'DEFENDER' },
-]
-
-export function sortTableRows(key: 'name' | 'atk' | 'def', direction: 'ascending' | 'descending' | 'none') {
-  if (direction === 'none') return TABLE_ROWS
-  return [...TABLE_ROWS].sort((a, b) => {
-    const left = a[key]
-    const right = b[key]
-    const difference = typeof left === 'number' && typeof right === 'number' ? left - right : String(left).localeCompare(String(right))
-    return direction === 'ascending' ? difference : -difference
-  })
-}
-
-export function nextTableSort(currentKey: 'name' | 'atk' | 'def', direction: 'ascending' | 'descending' | 'none', key: 'name' | 'atk' | 'def') {
-  return currentKey !== key ? 'descending' : direction === 'descending' ? 'ascending' : direction === 'ascending' ? 'none' : 'descending'
-}
-
 export type CollectionsModel = { t: I18nValue['t']; selectedTableRow: string; setSelectedTableRow: Dispatch<SetStateAction<string>>; tableStriped: boolean; setTableStriped: Dispatch<SetStateAction<boolean>>; tableTactical: boolean; setTableTactical: Dispatch<SetStateAction<boolean>>; tableSticky: boolean; setTableSticky: Dispatch<SetStateAction<boolean>>; tableSortKey: 'name' | 'atk' | 'def'; tableSortDir: 'ascending' | 'descending' | 'none'; handleTableSort: (key: 'name' | 'atk' | 'def') => void; tableData: { id: string; name: string; atk: number; def: number; role: string }[] }
 
 export function renderCollections({ t, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData }: CollectionsModel, tune: Tune) {

@@ -42,8 +42,8 @@ import {
   renderSkills,
   renderSurfaces,
 } from './example-lazy'
-import { sortTableRows, nextTableSort } from './examples/collections'
-import { DEPOT_ITEMS, filterDepotItems, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command'
+import { sortTableRows, nextTableSort } from './examples/collections-model'
+import { DEPOT_ITEMS, filterDepotItems, showcaseDialogStyle, useCommandNotice, useShowcaseDialog, type DepotCategory } from './examples/command-model'
 
 // 指南是纯文档，只有按需打开时才需要它的正文，所以单独成块。
 const GuideView = lazy(() => import('./guide').then((module) => ({ default: module.GuideView })))

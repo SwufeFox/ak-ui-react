@@ -5,6 +5,7 @@ import feedback from './examples/feedback.tsx?raw'
 import effects from './examples/effects.tsx?raw'
 import readouts from './examples/readouts.tsx?raw'
 import command from './examples/command.tsx?raw'
+import commandModel from './examples/command-model.ts?raw'
 import type { CommandSnapshot } from './examples/command-export'
 import type { Locale } from './i18n'
 import type { TuneOverrides } from './example-tune'
@@ -94,5 +95,5 @@ export function exportSite(locale: Locale, overrides: TuneOverrides, destination
         : renderSite({ t, mobileMenuRef, selectCategory }, tune)}
     </section>
   </div>`
-  return buildStandalone({ source: site, locale, overrides, setup, render, additionalSource: [actions, menus, feedback, effects, readouts, command].join('\n'), extraKeys: ['inspect', 'deploy', 'cancel', 'archive', 'file', 'edit', 'view'].map((name) => `ref.menu.${name}`) })
+  return buildStandalone({ source: site, locale, overrides, setup, render, additionalSource: [actions, menus, feedback, effects, readouts, commandModel, command].join('\n'), extraKeys: ['inspect', 'deploy', 'cancel', 'archive', 'file', 'edit', 'view'].map((name) => `ref.menu.${name}`) })
 }

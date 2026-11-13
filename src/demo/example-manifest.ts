@@ -13,6 +13,7 @@ import controls from './examples/controls.tsx?raw'
 import forms from './examples/forms.tsx?raw'
 import readouts from './examples/readouts.tsx?raw'
 import collections from './examples/collections.tsx?raw'
+import collectionsModel from './examples/collections-model.ts?raw'
 import operators from './examples/operators.tsx?raw'
 import skills from './examples/skills.tsx?raw'
 import panels from './examples/panels.tsx?raw'
@@ -88,10 +89,8 @@ export function exportCategory(id: number, locale: Locale, overrides: TuneOverri
       render = `{renderReadouts({ t, sanCurrent, setSanCurrent, sanTotal, sanLimit, loadingReady, setLoadingReady, dialogOpen, setDialogOpen }, tune)}`
       break
     case 16:
-      // `handleTableSort` below calls playTactileSound, which collections.tsx does not
-      // import. buildStandalone rewrites imports from the showcase source alias
-      // '../../ak' into the public package import, so the emitted file imports it once.
-      additionalSource = `import { playTactileSound } from '../../ak'\n`
+      // Copy the shared sort model alongside the renderer; the setup also needs tactile audio.
+      additionalSource = `${collectionsModel}\nimport { playTactileSound } from '../../ak'\n`
       setup = `const [selectedTableRow, setSelectedTableRow] = useState(${value('selectedTableRow')}); const [tableStriped, setTableStriped] = useState(${value('tableStriped')}); const [tableTactical, setTableTactical] = useState(${value('tableTactical')}); const [tableSticky, setTableSticky] = useState(${value('tableSticky')}); const [tableSortKey, setTableSortKey] = useState<'name' | 'atk' | 'def'>(${value('tableSortKey')}); const [tableSortDir, setTableSortDir] = useState<'ascending' | 'descending' | 'none'>(${value('tableSortDir')}); const tableData = sortTableRows(tableSortKey, tableSortDir); const handleTableSort = (key: 'name' | 'atk' | 'def') => { playTactileSound('dial', 0.15); setTableSortDir(nextTableSort(tableSortKey, tableSortDir, key)); setTableSortKey(key) }`
       render = `{renderCollections({ t, selectedTableRow, setSelectedTableRow, tableStriped, setTableStriped, tableTactical, setTableTactical, tableSticky, setTableSticky, tableSortKey, tableSortDir, handleTableSort, tableData }, tune)}`
       break
