@@ -65,6 +65,8 @@ export const DOC_REGISTRY: Record<string, BlockDoc> = {
       { name: 'defaultValue', type: 'number | string', desc: localizedDescription('非受控模式下的初始值，value 存在时忽略', 'Initial value in uncontrolled mode; ignored when value is defined.') },
       { name: 'onValueChange', type: '(value: number) => void / (value: string) => void', desc: localizedDescription('值变化回调（AkSlider / AkInputNumber 回传 number，AkSegmented 回传 string）；受控与非受控模式都会触发', 'Called with the next value in both modes: number for AkSlider / AkInputNumber, string for AkSegmented.') },
       { name: 'min / max', type: 'number', desc: localizedDescription('滑动条或数字步进器的范围极值', 'Lower and upper bounds for the slider or number stepper.') },
+      { name: 'step', type: 'number', default: '1', desc: localizedDescription('数字步进器支持小数步长；滑动条按 min 对齐到最近步点，居中时取较大值', 'Number steppers support fractional steps; sliders align to the nearest step from min, rounding midpoints upward.') },
+      { name: 'readOnly', type: 'boolean', default: 'false', desc: localizedDescription('禁止修改数值，保留聚焦与表单提交；数字步进器的快捷按钮也会禁用', 'Prevents value changes while retaining focus and form submission; also disables number-stepper shortcuts.') },
       { name: 'options', type: 'AkSegmentedOption[]', desc: localizedDescription('分段控制器的选项清单，每项含 label 与 value', 'Segmented-control options; each item carries a label and a value.') },
     ],
   },

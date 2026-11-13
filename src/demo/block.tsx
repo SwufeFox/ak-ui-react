@@ -221,8 +221,10 @@ export const Block = memo(function Block({
     return () => { cancelled = true }
   }, [active, tab, actualTree, exportCode, overrides, locale])
   const codeText = codeResult.status === 'ready' ? codeResult.text : ''
-  /** Pure and linear; recompute only when the generated source changes. */
-  const codeTokens = useMemo(() => tokenizeTsx(codeText), [codeText])
+  // Keep the highlighted React nodes stable too, including while Code is hidden during tuning.
+  const codeContent = useMemo(() => tokenizeTsx(codeText).map((token, index) =>
+    token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>,
+  ), [codeText])
   const cachedCode = codeCache.current
   const codeReady = active && tab === 'code' && codeResult.status === 'ready' && cachedCode?.text === codeResult.text && cachedCode.tree === actualTree && cachedCode.exportCode === exportCode && cachedCode.overrides === overrides && cachedCode.locale === locale
   const targetPrefix = target ? `${target.id}|` : ''
@@ -357,7 +359,7 @@ export const Block = memo(function Block({
           </span>
           <AkButton type="button" variant="action" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
         </div>
-        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0} aria-label={t('common.code')}><code>{codeTokens.map((token, index) => token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>)}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
+        {codeResult.status === 'ready' ? <pre className="demo-code-box" tabIndex={0} aria-label={t('common.code')}><code>{codeContent}</code></pre> : <p className="demo-note" role={codeResult.status === 'error' ? 'alert' : 'status'}>{t(codeResult.status === 'error' ? 'common.codeLoadError' : 'common.codeLoading')}</p>}
       </div>
 
       {tab === 'api' && api && (

@@ -9,6 +9,7 @@ export function createTuneSession(overrides: TuneOverrides) {
   const targets: TuneTarget[] = []
   const ids = new Set<string>()
   const counts = new Map<string, number>()
+  const entries = Object.entries(overrides)
   const tune: Tune = (id, element) => {
     if (ids.has(id)) throw new Error(`Duplicate tune ID: ${id}`)
     ids.add(id)
@@ -19,14 +20,14 @@ export function createTuneSession(overrides: TuneOverrides) {
     const original = element.props as Record<string, unknown>
     targets.push({ id, label: `${name} · ${count}`, props: original })
     const prefix = `${id}|`
-    const changed: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(overrides)) {
+    let changed: Record<string, unknown> | undefined
+    for (const [key, value] of entries) {
       if (key.startsWith(prefix)) {
         const prop = key.slice(prefix.length)
-        if (!Object.is(original[prop], value)) changed[prop] = value
+        if (!Object.is(original[prop], value)) (changed ??= {})[prop] = value
       }
     }
-    return Object.keys(changed).length ? cloneElement(element, changed) : element
+    return changed ? cloneElement(element, changed) : element
   }
   return { tune, targets }
 }

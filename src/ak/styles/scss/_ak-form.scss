@@ -312,7 +312,7 @@
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    padding: 0 calc(var(--ak-input-number-pad) * var(--ak-density-control, 1));
+    padding: 0 min(calc(var(--ak-input-number-pad) * var(--ak-density-control, 1)), 40%);
     border: none;
     outline: none;
     color: var(--ak-text-primary, #f8f8f5);
@@ -338,7 +338,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1));
+    // Four shortcuts share at most 80% of a narrow control; keep its value visible.
+    width: min(calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1)), 20%);
     height: 100%;
     padding: 0;
     border: 0;
@@ -431,11 +432,11 @@
   }
 
   & &__increase {
-    right: calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1));
+    right: min(calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1)), 20%);
   }
 
   & &__decrease {
-    left: calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1));
+    left: min(calc(var(--ak-input-number-step-w) * var(--ak-density-control, 1)), 20%);
   }
 }
 

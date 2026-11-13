@@ -847,10 +847,11 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 
 | `maxLabel` | `string` | yes | 「最大」按钮文字。 |
 | `min` | `number` | yes | 允许的最小值。 |
 | `minLabel` | `string` | yes | 「最小」按钮文字。 |
-| `step` | `number` | yes | 每次增减的步长。 |
+| `step` | `number` | yes | 每次增减的步长；支持小数，负值取绝对值，零或非有限值按 1 处理。 |
 | `value` | `number` | yes | Controlled value. When defined the field is controlled and this value wins; when `undefined` the component is uncontrolled. Out-of-range values are written back clamped through `onValueChange`. |
 | `defaultValue` | `number` | yes | Initial value in uncontrolled mode. Ignored whenever `value` is defined. Out-of-range values are clamped on mount. Defaults to `min`. |
 | `onValueChange` | `(value: number) => void` | yes | 值变化时回调；受控与非受控模式都会触发。 |
+| `readOnly` | `boolean` | yes | 禁止编辑和所有增减、最小值、最大值按钮；仍允许聚焦和表单提交。 |
 | `size` | `AkControlSize` | yes | 尺寸档：高度、左右快捷按钮和步进图标一起缩放。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖；可用 `--ak-input-number-width` 调整整体宽度。 |
 
@@ -1700,10 +1701,11 @@ Extends `Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 
 | `label` | `string` | yes | Accessible name for the range input, exposed as `aria-label`. Optional when the input is named by a visible `<label>` or a native `aria-label`; the native `aria-label` wins when both are provided. |
 | `min` | `number` | yes | 区间下限。 |
 | `max` | `number` | yes | 区间上限。 |
-| `step` | `number` | yes | 步长。 |
-| `value` | `number` | yes | Controlled value. When defined the slider is controlled and this value wins; when `undefined` the component is uncontrolled. Out-of-range values are displayed clamped. |
-| `defaultValue` | `number` | yes | Initial value in uncontrolled mode. Ignored whenever `value` is defined. Out-of-range values are clamped. Defaults to `min`. |
-| `onValueChange` | `(value: number) => void` | yes | Called with the clamped value while dragging, in both modes. |
+| `step` | `number` | yes | 正数步长；无效值按 1 处理。值按 min 对齐到最近的步点，恰好居中时取较大值。 |
+| `value` | `number` | yes | Controlled value. When defined the slider is controlled and this value wins. Values are clamped and aligned to the native step grid for both the input and fill; normalization does not call `onValueChange`. |
+| `defaultValue` | `number` | yes | Initial value in uncontrolled mode. Ignored whenever `value` is defined. Defaults to `min`. Bounds/step changes persist the normalized value and notify `onValueChange`, so expanding the range cannot restore stale values. |
+| `onValueChange` | `(value: number) => void` | yes | Called with the normalized value on user input or uncontrolled bounds/step correction. |
+| `readOnly` | `boolean` | yes | 禁止鼠标、触摸和键盘修改；保持可聚焦并参与表单提交。 |
 | `size` | `AkControlSize` | yes | 尺寸档：控件高度、轨道粗细与拇指尺寸一起缩。 |
 | `tokens` | `AkTokens` | yes | 逐实例令牌覆盖，例如 `{ '--ak-slider-accent': '#ff5e19' }`。 |
 
@@ -2244,11 +2246,11 @@ Types shared by many components.
 | `AkProfessionName` | `'pioneer' \| 'warrior' \| 'tank' \| 'sniper' \| 'caster' \| 'medic' \| 'support' \| 'special'` | — |
 | `AkProfessionSize` | `'sm' \| 'default' \| 'lg' \| 'xl'` | — |
 | `AkProgressVariant` | `'default' \| 'warning' \| 'danger' \| 'yellow' \| 'success'` | 外观档位。 `warning` / `danger` 是本库原有的两档；`yellow` 是上游的黄色档（本库的警告色 就是上游那支黄，故两档等价），`success` 是上游的成功绿档。 |
-| `AkRangeGrid` | `{ row: number` | 一格：相对自身的行 / 列（= 游戏 range_table 的 grids 项），或写成 `[row, col]`。 |
+| `AkRangeGrid` | `{ row: number; col: number; } \| readonly [row: number, col: number]` | 一格：相对自身的行 / 列（= 游戏 range_table 的 grids 项），或写成 `[row, col]`。 |
 | `AkRangeSize` | `'sm' \| 'md' \| 'lg'` | — |
 | `AkRarityLevel` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | — |
 | `AkRaritySize` | `'sm' \| 'default' \| 'lg'` | — |
-| `AkRichTextNode` | `{ type: 'text'` | 富文本节点：呈现型，不解析任何标记。 |
+| `AkRichTextNode` | `{ type: 'text'; text: string; } \| { type: 'buff'; children?: ReactNode; } \| { type: 'debuff'; children?: ReactNode; } \| { type: 'reminder'; children?: ReactNode; } \| { type: 'keyword'; children?: ReactNode; } \| { type: 'important'; children?: ReactNode; } \| { type: 'enemy'; children?: ReactNode; } \| { type: 'gild'; children?: ReactNode; } \| { type: 'level'; children?: ReactNode; } \| { type: 'potential'; children?: ReactNode; } \| { type: 'term'; children?: ReactNode; tip?: string; } \| { type: 'value'; text: string; delta?: 'up' \| 'down'; } \| { type: 'heading'; text: string; level?: 2 \| 3 \| 4; }` | 富文本节点：呈现型，不解析任何标记。 |
 | `AkRichTextTone` | `'buff' \| 'debuff' \| 'reminder' \| 'keyword' \| 'important' \| 'enemy' \| 'gild' \| 'level' \| 'potential' \| 'term'` | 富文本节点的语义色。 |
 | `AkSanVariant` | `'compact' \| 'terminal'` | 容器外观：`compact` 是仪表盘用的浅色卡片，`terminal` 是自适应容器尺寸的大面板。 |
 | `AkScopeTheme` | `'terminal' \| 'archive'` | — |

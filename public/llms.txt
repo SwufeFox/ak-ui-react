@@ -562,6 +562,26 @@ import {
 `defaultValue` (uncontrolled). A defined `value` always wins; `onValueChange` fires in both modes.
 Disclosure components (`AkDialog`, `AkCollapsible`) use `open` / `defaultOpen` / `onOpenChange`.
 
+**Numeric controls (`AkInputNumber`, `AkSlider`):** values and bounds must be finite numbers. Both
+controls clamp to `[min, max]`; a `max` below `min` collapses the range to `min`. Use `readOnly`
+to prevent user changes while preserving keyboard focus and form submission. `AkInputNumber`
+also disables its increase/decrease and min/max buttons, and stops an active hold when it becomes
+read-only or disabled. Empty or invalid number edits are ignored rather than converted to zero.
+
+`AkInputNumber` supports fractional steps, including scientific notation such as `step={1e-13}`.
+Stepping rounds decimal arithmetic using the value/step precision; direct edits and bound shortcuts
+preserve their precision. A negative step uses its absolute value; zero/non-finite steps use `1`.
+Out-of-range controlled values request a clamped value through `onValueChange`; uncontrolled values
+are also clamped when bounds change.
+
+`AkSlider` requires a positive step (otherwise `1`) and aligns values to the nearest valid
+`min + n * step` within the range, choosing the larger value at a midpoint. Its native value,
+submitted form value and fill use that same normalized value. For example,
+`<AkSlider min={0} max={10} step={2} value={3} />` renders/submits `4` with a `40%` fill.
+Controlled normalization does not call `onValueChange`. In uncontrolled mode, changing bounds or
+step persists the normalized value and calls `onValueChange` once for a changed value, preventing
+an old value from returning when bounds expand again.
+
 ---
 
 ### 3.6 Navigation

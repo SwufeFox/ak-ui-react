@@ -121,6 +121,26 @@ const parseInterfaceBody = (body) => {
   return props
 }
 
+/** 读到声明最外层的分号；对象成员内的分号和字符串内容不结束类型。 */
+const scanType = (src, index) => {
+  let depth = 0
+  let quote = ''
+  let i = index
+  for (; i < src.length; i++) {
+    const ch = src[i]
+    if (quote) {
+      if (ch === '\\') i++
+      else if (ch === quote) quote = ''
+      continue
+    }
+    if (ch === "'" || ch === '"' || ch === '`') quote = ch
+    else if (ch === '{' || ch === '(' || ch === '[') depth++
+    else if (ch === '}' || ch === ')' || ch === ']') depth--
+    else if (ch === ';' && depth === 0) break
+  }
+  return src.slice(index, i).replace(/\s+/g, ' ').trim()
+}
+
 /**
  * 读一个 `export declare function` 声明：名字、参数、返回类型。
  *
@@ -147,16 +167,7 @@ const scanFunction = (src, index) => {
   const retHead = /^\s*:\s*/.exec(src.slice(j))
   if (retHead) {
     j += retHead[0].length
-    let d = 0
-    let type = ''
-    for (; j < src.length; j++) {
-      const ch = src[j]
-      if (ch === '{' || ch === '(' || ch === '[') d++
-      else if (ch === '}' || ch === ')' || ch === ']') d--
-      else if (ch === ';' && d === 0) break
-      type += ch
-    }
-    returns = type.replace(/\s+/g, ' ').trim()
+    returns = scanType(src, j)
   }
   return { name, params: params.replace(/\s+/g, ' ').trim(), returns }
 }
@@ -218,9 +229,10 @@ for (const f of files) {
   }
 
   // export type X = …（变体枚举、共享类型）
-  for (const tm of src.matchAll(/export type (\w+) = ([^;]+);/g)) {
-    const [, name, type] = tm
-    typeAliases.push({ name, type: type.replace(/\s+/g, ' ').trim(), doc: leadDoc(src, tm.index), file: rel })
+  for (const tm of src.matchAll(/export type (\w+) = /g)) {
+    const name = tm[1]
+    const type = scanType(src, tm.index + tm[0].length)
+    typeAliases.push({ name, type, doc: leadDoc(src, tm.index), file: rel })
   }
 }
 

@@ -120,6 +120,15 @@ Browse the [showcase](https://ak-ui-react.pages.dev) for live previews and copya
 read [`llms.txt`](./llms.txt) for the machine-readable design contract and component index — it
 points at [`docs/api.md`](./docs/api.md), the generated reference with every prop, variant and method.
 
+For documentation changes, `npm run build:api` regenerates the reference from the built
+declarations, including complete object and tuple union types such as `AkRangeGrid`.
+`npm run check:docs` checks examples in this README, `llms.txt` and the guide against that
+reference, including both named and inline string literal unions with either JSX quote style.
+Rebuild declarations after changing source APIs before regenerating the reference.
+
+The showcase reuses syntax-highlighted React nodes while the generated source is unchanged.
+Each tuning session enumerates overrides once and only clones instances whose props actually change.
+
 ## Port notes
 
 ### Local fixes to vendored CSS
@@ -132,6 +141,7 @@ The vendored upstream CSS is kept recognisable, but a few rules are deliberately
 - **Loading track label** — upstream hangs it 5.3rem outside the right edge of the track, where narrow screens cut it in half; here it is attached to the track end instead.
 - **Tooltip class name** — upstream calls it `.ak-tooltip`, but that name belongs to `AkPopover` here (native Popover API), so the CSS-positioned bubble uses the sibling name `.ak-tip`.
 - **Avatar shape** — square by default, matching this library's geometry; upstream's round avatar stays available as an explicit opt-in.
+- **Narrow number steppers** — the four shortcuts use at most 80% of the control width, keeping the central value visible at every size tier in a narrow container.
 
 Do not "restore" these to upstream values.
 

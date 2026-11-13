@@ -28,18 +28,30 @@ const api = fs.readFileSync(apiPath, 'utf8')
 
 // ── docs/api.md → 组件 props / 联合类型 ──────────────────────────────
 const props = new Map()
+const propTypes = new Map()
 const sections = api.split(/\n## /).slice(1)
 for (const section of sections) {
   const name = section.slice(0, section.indexOf('\n')).trim()
   if (!/^Ak/.test(name)) continue
   const set = new Set()
-  for (const m of section.matchAll(/^\| `(\w+)` \|/gm)) set.add(m[1])
+  const types = new Map()
+  for (const m of section.matchAll(/^\| `(\w+)` \| `([^`]+)` \|/gm)) {
+    set.add(m[1])
+    types.set(m[1], m[2].replace(/\\\|/g, '|'))
+  }
+  propTypes.set(name, types)
   props.set(name, set)
 }
 
+// 只约束封闭的字符串字面量联合；`'small' | string` 等开放类型不能枚举。
+const stringLiterals = (type) => {
+  if (!/^'[^']*'(?:\s*\|\s*'[^']*')*$/.test(type)) return null
+  return [...type.matchAll(/'([^']*)'/g)].map((m) => m[1])
+}
 const unions = new Map()
-for (const m of api.matchAll(/^\| `(Ak\w+)` \| `([^`]*'[^`]*)` \|/gm)) {
-  unions.set(m[1], [...m[2].matchAll(/'([^']+)'/g)].map((x) => x[1]))
+for (const m of api.matchAll(/^\| `(Ak\w+)` \| `([^`]+)` \|/gm)) {
+  const allowed = stringLiterals(m[2].replace(/\\\|/g, '|'))
+  if (allowed) unions.set(m[1], allowed)
 }
 
 /** 属性表里不出现、但任何元素都接受的东西 */
@@ -83,17 +95,13 @@ for (const rel of sources) {
       }
     }
     // 联合类型取值
-    for (const attr of rawAttrs.matchAll(/(\w+)="([^"]+)"/g)) {
-      const [, name, value] = attr
-      const row = api
-        .split(/\n## /)
-        .slice(1)
-        .find((s) => s.startsWith(tag + '\n'))
-        ?.match(new RegExp('^\\| `' + name + '` \\| `([^`]+)`', 'm'))
-      if (!row) continue
-      const allowed = unions.get(row[1])
+    for (const attr of rawAttrs.matchAll(/(?:^|\s)([\w-]+)\s*=\s*(["'])(.*?)\2/g)) {
+      const [, name, , value] = attr
+      const type = propTypes.get(tag)?.get(name)
+      if (!type) continue
+      const allowed = unions.get(type) ?? stringLiterals(type)
       if (allowed && !allowed.includes(value)) {
-        failures.push(`${where}  <${tag} ${name}="${value}"> —— ${row[1]} 允许 ${allowed.join(' | ')}`)
+        failures.push(`${where}  <${tag} ${name}="${value}"> —— ${type} 允许 ${allowed.join(' | ')}`)
       }
     }
   }

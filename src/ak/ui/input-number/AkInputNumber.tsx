@@ -23,7 +23,7 @@ export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputEl
   min?: number
   /** 「最小」按钮文字。 */
   minLabel?: string
-  /** 每次增减的步长。 */
+  /** 每次增减的步长；支持小数，负值取绝对值，零或非有限值按 1 处理。 */
   step?: number
   /**
    * Controlled value. When defined the field is controlled and this value
@@ -38,14 +38,32 @@ export interface AkInputNumberProps extends Omit<InputHTMLAttributes<HTMLInputEl
   defaultValue?: number
   /** 值变化时回调；受控与非受控模式都会触发。 */
   onValueChange?: (value: number) => void
+  /** 禁止编辑和所有增减、最小值、最大值按钮；仍允许聚焦和表单提交。 */
+  readOnly?: boolean
   /** 尺寸档：高度、左右快捷按钮和步进图标一起缩放。 */
   size?: AkControlSize
   /** 逐实例令牌覆盖；可用 `--ak-input-number-width` 调整整体宽度。 */
   tokens?: AkTokens
 }
 
+function decimalPlaces(value: number): number {
+  const text = String(value)
+  const exponentAt = text.indexOf('e')
+  const decimalAt = text.indexOf('.')
+  const end = exponentAt < 0 ? text.length : exponentAt
+  const fraction = decimalAt < 0 ? 0 : end - decimalAt - 1
+  return Math.max(0, fraction - (exponentAt < 0 ? 0 : Number(text.slice(exponentAt + 1))))
+}
+
+function addStep(value: number, step: number, direction: 1 | -1): number {
+  const next = value + direction * step
+  const precision = Math.max(decimalPlaces(value), decimalPlaces(step))
+  return precision <= 100 ? Number(next.toFixed(precision)) : next
+}
+
 export function AkInputNumber({
   disabled = false,
+  readOnly = false,
   increaseLabel = '增加',
   decreaseLabel = '减少',
   label = '数值',
@@ -82,8 +100,8 @@ export function AkInputNumber({
   valueRef.current = normalizedValue
 
   const updateValue = (next: number) => {
-    if (disabled) return
-    const clamped = Number(clampRange(next, lower, upper).toFixed(12))
+    if (disabled || readOnly) return
+    const clamped = clampRange(next, lower, upper)
     // 同步写 ref，长按连按时不必等下一次渲染才看到新值。
     valueRef.current = clamped
     setValue(clamped)
@@ -112,8 +130,12 @@ export function AkInputNumber({
 
   useEffect(() => clearRepeat, [clearRepeat])
 
+  useEffect(() => {
+    if (disabled || readOnly) clearRepeat()
+  }, [disabled, readOnly, clearRepeat])
+
   const startRepeat = (dir: 1 | -1) => {
-    if (disabled) return
+    if (disabled || readOnly) return
     clearRepeat()
     pointerHandledRef.current = true
 
@@ -121,7 +143,7 @@ export function AkInputNumber({
       const cur = valueRef.current
       const stepVal = stepRef.current
       const { lower: minVal, upper: maxVal } = boundsRef.current
-      const next = cur + dir * stepVal
+      const next = Math.min(maxVal, Math.max(minVal, addStep(cur, stepVal, dir)))
       if ((dir > 0 && cur >= maxVal) || (dir < 0 && cur <= minVal)) {
         playTactileSound('warn', 0.1)
         clearRepeat()
@@ -139,7 +161,7 @@ export function AkInputNumber({
   }
 
   const handlePointerDown = (dir: 1 | -1) => (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (event.button !== 0 || disabled) return
+    if (event.button !== 0 || disabled || readOnly) return
     event.preventDefault()
     try {
       event.currentTarget.setPointerCapture(event.pointerId)
@@ -156,17 +178,18 @@ export function AkInputNumber({
     clearRepeat()
   }
 
-  const handleClick = (dir: 1 | -1) => () => {
+  const handleClick = (dir: 1 | -1) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || readOnly) return
     if (pointerHandledRef.current) {
       pointerHandledRef.current = false
-      return
+      if (event.detail > 0) return
     }
     if ((dir > 0 && normalizedValue >= upper) || (dir < 0 && normalizedValue <= lower)) {
       playTactileSound('warn', 0.1)
       return
     }
     playTactileSound('step', 0.12)
-    updateValue(normalizedValue + dir * normalizedStep)
+    updateValue(Math.min(upper, Math.max(lower, addStep(normalizedValue, normalizedStep, dir))))
   }
 
   return (
@@ -181,7 +204,7 @@ export function AkInputNumber({
         type="button"
         className="ak-input-number__increase"
         aria-label={increaseLabel}
-        disabled={disabled || normalizedValue >= upper}
+        disabled={disabled || readOnly || normalizedValue >= upper}
         onPointerDown={handlePointerDown(1)}
         onPointerUp={handlePointerUp}
         onPointerLeave={clearRepeat}
@@ -196,7 +219,7 @@ export function AkInputNumber({
         type="button"
         className="ak-input-number__decrease"
         aria-label={decreaseLabel}
-        disabled={disabled || normalizedValue <= lower}
+        disabled={disabled || readOnly || normalizedValue <= lower}
         onPointerDown={handlePointerDown(-1)}
         onPointerUp={handlePointerUp}
         onPointerLeave={clearRepeat}
@@ -210,7 +233,7 @@ export function AkInputNumber({
       <button
         type="button"
         className="ak-input-number__max"
-        disabled={disabled || normalizedValue >= upper}
+        disabled={disabled || readOnly || normalizedValue >= upper}
         onClick={() => {
           playTactileSound('toggle', 0.14)
           updateValue(upper)
@@ -221,7 +244,7 @@ export function AkInputNumber({
       <button
         type="button"
         className="ak-input-number__min"
-        disabled={disabled || normalizedValue <= lower}
+        disabled={disabled || readOnly || normalizedValue <= lower}
         onClick={() => {
           playTactileSound('toggle', 0.14)
           updateValue(lower)
@@ -235,13 +258,15 @@ export function AkInputNumber({
         type="number"
         aria-label={rest['aria-label'] ?? label}
         disabled={disabled}
+        readOnly={readOnly}
         max={upper}
         min={lower}
         step={normalizedStep}
         value={normalizedValue}
         onChange={(event) => {
-          const parsed = Number(event.target.value)
-          if (Number.isNaN(parsed)) return
+          if (disabled || readOnly) return
+          const parsed = event.target.valueAsNumber
+          if (!Number.isFinite(parsed)) return
           playTactileSound('step', 0.1)
           updateValue(parsed)
         }}
