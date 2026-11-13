@@ -1,7 +1,7 @@
 # API reference
 
 > **Generated file — do not edit by hand.** Run `npm run build:api` (or `npm run build`,
-> which calls it) to regenerate from the JSDoc in `dist/ui/**/*.d.ts`.
+> which calls it) to regenerate from the JSDoc in the `dist/{ui,lib,core}` declarations.
 
 Every public component, hook and shared type. `?` marks an optional prop. Props inherited
 from React's `HTMLAttributes` are not repeated here — they pass through unchanged.

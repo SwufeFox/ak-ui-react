@@ -293,7 +293,7 @@ const lines = []
 lines.push('# API reference')
 lines.push('')
 lines.push('> **Generated file — do not edit by hand.** Run `npm run build:api` (or `npm run build`,')
-lines.push('> which calls it) to regenerate from the JSDoc in `dist/ui/**/*.d.ts`.')
+lines.push('> which calls it) to regenerate from the JSDoc in the `dist/{ui,lib,core}` declarations.')
 lines.push('')
 lines.push('Every public component, hook and shared type. `?` marks an optional prop. Props inherited')
 lines.push("from React's `HTMLAttributes` are not repeated here — they pass through unchanged.")
