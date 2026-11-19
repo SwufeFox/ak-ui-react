@@ -1,3 +1,7 @@
+@media (max-width: 1260px) {
+  .demo-status { display: none; }
+}
+
 @media (max-width: 1100px) {
   .demo-tune-workspace[data-tuning="true"] {
     grid-template-columns: minmax(0, 1fr);
@@ -20,19 +24,24 @@
       "array"
       "readout";
   }
-  .demo-hero__array { min-height: 13rem; }
-  .demo-hero__array-ghost { font-size: 6rem; }
+  .demo-hero__stat + .demo-hero__stat {
+    padding-left: 0;
+    border-left: 0;
+  }
 }
 
 @media (max-width: 640px) {
-  .demo-status { display: none; }
-
   .demo-guide__row { grid-template-columns: minmax(0, 1fr); }
   .demo-topbar {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.25rem;
+  }
+
+  .demo-topbar[data-hidden] {
+    transform: none;
+    opacity: 1;
   }
 
   .demo-topbar__tagline { display: none; }
@@ -66,7 +75,8 @@
 @media (max-width: 380px) {
   .demo-topbar__link,
   .demo-settings summary { padding-inline: 0.35rem; font-size: 0.72rem; }
-  html .demo-topbar__language .ak-segmented__item { padding-inline: 0.35rem; }
+  html .demo-topbar__language .ak-segmented__item,
+  html .demo-topbar__theme .ak-segmented__item { padding-inline: 0.35rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -75,17 +85,17 @@
   .demo-tune-panel,
   .demo-tune-fields,
   .demo-code-container,
-  .demo-api-container { animation: none; }
+  .demo-api-container,
+  .demo-guide-overlay { animation: none; }
 
-  /* 首屏入场是纯位移，降级后直接给最终状态；阵列同样不淡入。 */
+  /* 首屏入场是纯位移，降级后直接给最终状态。 */
   .demo-hero__title,
   .demo-hero__desc,
   .demo-hero__install-box,
-  .demo-hero__readout,
-  .demo-hero__array-frame,
-  .demo-hero__array-sweep { animation: none; }
+  .demo-hero__readout { animation: none; }
 
-  .demo-topbar { transition: none; }
+  .demo-topbar,
+  .demo-rail { transition: none; }
 
   .demo-topbar[data-hidden] {
     transform: none;
@@ -96,9 +106,6 @@
   .demo-receipt { animation: none; }
 
   .demo-receipt__timer { display: none; }
-
-  /* 指针景深与扫描光斑是纯氛围，降级时整层去掉。 */
-  .demo-hero::after { display: none; }
 
   .demo-inspect { animation: none; }
 
@@ -125,9 +132,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .demo-screen-inspect__crystal::after,
-  .demo-screen-san-icon,
-  .demo-screen-feedback,
   .demo-llm-overlay {
     animation: none;
   }

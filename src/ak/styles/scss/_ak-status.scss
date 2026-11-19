@@ -88,13 +88,23 @@
     &:focus-visible {
       outline: var(--ak-focus-width, 3px) solid var(--ak-focus-color, #f1c644);
       outline-offset: 2px;
+      box-shadow: inset 0 0 0 2px var(--ak-focus-color, #f1c644);
     }
   }
 
   &[aria-pressed="true"] {
     // 选中态是信号色实底，字色要用与信号色成对比的那一档
-    --ak-tag-text: var(--ak-surface-canvas);
+    --ak-tag-text: var(--ak-signal-on-info);
     --ak-tag-surface: var(--ak-tag-signal);
+  }
+
+  &--advanced[aria-pressed="true"] {
+    --ak-tag-text: var(--ak-signal-on-action);
+  }
+
+  &--danger[aria-pressed="true"],
+  &--neutral[aria-pressed="true"] {
+    --ak-tag-text: #ffffff;
   }
 }
 
@@ -113,7 +123,7 @@
   // 信号辉光的颜色跟着本组件的信号色走（信息 / 警告 / 危险各一档），
   // 形状与强度复用全局的 --ak-shadow-signal；强度保持原值 80%。
   --ak-shadow-signal-color: var(--ak-status-signal);
-  --ak-shadow-signal: 0 0 0.75rem color-mix(in srgb, var(--ak-shadow-signal-color) 80%, transparent);
+  --ak-shadow-signal: 0 0 0.45rem color-mix(in srgb, var(--ak-shadow-signal-color) 50%, transparent);
   // 同 .ak-tag：底色与字色都改为从主题令牌派生，
   // 否则亮色主题下状态块是浅色页面上的黑砖（示例站点上实测到过）。
   --ak-status-text: var(--ak-text-primary);
@@ -127,8 +137,8 @@
   border: 1px solid color-mix(in srgb, var(--ak-status-signal) 28%, transparent);
   border-left: 3.5px solid var(--ak-status-signal);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.32);
+    inset 0 1px 0 0 var(--ak-inset-highlight),
+    0 2px 8px rgba(0, 0, 0, 0.22);
   clip-path: polygon(0 0, calc(100% - 0.55rem) 0, 100% 0.55rem, 100% 100%, 0 100%);
   grid-template-columns: auto auto;
   grid-template-rows: auto auto;
@@ -142,9 +152,8 @@
     transform: translateY(-1px);
     border-color: color-mix(in srgb, var(--ak-status-signal) 55%, transparent);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-      0 4px 14px rgba(0, 0, 0, 0.4),
-      0 0 12px color-mix(in srgb, var(--ak-status-signal) 24%, transparent);
+      inset 0 1px 0 0 var(--ak-inset-highlight),
+      0 4px 14px rgba(0, 0, 0, 0.28);
   }
 
   &__signal {
@@ -169,7 +178,7 @@
   }
 
   &__label {
-    color: var(--ak-status-signal);
+    color: color-mix(in srgb, var(--ak-status-signal) 78%, var(--ak-text-primary));
     font-family: $font-monospace;
     font-size: var(--ak-status-label-fs);
     font-weight: 800;
@@ -200,6 +209,11 @@
     .ak-status__signal {
       box-shadow: none;
       animation: none;
+
+      &::after {
+        display: none;
+        animation: none;
+      }
     }
   }
 }
@@ -208,15 +222,13 @@
   0% {
     opacity: 0.6;
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ak-shadow-signal-color) 60%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ak-shadow-signal-color) 45%, transparent);
   }
 
   50% {
     opacity: 1;
     transform: scale(1.05);
-    box-shadow:
-      0 0 0 5px color-mix(in srgb, var(--ak-shadow-signal-color) 0%, transparent),
-      0 0 12px var(--ak-shadow-signal-color);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ak-shadow-signal-color) 0%, transparent);
   }
 
   100% {
@@ -229,7 +241,7 @@
 @keyframes ak-status-wave {
   0% {
     transform: scale(1);
-    opacity: 0.8;
+    opacity: 0.7;
   }
   100% {
     transform: scale(2.4);
@@ -238,7 +250,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ak-status__signal {
+  .ak-status,
+  button.ak-tag {
+    transition: none;
+  }
+
+  .ak-status__signal,
+  .ak-status__signal::after {
     animation: none;
   }
 }

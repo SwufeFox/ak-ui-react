@@ -22,13 +22,15 @@
   display: inline-flex;
   height: calc(var(--ak-pagination-h) * var(--ak-density-control, 1));
   width: var(--ak-pagination-w);
-  background-color: var(--ak-pagination-bg, #999);
-  color: var(--ak-pagination-fg, white);
+  border: 1px solid var(--ak-border);
+  background-color: var(--ak-pagination-bg, var(--ak-surface-sunken));
+  color: var(--ak-pagination-fg, var(--ak-text-primary));
+  box-shadow: var(--ak-shadow-subtle);
 
   .prev,
   .next {
     position: relative;
-    background-color: var(--ak-pagination-arrow-bg, #333);
+    background-color: var(--ak-pagination-arrow-bg, var(--ak-surface-sunken-2));
     height: 100%;
     width: var(--ak-pagination-arrow-w);
     box-sizing: border-box;
@@ -36,7 +38,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 5px 10px rgba(black, 0.6);
     cursor: pointer;
     border: none;
     outline: none;
@@ -44,8 +45,8 @@
     font: inherit;
     transition:
       background-color var(--ak-motion-fast, 120ms) ease,
+      color var(--ak-motion-fast, 120ms) ease,
       transform var(--ak-motion-fast, 120ms) ease,
-      box-shadow var(--ak-motion-fast, 120ms) ease,
       opacity var(--ak-motion-fast, 120ms) ease;
 
     .ak-icon {
@@ -55,12 +56,12 @@
     }
 
     &:hover:not(:disabled) {
-      background-color: var(--ak-pagination-arrow-bg-hover, #444);
+      background-color: var(--ak-pagination-arrow-bg-hover, var(--ak-surface-raised));
+      color: var(--ak-signal-info-text);
     }
 
     &:active:not(:disabled) {
       transform: translateY(1px) scale(0.95);
-      box-shadow: inset 0 2px 5px rgba(black, 0.5), 0 2px 4px rgba(black, 0.3);
     }
 
     &:focus-visible {
@@ -71,7 +72,7 @@
     &:disabled {
       cursor: not-allowed;
       opacity: 0.35;
-      background-color: var(--ak-pagination-arrow-bg-disabled, #222);
+      background-color: var(--ak-pagination-arrow-bg-disabled, var(--ak-surface-canvas));
     }
 
     @include active-darken;
@@ -79,7 +80,7 @@
 
   .cur {
     display: inline-flex;
-    border: 2px solid var(--ak-pagination-cur-border, gray);
+    border: 2px solid var(--ak-pagination-cur-border, var(--ak-border-strong));
     border-width: 2px 0;
     width: var(--ak-pagination-cur-w);
     flex-direction: column;
@@ -146,7 +147,7 @@
 
   &:hover:not(.is-active):not(:disabled) {
     border-color: var(--ak-signal-info, #4aabea);
-    color: var(--ak-signal-info, #4aabea);
+    color: var(--ak-signal-info-text);
   }
 
   &:focus-visible {

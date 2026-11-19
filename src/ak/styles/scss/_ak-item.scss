@@ -43,8 +43,7 @@
       width: 50%;
       aspect-ratio: 1;
       content: "";
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), transparent 55%), var(--ak-item-tier);
-      box-shadow: 0 0 0.6rem color-mix(in srgb, var(--ak-item-tier) 60%, transparent);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), transparent 55%), var(--ak-item-tier);
       transform: rotate(45deg);
     }
 
@@ -104,12 +103,10 @@
 
   &--selected,
   &[aria-selected="true"] {
-    border-color: color-mix(in srgb, var(--ak-item-tier) 85%, #fff);
+    border-color: var(--ak-item-tier);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
-      inset 0 0 16px color-mix(in srgb, var(--ak-item-tier) 35%, transparent),
-      0 0 14px color-mix(in srgb, var(--ak-item-tier) 55%, transparent),
-      0 4px 12px rgba(0, 0, 0, 0.35);
+      inset 0 0 0 1px var(--ak-item-tier),
+      var(--ak-shadow-card);
 
     &::before {
       position: absolute;
@@ -129,17 +126,12 @@
     transition:
       transform var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease),
       box-shadow var(--ak-motion-fast, 120ms) var(--ak-ease-standard, ease),
-      border-color var(--ak-motion-fast, 120ms) ease,
-      filter var(--ak-motion-base, 200ms) ease;
+      border-color var(--ak-motion-fast, 120ms) ease;
 
     &:hover:not(:disabled):not(.ak-item--disabled) {
-      filter: brightness(1.1);
       transform: translateY(-2px);
-      border-color: color-mix(in srgb, var(--ak-text-primary) 22%, transparent);
-      box-shadow:
-        var(--ak-shadow-card),
-        0 6px 18px rgba(0, 0, 0, 0.32),
-        0 0 12px color-mix(in srgb, var(--ak-item-tier) 40%, transparent);
+      border-color: var(--ak-item-tier);
+      box-shadow: var(--ak-shadow-card);
     }
 
     &:active:not(:disabled):not(.ak-item--disabled) {

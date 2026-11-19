@@ -97,7 +97,10 @@ export function CatalogueRail({ active, selectCategory }: { active: string; sele
         <span className="demo-rail__count" aria-live="polite">{t('ref.catalogue.count', { n: filteredCategories.length })}</span>
       </div>
       <div className="demo-rail__search-box">
-        <span className="demo-rail__search-icon" aria-hidden="true">⌕</span>
+        <svg className="demo-rail__search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="6.75" cy="6.75" r="4.25" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M10 10L13.75 13.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
+        </svg>
         <input
           ref={searchInputRef}
           type="text"
@@ -152,6 +155,9 @@ export function CatalogueRail({ active, selectCategory }: { active: string; sele
           </div>
         ) : filteredCategories.map((category) => {
           const originalIndex = CATEGORIES.findIndex((item) => item.id === category.id)
+          const components = CATEGORY_COMPONENTS[category.id] ?? []
+          const query = searchQuery.trim().toLowerCase()
+          const matchedComp = query ? components.find((name) => name.toLowerCase().includes(query)) : undefined
           return (
             <a
               key={category.id}
@@ -167,7 +173,11 @@ export function CatalogueRail({ active, selectCategory }: { active: string; sele
               }}
             >
               <span className="demo-rail__index">{String(originalIndex + 1).padStart(2, '0')}</span>
-              <span className="demo-rail__label">{t(category.title)}</span>
+              <span className="demo-rail__label">
+                <span>{t(category.title)}</span>
+                {matchedComp ? <span className="demo-rail__match">{matchedComp}</span> : null}
+              </span>
+              <span className="demo-rail__tally" aria-hidden="true">{components.length}</span>
             </a>
           )
         })}

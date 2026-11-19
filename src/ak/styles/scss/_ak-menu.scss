@@ -42,12 +42,12 @@
 
   &:hover {
     // 左侧信号条才是这个组件的性格所在，悬停时让它点亮
-    color: var(--ak-signal-action, #{$yellow});
+    color: var(--ak-signal-action-text, var(--ak-signal-action));
     background: color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 10%, var(--ak-surface-raised, #171a1d));
   }
 
   &[aria-expanded="true"] {
-    color: var(--ak-signal-action, #{$yellow});
+    color: var(--ak-signal-action-text, var(--ak-signal-action));
     background: color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 16%, var(--ak-surface-raised, #171a1d));
     // 展开时左侧信号条加粗一点，指示"面板挂在它下面"
     border-inline-start-width: 5px;
@@ -136,14 +136,14 @@
 
 .ak-menu__item:hover:not(:disabled),
 .ak-menu__item:focus-visible {
-  background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
-  color: var(--ak-signal-action, #{$yellow});
+  background: var(--ak-surface-hover);
+  color: var(--ak-signal-action-text, var(--ak-signal-action));
   // 悬停时文字右侧让出一点空间，形成"这一行被点亮"的方向感。
   // ⚠️ 不能改 padding-inline-start：那会把整行文字往右推、相邻行错位。
   //    只在内侧垫一块不占位的渐变，视觉上一致但不动布局。
   background-image: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 22%, transparent),
+    color-mix(in srgb, var(--ak-signal-action, #{$yellow}) 20%, transparent),
     transparent 60%
   );
 }
@@ -154,6 +154,17 @@
 
 .ak-menu__item[data-destructive] {
   color: var(--ak-signal-danger, #e85b55);
+}
+
+.ak-menu__item[data-destructive]:hover:not(:disabled),
+.ak-menu__item[data-destructive]:focus-visible {
+  color: var(--ak-signal-danger, #e33b3b);
+  background: color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 12%, transparent);
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 22%, transparent),
+    transparent 60%
+  );
 }
 
 .ak-menu__item:disabled {
@@ -200,12 +211,17 @@
   color: var(--ak-text-primary, #f3f4ef);
   font: 700 0.75rem $font-monospace;
   cursor: pointer;
+  transition:
+    border-color var(--ak-motion-fast, 120ms) ease,
+    background-color var(--ak-motion-fast, 120ms) ease,
+    color var(--ak-motion-fast, 120ms) ease;
 }
 
 .ak-menubar [role="menuitem"]:hover,
 .ak-toolbar > button:hover {
   border-color: var(--ak-border-strong, #626a70);
-  color: var(--ak-signal-action, #{$yellow});
+  background: var(--ak-surface-hover);
+  color: var(--ak-signal-action-text, var(--ak-signal-action));
 }
 
 .ak-menubar :focus-visible,
@@ -230,6 +246,16 @@
   font: 700 0.78rem $font-monospace;
   cursor: pointer;
   list-style: none;
+  transition: background-color var(--ak-motion-fast, 120ms) ease;
+
+  &:hover {
+    background: var(--ak-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ak-signal-info);
+    outline-offset: -2px;
+  }
 }
 
 .ak-collapsible > summary::-webkit-details-marker {
@@ -237,7 +263,7 @@
 }
 
 .ak-collapsible > summary span {
-  color: var(--ak-signal-action, #{$yellow});
+  color: var(--ak-signal-action-text, var(--ak-signal-action));
   transition: transform var(--ak-motion-fast) var(--ak-ease-standard);
 }
 
@@ -324,7 +350,7 @@
 
 // ── 菜单项状态：当前项 ───────────────────────────────────────────────
 .ak-menu__item.is-active {
-  color: var(--ak-signal-action, #ffd800);
+  color: var(--ak-signal-action-text, var(--ak-signal-action));
   background: color-mix(in srgb, var(--ak-signal-action, #ffd800) 12%, transparent);
   background-image: none;
 }

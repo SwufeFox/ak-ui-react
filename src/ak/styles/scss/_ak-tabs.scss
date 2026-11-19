@@ -18,8 +18,8 @@
   color: var(--ak-text-primary, #f3f4ef);
   background: var(--ak-surface-sunken, rgba(17, 19, 21, 0.95));
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
-    0 4px 20px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 0 var(--ak-inset-highlight),
+    0 4px 20px rgba(0, 0, 0, 0.22);
 
   &__list {
     display: grid;
@@ -74,20 +74,17 @@
     }
 
     &[aria-selected="true"] {
-      color: #111315;
-      background: #f3f4ef;
+      color: var(--ak-text-inverse);
+      background: var(--ak-surface-inverse);
 
       &::after {
         position: absolute;
         right: 0;
         bottom: 0;
         left: 0;
-        height: 0.25rem;
+        height: 0.2rem;
         content: "";
         background: var(--ak-tabs-signal);
-        box-shadow:
-          0 0 10px var(--ak-tabs-signal),
-          0 0 2px var(--ak-tabs-signal);
         // 信号条从中间展开，比整条硬跳更像"切换"
         animation: ak-tabs-signal-in var(--ak-motion-base, 200ms) var(--ak-ease-emphasized, ease-out);
       }
@@ -115,7 +112,7 @@
     font-size: 0.72em;
     font-weight: 900;
     line-height: 1;
-    background: rgba(255, 255, 255, 0.16);
+    background: color-mix(in srgb, currentColor 14%, transparent);
     color: inherit;
     letter-spacing: 0;
   }
@@ -132,9 +129,9 @@
   &__eyebrow {
     display: block;
     margin-bottom: 0.7rem;
-    color: var(--ak-tabs-signal);
+    color: var(--ak-signal-info-text);
     font-family: $font-monospace;
-    font-size: var(--ak-segmented-fs);
+    font-size: var(--ak-tabs-tab-fs);
     font-weight: 800;
     letter-spacing: 0.12em;
   }
@@ -149,7 +146,7 @@
   &__description {
     max-width: 34rem;
     margin: 0.7rem 0 0;
-    color: rgba(243, 244, 239, 0.65);
+    color: var(--ak-text-secondary);
     font-family: $font-sans-serif;
     font-size: 0.8rem;
     line-height: 1.65;
@@ -192,7 +189,7 @@
     background: transparent;
     cursor: pointer;
     font-family: $font-monospace;
-    font-size: 0.625rem;
+    font-size: var(--ak-segmented-fs);
     font-weight: 800;
     letter-spacing: 0.08em;
 
@@ -200,7 +197,7 @@
     // 选中项不参与，避免"已选中的又在闪"。
     &:hover:not([aria-pressed="true"]):not(:disabled):not(.ak-segmented__item--disabled) {
       color: var(--ak-text-primary);
-      background: color-mix(in srgb, var(--ak-text-primary) 8%, transparent);
+      background: var(--ak-surface-hover);
     }
 
     &:active:not(:disabled):not(.ak-segmented__item--disabled) {
@@ -217,10 +214,8 @@
     }
 
     &[aria-pressed="true"] {
-      color: var(--ak-surface-canvas);
+      color: var(--ak-signal-on-action);
       background: var(--ak-segmented-signal);
-      // 选中态给一圈极轻的辉光，让"当前档位"在密集的顶栏里跳出来
-      box-shadow: 0 0 0.75rem color-mix(in srgb, var(--ak-segmented-signal) 45%, transparent);
     }
 
     &:focus-visible {
@@ -244,7 +239,7 @@
     font-size: 0.72em;
     font-weight: 900;
     line-height: 1;
-    background: rgba(255, 255, 255, 0.16);
+    background: color-mix(in srgb, currentColor 14%, transparent);
     color: inherit;
     letter-spacing: 0;
   }

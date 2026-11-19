@@ -10,11 +10,8 @@
   border: 0;
   background:
     linear-gradient(90deg, var(--ak-slider-accent) var(--ak-slider-fill), transparent var(--ak-slider-fill)) center / calc(100% - var(--ak-slider-thumb-w, 14px)) 100% no-repeat,
-    #202830;
-  box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.7),
-    0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 0 0 1px #59616a;
+    var(--ak-surface-sunken-2);
+  box-shadow: inset 0 0 0 1px var(--ak-border-strong);
 }
 
 @mixin slider-thumb {
@@ -23,15 +20,14 @@
   height: var(--ak-slider-thumb-h, 22px);
   border: 2px solid var(--ak-slider-accent);
   border-radius: 0;
-  background:
-    linear-gradient(180deg, #ffffff 0%, #ebece6 100%);
+  background: var(--ak-surface-inverse);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 0 0 3px var(--ak-slider-thumb-ring, #151b21),
-    0 2px 6px rgba(0, 0, 0, 0.4);
-  // 拇指自己也要有手感：悬停时信号色泛光
+    0 0 0 2px var(--ak-slider-thumb-ring, var(--ak-surface-canvas)),
+    0 2px 4px rgba(0, 0, 0, 0.25);
+  // 拇指手感：悬停换实底锁定，无散射辉光
   transition:
     box-shadow var(--ak-motion-fast, 120ms) ease,
+    background-color var(--ak-motion-fast, 120ms) ease,
     border-color var(--ak-motion-fast, 120ms) ease,
     transform var(--ak-motion-fast, 120ms) ease;
 }
@@ -46,7 +42,7 @@
     )
   );
 
-  --ak-slider-accent: var(--ak-color-primary, #4aabea);
+  --ak-slider-accent: var(--ak-signal-info);
   --ak-slider-fill: 0%;
   display: block;
   box-sizing: border-box;
@@ -66,7 +62,7 @@
   $ticks: ();
   $positions: ();
   @for $i from 0 through 10 {
-    $ticks: list.append($ticks, linear-gradient(#75808b, #75808b), comma);
+    $ticks: list.append($ticks, linear-gradient(var(--ak-border-strong), var(--ak-border-strong)), comma);
     $positions: list.append(
       $positions,
       calc(
@@ -102,18 +98,20 @@
 
   // 拇指的悬停/按下反馈（伪元素需要单独写，mixin 里挂不上选择器）
   &:hover:not(:disabled)::-webkit-slider-thumb {
-    border-color: var(--ak-signal-info, #{$blue});
-    box-shadow: 0 0 0 3px var(--ak-slider-thumb-ring, #151b21),
-      0 0 0.7rem color-mix(in srgb, var(--ak-slider-accent) 55%, transparent);
+    background: var(--ak-slider-accent);
+    border-color: var(--ak-slider-accent);
   }
 
   &:hover:not(:disabled)::-moz-range-thumb {
-    border-color: var(--ak-signal-info, #{$blue});
-    box-shadow: 0 0 0 3px var(--ak-slider-thumb-ring, #151b21),
-      0 0 0.7rem color-mix(in srgb, var(--ak-slider-accent) 55%, transparent);
+    background: var(--ak-slider-accent);
+    border-color: var(--ak-slider-accent);
   }
 
   &:active:not(:disabled)::-webkit-slider-thumb {
+    transform: scaleY(1.08);
+  }
+
+  &:active:not(:disabled)::-moz-range-thumb {
     transform: scaleY(1.08);
   }
 

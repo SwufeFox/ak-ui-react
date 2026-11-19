@@ -38,18 +38,28 @@ export function BootSequence({ lines, onDone }: BootSequenceProps) {
     }
     // 最后一行打完再留一点呼吸，然后收拢。
     const total = PANEL_DELAY + LINE_MS * lines.length + TYPE_MS + 80
+    let skipped = false
+    let skipDoneTimer: number | null = null
     const outTimer = window.setTimeout(() => setPhase('out'), total)
     const doneTimer = window.setTimeout(() => doneRef.current(), total + OUT_MS)
     // 任何输入都能跳过：跳过动作本身给一声确认音（此时正处在用户手势里，浏览器允许发声）。
     const skip = () => {
+      if (skipped) return
+      skipped = true
+      window.clearTimeout(outTimer)
+      window.clearTimeout(doneTimer)
+      window.removeEventListener('keydown', skip)
+      window.removeEventListener('pointerdown', skip)
       playTactileSound('confirm', 0.18)
       setPhase('out')
+      skipDoneTimer = window.setTimeout(() => doneRef.current(), OUT_MS)
     }
     window.addEventListener('keydown', skip)
     window.addEventListener('pointerdown', skip)
     return () => {
       window.clearTimeout(outTimer)
       window.clearTimeout(doneTimer)
+      if (skipDoneTimer !== null) window.clearTimeout(skipDoneTimer)
       window.removeEventListener('keydown', skip)
       window.removeEventListener('pointerdown', skip)
     }
@@ -66,7 +76,7 @@ export function BootSequence({ lines, onDone }: BootSequenceProps) {
             <li
               key={line}
               className="demo-boot__line"
-              style={{ '--boot-chars': line.length, animationDelay: `${index * LINE_MS}ms` } as CSSProperties}
+              style={{ '--boot-chars': line.length, animationDelay: `${PANEL_DELAY + index * LINE_MS}ms` } as CSSProperties}
             >
               <span className="demo-boot__caret" aria-hidden="true">▸</span>
               {line}

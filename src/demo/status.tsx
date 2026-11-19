@@ -44,7 +44,7 @@ export function SystemStatus() {
  * 固定在视口顶端的一条 2px 细线，填充比例是「当前分类读到了哪里」——
  * 不是整页比例，因为整页比例会被首屏横幅稀释掉。
  */
-export function StageProgress({ target }: { target: RefObject<HTMLElement | null> }) {
+export function StageProgress({ target, active }: { target: RefObject<HTMLElement | null>; active: string }) {
   const fillRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
@@ -65,14 +65,19 @@ export function StageProgress({ target }: { target: RefObject<HTMLElement | null
       frame = requestAnimationFrame(update)
     }
     update()
+    const observer = typeof ResizeObserver !== 'undefined' && target.current
+      ? new ResizeObserver(onScroll)
+      : null
+    if (observer && target.current) observer.observe(target.current)
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
     return () => {
       if (frame) cancelAnimationFrame(frame)
+      observer?.disconnect()
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
-  }, [target])
+  }, [target, active])
 
   return (
     <div className="demo-progress" aria-hidden="true">

@@ -1,12 +1,12 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { version as packageVersion, peerDependencies } from '../../package.json'
-import { AkDisplay, AkSegmented, useTactileSound, playTactileSound } from '../ak'
+import { AkButton, AkDisplay, AkProgress, AkSegmented, AkStatus, AkTag, useTactileSound, playTactileSound } from '../ak'
 import type { AkEntranceHandle, AkSkillLevel, GalleryItem } from '../ak'
 import { galleryItems } from './gallery-art'
 import { useI18n, type Locale, type MessageKey } from './i18n'
 import { DOC_REGISTRY } from './doc-data'
 import { Block } from './block'
-import { CATEGORIES } from './catalogue-data'
+import { CATEGORIES, CATEGORY_COMPONENTS } from './catalogue-data'
 import { CatalogueRail } from './catalogue-rail'
 import { StageContext } from './stage-context'
 import type { AkMobileMenuHandle } from '../ak/ui/site/AkMobileMenu'
@@ -65,6 +65,7 @@ const exportCommand = (snapshot: CommandSnapshot, overrides: TuneOverrides, loca
   loadCommand().then(([command, helpers, source]) => command.exportCommand(snapshot, overrides, helpers.exampleMessages(locale, source.default), helpers.standaloneCss(source.default)))
 
 type Theme = 'terminal' | 'archive'
+type Density = 'compact' | 'cozy' | 'spacious'
 
 /** 可选主题：设置面板与首屏读数共用这一份，主题名也从这张表取。 */
 const THEMES = ['terminal', 'archive'] as const satisfies readonly Theme[]
@@ -73,6 +74,9 @@ const THEME_LABELS: Record<Theme, MessageKey> = {
   terminal: 'app.theme.terminal',
   archive: 'app.theme.archive',
 }
+
+/** 目录已索引组件总数，展示在首屏真实读数栏。 */
+const TOTAL_COMPONENTS = new Set(Object.values(CATEGORY_COMPONENTS).flat()).size
 
 /** peerDependencies 里 React 的最低主版本，用于首屏读数。 */
 const REACT_PEER_MAJOR = /(\d+)/.exec(peerDependencies.react)?.[1] ?? '18'
@@ -86,8 +90,23 @@ const BOOT_LINES = [
 ] as const
 
 
-function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topbarRef: RefObject<HTMLElement | null>; navGuardUntil: RefObject<number> }) {
+function ReferenceView({
+  theme,
+  setTheme,
+  density,
+  setDensity,
+  topbarRef,
+  navGuardUntil,
+}: {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+  density: Density
+  setDensity: (density: Density) => void
+  topbarRef: RefObject<HTMLElement | null>
+  navGuardUntil: RefObject<number>
+}) {
   const { t, locale } = useI18n()
+  const [specimenPinged, setSpecimenPinged] = useState(false)
   const [tab, setTab] = useState('overview')
   const [segment, setSegment] = useState('all')
   const [galleryIndex, setGalleryIndex] = useState(0)
@@ -151,7 +170,7 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
       setInstallCopyState('error')
     }
     installCopyTimer.current = window.setTimeout(() => setInstallCopyState('idle'), 2000)
-  }, [])
+  }, [t])
 
   // 理智计数演示状态
   const [loadingReady, setLoadingReady] = useState(false)
@@ -369,28 +388,67 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
             </span>
           </button>
         </div>
-        {/* 测绘阵列：网格、三层装甲板与核心。纯静态几何，不再跟随指针。 */}
-        <div className="demo-hero__array" aria-hidden="true">
-          <span className="demo-hero__array-ghost" translate="no">{String(CATEGORIES.length).padStart(2, '0')}</span>
-          <div className="demo-hero__array-frame">
-            <span className="demo-hero__array-grid" />
-            <span className="demo-hero__array-plate demo-hero__array-plate--far" />
-            <span className="demo-hero__array-plate demo-hero__array-plate--mid" />
-            <span className="demo-hero__array-plate demo-hero__array-plate--near" />
-            <span className="demo-hero__array-core">PRTS</span>
-            <span className="demo-hero__array-sweep" />
+        {/* 实时组件样本：直接响应主题、密度与交互状态，取代纯装饰几何图。 */}
+        <div className="demo-hero__specimen">
+          <div className="demo-hero__specimen-head">
+            <span className="demo-hero__specimen-title">{t('ref.catalogue.specimenTitle')}</span>
+            <AkTag variant={specimenPinged ? 'advanced' : 'default'} size="sm">
+              {t(THEME_LABELS[theme])}
+            </AkTag>
           </div>
-          <span className="demo-hero__array-caption">
-            <span>SURVEY ARRAY</span>
-            <span className="demo-hero__array-state">LIVE</span>
-            <span>SECTOR 07</span>
-          </span>
+          <div className="demo-hero__specimen-row">
+            <AkStatus
+              size="sm"
+              variant={specimenPinged ? 'warning' : 'default'}
+              label={t('ref.catalogue.specimenStatus')}
+              detail={specimenPinged ? t('ref.catalogue.specimenAck') : t('ref.catalogue.specimenDetail')}
+            />
+            <AkButton
+              variant="action"
+              size="sm"
+              chamfer
+              onClick={() => setSpecimenPinged((prev) => !prev)}
+            >
+              {t('ref.catalogue.specimenAction')}
+            </AkButton>
+          </div>
+          <AkProgress
+            size="sm"
+            value={specimenPinged ? 100 : 88}
+            max={100}
+            label={t('ref.catalogue.specimenProgress')}
+            variant={specimenPinged ? 'success' : 'default'}
+          />
+          <div className="demo-hero__specimen-knobs">
+            <AkSegmented
+              size="sm"
+              ariaLabel={t('app.theme.label')}
+              options={THEMES.map((value) => ({ label: t(THEME_LABELS[value]), value }))}
+              value={theme}
+              onValueChange={(v) => setTheme(v as Theme)}
+            />
+            <AkSegmented
+              size="sm"
+              ariaLabel={t('app.density.label')}
+              options={[
+                { label: t('app.density.compact'), value: 'compact' },
+                { label: t('app.density.cozy'), value: 'cozy' },
+                { label: t('app.density.spacious'), value: 'spacious' },
+              ]}
+              value={density}
+              onValueChange={(v) => setDensity(v as Density)}
+            />
+          </div>
         </div>
-        {/* 读数条：把分类数、当前主题、React 版本摆成事实，填掉标题右侧的空档。 */}
+        {/* 读数条：把分类数、组件数、当前主题、React 版本摆成事实。 */}
         <dl className="demo-hero__readout">
           <div className="demo-hero__stat">
             <dt>{t('ref.catalogue.statCategories')}</dt>
             <dd>{CATEGORIES.length}</dd>
+          </div>
+          <div className="demo-hero__stat">
+            <dt>{t('ref.catalogue.statComponents')}</dt>
+            <dd>{TOTAL_COMPONENTS}</dd>
           </div>
           <div className="demo-hero__stat">
             <dt>{t('ref.catalogue.statTheme')}</dt>
@@ -403,7 +461,7 @@ function ReferenceView({ theme, topbarRef, navGuardUntil }: { theme: Theme; topb
         </dl>
       </header>
 
-      <StageProgress target={stageRef} />
+      <StageProgress target={stageRef} active={active} />
 
       <div className="demo-catalogue">
         <CatalogueRail active={active} selectCategory={selectCategory} />
@@ -494,12 +552,19 @@ export function App() {
   const { locale, setLocale, t } = useI18n()
   const { enabled: soundEnabled, toggle: toggleSound } = useTactileSound()
   const [theme, setTheme] = useState<Theme>('terminal')
-  const [density, setDensity] = useState<'compact' | 'cozy' | 'spacious'>('cozy')
+  const [density, setDensity] = useState<Density>('cozy')
+  const [hudEnabled, setHudEnabled] = useState(false)
   const [llmModalOpen, setLlmModalOpen] = useState(false)
   // 规范正文不进主包：打开弹窗时才取同目录的 llms.txt。
   const [llmText, setLlmText] = useState<string | null>(null)
   const [llmLoadFailed, setLlmLoadFailed] = useState(false)
-  const [booting, setBooting] = useState(true)
+  const [booting, setBooting] = useState(() => {
+    try {
+      return window.sessionStorage.getItem('ak-ui-booted') !== '1'
+    } catch {
+      return false
+    }
+  })
   // 指南是叠在目录之上的文档层：目录保持挂载，示例状态与调参结果都不会丢。
   const [guideOpen, setGuideOpen] = useState(() => typeof window !== 'undefined' && window.location.hash === '#guide')
   const guideDialogRef = useShowcaseDialog(guideOpen)
@@ -657,8 +722,16 @@ export function App() {
 
   return (
     <div className="demo-app">
-      {booting ? <BootSequence lines={BOOT_LINES} onDone={() => setBooting(false)} /> : null}
-      <HudReticle />
+      {booting ? (
+        <BootSequence
+          lines={BOOT_LINES}
+          onDone={() => {
+            try { window.sessionStorage.setItem('ak-ui-booted', '1') } catch {}
+            setBooting(false)
+          }}
+        />
+      ) : null}
+      {hudEnabled ? <HudReticle /> : null}
       <Receipts />
       <a className="demo-skip-link" href="#demo-main">{t('app.skip')}</a>
       <header className="demo-topbar" ref={topbarRef}>
@@ -686,6 +759,15 @@ export function App() {
           }}>
             llms.txt
           </button>
+
+          <AkSegmented
+            size="sm"
+            className="demo-topbar__theme"
+            ariaLabel={t('app.theme.label')}
+            options={THEMES.map((value) => ({ label: t(THEME_LABELS[value]), value }))}
+            value={theme}
+            onValueChange={(v) => setTheme(v as Theme)}
+          />
 
           <AkSegmented
             size="sm"
@@ -723,11 +805,14 @@ export function App() {
                     { label: t('app.density.spacious'), value: 'spacious' },
                   ]}
                   value={density}
-                  onValueChange={(v) => setDensity(v as 'compact' | 'cozy' | 'spacious')}
+                  onValueChange={(v) => setDensity(v as Density)}
                 />
               </div>
               <button type="button" className="demo-settings__sound" onClick={toggleSound} aria-label={t('app.sound.label')} aria-pressed={soundEnabled}>
                 {soundEnabled ? t('app.sound.on') : t('app.sound.off')}
+              </button>
+              <button type="button" className="demo-settings__sound" onClick={() => setHudEnabled((v) => !v)} aria-label={t('app.hud.label')} aria-pressed={hudEnabled}>
+                {hudEnabled ? t('app.hud.on') : t('app.hud.off')}
               </button>
             </div>
           </details>
@@ -738,7 +823,7 @@ export function App() {
         </div>
       </header>
 
-      <ReferenceView theme={theme} topbarRef={topbarRef} navGuardUntil={navGuardUntil} />
+      <ReferenceView theme={theme} setTheme={setTheme} density={density} setDensity={setDensity} topbarRef={topbarRef} navGuardUntil={navGuardUntil} />
 
       {guideOpen ? (
         <dialog
@@ -777,7 +862,7 @@ export function App() {
                   {t(llmCopyState === 'copied' ? 'app.llm.copied' : 'app.llm.copy')}
                 </button>
                 <a
-                  href="/llms.txt"
+                  href={`${import.meta.env.BASE_URL}llms.txt`}
                   target="_blank"
                   rel="noreferrer"
                   className="demo-raw-link"

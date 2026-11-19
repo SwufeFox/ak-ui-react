@@ -22,7 +22,7 @@
   justify-content: center;
   font-family: $font-sans-serif;
   outline: none;
-  border: none;
+  border: var(--ak-button-border, 1px solid var(--ak-border-strong));
   font-size: var(--ak-button-fs);
   font-weight: bold;
   height: calc(var(--ak-button-height) * var(--ak-density-control, 1));
@@ -30,13 +30,13 @@
   width: auto;
   max-width: 100%;
   padding: 0 var(--ak-button-pad-x);
-  color: var(--ak-button-fg, white);
-  background-color: var(--ak-button-bg, rgba(gray, 0.95));
+  color: var(--ak-button-fg, var(--ak-text-primary));
+  background-color: var(--ak-button-bg, var(--ak-surface-raised));
   // A narrow light band waits outside the face and crosses it on hover.
   background-image: linear-gradient(
     105deg,
     transparent 42%,
-    var(--ak-button-sheen, rgba(255, 255, 255, 0.24)) 50%,
+    var(--ak-button-sheen, rgba(255, 255, 255, 0.22)) 50%,
     transparent 58%
   );
   background-position: 150% 0;
@@ -44,15 +44,15 @@
   background-size: 250% 100%;
   box-shadow: var(
     --ak-button-shadow,
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 0 5px rgba(0, 0, 0, 0.2),
-    0 2px 4px rgba(0, 0, 0, 0.35),
-    0 6px 14px rgba(0, 0, 0, 0.28)
+    inset 0 1px 0 var(--ak-inset-highlight, rgba(255, 255, 255, 0.14)),
+    0 2px 6px rgba(0, 0, 0, 0.24)
   );
   transition:
     filter var(--ak-motion-base, 200ms) var(--ak-ease-tactical, ease),
     transform var(--ak-motion-fast, 120ms) var(--ak-ease-tactical, ease),
     box-shadow var(--ak-motion-base, 200ms) var(--ak-ease-tactical, ease),
+    border-color var(--ak-motion-fast, 120ms) var(--ak-ease-tactical, ease),
+    color var(--ak-motion-fast, 120ms) var(--ak-ease-tactical, ease),
     background-color var(--ak-motion-base, 200ms) var(--ak-ease-tactical, ease),
     background-position 0s linear var(--ak-motion-base, 200ms);
   cursor: pointer;
@@ -60,17 +60,18 @@
   @include active-darken;
 
   &:hover:not(:disabled) {
-    filter: brightness(1.12);
-    transform: translateY(-2px);
+    filter: brightness(1.08);
+    transform: translateY(-1px);
     background-position: -50% 0;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      0 4px 14px rgba(0, 0, 0, 0.42),
-      0 0 14px color-mix(in srgb, var(--ak-button-bg, var(--ak-signal-info)) 30%, transparent);
+      inset 0 1px 0 var(--ak-inset-highlight, rgba(255, 255, 255, 0.22)),
+      0 4px 12px rgba(0, 0, 0, 0.32);
     transition:
       filter var(--ak-motion-base, 200ms) var(--ak-ease-tactical, ease),
       transform var(--ak-motion-fast, 120ms) var(--ak-ease-tactical, ease),
       box-shadow var(--ak-motion-base, 200ms) var(--ak-ease-tactical, ease),
+      border-color var(--ak-motion-fast, 120ms) var(--ak-ease-tactical, ease),
+      color var(--ak-motion-fast, 120ms) var(--ak-ease-tactical, ease),
       background-color var(--ak-motion-base, 200ms) var(--ak-ease-tactical, ease),
       background-position var(--ak-motion-slow, 420ms) var(--ak-ease-emphasized, ease-out);
   }
@@ -86,13 +87,21 @@
 
     &::after {
       content: "";
+      visibility: visible;
       position: absolute;
       top: 0;
       right: 0;
+      left: auto;
+      bottom: auto;
       width: 0.625rem;
       height: 0.625rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.42) 0%, transparent 60%);
       pointer-events: none;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 var(--ak-focus-width, 3px) var(--ak-focus-color, #ffd800);
     }
   }
 
@@ -159,13 +168,14 @@
     display: inline-block;
     width: 4rem;
     height: 3.5rem;
-    background-color: rgba(gray, 0.6);
-    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.8);
+    background-color: var(--ak-surface-raised);
+    border: 1px solid var(--ak-border-strong);
+    box-shadow: var(--ak-shadow-card);
     padding: 0;
 
     &:active {
-      background-color: rgba(gray, 0.5);
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.8);
+      background-color: var(--ak-surface-sunken-2);
+      box-shadow: var(--ak-shadow-subtle);
     }
 
     .ak-button__icon {
@@ -177,31 +187,51 @@
   // 档位只声明这几枚变量，几何与配色规则本身共用一条 —— 于是
   // `tokens={{ '--ak-button-bg': ... }}` 在**任何**档位下都生效。
   &--outline {
-    --ak-button-border: 2px solid #fff;
-    --ak-button-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --ak-button-fg: var(--ak-text-primary);
+    --ak-button-bg: transparent;
+    --ak-button-border: 2px solid var(--ak-border-strong);
+    --ak-button-shadow: none;
 
     border: var(--ak-button-border);
     font-family: $font-sans-serif;
     box-shadow: var(--ak-button-shadow);
+
+    &:hover:not(:disabled) {
+      border-color: var(--ak-signal-info);
+      color: var(--ak-signal-info-text);
+      background-color: color-mix(in srgb, var(--ak-signal-info) 10%, transparent);
+      box-shadow: none;
+    }
   }
 
   &--action {
-    --ak-button-bg: #{map.get($colors, "blue")};
-    --ak-button-shadow: 2px 5px 50px -10px rgba(0, 0, 0, 0.5);
+    --ak-button-bg: var(--ak-signal-info);
+    --ak-button-fg: var(--ak-signal-on-info);
+    --ak-button-border: 1px solid var(--ak-signal-info);
+    --ak-button-shadow: var(--ak-shadow-subtle);
 
-    text-align: right;
+    border: var(--ak-button-border);
+    color: var(--ak-button-fg);
     background-color: var(--ak-button-bg);
     box-shadow: var(--ak-button-shadow);
   }
 
   &--advanced {
-    --ak-button-bg: #{rgba(map.get($colors, "yellow"), 0.85)};
+    --ak-button-bg: var(--ak-signal-action);
+    --ak-button-fg: var(--ak-signal-on-action);
+    --ak-button-border: 1px solid var(--ak-signal-action);
+
+    border: var(--ak-button-border);
+    color: var(--ak-button-fg);
+    background-color: var(--ak-button-bg);
   }
 
   &--light {
-    --ak-button-fg: #1b1d1f;
-    --ak-button-bg: #{rgba(#eee, 0.85)};
+    --ak-button-fg: var(--ak-text-inverse);
+    --ak-button-bg: var(--ak-surface-inverse);
+    --ak-button-border: 1px solid var(--ak-surface-inverse);
 
+    border: var(--ak-button-border);
     color: var(--ak-button-fg);
     background-color: var(--ak-button-bg);
   }
@@ -209,28 +239,24 @@
   &--danger {
     --ak-button-fg: #ffffff;
     --ak-button-bg: var(--ak-signal-danger, #e33b3b);
-    --ak-button-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      0 4px 14px rgba(0, 0, 0, 0.42),
-      0 0 14px color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 36%, transparent);
+    --ak-button-border: 1px solid var(--ak-signal-danger, #e33b3b);
+    --ak-button-shadow: var(--ak-shadow-subtle);
 
+    border: var(--ak-button-border);
     color: var(--ak-button-fg);
     background-color: var(--ak-button-bg);
     box-shadow: var(--ak-button-shadow);
 
     &:hover:not(:disabled) {
-      filter: brightness(1.15);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.45),
-        0 6px 18px rgba(0, 0, 0, 0.48),
-        0 0 20px color-mix(in srgb, var(--ak-signal-danger, #e33b3b) 50%, transparent);
+      filter: brightness(1.1);
+      box-shadow: var(--ak-shadow-card);
     }
   }
 
   &--ghost {
     --ak-button-fg: var(--ak-text-primary);
     --ak-button-bg: transparent;
-    --ak-button-border: 1px solid color-mix(in srgb, var(--ak-text-primary) 22%, transparent);
+    --ak-button-border: 1px solid var(--ak-border);
     --ak-button-shadow: none;
 
     border: var(--ak-button-border);
@@ -240,9 +266,9 @@
 
     &:hover:not(:disabled) {
       border-color: var(--ak-signal-info);
-      background-color: color-mix(in srgb, var(--ak-signal-info) 14%, transparent);
-      color: var(--ak-signal-info);
-      box-shadow: 0 0 14px color-mix(in srgb, var(--ak-signal-info) 28%, transparent);
+      background-color: color-mix(in srgb, var(--ak-signal-info) 10%, transparent);
+      color: var(--ak-signal-info-text);
+      box-shadow: none;
     }
   }
 
@@ -429,18 +455,19 @@
   min-height: 0;
   padding: 0;
   border: 0;
-  color: var(--ak-signal-info, #4aabea);
+  color: var(--ak-signal-info-text);
   background-color: transparent;
   background-image: none;
   box-shadow: none;
 
   &:hover:not(:disabled) {
-    color: var(--ak-signal-info, #4aabea);
+    color: var(--ak-signal-info-text);
     background-color: transparent;
     box-shadow: none;
     filter: none;
     transform: none;
     text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 }
 
@@ -453,14 +480,19 @@
 
   &::after {
     content: "";
+    visibility: visible;
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     margin: auto;
     width: 14px;
     height: 14px;
-    border: 2px solid var(--ak-button-fg, #fff);
+    border: 2px solid var(--ak-button-fg, var(--ak-text-primary));
     border-right-color: transparent;
     border-radius: 50%;
+    background: none;
     animation: ak-button-spin 0.7s linear infinite;
   }
 }
@@ -472,6 +504,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ak-button {
+    transition: none;
+  }
+
   .ak-button--loading::after,
   .ak-button.is-loading::after {
     animation: none;

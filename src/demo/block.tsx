@@ -10,6 +10,7 @@ import { tokenizeTsx } from './highlight'
 import { CATEGORIES } from './catalogue-data'
 import { StageContext } from './stage-context'
 import { readViewParam, writeViewParam, type DemoView } from './view-param'
+import { showcaseDialogStyle, useShowcaseDialog } from './examples/command-model'
 
 /** Keep incomplete numeric input (such as `1.`) intact until blur, with keyboard ArrowUp/ArrowDown stepping support. */
 function TuneNumberField({ value, onChange }: { value: number; onChange: (value: number) => void }) {
@@ -77,8 +78,7 @@ export const Block = memo(function Block({
   const [overrides, setOverrides] = useState<Record<string, unknown>>({})
   const [previewExpanded, setPreviewExpanded] = useState(true)
   const [inspecting, setInspecting] = useState(false)
-  const inspectButtonRef = useRef<HTMLButtonElement>(null)
-  const inspectCloseRef = useRef<HTMLButtonElement>(null)
+  const inspectDialogRef = useShowcaseDialog(inspecting)
   const [resetVersion, setResetVersion] = useState(0)
   const [codeResult, setCodeResult] = useState<{ status: 'loading' | 'error' } | { status: 'ready'; text: string }>({ status: 'loading' })
   const codeCache = useRef<{ tree: ReactNode; exportCode: typeof exportCode; overrides: typeof overrides; locale: Locale; promise: Promise<string>; text?: string } | null>(null)
@@ -108,63 +108,27 @@ export const Block = memo(function Block({
     } else {
       setInspecting(false)
     }
-    window.setTimeout(() => inspectButtonRef.current?.focus(), 0)
   }, [])
-  useEffect(() => {
-    if (!inspecting) return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    inspectCloseRef.current?.focus()
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        exitInspect()
-        return
-      }
-      if (event.key !== 'Tab') return
-      const dialog = inspectCloseRef.current?.closest<HTMLElement>('[role="dialog"]')
-      if (!dialog) return
-      const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
-        'a[href],area[href],button,input:not([type="hidden"]),select,textarea,summary,[tabindex],[contenteditable]:not([contenteditable="false"]),audio[controls],video[controls]',
-      )).filter((control) =>
-        !control.matches(':disabled,[aria-hidden="true"],[inert]') &&
-        control.tabIndex >= 0 &&
-        control.getClientRects().length > 0,
-      )
-      const first = controls[0]
-      const last = controls.at(-1)
-      if (!first || !last) {
-        event.preventDefault()
-        return
-      }
-      const focusInside = dialog.contains(document.activeElement)
-      if (event.shiftKey && (document.activeElement === first || !focusInside)) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && (document.activeElement === last || !focusInside)) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-    window.addEventListener('keydown', onKey, true)
-    return () => {
-      document.body.style.overflow = previous
-      window.removeEventListener('keydown', onKey, true)
-    }
-  }, [inspecting, exitInspect])
   // Drive the sliding underline from the active tab's box; the indicator itself only translates.
   useLayoutEffect(() => {
     const list = tabsRef.current
-    const activeTab = list?.querySelector<HTMLElement>('[aria-selected="true"]')
-    if (!list || !activeTab) return
-    // Fractional layout offsets keep the underline flush with sub-pixel tab edges; add scrollLeft
-    // because the tablist itself scrolls horizontally on narrow screens.
-    const listRect = list.getBoundingClientRect()
-    const tabRect = activeTab.getBoundingClientRect()
-    list.style.setProperty('--demo-tab-x', `${tabRect.left - listRect.left + list.scrollLeft}px`)
-    list.style.setProperty('--demo-tab-w', `${tabRect.width}px`)
-    list.dataset.measured = 'true'
-  }, [tab, active])
+    if (!list || !active) return
+    const measure = () => {
+      const activeTab = list.querySelector<HTMLElement>('[aria-selected="true"]')
+      if (!activeTab) return
+      // Fractional layout offsets keep the underline flush with sub-pixel tab edges; add scrollLeft
+      // because the tablist itself scrolls horizontally on narrow screens.
+      const listRect = list.getBoundingClientRect()
+      const tabRect = activeTab.getBoundingClientRect()
+      list.style.setProperty('--demo-tab-x', `${tabRect.left - listRect.left + list.scrollLeft}px`)
+      list.style.setProperty('--demo-tab-w', `${tabRect.width}px`)
+      list.dataset.measured = 'true'
+    }
+    measure()
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null
+    observer?.observe(list)
+    return () => observer?.disconnect()
+  }, [tab, active, locale])
   useLayoutEffect(() => {
     if (!overrideRegistry) return
     overrideRegistry.current[id] = overrides
@@ -221,6 +185,8 @@ export const Block = memo(function Block({
     return () => { cancelled = true }
   }, [active, tab, actualTree, exportCode, overrides, locale])
   const codeText = codeResult.status === 'ready' ? codeResult.text : ''
+  const codeLineCount = codeText ? codeText.split('\n').length : 0
+  const totalOverrides = Object.keys(overrides).length
   // Keep the highlighted React nodes stable too, including while Code is hidden during tuning.
   const codeContent = useMemo(() => tokenizeTsx(codeText).map((token, index) =>
     token.kind === 'plain' ? token.text : <span key={index} className={`tok tok-${token.kind}`}>{token.text}</span>,
@@ -265,6 +231,7 @@ export const Block = memo(function Block({
           <h2 id={`${id}-title`} tabIndex={-1}>{title}</h2>
           {note ? <p className="demo-note">{note}</p> : null}
         </div>
+        <div className="demo-block__toolbar">
           <div className="demo-block__tabs" role="tablist" aria-label={t('common.demoViews')} ref={tabsRef}>
             <span className="demo-doc-tab-indicator" aria-hidden="true" />
             {views.map((view) => (
@@ -297,13 +264,17 @@ export const Block = memo(function Block({
                 }}
               >
                 {view === 'preview' ? t('common.preview') : view === 'tune' ? t('common.tune') : view === 'code' ? t('common.code') : t('common.apiDocs')}
+                {view === 'tune' && totalOverrides > 0 ? (
+                  <span className="demo-doc-tab__badge" title={t('common.tuneModifiedShort', { n: totalOverrides })}>{totalOverrides}</span>
+                ) : null}
               </button>
             ))}
           </div>
-          <button type="button" className="demo-block__inspect" ref={inspectButtonRef} onClick={enterInspect} aria-haspopup="dialog">
+          <button type="button" className="demo-block__inspect" onClick={enterInspect} aria-haspopup="dialog">
             <span className="demo-block__inspect-glyph" aria-hidden="true">⤢</span>
             {t('common.inspect')}
           </button>
+        </div>
       </div>
 
       <div id={`${id}-workspace`} className="demo-tune-workspace" role="tabpanel" aria-labelledby={`${id}-tab-${tab === 'tune' ? 'tune' : 'preview'}`} data-tuning={tab === 'tune'} hidden={tab !== 'preview' && tab !== 'tune'}>
@@ -311,7 +282,7 @@ export const Block = memo(function Block({
           <AkButton type="button" variant="outline" size="sm" className="demo-tune-preview-toggle" hidden={tab !== 'tune'} aria-expanded={previewExpanded} aria-controls={`${id}-preview`} onClick={() => setPreviewExpanded((value) => !value)}>
             {t(previewExpanded ? 'common.tuneHidePreview' : 'common.tuneShowPreview')}
           </AkButton>
-          <div id={`${id}-preview`} className="demo-tune-preview">{actualTree}</div>
+          <div id={`${id}-preview`} className="demo-tune-preview">{!inspecting ? actualTree : null}</div>
         </div>
         <div className="demo-tune-panel" hidden={tab !== 'tune'}>
           {tunables.length === 0 ? <p>{t('common.tuneEmpty')}</p> : <>
@@ -355,7 +326,12 @@ export const Block = memo(function Block({
         <div className="demo-code-header">
           <span className="demo-code-title">
             <span className="demo-code-dot" />
-            JSX / TSX
+            <span>JSX / TSX</span>
+            {codeReady ? (
+              <span className="demo-code-meta">
+                {t('common.lines', { n: codeLineCount })} · {formatBytes(codeText.length)}
+              </span>
+            ) : null}
           </span>
           <AkButton type="button" variant="action" size="sm" sound={false} onClick={copyCode} disabled={!codeReady} aria-live="polite">{t(copyState === 'copied' ? 'common.codeCopied' : copyState === 'error' ? 'common.codeCopyError' : 'common.copyCode')}</AkButton>
         </div>
@@ -377,7 +353,7 @@ export const Block = memo(function Block({
             <tbody className="ak-table__body">
               {api.map((item, index) => (
                 <tr key={`${item.component ?? ''}:${item.name}:${index}`}>
-                  {hasComponentColumn ? <td><code>{item.component}</code></td> : null}
+                  {hasComponentColumn ? <td><code className="demo-api-comp">{item.component}</code></td> : null}
                   <td><code className="demo-api-prop">{item.name}</code></td>
                   <td><code className="demo-api-type">{item.type}</code></td>
                   <td><code className="demo-api-default" data-empty={item.default ? undefined : ''}>{item.default ?? '—'}</code></td>
@@ -390,24 +366,34 @@ export const Block = memo(function Block({
       )}
 
       {inspecting ? (
-        <div
-          className="demo-inspect"
-          role="dialog"
-          aria-modal="true"
+        <dialog
+          className="demo-inspect-dialog"
+          ref={inspectDialogRef}
           aria-label={`${t('common.inspect')} — ${title}`}
-          onClick={(event) => { if (event.target === event.currentTarget) exitInspect() }}
+          style={showcaseDialogStyle}
+          onCancel={(event) => {
+            event.preventDefault()
+            exitInspect()
+          }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) exitInspect()
+          }}
         >
-          <div className="demo-inspect__frame">
-            <div className="demo-inspect__bar">
-              <span className="demo-inspect__eyebrow">{displayEyebrow}</span>
-              <span className="demo-inspect__title">{title}</span>
-              <button type="button" className="demo-inspect__close" ref={inspectCloseRef} onClick={exitInspect}>
-                {t('common.close')} <span aria-hidden="true">⎋</span>
-              </button>
+          <div className="demo-inspect" onClick={(event) => { if (event.target === event.currentTarget) exitInspect() }}>
+            <div className="demo-inspect__frame" onClick={(event) => event.stopPropagation()}>
+              <div className="demo-inspect__bar">
+                <span className="demo-inspect__eyebrow">{displayEyebrow}</span>
+                <span className="demo-inspect__title">{title}</span>
+                <button type="button" className="demo-inspect__close" autoFocus onClick={exitInspect}>
+                  {t('common.close')} <span aria-hidden="true">⎋</span>
+                </button>
+              </div>
+              <div className="demo-inspect__stage">
+                <div className="demo-inspect__inner">{actualTree}</div>
+              </div>
             </div>
-            <div className="demo-inspect__stage">{actualTree}</div>
           </div>
-        </div>
+        </dialog>
       ) : null}
     </section>
   )

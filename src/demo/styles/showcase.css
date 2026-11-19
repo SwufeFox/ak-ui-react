@@ -54,14 +54,12 @@
   background: var(--ak-terminal-accent);
   color: #171a1d;
   border-color: var(--ak-terminal-accent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--ak-terminal-accent) 40%, transparent);
 }
 
 .demo-screen-tab__badge {
   padding: 0.1rem 0.35rem;
   background: rgba(0, 0, 0, 0.35);
   font-size: 0.62rem;
-  border-radius: 2px;
 }
 
 .demo-screen-search {
@@ -110,7 +108,6 @@
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.72rem;
   color: var(--ak-signal-info);
-  border-radius: 2px;
 }
 
 .demo-screen-san-icon {
@@ -156,7 +153,6 @@
 .demo-screen-san-btn:hover {
   background: var(--ak-signal-info);
   color: #121416;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--ak-signal-info) 50%, transparent);
   transform: scale(1.05);
 }
 
@@ -183,14 +179,12 @@
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.45) 80%);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.35);
   position: relative;
   flex-shrink: 0;
   transition:
     border-color var(--demo-motion-fast) ease,
-    background-color var(--demo-motion-fast) ease,
-    box-shadow var(--demo-motion-fast) ease;
+    background-color var(--demo-motion-fast) ease;
 }
 
 .demo-screen-inspect__crystal::after {
@@ -204,8 +198,7 @@
 .demo-screen-inspect__crystal[data-tier="6"],
 .demo-screen-inspect__crystal[data-rarity="6"] {
   border-color: var(--ak-signal-action);
-  background: radial-gradient(circle, color-mix(in srgb, var(--ak-signal-action) 25%, transparent) 0%, rgba(24, 18, 0, 0.75) 80%);
-  box-shadow: 0 0 25px color-mix(in srgb, var(--ak-signal-action) 50%, transparent), inset 0 0 15px color-mix(in srgb, var(--ak-signal-action) 25%, transparent);
+  background: color-mix(in srgb, var(--ak-signal-action) 14%, rgba(24, 18, 0, 0.75));
 }
 
 .demo-screen-inspect__crystal[data-tier="6"]::after,
@@ -216,8 +209,7 @@
 .demo-screen-inspect__crystal[data-tier="5"],
 .demo-screen-inspect__crystal[data-rarity="5"] {
   border-color: #ff9433;
-  background: radial-gradient(circle, rgba(255, 148, 51, 0.22) 0%, rgba(28, 14, 0, 0.75) 80%);
-  box-shadow: 0 0 22px rgba(255, 148, 51, 0.45), inset 0 0 12px rgba(255, 148, 51, 0.2);
+  background: rgba(255, 148, 51, 0.14);
 }
 
 .demo-screen-inspect__crystal[data-tier="5"]::after,
@@ -228,8 +220,7 @@
 .demo-screen-inspect__crystal[data-tier="4"],
 .demo-screen-inspect__crystal[data-rarity="4"] {
   border-color: #bb86fc;
-  background: radial-gradient(circle, rgba(187, 134, 252, 0.2) 0%, rgba(22, 0, 32, 0.75) 80%);
-  box-shadow: 0 0 18px rgba(187, 134, 252, 0.38), inset 0 0 10px rgba(187, 134, 252, 0.18);
+  background: rgba(187, 134, 252, 0.14);
 }
 
 .demo-screen-inspect__crystal[data-tier="4"]::after,
@@ -240,8 +231,7 @@
 .demo-screen-inspect__crystal[data-tier="3"],
 .demo-screen-inspect__crystal[data-rarity="3"] {
   border-color: var(--ak-signal-info);
-  background: radial-gradient(circle, color-mix(in srgb, var(--ak-signal-info) 20%, transparent) 0%, rgba(0, 22, 32, 0.75) 80%);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--ak-signal-info) 38%, transparent), inset 0 0 10px color-mix(in srgb, var(--ak-signal-info) 18%, transparent);
+  background: color-mix(in srgb, var(--ak-signal-info) 14%, rgba(0, 22, 32, 0.75));
 }
 
 .demo-screen-inspect__crystal[data-tier="3"]::after,
@@ -366,27 +356,6 @@
   transition: transform 90ms linear;
 }
 
-/* 预览区扫描：分类切换后光带扫过一次，像在读这块组件。 */
-.demo-tune-preview {
-  position: relative;
-  overflow: hidden;
-}
-
-.demo-tune-preview::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--ak-signal-info) 14%, transparent), transparent);
-  transform: translate3d(0, -100%, 0);
-  animation: demo-scan 780ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-@keyframes demo-scan {
-  from { transform: translate3d(0, -100%, 0); }
-  to { transform: translate3d(0, 100%, 0); }
-}
-
 /* 开机：CRT 显像管点亮 → 终端自检 → 横向收拢。 */
 .demo-boot {
   position: fixed;
@@ -402,7 +371,7 @@
   clip-path: inset(50% 0 50% 0);
 }
 
-/* 显像层：从一条亮线展开成整屏。只动 transform / filter，不动文字。 */
+/* 显像层：从一条亮线展开成整屏。只动 transform / opacity，不动滤镜与布局。 */
 .demo-boot__crt {
   position: absolute;
   inset: 0;
@@ -412,10 +381,10 @@
 }
 
 @keyframes demo-boot-crt {
-  0% { transform: scaleY(0.004); filter: brightness(2.8); }
-  45% { transform: scaleY(0.004); filter: brightness(2.8); }
-  72% { transform: scaleY(1.04); filter: brightness(1.35); }
-  100% { transform: scaleY(1); filter: brightness(1); }
+  0% { transform: scaleY(0.004); opacity: 0.85; }
+  45% { transform: scaleY(0.004); opacity: 1; }
+  72% { transform: scaleY(1.02); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 1; }
 }
 
 /* 面板在显像之后才浮上来。 */
@@ -499,7 +468,7 @@
   height: 100%;
   background: var(--ak-signal-info);
   transform-origin: left center;
-  animation: demo-boot-bar 760ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: demo-boot-bar 760ms cubic-bezier(0.4, 0, 0.2, 1) 300ms both;
 }
 
 @keyframes demo-boot-bar {
@@ -564,8 +533,10 @@
   position: absolute;
   top: 14px;
   left: 16px;
-  padding-left: 8px;
+  padding: 0.18rem 0.45rem;
+  border: 1px solid var(--demo-hairline);
   border-left: 2px solid var(--ak-signal-info);
+  background: var(--ak-surface-canvas);
   color: var(--demo-accent-text);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.62rem;
@@ -588,13 +559,15 @@
 /* 遥测：目标尺寸与底色，只在锁定可交互件时出现。 */
 .demo-hud__spec {
   position: absolute;
-  top: 32px;
+  top: 40px;
   left: 16px;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-left: 8px;
+  padding: 0.16rem 0.45rem;
+  border: 1px solid var(--demo-hairline);
   border-left: 2px solid color-mix(in srgb, var(--ak-signal-info) 55%, transparent);
+  background: var(--ak-surface-canvas);
   color: var(--demo-text-muted);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.6rem;
@@ -605,6 +578,22 @@
   transition:
     opacity 140ms linear,
     transform 200ms var(--demo-motion-ease);
+}
+
+.demo-hud[data-flip-x='true'] .demo-hud__readout,
+.demo-hud[data-flip-x='true'] .demo-hud__spec {
+  left: auto;
+  right: 16px;
+}
+
+.demo-hud[data-flip-y='true'] .demo-hud__readout {
+  top: auto;
+  bottom: 40px;
+}
+
+.demo-hud[data-flip-y='true'] .demo-hud__spec {
+  top: auto;
+  bottom: 14px;
 }
 
 .demo-hud[data-locked='true'] .demo-hud__spec {
@@ -665,8 +654,8 @@
   overflow: hidden;
   border: 1px solid var(--demo-hairline);
   border-left: 2px solid var(--ak-signal-info);
-  background: color-mix(in srgb, var(--ak-surface-sunken) 92%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--ak-surface-sunken);
+  box-shadow: var(--ak-shadow-card);
   color: var(--demo-text-strong);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.7rem;
@@ -675,7 +664,7 @@
 }
 
 .demo-receipt__mark {
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
   font-size: 0.6rem;
   line-height: 1.7;
 }
@@ -687,7 +676,7 @@
 }
 
 .demo-receipt__label {
-  color: var(--ak-signal-info);
+  color: var(--demo-accent-text);
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -727,8 +716,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  align-self: start;
-  padding: 0.4rem 0.7rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.75rem;
   border: 1px solid var(--demo-hairline);
   background: transparent;
   color: var(--demo-text-muted);
@@ -768,8 +757,7 @@
   display: grid;
   place-items: center;
   padding: clamp(0.75rem, 2vw, 1.5rem);
-  background: color-mix(in srgb, var(--demo-canvas) 88%, transparent);
-  backdrop-filter: blur(6px);
+  background: var(--ak-scrim);
   animation: demo-inspect-in 260ms var(--demo-motion-ease) both;
 }
 
@@ -787,6 +775,7 @@
   border: 1px solid var(--demo-hairline);
   border-top: 2px solid var(--ak-signal-info);
   background: var(--ak-surface-sunken);
+  box-shadow: var(--ak-shadow-panel);
 }
 
 .demo-inspect__bar {
@@ -813,8 +802,11 @@
 }
 
 .demo-inspect__close {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
   margin-left: auto;
-  padding: 0.3rem 0.6rem;
+  padding: 0.3rem 0.7rem;
   border: 1px solid var(--demo-hairline);
   background: transparent;
   color: var(--demo-text);
@@ -838,18 +830,23 @@
 }
 
 .demo-inspect__stage {
-  display: grid;
-  align-content: start;
-  justify-items: center;
-  gap: clamp(1rem, 2vw, 1.5rem);
   overflow: auto;
   overscroll-behavior: contain;
   padding: clamp(1.5rem, 3vw, 2.5rem);
   /* 检视台面：极淡的战术网格，标记「这是被检视的内容区」。 */
+  background-color: var(--ak-surface-canvas);
   background-image:
     linear-gradient(color-mix(in srgb, var(--ak-signal-info) 4%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--ak-signal-info) 4%, transparent) 1px, transparent 1px);
   background-size: 48px 48px;
+}
+
+.demo-inspect__inner {
+  display: grid;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
 }
 
 /* 面板与检视框共用同一个转场名：浏览器负责把前者补间成后者。 */
@@ -871,8 +868,7 @@
   display: grid;
   place-items: center;
   padding: clamp(0.75rem, 2.5vw, 2rem);
-  background: color-mix(in srgb, var(--demo-canvas) 90%, transparent);
-  backdrop-filter: blur(8px);
+  background: var(--ak-scrim);
   animation: demo-guide-in 240ms var(--demo-motion-ease) both;
 }
 
@@ -930,6 +926,7 @@
 
 .demo-guide__back {
   flex: none;
+  min-height: 1.75rem;
   padding: 0.45rem 0.8rem;
   border: 1px solid var(--demo-hairline);
   background: transparent;
@@ -1033,7 +1030,8 @@
 }
 
 .demo-snippet__copy {
-  padding: 0.25rem 0.6rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.65rem;
   border: 1px solid var(--demo-hairline);
   background: transparent;
   color: var(--demo-text);
@@ -1079,18 +1077,23 @@
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
+    padding-inline: 0.85rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--demo-hairline);
-    /* 横向滚动时用边缘渐隐说明「还有内容」，否则被截断的分类名看起来像坏掉。 */
+    /* 横向滚动时用边缘渐隐说明「还有内容」，padding-inline 防止首尾项被遮罩裁字。 */
     mask-image: linear-gradient(90deg, transparent 0, #000 0.85rem, #000 calc(100% - 0.85rem), transparent 100%);
   }
 
   .demo-rail__item {
     flex: 0 0 auto;
     width: auto;
+    grid-template-columns: auto auto auto;
+    white-space: nowrap;
     border: 0;
     border-bottom: 2px solid transparent;
   }
+
+  .demo-rail__tally { display: none; }
 
   .demo-rail__item[aria-current] { border-bottom-color: var(--ak-signal-info); }
 }
@@ -1130,7 +1133,9 @@
 }
 
 dialog.demo-screen-dialog::backdrop,
-dialog.demo-llm-dialog::backdrop {
+dialog.demo-llm-dialog::backdrop,
+dialog.demo-guide-dialog::backdrop,
+dialog.demo-inspect-dialog::backdrop {
   background: transparent;
 }
 
@@ -1141,9 +1146,7 @@ dialog.demo-llm-dialog::backdrop {
   display: grid;
   place-items: center;
   padding: clamp(1rem, 3vw, 2.5rem);
-  background: color-mix(in srgb, var(--ak-surface-canvas) 88%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: var(--ak-scrim);
   animation: ak-dialog-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -1155,7 +1158,6 @@ dialog.demo-llm-dialog::backdrop {
   border: 1px solid var(--ak-border);
   border-top: 3px solid var(--ak-signal-info);
   background: var(--ak-surface-canvas);
-  clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 1rem, 100% 100%, 0 100%);
   box-shadow: var(--ak-shadow-panel);
 }
 
@@ -1206,12 +1208,13 @@ dialog.demo-llm-dialog::backdrop {
 .demo-raw-link {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.65rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.7rem;
   border: 1px solid var(--demo-hairline);
   background: transparent;
   color: var(--demo-text-muted);
   font-family: var(--ak-font-mono, monospace);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-decoration: none;
   transition:
@@ -1267,7 +1270,7 @@ dialog.demo-llm-dialog::backdrop {
   border: 1px solid var(--demo-hairline);
   background: var(--ak-surface-sunken-2);
   overflow: hidden;
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 0 var(--ak-inset-highlight), 0 2px 8px rgba(0, 0, 0, 0.14);
 }
 
 .demo-surface p {
@@ -1286,13 +1289,13 @@ dialog.demo-llm-dialog::backdrop {
   display: grid;
   place-items: center;
   height: 3.5rem;
-  background: repeating-linear-gradient(45deg, #182026 0 10px, #12181d 10px 20px);
+  background: repeating-linear-gradient(45deg, var(--ak-surface-sunken) 0 10px, var(--ak-surface-canvas) 10px 20px);
   border: 1px solid var(--ak-border);
   font-family: var(--ak-font-mono, monospace);
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: var(--ak-signal-action);
+  color: var(--ak-signal-action-text);
   overflow: hidden;
 }
 
@@ -1302,9 +1305,9 @@ dialog.demo-llm-dialog::backdrop {
   place-items: center;
   height: 3.5rem;
   background:
-    radial-gradient(circle at 30% 50%, var(--ak-signal-info) 0%, transparent 60%),
-    radial-gradient(circle at 75% 50%, var(--ak-signal-action) 0%, transparent 60%),
-    #171a1d;
+    radial-gradient(circle at 30% 50%, color-mix(in srgb, var(--ak-signal-info) 45%, transparent) 0%, transparent 60%),
+    radial-gradient(circle at 75% 50%, color-mix(in srgb, var(--ak-signal-action) 45%, transparent) 0%, transparent 60%),
+    var(--ak-surface-canvas);
   border: 1px solid var(--ak-border);
   overflow: hidden;
 }
@@ -1314,7 +1317,7 @@ dialog.demo-llm-dialog::backdrop {
   font-size: 0.75rem;
   font-weight: 900;
   letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--ak-text-primary);
   text-transform: uppercase;
 }
 
@@ -1326,7 +1329,7 @@ dialog.demo-llm-dialog::backdrop {
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--ak-text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--ak-border-strong);
 }
 
 /* ── TUNE workspace ─────────────────────────────────────────────────── */
@@ -1361,14 +1364,131 @@ dialog.demo-llm-dialog::backdrop {
 .demo-tune-workspace .demo-tune-preview-toggle:focus-visible { outline-color: var(--demo-text-strong); }
 
 .demo-tune-preview {
+  position: relative;
   min-width: 0;
-  padding: clamp(1rem, 2.5vw, 1.5rem);
-  background: color-mix(in srgb, var(--ak-surface-sunken-2) 72%, transparent);
+  min-height: 8.5rem;
+  padding: clamp(1.15rem, 2.5vw, 1.75rem);
+  border: 1px solid var(--demo-hairline);
+  background-color: var(--ak-surface-canvas);
+  background-image:
+    linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+    linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+    linear-gradient(var(--ak-signal-info), var(--ak-signal-info)),
+    linear-gradient(var(--ak-signal-info), var(--ak-signal-info));
+  background-size: 8px 1.5px, 1.5px 8px, 8px 1.5px, 1.5px 8px;
+  background-position: 0 0, 0 0, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
   overflow: auto;
   animation: demo-view-enter 200ms var(--demo-motion-ease);
 }
 
 .demo-tune-preview > * + * { margin-block-start: 1rem; }
+
+/* ── 示例舞台容器（供独立导出 & 预览共用） ─────────────────────────── */
+.demo-canvas {
+  position: relative;
+  min-height: 15rem;
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-canvas-label {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin: 0.75rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-canvas);
+  color: var(--demo-text-muted);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.demo-depth {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 15rem;
+  overflow: hidden;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-depth__grid {
+  position: absolute;
+  inset: -1.5rem;
+  background-image:
+    linear-gradient(var(--ak-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ak-grid-color) 1px, transparent 1px);
+  background-size: 1.5rem 1.5rem;
+  pointer-events: none;
+}
+
+.demo-depth__glyph {
+  position: relative;
+  z-index: 1;
+  color: var(--demo-text-strong);
+  pointer-events: none;
+}
+
+.demo-depth__hud {
+  position: relative;
+  z-index: 2;
+  color: var(--ak-signal-info);
+  pointer-events: none;
+}
+
+.demo-hint {
+  margin: 0.5rem 0 0;
+  color: var(--demo-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.demo-menu-target {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.3rem;
+  min-height: 7.5rem;
+  padding: 1.5rem;
+  border: 1px dashed var(--ak-border-strong);
+  background: var(--ak-surface-sunken);
+  color: var(--demo-text-strong);
+  font-family: var(--ak-font-mono, monospace);
+  font-size: 0.8rem;
+  cursor: context-menu;
+}
+
+.demo-menu-target em {
+  color: var(--demo-text-muted);
+  font-style: normal;
+  font-size: 0.72rem;
+}
+
+.demo-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--demo-hairline);
+  background: var(--ak-surface-sunken);
+}
+
+.demo-fx-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 2rem;
+  padding: 0.75rem 0.5rem;
+}
+
+.demo-shell {
+  border: 1px solid var(--demo-hairline);
+  overflow: hidden;
+}
 
 .demo-tune-panel {
   display: grid;

@@ -20,7 +20,7 @@
     border-color var(--ak-motion-fast, 120ms) ease;
   box-shadow: var(
     --ak-card-shadow,
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 0 var(--ak-inset-highlight),
     0 1px 2px rgba(0, 0, 0, 0.15),
     0 4px 14px rgba(0, 0, 0, 0.22)
   );
@@ -39,16 +39,16 @@
     background-color: var(--ak-surface-sunken-2);
     border: 1px solid color-mix(in srgb, var(--ak-text-primary) 16%, transparent);
     box-shadow:
-      inset 0 1px 0 0 color-mix(in srgb, var(--ak-text-primary) 12%, transparent),
-      0 1px 2px rgba(0, 0, 0, 0.2),
-      0 8px 24px rgba(0, 0, 0, 0.28);
+      inset 0 1px 0 0 var(--ak-inset-highlight),
+      0 1px 2px rgba(0, 0, 0, 0.14),
+      0 8px 24px rgba(0, 0, 0, 0.2);
 
     &:hover {
       border-color: color-mix(in srgb, var(--ak-text-primary) 30%, transparent);
       box-shadow:
-        inset 0 1px 0 0 color-mix(in srgb, var(--ak-text-primary) 16%, transparent),
-        0 2px 4px rgba(0, 0, 0, 0.22),
-        0 10px 28px rgba(0, 0, 0, 0.32);
+        inset 0 1px 0 0 var(--ak-inset-highlight),
+        0 2px 4px rgba(0, 0, 0, 0.16),
+        0 10px 28px rgba(0, 0, 0, 0.24);
     }
   }
 
@@ -86,11 +86,10 @@
 
   &--hoverable {
     &:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 8px 24px -4px rgba(0, 0, 0, 0.45);
+        inset 0 1px 0 0 var(--ak-inset-highlight),
+        0 6px 20px -4px rgba(0, 0, 0, 0.32);
     }
   }
 
@@ -101,8 +100,8 @@
     &:active {
       transform: translateY(1px) scale(0.99);
       box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-        0 2px 6px rgba(0, 0, 0, 0.2);
+        inset 0 1px 0 0 var(--ak-inset-highlight),
+        0 2px 6px rgba(0, 0, 0, 0.18);
     }
 
     &:focus-visible {
@@ -111,13 +110,18 @@
     }
   }
 
+  &--chamfer#{&}--interactive:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 var(--ak-focus-width, 3px) var(--ak-focus-color, #f1c644);
+  }
+
   &--tactical {
     position: relative;
     border: 1px solid color-mix(in srgb, var(--ak-text-primary) 15%, transparent);
     background-color: var(--ak-card-bg, color-mix(in srgb, var(--ak-surface-canvas) 85%, var(--ak-surface-sunken-2)));
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
-      0 4px 20px rgba(0, 0, 0, 0.38);
+      inset 0 1px 0 0 var(--ak-inset-highlight),
+      0 4px 18px rgba(0, 0, 0, 0.24);
 
     // 顶部战术细线
     &::before {
@@ -164,24 +168,23 @@
         0 100%, 0 100%,
         100% 100%, 100% 100%;
       background-repeat: no-repeat;
-      opacity: 0.75;
+      opacity: 0.72;
       transition: opacity var(--ak-motion-base, 200ms) ease;
     }
 
     &:hover::after {
       opacity: 1;
-      filter: drop-shadow(0 0 3px var(--ak-signal-info));
     }
   }
 
   &--chassis {
     position: relative;
+    padding-inline-start: calc(var(--ak-space-4, 1rem) + 7px);
     border: 1px solid color-mix(in srgb, var(--ak-text-primary) 18%, transparent);
     background-color: var(--ak-card-bg, color-mix(in srgb, var(--ak-surface-canvas) 88%, var(--ak-surface-sunken-2)));
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-      0 6px 24px rgba(0, 0, 0, 0.42);
+      inset 0 1px 0 0 var(--ak-inset-highlight),
+      0 6px 20px rgba(0, 0, 0, 0.26);
 
     // 左边缘战术斑马条（Hazard Edge）
     &::before {
@@ -194,7 +197,7 @@
       background: repeating-linear-gradient(
         -45deg,
         var(--ak-signal-action) 0 4px,
-        #15181a 4px 8px
+        var(--ak-surface-canvas) 4px 8px
       );
       pointer-events: none;
     }
@@ -209,32 +212,30 @@
     }
 
     &:hover {
-      border-color: color-mix(in srgb, var(--ak-signal-action) 50%, transparent);
+      border-color: var(--ak-signal-action);
       box-shadow:
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 8px 32px rgba(0, 0, 0, 0.48),
-        0 0 18px color-mix(in srgb, var(--ak-signal-action) 20%, transparent);
+        inset 0 1px 0 0 var(--ak-inset-highlight),
+        0 8px 24px rgba(0, 0, 0, 0.3);
     }
   }
 
   &--outline {
     display: block;
     min-height: 100px;
-    border: 0.5rem solid var(--ak-card-border, white);
+    border: 0.35rem solid var(--ak-card-border, var(--ak-border-strong));
     background-color: var(--ak-card-bg, transparent);
-    box-shadow: var(--ak-card-shadow, 2px 2px 15px rgba(0, 0, 0, 0.2));
+    box-shadow: var(--ak-card-shadow, var(--ak-shadow-subtle));
 
     > .title,
     .ak-card__title {
       font-weight: 900;
       font-size: large;
       margin: 0.2rem 0;
-      border-bottom: 2px solid var(--ak-card-border, white);
+      border-bottom: 2px solid var(--ak-border-strong);
     }
 
     &:hover {
-      box-shadow: var(--ak-card-shadow-hover, 2px 2px 30px rgba(0, 0, 0, 0.2));
+      box-shadow: var(--ak-card-shadow-hover, var(--ak-shadow-card));
     }
   }
 
@@ -277,22 +278,20 @@
   }
 
   &--place {
-    border: 1px solid transparent;
+    border: 1px solid var(--ak-border-strong);
     width: var(--ak-card-w, 100px);
     height: var(--ak-card-h, 100px);
-    box-shadow: inset 0 0 20px rgba($color: #fff, $alpha: 1);
-    border-bottom: 4px solid var(--ak-card-place-color, white);
+    background-color: var(--ak-surface-sunken-2);
+    box-shadow: inset 0 1px 0 0 var(--ak-inset-highlight), var(--ak-shadow-subtle);
+    border-bottom: 4px solid var(--ak-card-place-color, var(--ak-signal-info));
     padding: 0;
 
     &:active,
     &:focus:not([aria-pressed="false"]),
     &[aria-pressed="true"] {
-      border-top: 1px solid #fff;
-      border-left: 1px solid #fff;
-      border-right: 1px solid #fff;
-      box-shadow: inset 0 0 20px rgba($color: #fff, $alpha: 1),
-        0 5px 10px rgba(0, 0, 0, 0.1);
-      transform: translateY(-10px);
+      border-color: var(--ak-card-place-color, var(--ak-signal-info));
+      box-shadow: inset 0 0 0 1px var(--ak-card-place-color, var(--ak-signal-info)), var(--ak-shadow-card);
+      transform: translateY(-6px);
     }
   }
   // 选中态放在文件末尾：用复合选择器 (0,2,0) 压过 --hoverable/--glass 的
@@ -317,6 +316,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ak-card {
+    transition: none;
+  }
+
   .ak-card--stripe:hover::before {
     animation: none;
   }
@@ -357,6 +360,6 @@
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--ak-signal-info, #4aabea) 45%, transparent);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
-    0 8px 22px -4px rgba(0, 0, 0, 0.42);
+    inset 0 1px 0 0 var(--ak-inset-highlight),
+    0 8px 22px -4px rgba(0, 0, 0, 0.28);
 }

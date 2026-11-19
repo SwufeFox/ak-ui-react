@@ -2,6 +2,8 @@
 
 :root,
 [data-ak-theme="terminal"] {
+  color-scheme: dark;
+  accent-color: var(--ak-signal-info);
   // 全局亚像素抗锯齿与排版优化，保证深色界面下拉丁展示字与数据标签的边缘极度锐利细腻
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -15,7 +17,7 @@
   --ak-surface-canvas: #111315;
   --ak-surface-panel: rgba(253, 253, 251, 0.9);
   --ak-surface-muted: rgba(235, 236, 235, 0.9);
-  --ak-surface-raised: rgba(66, 66, 66, 0.92);
+  --ak-surface-raised: #272a2d;
   // 反色块：相对当前主题取反（暗色主题下是浅底深字，亮色主题下反过来）。
   // 与 prts-design 的 --ak-bg-inverse / --ak-fg-inverse 同语义，两主题都必须是
   // 对比色对——注意 --ak-surface-raised 才是深色面板，别混用。
@@ -23,10 +25,18 @@
   --ak-text-primary: #f8f8f5;
   --ak-text-secondary: rgba(248, 248, 245, 0.68);
   --ak-text-inverse: #1b1d1f;
+  --ak-surface-hover: color-mix(in srgb, var(--ak-text-primary) 6%, transparent);
+  --ak-surface-active: color-mix(in srgb, var(--ak-text-primary) 11%, transparent);
+  --ak-scrim: rgba(11, 13, 15, 0.82);
+  --ak-inset-highlight: rgba(255, 255, 255, 0.09);
 
   // Functional signals
   --ak-signal-info: #18d1ff;
+  --ak-signal-info-text: #38d9ff;
+  --ak-signal-on-info: #0b1114;
   --ak-signal-action: #ffd800;
+  --ak-signal-action-text: #ffd800;
+  --ak-signal-on-action: #111315;
   --ak-signal-accent: var(--ak-color-accent);
   --ak-signal-success: #46c47c;
   --ak-signal-danger: #e33b3b;
@@ -165,15 +175,15 @@
   --ak-cut-lg: 1.5rem;
   --ak-radius-subtle: 2px;
   // 多层柔和自然阴影：顶部发丝微高光 + 接触阴影 + 中景扩散 + 远景深层遮蔽，细腻还原高科技设备的复合材质厚度
-  --ak-shadow-panel: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.25), 0 6px 16px rgba(0, 0, 0, 0.32), 0 20px 44px rgba(0, 0, 0, 0.48);
-  --ak-shadow-card: inset 0 1px 0 0 rgba(255, 255, 255, 0.09), inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3);
-  --ak-shadow-subtle: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.24);
-  --ak-shadow-elevated: inset 0 1px 0 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.25), 0 10px 24px rgba(0, 0, 0, 0.38), 0 28px 64px rgba(0, 0, 0, 0.52);
+  --ak-shadow-panel: inset 0 1px 0 0 var(--ak-inset-highlight), inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 2px 4px rgba(0, 0, 0, 0.25), 0 6px 16px rgba(0, 0, 0, 0.32), 0 20px 44px rgba(0, 0, 0, 0.48);
+  --ak-shadow-card: inset 0 1px 0 0 var(--ak-inset-highlight), inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.3);
+  --ak-shadow-subtle: inset 0 1px 0 0 var(--ak-inset-highlight), 0 1px 2px rgba(0, 0, 0, 0.18), 0 3px 8px rgba(0, 0, 0, 0.24);
+  --ak-shadow-elevated: inset 0 1px 0 0 var(--ak-inset-highlight), inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.25), 0 10px 24px rgba(0, 0, 0, 0.38), 0 28px 64px rgba(0, 0, 0, 0.52);
   // 信号色辉光：形状与强度归这枚令牌，颜色跟随 --ak-shadow-signal-color。
   // 组件（.ak-status）把颜色接到自己的信号色上，于是同一枚令牌能服务
   // 信息 / 警告 / 危险各档；宿主改这里就能整体重调所有信号辉光。
-  --ak-shadow-signal: 0 0 1rem color-mix(in srgb, var(--ak-shadow-signal-color, var(--ak-signal-info)) 62%, transparent);
-  --ak-shadow-neon: 0 0 16px color-mix(in srgb, var(--ak-signal-info) 38%, transparent), 0 0 2px var(--ak-signal-info);
+  --ak-shadow-signal: 0 0 0.45rem color-mix(in srgb, var(--ak-shadow-signal-color, var(--ak-signal-info)) 45%, transparent);
+  --ak-shadow-neon: 0 0 12px color-mix(in srgb, var(--ak-signal-info) 28%, transparent), 0 0 2px var(--ak-signal-info);
   --ak-depth-perspective: 30em;
 
   // Motion and focus
@@ -197,14 +207,23 @@
 //  on the theme for colour.
 // ══════════════════════════════════════════════════════════════════════════
 [data-ak-theme="archive"] {
+  color-scheme: light;
   --ak-surface-canvas: #eef0f1;
   --ak-surface-panel: rgba(253, 253, 251, 0.96);
   --ak-surface-muted: rgba(228, 230, 232, 0.92);
   --ak-surface-raised: #ffffff;
   --ak-text-primary: #1b1d1f;
   --ak-text-secondary: rgba(27, 29, 31, 0.68);
-  --ak-signal-info: #0098dc;
+  --ak-surface-hover: color-mix(in srgb, var(--ak-text-primary) 5%, transparent);
+  --ak-surface-active: color-mix(in srgb, var(--ak-text-primary) 10%, transparent);
+  --ak-scrim: rgba(27, 29, 31, 0.56);
+  --ak-inset-highlight: rgba(255, 255, 255, 0.72);
+  --ak-signal-info: #007ab3;
+  --ak-signal-info-text: #006694;
+  --ak-signal-on-info: #ffffff;
   --ak-signal-action: #c99d00;
+  --ak-signal-action-text: #7d5d00;
+  --ak-signal-on-action: #111315;
 
   // 亮色主题下反色块翻过来：深底配浅字
   --ak-surface-inverse: #1b1d1f;
@@ -261,7 +280,8 @@
 // ── Theme-invariant exceptions ────────────────────────────────────────────
 // 极少数无法表达成令牌值的 archive 差异集中在这里，组件 partial 不再开第二个
 // 主题分支。信号灯在浅色纸面上不需要发光、也改回直角（保持「档案印刷」语气）。
-[data-ak-theme="archive"] .ak-status__signal {
+[data-ak-theme="archive"] .ak-status__signal,
+[data-ak-theme="archive"] .ak-status__signal::after {
   border-radius: 0;
   box-shadow: none;
 }

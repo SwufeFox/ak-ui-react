@@ -80,22 +80,20 @@
     font-weight: 900;
     line-height: 1;
     letter-spacing: 0.06em;
-    color: rgba(255, 255, 255, 0.78);
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: var(--ak-text-secondary);
+    background: color-mix(in srgb, var(--ak-text-primary) 10%, transparent);
+    border: 1px solid var(--ak-border-strong);
 
     &[data-elite="1"] {
-      color: #92d8f8;
-      border-color: rgba(146, 216, 248, 0.55);
-      background: color-mix(in srgb, #92d8f8 15%, transparent);
-      box-shadow: 0 0 5px rgba(146, 216, 248, 0.25);
+      color: color-mix(in srgb, var(--ak-signal-info) 75%, var(--ak-text-primary));
+      border-color: color-mix(in srgb, var(--ak-signal-info) 55%, transparent);
+      background: color-mix(in srgb, var(--ak-signal-info) 14%, transparent);
     }
 
     &[data-elite="2"] {
-      color: #ffe066;
-      border-color: rgba(255, 224, 102, 0.6);
-      background: color-mix(in srgb, #ffe066 18%, transparent);
-      box-shadow: 0 0 6px rgba(255, 224, 102, 0.35);
+      color: color-mix(in srgb, var(--ak-signal-action) 75%, var(--ak-text-primary));
+      border-color: color-mix(in srgb, var(--ak-signal-action) 60%, transparent);
+      background: color-mix(in srgb, var(--ak-signal-action) 16%, transparent);
     }
   }
 
@@ -153,19 +151,14 @@
 
     &:hover:not(:disabled):not(.ak-slot--disabled) {
       transform: translateY(-2px);
-      box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.4),
-        0 0 12px color-mix(in srgb, var(--ak-slot-rarity) 35%, transparent);
+      border-color: var(--ak-slot-rarity);
+      box-shadow: var(--ak-shadow-card);
     }
 
-    // 高稀有度（5星/6星）干员槽位全息光晕
     &[data-rarity="5"]:hover:not(:disabled):not(.ak-slot--disabled),
     &[data-rarity="6"]:hover:not(:disabled):not(.ak-slot--disabled) {
-      box-shadow:
-        0 6px 20px rgba(0, 0, 0, 0.45),
-        0 0 18px color-mix(in srgb, var(--ak-slot-rarity) 60%, transparent),
-        inset 0 0 10px color-mix(in srgb, var(--ak-slot-rarity) 22%, transparent);
-      border-color: color-mix(in srgb, var(--ak-slot-rarity) 65%, rgba(255, 255, 255, 0.35));
+      border-color: var(--ak-slot-rarity);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ak-slot-rarity) 45%, transparent), var(--ak-shadow-card);
     }
 
     &:active:not(:disabled):not(.ak-slot--disabled) {
@@ -184,7 +177,8 @@
   }
 
   &[aria-pressed="true"] {
-    box-shadow: 0 0 0 2px var(--ak-signal-action, #f1c644), 0 0 1.2rem rgba(241, 198, 68, 0.3);
+    border-color: var(--ak-signal-action);
+    box-shadow: 0 0 0 2px var(--ak-signal-action, #f1c644);
   }
 
   &:focus-visible {
@@ -211,18 +205,11 @@
 @keyframes ak-slot-reveal {
   0% {
     opacity: 0;
-    filter: brightness(3);
     translate: 0 1rem;
-  }
-
-  60% {
-    opacity: 1;
-    filter: brightness(1.6);
   }
 
   100% {
     opacity: 1;
-    filter: none;
     translate: 0 0;
   }
 }

@@ -133,6 +133,8 @@ export function HudReticle() {
       targetY = event.clientY
       dirty = true
       root.dataset.visible = 'true'
+      root.dataset.flipX = targetX > window.innerWidth - 180 ? 'true' : 'false'
+      root.dataset.flipY = targetY > window.innerHeight - 70 ? 'true' : 'false'
       wake()
     }
     const onLeave = () => {
